@@ -20,12 +20,10 @@ const isValidToken = (accessToken: string): boolean => {
 const setSession = (accessToken: string | null) => {
   if (accessToken) {
     localStorage.setItem('accessToken', accessToken);
-    axiosInstances.shop.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
-    axiosInstances.warehouse.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
+    axiosInstances.base.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
   } else {
     localStorage.removeItem('accessToken');
-    delete axiosInstances.shop.defaults.headers.common.Authorization;
-    delete axiosInstances.warehouse.defaults.headers.common.Authorization;
+    delete axiosInstances.base.defaults.headers.common.Authorization;
   }
 };
 

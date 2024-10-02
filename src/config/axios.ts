@@ -1,9 +1,7 @@
 import axios, { AxiosRequestConfig } from 'axios';
 
 export enum AxiosClientFactoryEnum {
-  AUTH = 'auth',
-  SHOP = 'shop',
-  WAREHOUSE = 'warehouse',
+  BASE = '/',
 }
 
 export const parseParams = (params: any) => {
@@ -29,12 +27,10 @@ export const parseParams = (params: any) => {
   return options ? options.slice(0, -1) : options;
 };
 
-const auth = `https://loco.com.co/authcontainer/api/`;
-const shop = `https://loco.com.co/shopcontainer/api/`;
-const warehouse = `https://loco.com.co/managementcontainer/api/`;
+const baseURL = `https://localhost:7012/api/v1/`;
 
 const request = axios.create({
-  baseURL: auth,
+  baseURL: baseURL,
   paramsSerializer: parseParams
 });
 
@@ -55,68 +51,11 @@ request.interceptors.response.use(
   (error) => Promise.reject((error.response && error.response.data) || 'Có lỗi xảy ra')
 );
 
-const requestManagement = axios.create({
-  baseURL: shop,
-  paramsSerializer: parseParams,
-  headers: {
-    Authorization:
-      'Bearer '
-  }
-});
-
-requestManagement.interceptors.request.use((options) => {
-  const { method } = options;
-
-  if (method === 'put' || method === 'post') {
-    Object.assign(options.headers, {
-      'Content-Type': 'application/json;charset=UTF-8'
-    });
-  }
-
-  return options;
-});
-
-requestManagement.interceptors.response.use(
-  (response) => response,
-  (error) => Promise.reject((error.response && error.response.data) || 'Có lỗi xảy ra')
-);
-
-const requestWarehouse = axios.create({
-    baseURL: warehouse,
-    paramsSerializer: parseParams,
-    headers: {
-        Authorization:
-          'Bearer '
-      }
-});
-  
-  
-requestWarehouse.interceptors.request.use((options) => {
-    const { method } = options;
-
-  if (method === 'put' || method === 'post') {
-    Object.assign(options.headers, {
-      'Content-Type': 'application/json;charset=UTF-8'
-    });
-  }
-
-  return options;
-  });
-  
-requestWarehouse.interceptors.response.use(
-    (response) => response,
-    (error) => Promise.reject((error.response && error.response.data) || 'Có lỗi xảy ra')
-  );
-
 class AxiosClientFactory {
   getAxiosClient(type?: AxiosClientFactoryEnum, config: AxiosRequestConfig = {}) {
     switch (type) {
-      case 'auth':
+      case '/':
         return request;
-      case 'shop':
-        return requestManagement;
-      case 'warehouse':
-        return requestWarehouse;
       default:
         return request;
     }
@@ -126,9 +65,7 @@ class AxiosClientFactory {
 const axiosClientFactory = new AxiosClientFactory();
 
 const axiosInstances = {
-  auth: axiosClientFactory.getAxiosClient(AxiosClientFactoryEnum.AUTH),
-  shop: axiosClientFactory.getAxiosClient(AxiosClientFactoryEnum.SHOP),
-  warehouse: axiosClientFactory.getAxiosClient(AxiosClientFactoryEnum.WAREHOUSE),
+  base: axiosClientFactory.getAxiosClient(AxiosClientFactoryEnum.BASE),
 };
 
 export { axiosClientFactory };

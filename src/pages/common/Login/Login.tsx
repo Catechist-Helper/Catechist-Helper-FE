@@ -1,11 +1,12 @@
 import React from "react";
 import HomeTemplate from "../../../components/Templates/HomeTemplate/HomeTemplate";
+import LoginComponent from "./LoginComponent";
 
 const Login: React.FC = () => {
   return (
     <>
       <HomeTemplate>
-        <></>
+        <LoginComponent />
       </HomeTemplate>
     </>
   );
