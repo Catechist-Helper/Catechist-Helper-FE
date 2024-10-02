@@ -11,7 +11,6 @@ import RoleBasedGuard from "../guards/RoleBasedGuard";
 // ----------------------------------------------------------------------
 
 const Loadable = (Component: any) => (props: any) => {
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   const { pathname } = useLocation();
   const isDashboard = pathname.includes("/dashboard");
 
@@ -40,7 +39,6 @@ export default function Router() {
   return useRoutes([
     {
       path: "/",
-      // element: <Navigate to="/" />,
       children: [
         { path: "/", element: <Home /> },
         {
@@ -54,7 +52,12 @@ export default function Router() {
       ],
     },
 
-    { path: "*", element: <Navigate to="/404" replace /> },
+    {
+      path: "/admin",
+      children: [{ path: "/admin", element: <AdminLandingPage /> }],
+    },
+
+    { path: "*", element: <NotFound /> },
   ]);
 }
 
@@ -64,3 +67,11 @@ const Home = Loadable(lazy(() => import("../pages/common/Home/Home")));
 
 // Authentication
 const Login = Loadable(lazy(() => import("../pages/common/Login/Login")));
+
+//404
+const NotFound = Loadable(lazy(() => import("../pages/error/BasicErrorPage")));
+
+//Admin
+const AdminLandingPage = Loadable(
+  lazy(() => import("../pages/admin/AdminLandingPage/index"))
+);

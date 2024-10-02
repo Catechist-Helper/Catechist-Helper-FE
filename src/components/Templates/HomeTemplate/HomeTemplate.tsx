@@ -32,7 +32,7 @@ const HomeTemplate: FC<HomeTemplateProps> = ({ children }) => {
 )`,
             }}
           ></div>
-          <div className="z-100 relative">{children}</div>
+          <div className="z-100 relative h-[100%]">{children}</div>
         </main>
         <FooterHome />
       </div>
