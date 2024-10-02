@@ -342,7 +342,6 @@ function AuthProvider({ children }: { children: ReactNode }) {
         disableLoading();
         var res: ResponseDTO = response.data;
         if (res.isSuccess) {
-          
         }
         if (!res.isSuccess) {
           if (res.message && res.message.toLowerCase().includes("duplicate")) {

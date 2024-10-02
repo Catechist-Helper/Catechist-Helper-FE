@@ -1,27 +1,21 @@
-import { ReactNode, useEffect } from "react";
+import { ReactNode } from "react";
+import { Navigate } from "react-router-dom";
+// hooks
 import useAuth from "../hooks/useAuth";
-import { LOCALSTORAGE_CONSTANTS } from "../constants/WebsiteConstant";
+import { PATH_ROOT_HOME } from "../routes/paths";
+
+// ----------------------------------------------------------------------
 
 type GuestGuardProps = {
   children: ReactNode;
 };
 
 export default function GuestGuard({ children }: GuestGuardProps) {
-  const { isAuthenticated, isInitialized } = useAuth();
-  // const router = useRouter();
+  const { isAuthenticated } = useAuth();
 
-  const navigateToPage = (route: string) => {
-    if (typeof window !== "undefined") {
-      localStorage.setItem(LOCALSTORAGE_CONSTANTS.CURRENT_PAGE, route);
-    }
-    // router.push(route);
-  };
-
-  useEffect(() => {
-    if (isAuthenticated && isInitialized) {
-      navigateToPage("/");
-    }
-  }, [isAuthenticated, isInitialized]);
+  if (isAuthenticated) {
+    return <Navigate to={PATH_ROOT_HOME} />;
+  }
 
   return <>{children}</>;
 }
