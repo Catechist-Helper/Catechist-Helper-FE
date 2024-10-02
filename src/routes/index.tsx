@@ -1,7 +1,7 @@
 import { lazy, Suspense } from "react";
 import { Navigate, useLocation, useRoutes } from "react-router-dom";
 // components
-import LoadingScreen from "../components/LoadingScreen";
+import LoadingScreen from "../components/Organisms/LoadingScreen/LoadingScreen";
 // guards
 import AuthGuard from "../guards/AuthGuard";
 import GuestGuard from "../guards/GuestGuard";
@@ -39,23 +39,19 @@ const Loadable = (Component: any) => (props: any) => {
 export default function Router() {
   return useRoutes([
     {
-      path: "auth",
+      path: "/",
+      // element: <Navigate to="/" />,
       children: [
+        { path: "/", element: <Home /> },
         {
-          path: "login",
+          path: "/login",
           element: (
             <GuestGuard>
-              {/* Login Page here */}
-              <></>
+              <Login />
             </GuestGuard>
           ),
         },
       ],
-    },
-
-    {
-      path: "/",
-      element: <Navigate to="/" />,
     },
 
     { path: "*", element: <Navigate to="/404" replace /> },
@@ -64,5 +60,7 @@ export default function Router() {
 
 // IMPORT COMPONENTS
 
+const Home = Loadable(lazy(() => import("../pages/common/Home/Home")));
+
 // Authentication
-// const Login = Loadable(lazy(() => import("../pages/authentication/Login")));
+const Login = Loadable(lazy(() => import("../pages/common/Login/Login")));
