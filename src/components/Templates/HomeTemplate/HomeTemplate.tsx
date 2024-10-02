@@ -21,7 +21,7 @@ const HomeTemplate: FC<HomeTemplateProps> = ({ children }) => {
           }}
         >
           <div
-            className="w-[100%] h-[100%] absolute"
+            className="w-[100%] h-[100%] absolute z-1"
             style={{
               background: `linear-gradient(
   to right, 
@@ -32,7 +32,7 @@ const HomeTemplate: FC<HomeTemplateProps> = ({ children }) => {
 )`,
             }}
           ></div>
-          <div className="z-100">{children}</div>
+          <div className="z-100 relative">{children}</div>
         </main>
         <FooterHome />
       </div>
