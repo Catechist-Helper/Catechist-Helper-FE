@@ -1,0 +1,84 @@
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* Changed to space-between to push elements to the edges */
+  padding: 10px 20px;
+  background-color: white;
+  color: #333;
+  border-bottom: 1px solid black; /* Adding a black border line to the bottom of the header */
+}
+
+.search-bar {
+  flex: 1; /* Allowing the search bar to take up remaining space */
+}
+
+.search-bar input {
+  padding: 5px;
+  margin-right: 10px;
+  border: 1px solid black; /* Changing the border color of the input */
+}
+
+.search-bar button {
+  padding: 5px 10px;
+}
+
+.notification,
+.message,
+.user-profile {
+  position: relative;
+  cursor: pointer;
+}
+
+.notification,
+.message {
+  margin-right: 10px; /* Adding margin to separate notification and message buttons */
+  position: relative; /* Adding position relative to allow for positioning of badge */
+}
+
+.notification i,
+.message i {
+  margin-right: 5px;
+  color: #333; /* Changing the color of the icons */
+  font-size: 1.5em; /* Adjusting the icon size */
+}
+
+.badge {
+  position: absolute;
+  top: -5px;
+  right: -10px;
+  background-color: red;
+  color: #fff;
+  border-radius: 50%;
+  padding: 3px;
+}
+
+.user-profile img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 60px;
+  right: 0;
+  background-color: #fff;
+  border-radius: 5px;
+  padding: 7px 12px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.dropdown-menu ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.dropdown-menu ul li {
+  cursor: pointer;
+  padding: 5px 0;
+}
+
+.header_component_title {
+  text-shadow: 3px 3px 3px rgba(0, 0, 0, 0.2);
+}
