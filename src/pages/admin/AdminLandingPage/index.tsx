@@ -5,7 +5,8 @@ const AdminHome: React.FC = () => {
   return (
     <>
       <AdminTemplate>
-        <></>
+        {/* components */}
+        <>hehe</>
       </AdminTemplate>
     </>
   );

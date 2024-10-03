@@ -6,6 +6,8 @@ import LoadingScreen from "../components/Organisms/LoadingScreen/LoadingScreen";
 import AuthGuard from "../guards/AuthGuard";
 import GuestGuard from "../guards/GuestGuard";
 import RoleBasedGuard from "../guards/RoleBasedGuard";
+import { AccountRoleString } from "../enums/accountRole";
+import IdBasedGuard from "../guards/IdBasedGuard";
 // path
 
 // ----------------------------------------------------------------------
@@ -54,7 +56,12 @@ export default function Router() {
 
     {
       path: "/admin",
-      children: [{ path: "/admin", element: <AdminLandingPage /> }],
+      children: [
+        {
+          path: "/admin",
+          element: <AdminLandingPage />,
+        },
+      ],
     },
 
     { path: "*", element: <NotFound /> },

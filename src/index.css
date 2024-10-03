@@ -21,11 +21,13 @@ a {
   text-decoration: none;
 }
 
+.links_dark_hover{cursor: pointer;}
+
 .links_dark_hover:hover {
-  font-weight: bolder;
+  font-weight: bold;
   color: #fff;
   border-bottom: 3px solid #fff;
-  transition: all 0.5s ease;
+  /* transition: all 0.5s ease; */
 }
 
 body {

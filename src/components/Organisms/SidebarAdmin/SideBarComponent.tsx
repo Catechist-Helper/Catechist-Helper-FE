@@ -33,7 +33,7 @@ const SideBarComponent = (props: {}) => {
 
   return (
     <div
-      className="bg-gray-100"
+      className="bg-gray-300"
       style={{
         height: "100%",
         overflowY: "auto",
@@ -296,7 +296,7 @@ const SideBarComponent = (props: {}) => {
               </li>
             </ul>
           </div>
-          <div className="w-max -mb-3">
+          {/* <div className="w-max -mb-3">
             <a
               href="#"
               className="relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-sky-600 hover:to-cyan-400 px-4 py-3 hover:text-white"
@@ -313,9 +313,9 @@ const SideBarComponent = (props: {}) => {
                   clipRule="evenodd"
                 />
               </svg>
-              <span className="group-hover:text-gray-700">Settings</span>
+              <p className="group-hover:text-gray-700">Settings</p>
             </a>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>

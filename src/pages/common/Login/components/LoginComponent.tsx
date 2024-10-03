@@ -1,7 +1,12 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Form, Input, theme } from "antd";
 import { useFormik } from "formik";
-import useAuth from "../../../hooks/useAuth";
+import useAuth from "../../../../hooks/useAuth";
+import accountApi from "../../../../api/Account";
+import { AxiosResponse } from "axios";
+import { BasicResponse } from "../../../../model/BasicResponse";
+import sweetAlert from "../../../../utils/sweetAlert";
+import { formatDate } from "../../../../utils/formatDate";
 
 const LoginComponent: React.FC = () => {
   const [form] = Form.useForm();
@@ -17,8 +22,30 @@ const LoginComponent: React.FC = () => {
     },
   });
 
-  const handleForgetPassword = () => {};
+  // const [accounts, setAccounts] = useState([]);
+  // useEffect(() => {
+  //   accountApi
+  //     .getAll(1, 5)
+  //     .then((axiosRes: AxiosResponse) => {
+  //       console.log("====================================");
+  //       console.log("aaaaaaaa", axiosRes);
+  //       console.log("====================================");
 
+  //       // setAccount
+  //       const res: BasicResponse = axiosRes.data;
+  //       console.log("bbbbbbbbb", res);
+
+  //       if (
+  //         res.statusCode.toString().trim().startsWith("2") &&
+  //         res.data != null
+  //       ) {
+  //         setAccounts(res.data);
+  //       }
+  //     })
+  //     .catch((err) => {});
+  // }, []);
+
+  const handleForgetPassword = () => {};
   return (
     <>
       <div

@@ -23,10 +23,7 @@ const NavbarAdmin = () => {
   };
 
   return (
-    <nav
-      className="flex-grow-0 justify-between px-20 items-center bg-white"
-      style={{ paddingBottom: "1.5rem", paddingTop: "1.5rem" }}
-    >
+    <nav className="flex-grow-0 justify-between px-10 py-2 items-center bg-white">
       <div className="text-black flex items-center">
         <div className="flex items-center">
           <h1
