@@ -1,7 +1,10 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import useAuth from "../../../hooks/useAuth";
 
 const HeaderHome: React.FC = () => {
+  const { isAuthenticated, logout } = useAuth();
+
   return (
     <header className="bg-primary text-text_primary_light">
       <div className="px-20 py-3 flex flex-row items-center justify-between">
@@ -23,9 +26,29 @@ const HeaderHome: React.FC = () => {
           <Link to={"/"} className="links_dark_hover">
             TIN TỨC
           </Link>
-          <Link to={"/login"} className="links_dark_hover">
-            ĐĂNG NHẬP
-          </Link>
+          {!isAuthenticated ? (
+            <>
+              <Link to={"/login"} className="links_dark_hover">
+                ĐĂNG NHẬP
+              </Link>
+            </>
+          ) : (
+            <></>
+          )}
+          {isAuthenticated ? (
+            <>
+              <p
+                onClick={() => {
+                  logout();
+                }}
+                className="links_dark_hover"
+              >
+                ĐĂNG XUẤT
+              </p>
+            </>
+          ) : (
+            <></>
+          )}
         </div>
       </div>
     </header>

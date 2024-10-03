@@ -70,11 +70,28 @@ function ProgressBar() {
 }
 
 export default function LoadingScreen({ ...other }) {
+  const { transparent } = other;
+
   return (
     <>
       <ProgressBar />
 
-      <RootStyle {...other}>
+      <RootStyle
+        {...other}
+        style={{
+          background: `${
+            transparent
+              ? `linear-gradient(
+to right, 
+rgba(0, 0, 0, 0.8) 0%, 
+rgba(0, 0, 0, 0.75) 4%, 
+rgba(0, 0, 0, 0.7) 18%, 
+rgba(0, 0, 0, 0.75) 100%
+)`
+              : ``
+          }`,
+        }}
+      >
         <motion.div
           initial={{ rotateY: 0 }}
           animate={{ rotateY: 360 }}
