@@ -3,4 +3,11 @@ export enum AccountRoleString {
     MANAGER = "MANAGER",
     CATECHIST = "CATECHIST"
 }
+
+export enum AccountRoleEnum
+{
+    Admin,
+    Manager,
+    Catechist,
+}
  

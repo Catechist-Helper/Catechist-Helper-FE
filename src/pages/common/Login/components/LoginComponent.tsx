@@ -4,9 +4,10 @@ import { useFormik } from "formik";
 import useAuth from "../../../../hooks/useAuth";
 import accountApi from "../../../../api/Account";
 import { AxiosResponse } from "axios";
-import { BasicResponse } from "../../../../model/BasicResponse";
+import { BasicResponse } from "../../../../model/Response/BasicResponse";
 import sweetAlert from "../../../../utils/sweetAlert";
 import { formatDate } from "../../../../utils/formatDate";
+import { AccountResponse } from "../../../../model/Response/Account";
 
 const LoginComponent: React.FC = () => {
   const [form] = Form.useForm();
@@ -22,28 +23,30 @@ const LoginComponent: React.FC = () => {
     },
   });
 
-  // const [accounts, setAccounts] = useState([]);
-  // useEffect(() => {
-  //   accountApi
-  //     .getAll(1, 5)
-  //     .then((axiosRes: AxiosResponse) => {
-  //       console.log("====================================");
-  //       console.log("aaaaaaaa", axiosRes);
-  //       console.log("====================================");
+  const [accounts, setAccounts] = useState<AccountResponse[]>([]);
+  useEffect(() => {
+    accountApi
+      .getAllAccounts(1)
+      .then((axiosRes: AxiosResponse) => {
+        console.log("====================================");
+        console.log("aaaaaaaa", axiosRes);
+        console.log("====================================");
 
-  //       // setAccount
-  //       const res: BasicResponse = axiosRes.data;
-  //       console.log("bbbbbbbbb", res);
+        // setAccount
+        const res: BasicResponse = axiosRes.data;
+        console.log("bbbbbbbbb", res);
 
-  //       if (
-  //         res.statusCode.toString().trim().startsWith("2") &&
-  //         res.data != null
-  //       ) {
-  //         setAccounts(res.data);
-  //       }
-  //     })
-  //     .catch((err) => {});
-  // }, []);
+        if (
+          res.statusCode.toString().trim().startsWith("2") &&
+          res.data != null
+        ) {
+          setAccounts(res.data);
+        }
+      })
+      .catch((err) => {});
+  }, []);
+
+  console.log("cccccccc", accounts);
 
   const handleForgetPassword = () => {};
   return (
