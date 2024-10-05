@@ -8,6 +8,10 @@ import GuestGuard from "../guards/GuestGuard";
 import RoleBasedGuard from "../guards/RoleBasedGuard";
 import { AccountRoleString } from "../enums/Account";
 import IdBasedGuard from "../guards/IdBasedGuard";
+import CreatePostCategory from "../pages/admin/AdminLandingPage/posts/CreatePostCategory";
+import PostCategory from "../pages/admin/AdminLandingPage/posts/PostCategory";
+import UpdatePostCategory from "../pages/admin/AdminLandingPage/posts/UpdatePostCategory";
+import CreatePost from "../pages/admin/AdminLandingPage/posts/CreatePost";
 // path
 
 // ----------------------------------------------------------------------
@@ -59,6 +63,22 @@ export default function Router() {
         {
           path: "/admin",
           element: <AdminLandingPage />,
+        },
+        {
+          path: "/admin/create-post-category",
+          element: <CreatePostCategory />, 
+        },
+        {
+          path: "/admin/post-category",
+          element: <PostCategory />, 
+        },
+        {
+          path: "/admin/update-post-category/:id",
+          element: <UpdatePostCategory />, 
+        },
+        {
+          path: "/admin/create-post",
+          element: <CreatePost />, 
         },
       ],
     },
