@@ -60,6 +60,10 @@ export default function Router() {
           path: "/admin",
           element: <AdminLandingPage />,
         },
+        {
+          path: "/admin/registration",
+          element: <RegistrationAdminPage />,
+        },
       ],
     },
 
@@ -80,4 +84,8 @@ const NotFound = Loadable(lazy(() => import("../pages/error/BasicErrorPage")));
 //Admin
 const AdminLandingPage = Loadable(
   lazy(() => import("../pages/admin/AdminLandingPage/index"))
+);
+
+const RegistrationAdminPage = Loadable(
+  lazy(() => import("../pages/admin/Registration/index"))
 );
