@@ -25,28 +25,26 @@ const LoginComponent: React.FC = () => {
 
   const [accounts, setAccounts] = useState<AccountResponse[]>([]);
   useEffect(() => {
-    accountApi
-      .getAllAccounts(1)
-      .then((axiosRes: AxiosResponse) => {
-        console.log("====================================");
-        console.log("aaaaaaaa", axiosRes);
-        console.log("====================================");
-
-        // setAccount
-        const res: BasicResponse = axiosRes.data;
-        console.log("bbbbbbbbb", res);
-
-        if (
-          res.statusCode.toString().trim().startsWith("2") &&
-          res.data != null
-        ) {
-          setAccounts(res.data);
-        }
-      })
-      .catch((err) => {});
+    // accountApi
+    //   .getAllAccounts(1)
+    //   .then((axiosRes: AxiosResponse) => {
+    //     console.log("====================================");
+    //     console.log("aaaaaaaa", axiosRes);
+    //     console.log("====================================");
+    //     // setAccount
+    //     const res: BasicResponse = axiosRes.data;
+    //     console.log("bbbbbbbbb", res);
+    //     if (
+    //       res.statusCode.toString().trim().startsWith("2") &&
+    //       res.data != null
+    //     ) {
+    //       setAccounts(res.data);
+    //     }
+    //   })
+    //   .catch((err) => {});
   }, []);
 
-  console.log("cccccccc", accounts);
+  // console.log("cccccccc", accounts);
 
   const handleForgetPassword = () => {};
   return (
@@ -79,7 +77,7 @@ const LoginComponent: React.FC = () => {
                   </span>
                 </p>
                 <Form.Item
-                  className="col-sm-12 col-md-7 mx-0 px-0"
+                  className="col-sm-12 col-md-7 col-12 w-full mx-0 px-0"
                   name="email"
                   label=""
                   rules={[
@@ -112,7 +110,7 @@ const LoginComponent: React.FC = () => {
                   </span>
                 </p>
                 <Form.Item
-                  className="col-sm-12 col-md-7 mx-0 px-0"
+                  className="col-sm-12 col-md-7 col-12 w-full mx-0 px-0"
                   name="password"
                   label=""
                   rules={[
@@ -180,7 +178,7 @@ const LoginComponent: React.FC = () => {
                 <button
                   type="submit"
                   style={{ fontWeight: "bolder" }}
-                  className="hover:bg-yellow-600 bg-primary text-white mt-2 box-border flex w-full max-w-full flex-1 cursor-pointer flex-row items-start justify-center overflow-hidden whitespace-nowrap rounded-md bg-primary-colour px-5 py-[10px] [border:none]"
+                  className="hover:bg-yellow-600 bg-primary_color text-white mt-2 box-border flex w-full max-w-full flex-1 cursor-pointer flex-row items-start justify-center overflow-hidden whitespace-nowrap rounded-md bg-primary_color px-5 py-[10px] [border:none]"
                 >
                   <div className="font-baloo relative mt-0 flex w-full items-center justify-center text-center text-lg font-medium text-neutral-white">
                     Đăng Nhập

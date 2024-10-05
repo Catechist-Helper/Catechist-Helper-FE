@@ -1,14 +1,15 @@
 import React from "react";
 import AdminTemplate from "../../../components/Templates/AdminTemplate/AdminTemplate";
+import RegistrationComponent from "./RegistrationComponent";
 
-const AdminHome: React.FC = () => {
+const RegistrationAdminPage: React.FC = () => {
   return (
     <>
       <AdminTemplate>
-        <></>
+        <RegistrationComponent />
       </AdminTemplate>
     </>
   );
 };
 
-export default AdminHome;
+export default RegistrationAdminPage;

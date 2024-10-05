@@ -6,7 +6,7 @@ const HeaderHome: React.FC = () => {
   const { isAuthenticated, logout } = useAuth();
 
   return (
-    <header className="bg-primary text-text_primary_light">
+    <header className="bg-primary_color text-text_primary_light">
       <div className="px-20 py-3 flex flex-row items-center justify-between">
         <div>
           <h2

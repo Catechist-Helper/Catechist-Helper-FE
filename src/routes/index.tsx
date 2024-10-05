@@ -8,10 +8,11 @@ import GuestGuard from "../guards/GuestGuard";
 import RoleBasedGuard from "../guards/RoleBasedGuard";
 import { AccountRoleString } from "../enums/Account";
 import IdBasedGuard from "../guards/IdBasedGuard";
-import CreatePostCategory from "../pages/admin/AdminLandingPage/posts/CreatePostCategory";
-import PostCategory from "../pages/admin/AdminLandingPage/posts/PostCategory";
-import UpdatePostCategory from "../pages/admin/AdminLandingPage/posts/UpdatePostCategory";
-import CreatePost from "../pages/admin/AdminLandingPage/posts/CreatePost";
+import CreatePostCategory from "../pages/admin/posts/CreatePostCategory";
+import PostCategory from "../pages/admin/posts/PostCategory";
+import UpdatePostCategory from "../pages/admin/posts/UpdatePostCategory";
+import CreatePost from "../pages/admin/posts/CreatePost";
+import { PATH_ADMIN } from "./paths";
 // path
 
 // ----------------------------------------------------------------------
@@ -64,26 +65,35 @@ export default function Router() {
           path: "/admin",
           element: <AdminLandingPage />,
         },
+        // Thuận
         {
           path: "/admin/registration",
           element: <RegistrationAdminPage />,
         },
+        //--------------------
+
+        // Chị Tâm
         {
-          path: "/admin/create-post-category",
+          path: PATH_ADMIN.post,
+          element: <HomePost />,
+        },
+        {
+          path: PATH_ADMIN.create_post,
+          element: <CreatePost />,
+        },
+        {
+          path: PATH_ADMIN.create_post_category,
           element: <CreatePostCategory />,
         },
         {
-          path: "/admin/post-category",
+          path: PATH_ADMIN.post_category,
           element: <PostCategory />,
         },
         {
-          path: "/admin/update-post-category/:id",
+          path: PATH_ADMIN.update_post_category,
           element: <UpdatePostCategory />,
         },
-        {
-          path: "/admin/create-post",
-          element: <CreatePost />,
-        },
+        //--------------------
       ],
     },
 
@@ -106,6 +116,14 @@ const AdminLandingPage = Loadable(
   lazy(() => import("../pages/admin/AdminLandingPage/index"))
 );
 
+// Thuận
 const RegistrationAdminPage = Loadable(
   lazy(() => import("../pages/admin/Registration/index"))
 );
+
+//----------------------------
+
+// Chị Tâm
+const HomePost = Loadable(lazy(() => import("../pages/admin/posts/HomePost")));
+
+//-----------------------------
