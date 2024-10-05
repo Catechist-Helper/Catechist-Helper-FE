@@ -5,6 +5,7 @@ import { LOCALSTORAGE_CONSTANTS } from "../../../constants/WebsiteConstant";
 // import { PATH_MAIN } from "@/routes/paths";
 import { useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
+import { PATH_ADMIN } from "../../../routes/paths";
 
 interface SideBarProps {
   activeItem?: string;
@@ -33,7 +34,7 @@ const SideBarComponent = (props: {}) => {
 
   return (
     <div
-      className="bg-gray-300"
+      className="bg-gray-300 z-[999]"
       style={{
         height: "100%",
         overflowY: "auto",
@@ -74,7 +75,7 @@ const SideBarComponent = (props: {}) => {
                   }`}
                 >
                   <Link
-                    to="/admin"
+                    to={PATH_ADMIN.root}
                     aria-label="dashboard"
                     className="relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-sky-600 hover:to-cyan-400 px-4 py-3 hover:text-white"
                   >
@@ -112,8 +113,8 @@ const SideBarComponent = (props: {}) => {
                   //       : ""
                   //   }`}
                 >
-                  <a
-                    href="/category"
+                  <Link
+                    to={PATH_ADMIN.post_category}
                     className="relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-sky-600 hover:to-cyan-400 px-4 py-3 hover:text-white"
                   >
                     <svg
@@ -133,8 +134,10 @@ const SideBarComponent = (props: {}) => {
                         d="M6 12a2 2 0 012-2h8a2 2 0 012 2v2a2 2 0 01-2 2H2h2a2 2 0 002-2v-2z"
                       />
                     </svg>
-                    <span className="group-hover:text-gray-700">Category</span>
-                  </a>
+                    <span className="group-hover:text-gray-700">
+                      Danh mục tin tức
+                    </span>
+                  </Link>
                 </div>
               </li>
               <li className="min-w-max">
@@ -148,8 +151,8 @@ const SideBarComponent = (props: {}) => {
                   //       : ""
                   //   }`}
                 >
-                  <a
-                    href="/order"
+                  <Link
+                    to={PATH_ADMIN.post}
                     className="relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-sky-600 hover:to-cyan-400 px-4 py-3 hover:text-white"
                   >
                     <svg
@@ -169,8 +172,8 @@ const SideBarComponent = (props: {}) => {
                         d="M15 7h1a2 2 0 012 2v5.5a1.5 1.5 0 01-3 0V7z"
                       />
                     </svg>
-                    <span className="group-hover:text-gray-700">Order</span>
-                  </a>
+                    <span className="group-hover:text-gray-700">Tin tức</span>
+                  </Link>
                 </div>
               </li>
               <li className="min-w-max">

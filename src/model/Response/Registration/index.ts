@@ -49,9 +49,9 @@ export type RegistrationItemResponse = {
 
 // Mô hình cho phản hồi của danh sách Registration (hỗ trợ phân trang)
 export type RegistrationResponse = {
-  pageNumber: number;
-  pageSize: number;
-  totalCount: number;
-  totalPages: number;
+  size: number,
+  page: number,
+  total: number,
+  totalPages: number,
   items: RegistrationItemResponse[];
 };

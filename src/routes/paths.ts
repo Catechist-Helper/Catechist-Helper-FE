@@ -3,9 +3,25 @@ function path(root: string, sublink: string) {
 }
 
 export const PATH_ROOT_HOME = "/";
+const PATH_ROOT_ADMIN = "/admin";
 const ROOTS_AUTH = '/auth';
 
 export const PATH_AUTH = {
   root: ROOTS_AUTH,
   login: path(ROOTS_AUTH, '/login'),
+};
+
+export const PATH_ADMIN = {
+  root: PATH_ROOT_ADMIN,
+          // Thuan
+
+          //----------
+
+          // Chị Tâm
+  post: path(PATH_ROOT_ADMIN, '/post'),
+  create_post: path(PATH_ROOT_ADMIN, '/create-post'),
+  post_category: path(PATH_ROOT_ADMIN, '/post-category'),
+  create_post_category: path(PATH_ROOT_ADMIN, '/create-post-category'),
+  update_post_category: path(PATH_ROOT_ADMIN, '/update-post-category/:id'),
+  //---------------------
 };

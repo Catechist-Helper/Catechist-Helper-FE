@@ -11,10 +11,10 @@ export type AccountItemResponse = {
   };
   
 export type AccountResponse = {
-    pageNumber: number;
-    pageSize: number;
-    totalCount: number;
-    totalPages: number;
+    size: number,
+    page: number,
+    total: number,
+    totalPages: number,
     items: AccountItemResponse[];
   };
   
