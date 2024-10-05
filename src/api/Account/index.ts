@@ -1,32 +1,47 @@
-import axiosInstances from "../../config/axios"
+// src/api/Account/index.ts
+import axiosInstances from "../../config/axios";
+import { BasicResponse } from "../../model/Response/BasicResponse";
+import { CreateAccountRequest, UpdateAccountRequest } from "../../model/Request/Account";
+import { AccountResponse } from "../../model/Response/Account";
 
-const request = axiosInstances.base
-// https://localhost:7012/api/v1/
+const request = axiosInstances.base;
+const ROOT_ACCOUNT = "/accounts";
 
-const ROOT_ACCOUNT = "/accounts"
+// GET: Lấy danh sách tất cả accounts (page và size không bắt buộc)
+const getAllAccounts = (page?: number, size?: number) => {
+  const params = {
+    ...(page !== undefined && { page }),
+    ...(size !== undefined && { size })
+  };
+  return request.get<BasicResponse<AccountResponse[]>>(`${ROOT_ACCOUNT}`, { params });
+};
 
-const getAll = (page?: number, size?: number) => 
-    request.get(`${ROOT_ACCOUNT}`, {
-    params: {
-        page,
-        size
-    }
-});
+// POST: Tạo mới một account
+const createAccount = (data: CreateAccountRequest) => {
+  return request.post<BasicResponse<AccountResponse>>(`${ROOT_ACCOUNT}`, data);
+};
 
-const create = (email: string, password: string, roleId: string) => 
-    request.post(`${ROOT_ACCOUNT}`, {
-    email, password, roleId
-});
+// GET: Lấy thông tin chi tiết của một account
+const getAccountById = (id: string) => {
+  return request.get<BasicResponse<AccountResponse>>(`${ROOT_ACCOUNT}/${id}`);
+};
 
-const update = (id: string, updatePassword: string) => 
-    request.put(`${ROOT_ACCOUNT}/${id}`, {
-    password: updatePassword
-});
+// PUT: Cập nhật thông tin của một account
+const updateAccount = (id: string, data: UpdateAccountRequest) => {
+  return request.put<BasicResponse<boolean>>(`${ROOT_ACCOUNT}/${id}`, data);
+};
+
+// DELETE: Xóa một account
+const deleteAccount = (id: string) => {
+  return request.delete<BasicResponse<boolean>>(`${ROOT_ACCOUNT}/${id}`);
+};
 
 const accountApi = {
-    getAll,
-    create,
-    update
+  getAllAccounts,
+  createAccount,
+  getAccountById,
+  updateAccount,
+  deleteAccount
 };
-  
+
 export default accountApi;

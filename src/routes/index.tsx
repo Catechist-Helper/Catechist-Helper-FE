@@ -6,7 +6,7 @@ import LoadingScreen from "../components/Organisms/LoadingScreen/LoadingScreen";
 import AuthGuard from "../guards/AuthGuard";
 import GuestGuard from "../guards/GuestGuard";
 import RoleBasedGuard from "../guards/RoleBasedGuard";
-import { AccountRoleString } from "../enums/accountRole";
+import { AccountRoleString } from "../enums/Account";
 import IdBasedGuard from "../guards/IdBasedGuard";
 import CreatePostCategory from "../pages/admin/AdminLandingPage/posts/CreatePostCategory";
 import PostCategory from "../pages/admin/AdminLandingPage/posts/PostCategory";
@@ -18,20 +18,19 @@ import CreatePost from "../pages/admin/AdminLandingPage/posts/CreatePost";
 
 const Loadable = (Component: any) => (props: any) => {
   const { pathname } = useLocation();
-  const isDashboard = pathname.includes("/dashboard");
 
   return (
     <Suspense
       fallback={
         <LoadingScreen
           sx={{
-            ...(!isDashboard && {
+            ...{
               top: 0,
               left: 0,
               width: 1,
               zIndex: 9999,
               position: "fixed",
-            }),
+            },
           }}
         />
       }
