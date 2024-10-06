@@ -4,15 +4,24 @@ import postCategoryApi from "../../../api/PostCategory";
 import { AxiosResponse } from "axios";
 import { BasicResponse } from "../../../model/Response/BasicResponse";
 import postsApi from "../../../api/Post";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import AdminTemplate from "../../../components/Templates/AdminTemplate/AdminTemplate";
+import { PATH_ADMIN } from "../../../routes/paths";
+
 const HomePost: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState("");
-  const [postCategories, setPostCategories] = useState([]);
+  const [postCategories, setPostCategories] = useState<PostCategory[]>([]);
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) =>
     setSelectedDate(e.target.value);
   const [post, setPost] = useState([]);
   const navigate = useNavigate();
+
+  type PostCategory = {
+    id: string;
+    name: string;
+  };
+
+
   useEffect(() => {
     postsApi
       .getAll(1, 5)
@@ -35,10 +44,6 @@ const HomePost: React.FC = () => {
       });
   }, []);
 
-  // const handleCreate = () => {
-  //     navigate("/admin/create-post-category");
-  // };
-
   useEffect(() => {
     postCategoryApi
       .getAll(1, 5)
@@ -60,9 +65,29 @@ const HomePost: React.FC = () => {
         console.error("Không thấy danh mục : ", err);
       });
   }, []);
+
   const handleCreatePost = () => {
     navigate("/admin/create-post");
   };
+
+  const handleDeletePostClick = (id: string): void => {
+    if (window.confirm("Bạn có chắc là muốn xóa bài này không?")) {
+      postsApi
+        .deletePosts(id)
+        .then(() => {
+          console.log(`Post with ID: ${id} đã xóa thành công.`);
+          window.location.reload();
+        })
+        .catch((err: Error) => {
+          console.error(`Failed to delete post with ID: ${id}`, err);
+        });
+    }
+  };
+
+  const handleEditPostClick = (id: string): void => {
+    navigate(`/admin/update-post/${id}`);
+  };
+
   return (
     <>
       <AdminTemplate>
@@ -114,50 +139,54 @@ const HomePost: React.FC = () => {
           <table className="w-full text-sm text-left rtl:text-right text-gray-500 ">
             <thead className="text-xs text-white uppercase bg-[#70492A] h-20">
               <tr>
-                <th scope="col" className="px-6 py-3">
-                  Tiêu đề
-                </th>
-                <th scope="col" className="px-6 py-3">
-                  Nội dung
-                </th>
-                <th scope="col" className="px-6 py-3">
-                  Module
-                </th>
-                <th scope="col" className="px-6 py-3">
-                  Người đăng
-                </th>
-                <th scope="col" className="px-6 py-3">
-                  Danh mục
-                </th>
+                <th scope="col" className="px-6 py-3">Tiêu đề</th>
+                <th scope="col" className="px-6 py-3">Nội dung</th>
+                <th scope="col" className="px-6 py-3">Module</th>
+                {/* <th scope="col" className="px-6 py-3">Người đăng</th> */}
+                <th scope="col" className="px-6 py-3">Danh mục</th>
+                <th scope="col" className="px-6 py-3">Action</th>
               </tr>
             </thead>
             <tbody>
               {post && post.length > 0 ? (
-                post.map((isPost: any) => (
-                  <tr
-                    className="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
-                    key={isPost.id}
-                  >
-                    <th
-                      scope="row"
-                      className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
-                    >
-                      {isPost.title}
-                    </th>
-                    <td className="px-6 py-4">{isPost.content}</td>
-                    <td className="px-6 py-4">{isPost.module}</td>
-                    <td className="px-6 py-4">{isPost.accountId}</td>
-                    <td className="px-6 py-4">{isPost.postCategoryId}</td>
-                  </tr>
-                ))
+                post.map((isPost: any) => {
+                  const category = postCategories.find(
+                    (category: any) => category.id === isPost.postCategoryId
+                  );
+
+                  return (
+                    <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700" key={isPost.id}>
+                      <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                        <Link className="text-dark" to={`/admin/post-detail/${isPost.id}`}>
+                          {isPost.title}
+                        </Link>
+                      </th>
+                      <td className="px-6 py-4">
+                        {isPost.content.split(" ").slice(0, 10).join(" ")}...
+                      </td>
+                      <td className="px-6 py-4">{isPost.module}</td>
+                      <td className="px-6 py-4">{category ? category.name : 'Không có danh mục'}</td>
+                      <td>
+                        <button onClick={() => handleEditPostClick(isPost.id)} className="btn btn-info">
+                          Edit
+
+                        </button>
+                        <button onClick={() => handleDeletePostClick(isPost.id)} className="btn btn-warning">
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })
               ) : (
                 <tr>
-                  <td colSpan={4}>Không thấy danh sách danh mục</td>
+                  <td colSpan={6}>Không thấy danh sách bài viết</td>
                 </tr>
               )}
             </tbody>
           </table>
         </div>
+
       </AdminTemplate>
     </>
   );
