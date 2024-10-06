@@ -31,9 +31,16 @@ export const setUserInfo = (userInfo: any) => {
   );
 };
 
+// export const getUserInfo = () => {
+//   return getLocalStorage("USER_INFO");
+// };
+// export const getUserInfo = () => 
+//   JSON.parse(getLocalStorage("USER_INFO") || '{}');
 export const getUserInfo = () => {
-  return getLocalStorage("USER_INFO");
+  const user = getLocalStorage("USER_INFO");
+  return user ? JSON.parse(user) : {};
 };
+
 
 export const getUserInfoId = () => {
   var userInfoString : any = getUserInfo();

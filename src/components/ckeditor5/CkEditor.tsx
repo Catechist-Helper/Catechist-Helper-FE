@@ -73,7 +73,7 @@ import 'ckeditor5/ckeditor5.css';
 import './Ck.css';
 import { EditorConfig } from '@ckeditor/ckeditor5-core';
 // TypeScript typing cho các tham chiếu DOM
-const CkEditorComponent: React.FC = () => {
+const CkEditorComponent: React.FC<{ onChange: (data: string) => void; data: string }> = ({ onChange, data }) => {
   const editorContainerRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<HTMLDivElement>(null);
   const [isLayoutReady, setIsLayoutReady] = useState<boolean>(false);
@@ -236,6 +236,7 @@ const CkEditorComponent: React.FC = () => {
       }
   };
   
+  
 
   return (
     <div>
@@ -250,6 +251,8 @@ const CkEditorComponent: React.FC = () => {
                 <CKEditor
                   editor={ClassicEditor}
                   config={editorConfig}
+                  data={data}
+                  onChange={(event, editor) => onChange(editor.getData())}
                 />
               )}
             </div>
