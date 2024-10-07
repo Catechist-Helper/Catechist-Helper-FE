@@ -67,7 +67,7 @@ export default function Router() {
         },
         // Thuận
         {
-          path: "/admin/registration",
+          path: PATH_ADMIN.registration,
           element: <RegistrationAdminPage />,
         },
         //--------------------

@@ -14,7 +14,7 @@ export const PATH_AUTH = {
 export const PATH_ADMIN = {
   root: PATH_ROOT_ADMIN,
           // Thuan
-
+  registration: path(PATH_ROOT_ADMIN, '/registration'),
           //----------
 
           // Chị Tâm
