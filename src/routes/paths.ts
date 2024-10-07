@@ -27,3 +27,9 @@ export const PATH_ADMIN = {
   post_detail: path(PATH_ROOT_ADMIN, '/post-detail/:id'),
   //---------------------
 };
+
+export const PATH_HOME = {
+  root: PATH_ROOT_HOME, 
+  new: path(PATH_ROOT_HOME,'/new'),
+  new_detail: path(PATH_ROOT_HOME,'/new-detail/:id'),
+};
