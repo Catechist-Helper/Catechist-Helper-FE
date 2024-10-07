@@ -13,6 +13,8 @@ import PostCategory from "../pages/admin/posts/PostCategory";
 import UpdatePostCategory from "../pages/admin/posts/UpdatePostCategory";
 import CreatePost from "../pages/admin/posts/CreatePost";
 import { PATH_ADMIN } from "./paths";
+import PostDetails from "../pages/admin/posts/PostDetails";
+import UpdatePost from "../pages/admin/posts/UpdatePost";
 // path
 
 // ----------------------------------------------------------------------
@@ -93,7 +95,16 @@ export default function Router() {
           path: PATH_ADMIN.update_post_category,
           element: <UpdatePostCategory />,
         },
+        {
+          path: PATH_ADMIN.update_post,
+          element: <UpdatePost />,
+        },
+
         //--------------------
+        {
+          path: PATH_ADMIN.post_detail,
+          element: <PostDetails />,
+        },
       ],
     },
 

@@ -31,9 +31,16 @@ export const setUserInfo = (userInfo: any) => {
   );
 };
 
+// export const getUserInfo = () => {
+//   return getLocalStorage("USER_INFO");
+// };
+// export const getUserInfo = () => 
+//   JSON.parse(getLocalStorage("USER_INFO") || '{}');
 export const getUserInfo = () => {
-  return JSON.parse(getLocalStorage("USER_INFO") ?? `{}`);
+  const user = getLocalStorage("USER_INFO");
+  return user ? JSON.parse(user) : {};
 };
+
 
 export const getUserInfoId = () => {
   var userInfoString : any = getUserInfo();
@@ -43,7 +50,6 @@ export const getUserInfoId = () => {
 
 export const formatPhone = (phone: string): string => {
   const cleanedPhone = phone.replace(/\D/g, '');
-
   if (cleanedPhone.length === 10) {
     return cleanedPhone.replace(/(\d{4})(\d{3})(\d{3})/, '$1 $2 $3');
   } else if (cleanedPhone.length === 11) {
