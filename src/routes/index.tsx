@@ -127,6 +127,10 @@ export default function Router() {
           path: PATH_ADMIN.post_detail,
           element: <PostDetails />,
         },
+        {
+          path: PATH_ADMIN.registration,
+          element: <RegisterForm />,
+        },
       ],
     },
 
@@ -160,5 +164,6 @@ const ApprovedRegistrationPage = Loadable(
 
 // Chị Tâm
 const HomePost = Loadable(lazy(() => import("../pages/admin/posts/HomePost")));
+import RegisterForm from './../pages/admin/Registration/RegisterForm';
 
 //-----------------------------
