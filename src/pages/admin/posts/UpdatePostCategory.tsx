@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useFormik } from "formik";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import postCategoryApi from "../../../api/PostCategory";
 import AdminTemplate from "../../../components/Templates/AdminTemplate/AdminTemplate";
-
+import { PATH_ADMIN } from "../../../routes/paths";
 const UpdatePostCategory: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -24,7 +24,7 @@ const UpdatePostCategory: React.FC = () => {
           values.description
         );
         console.log("Update successful: ", response);
-        navigate("/admin");
+        navigate("/admin/post-category");
       } catch (error) {
         console.error("Update failed: ", error);
       } finally {
@@ -60,12 +60,6 @@ const UpdatePostCategory: React.FC = () => {
   return (
     <AdminTemplate>
       <div>
-<<<<<<< Updated upstream
-        <h2>Update Post Category</h2>
-        <form onSubmit={formik.handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="name">Name:</label>
-=======
         <h3 className="text-center pt-10 fw-bold">CẬP NHẬT DANH MỤC BÀI VIẾT</h3>
         <form onSubmit={formik.handleSubmit} className="max-w-sm mx-auto mt-5">
           <div className="mb-5">
@@ -75,14 +69,10 @@ const UpdatePostCategory: React.FC = () => {
             >
               Tên
             </label>
->>>>>>> Stashed changes
             <input
-              type="text"
-              className="form-control"
+              id="name"
               name="name"
               value={formik.values.name}
-<<<<<<< Updated upstream
-=======
             />
           </div>
 
@@ -98,21 +88,25 @@ const UpdatePostCategory: React.FC = () => {
               name="description"
               type="text"
               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
->>>>>>> Stashed changes
               onChange={formik.handleChange}
+              value={formik.values.name}
             />
           </div>
-<<<<<<< Updated upstream
-          <div className="form-group">
-            <label htmlFor="description">Description:</label>
+          <div className="mb-5">
+            <label
+              htmlFor="description"
+              className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+            >
+              Description
+            </label>
             <input
-              type="text"
-              className="form-control"
+              id="description"
               name="description"
-              value={formik.values.description}
+              type="text"
+              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               onChange={formik.handleChange}
+              value={formik.values.description}
             />
-=======
 
           <div className="flex items-start mb-5">
             <button
@@ -128,15 +122,7 @@ const UpdatePostCategory: React.FC = () => {
             >
              Quay lại
             </Link>
->>>>>>> Stashed changes
           </div>
-          <button
-            type="submit"
-            className="btn btn-primary"
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? "Updating..." : "Update Post Category"}
-          </button>
         </form>
       </div>
     </AdminTemplate>

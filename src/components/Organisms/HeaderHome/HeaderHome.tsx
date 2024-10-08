@@ -1,9 +1,20 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import useAuth from "../../../hooks/useAuth";
+import { PATH_ADMIN } from "../../../routes/paths";
+import { getUserInfo } from "../../../utils/utils";
+import { AuthUser } from "../../../types/authentication";
+import { AccountRoleString } from "../../../enums/Account";
 
 const HeaderHome: React.FC = () => {
   const { isAuthenticated, logout } = useAuth();
+  const [userLogin, setUserLogin] = useState<AuthUser>({});
+  useEffect(() => {
+    const user: AuthUser = getUserInfo();
+    if (user && user.id) {
+      setUserLogin(user);
+    }
+  }, []);
 
   return (
     <header className="bg-primary_color text-text_primary_light">
@@ -23,7 +34,7 @@ const HeaderHome: React.FC = () => {
           <Link to={"/"} className="links_dark_hover">
             GIỚI THIỆU
           </Link>
-          <Link to={"/"} className="links_dark_hover">
+          <Link to={"/new"} className="links_dark_hover">
             TIN TỨC
           </Link>
           {!isAuthenticated ? (
@@ -45,6 +56,18 @@ const HeaderHome: React.FC = () => {
               >
                 ĐĂNG XUẤT
               </p>
+              {userLogin &&
+              userLogin.role &&
+              userLogin.role.trim().toLowerCase() ===
+                AccountRoleString.ADMIN.trim().toLowerCase() ? (
+                <>
+                  <Link to={PATH_ADMIN.root} className="links_dark_hover">
+                    QUẢN LÝ
+                  </Link>
+                </>
+              ) : (
+                <></>
+              )}
             </>
           ) : (
             <></>

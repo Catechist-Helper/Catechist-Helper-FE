@@ -15,6 +15,7 @@ export const PATH_ADMIN = {
   root: PATH_ROOT_ADMIN,
           // Thuan
   registration: path(PATH_ROOT_ADMIN, '/registration'),
+  approved_registration: path(PATH_ROOT_ADMIN, '/interview'),
           //----------
 
           // Chị Tâm
@@ -27,4 +28,10 @@ export const PATH_ADMIN = {
   post_detail: path(PATH_ROOT_ADMIN, '/post-detail/:id'),
   registration: path(PATH_ROOT_ADMIN,'/register-form'),
   //---------------------
+};
+
+export const PATH_HOME = {
+  root: PATH_ROOT_HOME, 
+  new: path(PATH_ROOT_HOME,'/new'),
+  new_detail: path(PATH_ROOT_HOME,'/new-detail/:id'),
 };

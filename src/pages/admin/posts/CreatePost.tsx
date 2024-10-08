@@ -3,11 +3,12 @@ import AdminTemplate from "../../../components/Templates/AdminTemplate/AdminTemp
 import { useFormik } from "formik";
 import postsApi from "../../../api/Post";
 import postCategoryApi from "../../../api/PostCategory";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { AxiosResponse } from "axios";
 import { BasicResponse } from "../../../model/Response/BasicResponse";
 import CkEditor from "../../../components/ckeditor5/CkEditor";
-import { AccountRoleString } from "../../../enums/Account";
+import { PostStatus } from "../../../enums/Post";
+import { PATH_ADMIN } from "../../../routes/paths";
 import axios from 'axios';
 
 interface UserLogin {
@@ -25,7 +26,7 @@ const CreatePost: React.FC = () => {
     const fetchUser = async () => {
       try {
         const response = await axios.get('https://catechist-helper-api.azurewebsites.net/api/v1/accounts');
-        setUserLogin(response.data.data.items[0]); 
+        setUserLogin(response.data.data.items[0]);
       } catch (error) {
         console.error('Error fetching user info:', error);
       }
@@ -62,12 +63,12 @@ const CreatePost: React.FC = () => {
           return;
         }
 
-        const accountId = userLogin.id; 
+        const accountId = userLogin.id;
         const newPost = {
           title: values.title,
           content: values.content,
           module: values.module,
-          accountId, 
+          accountId,
           postCategoryId: values.postCategoryId,
         };
 
@@ -121,8 +122,8 @@ const CreatePost: React.FC = () => {
             <div className="p-0">
               <div className="border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400">
                 <CkEditor
-                 data={formik.values.content}
-                onChange={(data) => formik.setFieldValue('content', data)} /> 
+                  data={formik.values.content}
+                  onChange={(data) => formik.setFieldValue('content', data)} />
               </div>
             </div>
           </div>
@@ -135,14 +136,15 @@ const CreatePost: React.FC = () => {
               onChange={formik.handleChange}
               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
             >
-              <option value="">Chọn module</option>
-              {Object.values(AccountRoleString).map((module) => (
-                <option key={module} value={module}>
-                  {module}
+              <option value="">Chọn trạng thái</option>
+              {Object.values(PostStatus).map((status) => (
+                <option key={status} value={status}>
+                  {status}
                 </option>
               ))}
             </select>
           </div>
+
 
           <div className="mb-5">
             <label
@@ -173,15 +175,13 @@ const CreatePost: React.FC = () => {
           >
             {isSubmitting ? "Đang tạo..." : "Tạo bài viết"}
           </button>
-<<<<<<< Updated upstream
-=======
           <Link
             to={PATH_ADMIN.post}
             className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center ml-5"
           >
             Quay lại
           </Link>
->>>>>>> Stashed changes
+
         </form>
       </div>
     </AdminTemplate>

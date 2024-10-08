@@ -12,9 +12,11 @@ import CreatePostCategory from "../pages/admin/posts/CreatePostCategory";
 import PostCategory from "../pages/admin/posts/PostCategory";
 import UpdatePostCategory from "../pages/admin/posts/UpdatePostCategory";
 import CreatePost from "../pages/admin/posts/CreatePost";
-import { PATH_ADMIN } from "./paths";
+import { PATH_ADMIN, PATH_HOME } from "./paths";
 import PostDetails from "../pages/admin/posts/PostDetails";
 import UpdatePost from "../pages/admin/posts/UpdatePost";
+import New from "../pages/common/Home/New";
+import NewDetails from "../pages/common/Home/NewDetails";
 // path
 
 // ----------------------------------------------------------------------
@@ -55,7 +57,23 @@ export default function Router() {
             <GuestGuard>
               <Login />
             </GuestGuard>
-          ),
+          ),          
+        },
+        {
+          path: PATH_HOME.new,
+          element: (
+            <GuestGuard>
+            <New />
+          </GuestGuard>
+          ),          
+        },
+        {
+          path: PATH_HOME.new_detail,
+          element: (
+            <GuestGuard>
+            <NewDetails />
+          </GuestGuard>
+          ),          
         },
       ],
     },
@@ -71,6 +89,10 @@ export default function Router() {
         {
           path: PATH_ADMIN.registration,
           element: <RegistrationAdminPage />,
+        },
+        {
+          path: PATH_ADMIN.approved_registration,
+          element: <ApprovedRegistrationPage />,
         },
         //--------------------
 
@@ -135,7 +157,9 @@ const AdminLandingPage = Loadable(
 const RegistrationAdminPage = Loadable(
   lazy(() => import("../pages/admin/Registration/index"))
 );
-
+const ApprovedRegistrationPage = Loadable(
+  lazy(() => import("../pages/admin/ApprovedRegistration/index"))
+);
 //----------------------------
 
 // Chị Tâm
