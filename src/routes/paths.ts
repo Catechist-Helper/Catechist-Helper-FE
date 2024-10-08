@@ -26,12 +26,13 @@ export const PATH_ADMIN = {
   update_post_category: path(PATH_ROOT_ADMIN, '/update-post-category/:id'),
   update_post: path(PATH_ROOT_ADMIN, '/update-post/:id'),
   post_detail: path(PATH_ROOT_ADMIN, '/post-detail/:id'),
-  registration: path(PATH_ROOT_ADMIN,'/register-form'),
   //---------------------
 };
 
 export const PATH_HOME = {
   root: PATH_ROOT_HOME, 
-  new: path(PATH_ROOT_HOME,'/new'),
-  new_detail: path(PATH_ROOT_HOME,'/new-detail/:id'),
+  news: path(PATH_ROOT_HOME,'news'),
+  news_detail: path(PATH_ROOT_HOME,'news-detail/:id'),
+  news_detail_page: (id: any) => path(PATH_ROOT_HOME,`news-detail/${id}`),
+  registration: path(PATH_ROOT_HOME,'register-form'),
 };

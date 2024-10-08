@@ -57,23 +57,31 @@ export default function Router() {
             <GuestGuard>
               <Login />
             </GuestGuard>
-          ),          
+          ),
         },
         {
-          path: PATH_HOME.new,
+          path: PATH_HOME.news,
           element: (
-            <GuestGuard>
+            // <GuestGuard>
             <New />
-          </GuestGuard>
-          ),          
+            // </GuestGuard>
+          ),
         },
         {
-          path: PATH_HOME.new_detail,
+          path: PATH_HOME.news_detail,
           element: (
-            <GuestGuard>
+            // <GuestGuard>
             <NewDetails />
-          </GuestGuard>
-          ),          
+            // </GuestGuard>
+          ),
+        },
+        {
+          path: PATH_HOME.registration,
+          element: (
+            // <GuestGuard>
+            <RegisterForm />
+            // </GuestGuard>
+          ),
         },
       ],
     },
@@ -87,7 +95,7 @@ export default function Router() {
         },
         // Thuận
         {
-          path: PATH_ADMIN.registration,
+          path: PATH_ADMIN.admin_registration,
           element: <RegistrationAdminPage />,
         },
         {
@@ -127,10 +135,6 @@ export default function Router() {
           path: PATH_ADMIN.post_detail,
           element: <PostDetails />,
         },
-        {
-          path: PATH_ADMIN.registration,
-          element: <RegisterForm />,
-        },
       ],
     },
 
@@ -164,6 +168,6 @@ const ApprovedRegistrationPage = Loadable(
 
 // Chị Tâm
 const HomePost = Loadable(lazy(() => import("../pages/admin/posts/HomePost")));
-import RegisterForm from './../pages/admin/Registration/RegisterForm';
+import RegisterForm from "./../pages/admin/Registration/RegisterForm";
 
 //-----------------------------

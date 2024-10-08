@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import useAuth from "../../../hooks/useAuth";
-import { PATH_ADMIN } from "../../../routes/paths";
+import { PATH_ADMIN, PATH_AUTH, PATH_HOME } from "../../../routes/paths";
 import { getUserInfo } from "../../../utils/utils";
 import { AuthUser } from "../../../types/authentication";
 import { AccountRoleString } from "../../../enums/Account";
@@ -34,12 +34,12 @@ const HeaderHome: React.FC = () => {
           <Link to={"/"} className="links_dark_hover">
             GIỚI THIỆU
           </Link>
-          <Link to={"/new"} className="links_dark_hover">
+          <Link to={PATH_HOME.news} className="links_dark_hover">
             TIN TỨC
           </Link>
           {!isAuthenticated ? (
             <>
-              <Link to={"/login"} className="links_dark_hover">
+              <Link to={PATH_AUTH.login} className="links_dark_hover">
                 ĐĂNG NHẬP
               </Link>
             </>
