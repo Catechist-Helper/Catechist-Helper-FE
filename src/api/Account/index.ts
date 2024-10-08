@@ -2,7 +2,7 @@
 import axiosInstances from "../../config/axios";
 import { BasicResponse } from "../../model/Response/BasicResponse";
 import { CreateAccountRequest, UpdateAccountRequest } from "../../model/Request/Account";
-import { AccountResponse } from "../../model/Response/Account";
+import { AccountResponse, AccountItemResponse } from "../../model/Response/Account";
 
 const request = axiosInstances.base;
 const ROOT_ACCOUNT = "/accounts";
@@ -13,12 +13,12 @@ const getAllAccounts = (page?: number, size?: number) => {
     ...(page !== undefined && { page }),
     ...(size !== undefined && { size })
   };
-  return request.get<BasicResponse<AccountResponse[]>>(`${ROOT_ACCOUNT}`, { params });
+  return request.get<BasicResponse<AccountResponse>>(`${ROOT_ACCOUNT}`, { params });
 };
 
 // POST: Tạo mới một account
 const createAccount = (data: CreateAccountRequest) => {
-  return request.post<BasicResponse<AccountResponse>>(`${ROOT_ACCOUNT}`, data);
+  return request.post<BasicResponse<AccountItemResponse>>(`${ROOT_ACCOUNT}`, data);
 };
 
 // GET: Lấy thông tin chi tiết của một account

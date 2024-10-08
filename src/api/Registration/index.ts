@@ -26,10 +26,17 @@ const createRegistration = (data: CreateRegistrationRequest) => {
   return request.post<BasicResponse<RegistrationItemResponse>>(`${ROOT_REGISTRATION}`, data);
 };
 
-// PUT: Cập nhật thông tin của một registration, thêm các recruiters vào danh sách phỏng vấn
-const updateRegistration = (id: string, data: { status: number; accounts: string[] }) => {
-    return request.put<BasicResponse<boolean>>(`${ROOT_REGISTRATION}/${id}`, data);
+// PUT: Cập nhật thông tin của một registration, có thể thêm các recruiters vào danh sách phỏng vấn
+const updateRegistration = (id: string, data: { status: number; accounts?: string[] }) => {
+  // Xử lý khi accounts có thể không tồn tại
+  const updateData = {
+    status: data.status,
+    ...(data.accounts && { accounts: data.accounts }), // Chỉ thêm trường accounts nếu nó tồn tại
   };
+  
+  return request.put<BasicResponse<boolean>>(`${ROOT_REGISTRATION}/${id}`, updateData);
+};
+
 
 // DELETE: Xóa một registration
 const deleteRegistration = (id: string) => {

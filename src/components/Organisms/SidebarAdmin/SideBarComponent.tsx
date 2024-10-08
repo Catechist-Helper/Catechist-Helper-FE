@@ -6,6 +6,7 @@ import { LOCALSTORAGE_CONSTANTS } from "../../../constants/WebsiteConstant";
 import { useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
 import { PATH_ADMIN } from "../../../routes/paths";
+import useAuth from "../../../hooks/useAuth";
 
 interface SideBarProps {
   activeItem?: string;
@@ -14,6 +15,7 @@ interface SideBarProps {
 
 const SideBarComponent = (props: {}) => {
   const [isHovered, setIsHovered] = useState(false);
+  const { isAuthenticated, logout } = useAuth();
 
   const navigateTo = (route: string) => {
     if (typeof window !== "undefined") {
@@ -45,7 +47,7 @@ const SideBarComponent = (props: {}) => {
       }}
     >
       <div
-        className="sidebar h-full w-[3.35rem] overflow-hidden border-r hover:w-56 hover:bg-white hover:shadow-lg"
+        className="sidebar h-full w-[3.8rem] overflow-hidden border-r hover:w-56 hover:bg-white hover:shadow-lg"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         style={{ height: "100%" }}
@@ -98,6 +100,76 @@ const SideBarComponent = (props: {}) => {
                       ></path>
                     </svg>
                     <span className="-mr-1 font-medium">Dashboard</span>
+                  </Link>
+                </div>
+              </li>
+              <li className="min-w-max">
+                <div
+                  onClick={() => {
+                    // navigateTo(PATH_MAIN.supplier);
+                  }}
+                  //   className={`links_hover ${
+                  //     typeof window !== "undefined" &&
+                  //     isActive(PATH_MAIN.supplier)
+                  //       ? "active_current_link"
+                  //       : ""
+                  //   }`}
+                >
+                  <Link
+                    to={PATH_ADMIN.registration}
+                    className="relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-sky-600 hover:to-cyan-400 px-4 py-3 hover:text-white"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        className="fill-current text-gray-600 group-hover:text-cyan-600"
+                        d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z"
+                      />
+                      <path
+                        className="fill-current text-gray-300 group-hover:text-cyan-300"
+                        d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z"
+                      />
+                    </svg>
+                    <span className="group-hover:text-gray-700">Ứng tuyển</span>
+                  </Link>
+                </div>
+              </li>
+              <li className="min-w-max">
+                <div
+                  onClick={() => {
+                    // navigateTo(PATH_MAIN.supplier);
+                  }}
+                  //   className={`links_hover ${
+                  //     typeof window !== "undefined" &&
+                  //     isActive(PATH_MAIN.supplier)
+                  //       ? "active_current_link"
+                  //       : ""
+                  //   }`}
+                >
+                  <Link
+                    to={PATH_ADMIN.approved_registration}
+                    className="relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-sky-600 hover:to-cyan-400 px-4 py-3 hover:text-white"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        className="fill-current text-gray-600 group-hover:text-cyan-600"
+                        d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z"
+                      />
+                      <path
+                        className="fill-current text-gray-300 group-hover:text-cyan-300"
+                        d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z"
+                      />
+                    </svg>
+                    <span className="group-hover:text-gray-700">Phỏng vấn</span>
                   </Link>
                 </div>
               </li>
@@ -176,41 +248,7 @@ const SideBarComponent = (props: {}) => {
                   </Link>
                 </div>
               </li>
-              <li className="min-w-max">
-                <div
-                  onClick={() => {
-                    // navigateTo(PATH_MAIN.supplier);
-                  }}
-                  //   className={`links_hover ${
-                  //     typeof window !== "undefined" &&
-                  //     isActive(PATH_MAIN.supplier)
-                  //       ? "active_current_link"
-                  //       : ""
-                  //   }`}
-                >
-                  <a
-                    href="/supplier"
-                    className="relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-sky-600 hover:to-cyan-400 px-4 py-3 hover:text-white"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-5 w-5"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                    >
-                      <path
-                        className="fill-current text-gray-600 group-hover:text-cyan-600"
-                        d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z"
-                      />
-                      <path
-                        className="fill-current text-gray-300 group-hover:text-cyan-300"
-                        d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z"
-                      />
-                    </svg>
-                    <span className="group-hover:text-gray-700">Supplier</span>
-                  </a>
-                </div>
-              </li>
+              {/* 
               <li className="min-w-max">
                 <a
                   href="/report"
@@ -235,10 +273,10 @@ const SideBarComponent = (props: {}) => {
                   </svg>
                   <span className="group-hover:text-gray-700">Report</span>
                 </a>
-              </li>
+              </li> */}
               <li className="min-w-max">
-                <a
-                  href="/delivery"
+                <Link
+                  to={"/"}
                   className="relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-sky-600 hover:to-cyan-400 px-4 py-3 hover:text-white"
                 >
                   <svg
@@ -258,12 +296,13 @@ const SideBarComponent = (props: {}) => {
                       clipRule="evenodd"
                     />
                   </svg>
-                  <span className="group-hover:text-gray-700">Delivery</span>
-                </a>
+                  <span className="group-hover:text-gray-700">Trang chủ</span>
+                </Link>
               </li>
-              <li className="min-w-max">
+              <li className="min-w-max cursor-pointer">
                 <div
                   onClick={() => {
+                    logout();
                     // navigateTo(PATH_MAIN.users);
                   }}
                   //   className={`links_hover ${
@@ -272,8 +311,8 @@ const SideBarComponent = (props: {}) => {
                   //       : ""
                   //   }`}
                 >
-                  <a
-                    href="/users"
+                  <Link
+                    to={"/"}
                     className="relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-sky-600 hover:to-cyan-400 px-4 py-3 hover:text-white"
                   >
                     <svg
@@ -293,8 +332,8 @@ const SideBarComponent = (props: {}) => {
                         clipRule="evenodd"
                       />
                     </svg>
-                    <span className="group-hover:text-gray-700">Users</span>
-                  </a>
+                    <span className="group-hover:text-gray-700">Đăng xuất</span>
+                  </Link>
                 </div>
               </li>
             </ul>
