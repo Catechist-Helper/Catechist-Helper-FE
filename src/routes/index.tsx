@@ -15,8 +15,8 @@ import CreatePost from "../pages/admin/posts/CreatePost";
 import { PATH_ADMIN, PATH_HOME } from "./paths";
 import PostDetails from "../pages/admin/posts/PostDetails";
 import UpdatePost from "../pages/admin/posts/UpdatePost";
-import New from "../pages/common/Home/New";
-import NewDetails from "../pages/common/Home/NewDetails";
+import New from "../pages/common/News/New";
+import NewDetails from "../pages/common/News/NewDetails";
 // path
 
 // ----------------------------------------------------------------------
@@ -78,9 +78,9 @@ export default function Router() {
         {
           path: PATH_HOME.registration,
           element: (
-            // <GuestGuard>
-            <RegisterForm />
-            // </GuestGuard>
+            <GuestGuard>
+              <RegisterForm />
+            </GuestGuard>
           ),
         },
       ],
