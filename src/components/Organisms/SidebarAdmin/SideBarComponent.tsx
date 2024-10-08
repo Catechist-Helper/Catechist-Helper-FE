@@ -116,7 +116,7 @@ const SideBarComponent = (props: {}) => {
                   //   }`}
                 >
                   <Link
-                    to={PATH_ADMIN.registration}
+                    to={PATH_ADMIN.admin_registration}
                     className="relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-sky-600 hover:to-cyan-400 px-4 py-3 hover:text-white"
                   >
                     <svg

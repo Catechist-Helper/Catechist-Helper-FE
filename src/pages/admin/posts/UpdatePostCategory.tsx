@@ -11,8 +11,8 @@ const UpdatePostCategory: React.FC = () => {
 
   const formik = useFormik({
     initialValues: {
-      name: "", 
-      description: "", 
+      name: "",
+      description: "",
     },
 
     onSubmit: async (values) => {
@@ -60,7 +60,9 @@ const UpdatePostCategory: React.FC = () => {
   return (
     <AdminTemplate>
       <div>
-        <h3 className="text-center pt-10 fw-bold">CẬP NHẬT DANH MỤC BÀI VIẾT</h3>
+        <h3 className="text-center pt-10 fw-bold">
+          CẬP NHẬT DANH MỤC BÀI VIẾT
+        </h3>
         <form onSubmit={formik.handleSubmit} className="max-w-sm mx-auto mt-5">
           <div className="mb-5">
             <label
@@ -69,11 +71,7 @@ const UpdatePostCategory: React.FC = () => {
             >
               Tên
             </label>
-            <input
-              id="name"
-              name="name"
-              value={formik.values.name}
-            />
+            <input id="name" name="name" value={formik.values.name} />
           </div>
 
           <div className="mb-5">
@@ -107,6 +105,7 @@ const UpdatePostCategory: React.FC = () => {
               onChange={formik.handleChange}
               value={formik.values.description}
             />
+          </div>
 
           <div className="flex items-start mb-5">
             <button
@@ -117,10 +116,10 @@ const UpdatePostCategory: React.FC = () => {
               {isSubmitting ? "Đang cập nhật..." : "Cập nhật danh mục tin"}
             </button>
             <Link
-              to={PATH_ADMIN.post_category} 
+              to={PATH_ADMIN.post_category}
               className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center ml-5"
             >
-             Quay lại
+              Quay lại
             </Link>
           </div>
         </form>
