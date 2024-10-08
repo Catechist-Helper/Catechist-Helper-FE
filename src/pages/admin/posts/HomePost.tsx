@@ -91,7 +91,11 @@ const HomePost: React.FC = () => {
   return (
     <>
       <AdminTemplate>
+        <div className="mb-10 text-center fw-bold mb-50">
+          <h1>BẢNG TIN</h1>
+        </div>
         <div className="flex items-center justify-end space-x-4 p-5">
+
           <div className="d-flex">
             {postCategories.map((category: any) => (
               <button
@@ -162,8 +166,9 @@ const HomePost: React.FC = () => {
                         </Link>
                       </th>
                       <td className="px-6 py-4">
-                        {isPost.content.split(" ").slice(0, 10).join(" ")}...
+                        {isPost.content.replace(/<[^>]*>/g, '').split(" ").slice(0, 10).join(" ")}...
                       </td>
+
                       <td className="px-6 py-4">{isPost.module}</td>
                       <td className="px-6 py-4">{category ? category.name : 'Không có danh mục'}</td>
                       <td>

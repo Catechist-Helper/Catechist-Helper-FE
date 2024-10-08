@@ -34,7 +34,7 @@ const HeaderHome: React.FC = () => {
           <Link to={"/"} className="links_dark_hover">
             GIỚI THIỆU
           </Link>
-          <Link to={"/"} className="links_dark_hover">
+          <Link to={"/new"} className="links_dark_hover">
             TIN TỨC
           </Link>
           {!isAuthenticated ? (
