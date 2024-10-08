@@ -292,15 +292,21 @@ export default function RegistrationDataTable() {
               ) : (
                 <></>
               )}
-              <button
-                className="mx-1 btn btn-warning"
-                onClick={() => {
-                  handleRejectApplications();
-                }}
-                disabled={hasFunction}
-              >
-                Từ chối đơn
-              </button>
+              {viewMode != "rejected" ? (
+                <>
+                  <button
+                    className="mx-1 btn btn-warning"
+                    onClick={() => {
+                      handleRejectApplications();
+                    }}
+                    disabled={hasFunction}
+                  >
+                    Từ chối đơn
+                  </button>
+                </>
+              ) : (
+                <></>
+              )}
               <button
                 className="mx-1 btn btn-danger"
                 disabled={hasFunction}

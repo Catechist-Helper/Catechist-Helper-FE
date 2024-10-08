@@ -19,14 +19,18 @@ const HeaderHome: React.FC = () => {
   return (
     <header className="bg-primary_color text-text_primary_light">
       <div className="px-20 py-3 flex flex-row items-center justify-between">
-        <div>
+        <Link
+          to={"/"}
+          style={{ textDecoration: "none" }}
+          className="hover:text-text_primary_light"
+        >
           <h2
             className="text-[1.5rem] inline-block"
             style={{ fontWeight: "bolder" }}
           >
             Catechist Helper
           </h2>
-        </div>
+        </Link>
         <div className="flex gap-x-10" style={{ fontWeight: "500" }}>
           <Link to={"/"} className="links_dark_hover">
             TRANG CHỦ

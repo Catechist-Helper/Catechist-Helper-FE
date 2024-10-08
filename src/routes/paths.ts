@@ -4,11 +4,10 @@ function path(root: string, sublink: string) {
 
 export const PATH_ROOT_HOME = "/";
 const PATH_ROOT_ADMIN = "/admin";
-const ROOTS_AUTH = '/auth';
+const ROOTS_AUTH = '/';
 
 export const PATH_AUTH = {
-  root: ROOTS_AUTH,
-  login: path(ROOTS_AUTH, '/login'),
+  login: path(ROOTS_AUTH, 'login'),
 };
 
 export const PATH_ADMIN = {

@@ -91,7 +91,13 @@ export default function Router() {
       children: [
         {
           path: "/admin",
-          element: <AdminLandingPage />,
+          element: (
+            <AuthGuard>
+              {/* <RoleBasedGuard accessibleRoles={[AccountRoleString.ADMIN]}> */}
+              <AdminLandingPage />
+              {/* </RoleBasedGuard> */}
+            </AuthGuard>
+          ),
         },
         // Thuận
         {
