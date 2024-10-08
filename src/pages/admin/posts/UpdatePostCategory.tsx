@@ -11,8 +11,6 @@ const UpdatePostCategory: React.FC = () => {
 
   const formik = useFormik({
     initialValues: {
-      name: "", // Tên danh mục
-      description: "", // Mô tả danh mục
     },
 
     onSubmit: async (values) => {

@@ -6,7 +6,7 @@ import { BasicResponse } from "../../../model/Response/BasicResponse";
 import postsApi from "../../../api/Post";
 import { useNavigate, Link } from "react-router-dom";
 import AdminTemplate from "../../../components/Templates/AdminTemplate/AdminTemplate";
-import { PATH_ADMIN } from "../../../routes/paths";
+
 
 const HomePost: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState("");
@@ -96,7 +96,7 @@ const HomePost: React.FC = () => {
             {postCategories.map((category: any) => (
               <button
                 key={category.id}
-                className="btn btn-outline-primary mx-2"
+                className="btn btn-outline-primary mx-2 px-4 py-2 border border-black text-black bg-white hover:bg-gray-200"
               >
                 {category.name}
               </button>
@@ -128,16 +128,20 @@ const HomePost: React.FC = () => {
           </div>
 
           <button
-            className="bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-2 px-6 rounded-full"
+            className="bg-white text-black px-4 py-2 border border-black hover:bg-gray-200 hover:text-blue-600 transition-colors duration-200 !important"
             onClick={handleCreatePost}
           >
             Tạo bài mới
           </button>
+
+
+
+
         </div>
 
         <div className="flex relative overflow-x-auto justify-center p-6">
           <table className="w-full text-sm text-left rtl:text-right text-gray-500 ">
-            <thead className="text-xs text-white uppercase bg-[#70492A] h-20">
+            <thead className="text-xs text-white uppercase bg-[#422A14] h-20">
               <tr>
                 <th scope="col" className="px-6 py-3">Tiêu đề</th>
                 <th scope="col" className="px-6 py-3">Nội dung</th>
@@ -168,11 +172,11 @@ const HomePost: React.FC = () => {
                       <td className="px-6 py-4">{category ? category.name : 'Không có danh mục'}</td>
                       <td>
                         <button onClick={() => handleEditPostClick(isPost.id)} className="btn btn-info">
-                          Edit
+                          Chỉnh sửa
 
                         </button>
                         <button onClick={() => handleDeletePostClick(isPost.id)} className="btn btn-warning">
-                          Delete
+                          Xóa
                         </button>
                       </td>
                     </tr>
