@@ -15,6 +15,7 @@ export const PATH_ADMIN = {
   root: PATH_ROOT_ADMIN,
           // Thuan
   registration: path(PATH_ROOT_ADMIN, '/registration'),
+  approved_registration: path(PATH_ROOT_ADMIN, '/interview'),
           //----------
 
           // Chị Tâm

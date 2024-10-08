@@ -72,6 +72,10 @@ export default function Router() {
           path: PATH_ADMIN.registration,
           element: <RegistrationAdminPage />,
         },
+        {
+          path: PATH_ADMIN.approved_registration,
+          element: <ApprovedRegistrationPage />,
+        },
         //--------------------
 
         // Chị Tâm
@@ -131,7 +135,9 @@ const AdminLandingPage = Loadable(
 const RegistrationAdminPage = Loadable(
   lazy(() => import("../pages/admin/Registration/index"))
 );
-
+const ApprovedRegistrationPage = Loadable(
+  lazy(() => import("../pages/admin/ApprovedRegistration/index"))
+);
 //----------------------------
 
 // Chị Tâm
