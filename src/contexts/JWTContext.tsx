@@ -12,12 +12,13 @@ import {
   JWTContextType,
 } from "../types/authentication";
 import useAppContext from "../hooks/useAppContext";
-import { PATH_AUTH } from "../routes/paths";
+import { PATH_ADMIN, PATH_AUTH } from "../routes/paths";
 import { LOCALSTORAGE_CONSTANTS } from "../constants/WebsiteConstant";
 import Swal from "sweetalert2";
 import { BasicResponse } from "../model/Response/BasicResponse";
 import { useNavigate } from "react-router-dom";
 import { AxiosResponse } from "axios";
+import { AccountRoleEnum, AccountRoleString } from "../enums/Account";
 // import authApi from "@/api/auth/authApi";
 
 // ----------------------------------------------------------------------
@@ -100,7 +101,7 @@ function AuthProvider({ children }: { children: ReactNode }) {
         if (accessToken && isValidToken(accessToken) && userRaw) {
           setSession(accessToken);
 
-          const user = JSON.parse(userRaw);
+          const user = userRaw;
 
           dispatch({
             type: Types.Initial,
@@ -182,7 +183,17 @@ function AuthProvider({ children }: { children: ReactNode }) {
               },
             });
 
-            navigateToPage("/");
+            if (
+              role &&
+              role.trim().toLowerCase() ===
+                AccountRoleString.ADMIN.trim().toLowerCase()
+            ) {
+              setTimeout(() => {
+                navigateToPage(PATH_ADMIN.root);
+              }, 5000);
+            } else {
+              navigateToPage("/");
+            }
             disableLoading();
           } else {
             disableLoading();

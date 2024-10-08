@@ -1,13 +1,7 @@
-import React, { useEffect, useState } from "react";
-import { Form, Input, theme } from "antd";
+import React from "react";
+import { Form, Input } from "antd";
 import { useFormik } from "formik";
 import useAuth from "../../../../hooks/useAuth";
-import accountApi from "../../../../api/Account";
-import { AxiosResponse } from "axios";
-import { BasicResponse } from "../../../../model/Response/BasicResponse";
-import sweetAlert from "../../../../utils/sweetAlert";
-import { formatDate } from "../../../../utils/formatDate";
-import { AccountResponse } from "../../../../model/Response/Account";
 
 const LoginComponent: React.FC = () => {
   const [form] = Form.useForm();
@@ -22,29 +16,6 @@ const LoginComponent: React.FC = () => {
       await login(values.email, values.password);
     },
   });
-
-  const [accounts, setAccounts] = useState<AccountResponse[]>([]);
-  useEffect(() => {
-    // accountApi
-    //   .getAllAccounts(1)
-    //   .then((axiosRes: AxiosResponse) => {
-    //     console.log("====================================");
-    //     console.log("aaaaaaaa", axiosRes);
-    //     console.log("====================================");
-    //     // setAccount
-    //     const res: BasicResponse = axiosRes.data;
-    //     console.log("bbbbbbbbb", res);
-    //     if (
-    //       res.statusCode.toString().trim().startsWith("2") &&
-    //       res.data != null
-    //     ) {
-    //       setAccounts(res.data);
-    //     }
-    //   })
-    //   .catch((err) => {});
-  }, []);
-
-  // console.log("cccccccc", accounts);
 
   const handleForgetPassword = () => {};
   return (
@@ -178,7 +149,7 @@ const LoginComponent: React.FC = () => {
                 <button
                   type="submit"
                   style={{ fontWeight: "bolder" }}
-                  className="hover:bg-yellow-600 bg-primary_color text-white mt-2 box-border flex w-full max-w-full flex-1 cursor-pointer flex-row items-start justify-center overflow-hidden whitespace-nowrap rounded-md bg-primary_color px-5 py-[10px] [border:none]"
+                  className="hover:bg-yellow-600 bg-primary_color text-white mt-2 box-border flex w-full max-w-full flex-1 cursor-pointer flex-row items-start justify-center overflow-hidden whitespace-nowrap rounded-md px-5 py-[10px] [border:none]"
                 >
                   <div className="font-baloo relative mt-0 flex w-full items-center justify-center text-center text-lg font-medium text-neutral-white">
                     Đăng Nhập
