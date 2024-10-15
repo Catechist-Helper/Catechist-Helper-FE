@@ -6,6 +6,7 @@ import { BasicResponse } from "../../../model/Response/BasicResponse";
 import postsApi from "../../../api/Post";
 import { useNavigate, Link } from "react-router-dom";
 import AdminTemplate from "../../../components/Templates/AdminTemplate/AdminTemplate";
+import CreateChristianName from "../ChristianName/HomeChristianName";
 
 
 const HomePost: React.FC = () => {
@@ -142,7 +143,7 @@ const HomePost: React.FC = () => {
 
 
         </div>
-
+        
         <div className="flex relative overflow-x-auto justify-center p-6">
           <table className="w-full text-sm text-left rtl:text-right text-gray-500 ">
             <thead className="text-xs text-white uppercase bg-[#422A14] h-20">

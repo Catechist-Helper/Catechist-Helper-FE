@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import registrationApi from "../../../api/Registration";
-import sweetAlert from "../../../utils/sweetAlert";
+// import sweetAlert from "../../../utils/sweetAlert";
 import Swal from "sweetalert2";
 
 const RegisterForm: React.FC = () => {
