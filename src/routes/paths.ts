@@ -25,6 +25,9 @@ export const PATH_ADMIN = {
   update_post_category: path(PATH_ROOT_ADMIN, '/update-post-category/:id'),
   update_post: path(PATH_ROOT_ADMIN, '/update-post/:id'),
   post_detail: path(PATH_ROOT_ADMIN, '/post-detail/:id'),
+  create_christian_name: path(PATH_ROOT_ADMIN, '/create-christian-name'),
+  update_christian_name: path(PATH_ROOT_ADMIN, '/update-christian-name/:id'),
+  christian_name: path(PATH_ROOT_ADMIN, '/christian-name'),
   //---------------------
 };
 

@@ -17,6 +17,8 @@ import PostDetails from "../pages/admin/posts/PostDetails";
 import UpdatePost from "../pages/admin/posts/UpdatePost";
 import New from "../pages/common/News/New";
 import NewDetails from "../pages/common/News/NewDetails";
+import CreateChristianName from "../pages/admin/ChristianName/CreateChristianName";
+import UpdateChristianName from "../pages/admin/ChristianName/UpdateChristianName";
 // path
 
 // ----------------------------------------------------------------------
@@ -141,6 +143,18 @@ export default function Router() {
           path: PATH_ADMIN.post_detail,
           element: <PostDetails />,
         },
+        {
+          path: PATH_ADMIN.create_christian_name,
+          element: <CreateChristianName />,
+        },
+        {
+          path: PATH_ADMIN.update_christian_name,
+          element: <UpdateChristianName />,
+        },
+        {
+          path: PATH_ADMIN.christian_name,
+          element: <HomeChristianName />,
+        },
       ],
     },
 
@@ -175,5 +189,8 @@ const ApprovedRegistrationPage = Loadable(
 // Chị Tâm
 const HomePost = Loadable(lazy(() => import("../pages/admin/posts/HomePost")));
 import RegisterForm from "./../pages/admin/Registration/RegisterForm";
+
+const HomeChristianName = Loadable(lazy(() => import("../pages/admin/ChristianName/HomeChristianName")));
+
 
 //-----------------------------
