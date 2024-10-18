@@ -7,7 +7,7 @@ import { Link, useNavigate } from "react-router-dom";
 import AdminTemplate from "../../../components/Templates/AdminTemplate/AdminTemplate";
 import { PATH_ADMIN } from "../../../routes/paths";
 import { AxiosError } from "axios";
-import * as Yup from 'yup';
+import * as Yup from "yup";
 
 // Define form values interface
 interface RoomFormValues {
@@ -18,16 +18,17 @@ interface RoomFormValues {
 
 const CreateRoom: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const navigate = useNavigate();
 
   // Validation schema using Yup
   const validationSchema = Yup.object({
     name: Yup.string()
-      .required('Tên phòng học không được bỏ trống.')
-      .max(100, 'Tên không được quá 100 ký tự.'),
+      .required("Tên phòng học không được bỏ trống.")
+      .max(100, "Tên không được quá 100 ký tự."),
     description: Yup.string()
-      .required('Mô tả không được bỏ trống.')
-      .max(500, 'Mô tả không được quá 500 ký tự.'),
+      .required("Mô tả không được bỏ trống.")
+      .max(500, "Mô tả không được quá 500 ký tự."),
   });
 
   const formik = useFormik<RoomFormValues>({
@@ -37,39 +38,28 @@ const CreateRoom: React.FC = () => {
       image: null,
     },
     validationSchema,
-    onSubmit: async (values: RoomFormValues, { resetForm }: FormikHelpers<RoomFormValues>) => {
+    onSubmit: async (
+      values: RoomFormValues,
+      { resetForm }: FormikHelpers<RoomFormValues>
+    ) => {
       setIsSubmitting(true);
       try {
         // Prepare FormData to send
         const formData = new FormData();
         formData.append("Name", values.name.trim());
         formData.append("Description", values.description.trim());
-      
+
         // Check if image exists and is a file
         if (values.image && values.image instanceof File) {
           formData.append("Image", values.image);
-
-          // Validate MIME type
-          if (!values.image.type.startsWith('image/')) {
-            message.error("Vui lòng chọn một tệp hình ảnh hợp lệ.");
-            setIsSubmitting(false);
-            return;
-          }
-
-          // Validate file size (limit to 5MB)
-          if (values.image.size > 5 * 1024 * 1024) {
-            message.error("Kích thước tệp hình ảnh phải nhỏ hơn 5MB.");
-            setIsSubmitting(false);
-            return;
-          }
         } else {
           message.error("Vui lòng chọn một hình ảnh.");
           setIsSubmitting(false);
           return;
         }
 
-        // Debugging FormData content
-        for (let [key, value] of formData.entries()) {
+        // Debugging: Log FormData entries
+        for (const [key, value] of formData.entries()) {
           console.log(`${key}:`, value);
         }
 
@@ -78,10 +68,15 @@ const CreateRoom: React.FC = () => {
         console.log("Response:", response.data);
         message.success("Phòng học được tạo thành công!");
         resetForm(); // Reset form after success
+        setImagePreview(null); // Reset image preview
         navigate(PATH_ADMIN.rooms);
       } catch (error: unknown) {
         const axiosError = error as AxiosError<{ errors: any }>;
-        if (axiosError.response && axiosError.response.data && axiosError.response.data.errors) {
+        if (
+          axiosError.response &&
+          axiosError.response.data &&
+          axiosError.response.data.errors
+        ) {
           console.error("Lỗi xác thực: ", axiosError.response.data.errors);
           message.error("Lỗi xác thực, vui lòng kiểm tra lại.");
         } else {
@@ -99,10 +94,17 @@ const CreateRoom: React.FC = () => {
     if (event.currentTarget.files && event.currentTarget.files[0]) {
       const file = event.currentTarget.files[0];
       formik.setFieldValue("image", file);
-      console.log("Tệp đã chọn:", file);
+      setImagePreview(URL.createObjectURL(file)); // Tạo URL để hiển thị ảnh xem trước
     } else {
       formik.setFieldValue("image", null); // Reset if no file is chosen
+      setImagePreview(null); // Reset preview
     }
+  };
+
+  // Handle remove image
+  const handleRemoveImage = () => {
+    formik.setFieldValue("image", null);
+    setImagePreview(null); // Reset preview
   };
 
   return (
@@ -111,7 +113,10 @@ const CreateRoom: React.FC = () => {
         <h3 className="text-center pt-10 fw-bold">TẠO PHÒNG HỌC</h3>
         <form onSubmit={formik.handleSubmit} className="max-w-sm mx-auto mt-5">
           <div className="mb-5">
-            <label htmlFor="name" className="block mb-2 text-sm font-medium text-gray-900">
+            <label
+              htmlFor="name"
+              className="block mb-2 text-sm font-medium text-gray-900"
+            >
               Phòng học
             </label>
             <input
@@ -127,7 +132,10 @@ const CreateRoom: React.FC = () => {
             ) : null}
           </div>
           <div className="mb-5">
-            <label htmlFor="description" className="block mb-2 text-sm font-medium text-gray-900">
+            <label
+              htmlFor="description"
+              className="block mb-2 text-sm font-medium text-gray-900"
+            >
               Mô tả
             </label>
             <input
@@ -139,11 +147,16 @@ const CreateRoom: React.FC = () => {
               value={formik.values.description}
             />
             {formik.errors.description && formik.touched.description ? (
-              <div className="text-red-500 text-sm">{formik.errors.description}</div>
+              <div className="text-red-500 text-sm">
+                {formik.errors.description}
+              </div>
             ) : null}
           </div>
           <div className="mb-5">
-            <label htmlFor="image" className="block mb-2 text-sm font-medium text-gray-900">
+            <label
+              htmlFor="image"
+              className="block mb-2 text-sm font-medium text-gray-900"
+            >
               Ảnh phòng học
             </label>
             <input
@@ -154,6 +167,23 @@ const CreateRoom: React.FC = () => {
               className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50"
               onChange={handleFileChange}
             />
+            {/* Hiển thị ảnh xem trước nếu có */}
+            {imagePreview && (
+              <div className="mt-2">
+                <img
+                  src={imagePreview}
+                  alt="Preview"
+                  className="w-full h-auto rounded"
+                />
+                <button
+                  type="button"
+                  onClick={handleRemoveImage}
+                  className="mt-2 text-red-500 hover:underline"
+                >
+                  Xóa ảnh
+                </button>
+              </div>
+            )}
           </div>
 
           <div className="flex items-start mb-5">
