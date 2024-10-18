@@ -7,6 +7,10 @@ export type RoleInAccountResponse = {
 export type AccountItemResponse = {
     id: string;
     email: string;
+    fullName: string,
+    gender: string,
+    phone: string,
+    avatar: string,
     role: RoleInAccountResponse;
   };
   

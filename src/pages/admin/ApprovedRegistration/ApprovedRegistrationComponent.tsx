@@ -15,6 +15,7 @@ import {
   FormControl,
   InputLabel,
 } from "@mui/material";
+import viVNGridTranslation from "../../../locale/MUITable";
 import Select from "react-select";
 import dayjs from "dayjs";
 import registrationApi from "../../../api/Registration";
@@ -25,6 +26,7 @@ import { RegistrationItemResponse } from "../../../model/Response/Registration";
 import { RegistrationStatus } from "../../../enums/Registration";
 import sweetAlert from "../../../utils/sweetAlert";
 import { formatDate } from "../../../utils/formatDate";
+import { AccountRoleString } from "../../../enums/Account";
 
 // Định dạng ngày và giờ
 const formatDateTime = {
@@ -49,6 +51,13 @@ const columns: GridColDef[] = [
   { field: "phone", headerName: "Số điện thoại", width: 120 },
   { field: "address", headerName: "Địa chỉ", width: 180 },
   {
+    field: "isTeachingBefore",
+    headerName: "Đã từng dạy",
+    width: 120,
+    renderCell: (params) => (params.value ? "Có" : "Không"),
+  },
+  { field: "yearOfTeaching", headerName: "Số năm giảng dạy", width: 150 },
+  {
     field: "meetingTime",
     headerName: "Thời gian phỏng vấn",
     width: 180,
@@ -68,7 +77,7 @@ const columns: GridColDef[] = [
     width: 200,
     renderCell: (params) => {
       return params.row.recruiters
-        .map((recruiter: any) => recruiter.email)
+        .map((recruiter: any) => recruiter.fullName)
         .join(", ");
     },
   },
@@ -130,12 +139,19 @@ export default function ApprovedRegistrationsTable() {
   const [interviewResult, setInterviewResult] = useState<string>(""); // Kết quả phỏng vấn
   const [selectedRegistration, setSelectedRegistration] =
     useState<RegistrationItemResponse | null>(null); // Đơn đăng ký được chọn
+  const [selectedRegistrationOfModal, setSelectedRegistrationOfModal] =
+    useState<RegistrationItemResponse | null>(null);
 
   // Modal state cho cập nhật phỏng vấn
   const [openUpdateModal, setOpenUpdateModal] = useState<boolean>(false);
+  const [openDeleteModal, setOpenDeleteModal] = useState<boolean>(false);
   const [selectedRecruiters, setSelectedRecruiters] = useState<any[]>([]);
   const [meetingTime, setMeetingTime] = useState<string>("");
   const [recruiters, setRecruiters] = useState<any[]>([]); // Lưu danh sách recruiter
+  const [updatedInterviewReason, setUpdatedInterviewReason] =
+    useState<string>("");
+  const [deletedInterviewReason, setDeletedInterviewReason] =
+    useState<string>("");
 
   // State cho loại đơn hiện tại
   const [currentFilter, setCurrentFilter] = useState<
@@ -156,67 +172,50 @@ export default function ApprovedRegistrationsTable() {
   const fetchApprovedRegistrations = async () => {
     try {
       setLoading(true);
-      const { data } = await registrationApi.getAllRegistrations(1, 100);
 
-      // Lọc các đơn theo trạng thái được chọn
-      const filteredRegistrations = data.data.items
-        .filter((registration: RegistrationItemResponse) => {
-          switch (currentFilter) {
-            case "accepted":
-              return (
-                registration.status === RegistrationStatus.Approved_Phong_Van
-              );
-            case "rejected":
-              return (
-                registration.status === RegistrationStatus.Rejected_Phong_Van
-              );
-            default:
-              return (
-                registration.status === RegistrationStatus.Approved_Duyet_Don
-              );
-          }
-        })
-        .filter((registration: RegistrationItemResponse) => {
-          if (!selectedDate) return true; // Nếu không chọn ngày, hiển thị tất cả
-          return (
-            registration.interviews.length > 0 &&
-            dayjs(registration.interviews[0].meetingTime).format(
-              "YYYY-MM-DD"
-            ) === selectedDate
-          );
-        })
-        .sort((a, b) => {
-          const meetingTimeA =
-            a.interviews.length > 0 ? a.interviews[0].meetingTime : null;
-          const meetingTimeB =
-            b.interviews.length > 0 ? b.interviews[0].meetingTime : null;
+      // Xác định giá trị status dựa trên bộ lọc hiện tại
+      let status;
+      switch (currentFilter) {
+        case "accepted":
+          status = RegistrationStatus.Approved_Phong_Van;
+          break;
+        case "rejected":
+          status = RegistrationStatus.Rejected_Phong_Van;
+          break;
+        default:
+          status = RegistrationStatus.Approved_Duyet_Don;
+          break;
+      }
 
-          if (!meetingTimeA || !meetingTimeB) return 0;
+      // Xác định ngày bắt đầu và kết thúc (lọc theo ngày nếu có selectedDate)
+      const startDate = selectedDate ? selectedDate : undefined;
+      const endDate = selectedDate ? selectedDate : undefined;
 
-          if (currentFilter === "waiting") {
-            // Sắp xếp từ xa đến gần cho đơn chờ phỏng vấn
-            return dayjs(meetingTimeA).isBefore(dayjs(meetingTimeB)) ? -1 : 1;
-          } else {
-            // Sắp xếp từ gần đến xa cho đơn chấp nhận và từ chối
-            return dayjs(meetingTimeA).isAfter(dayjs(meetingTimeB)) ? -1 : 1;
-          }
-        });
-
-      setRowCount(filteredRegistrations.length);
-
-      // Phân trang thủ công
-      const paginatedRows = filteredRegistrations.slice(
-        paginationModel.page * paginationModel.pageSize,
-        (paginationModel.page + 1) * paginationModel.pageSize
+      // Gọi API getAllRegistrations với các tham số
+      const { data } = await registrationApi.getAllRegistrations(
+        startDate,
+        endDate,
+        status,
+        paginationModel.page + 1, // Sử dụng paginationModel.page + 1 vì API có thể sử dụng số trang bắt đầu từ 1
+        paginationModel.pageSize // Sử dụng kích thước trang từ paginationModel
       );
 
-      setRows(paginatedRows);
+      // Cập nhật tổng số hàng
+      setRowCount(data.data.total); // Cập nhật tổng số hàng từ API
+      setRows(data.data.items); // Cập nhật hàng được trả về từ API
     } catch (error) {
       console.error("Lỗi khi tải danh sách registrations:", error);
     } finally {
       setLoading(false);
     }
   };
+
+  const element = document.querySelector<HTMLElement>(
+    ".MuiTablePagination-selectLabel"
+  );
+  if (element) {
+    element.innerHTML = "Số hàng mỗi trang";
+  }
 
   // Gọi API khi component được render
   useEffect(() => {
@@ -228,16 +227,29 @@ export default function ApprovedRegistrationsTable() {
     setSelectedRegistrations(newSelectionModel);
   };
 
+  const fetchSelectedRegistrationOfModal = async () => {
+    await registrationApi
+      .getRegistrationById(selectedRegistrations[0].toString())
+      .then((res) => {
+        setSelectedRegistrationOfModal(res.data.data);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+
   // Mở modal phê duyệt phỏng vấn
   const handleOpenApprovalModal = (registrationId: string) => {
     const selectedRow = rows.find((row) => row.id === registrationId);
     if (selectedRow) {
       setSelectedRegistration(selectedRow);
+      fetchSelectedRegistrationOfModal();
       setOpenApprovalModal(true);
     }
   };
 
   const handleCloseApprovalModal = () => {
+    setSelectedRegistrationOfModal(null);
     setOpenApprovalModal(false);
     setInterviewNote(""); // Reset các trường input
     setInterviewResult("");
@@ -248,10 +260,11 @@ export default function ApprovedRegistrationsTable() {
     const selectedRow = rows.find((row) => row.id === registrationId);
     if (selectedRow) {
       setSelectedRegistration(selectedRow);
+      fetchSelectedRegistrationOfModal();
       setSelectedRecruiters(
         selectedRow.recruiters.map((recruiter: any) => ({
           value: recruiter.id,
-          label: recruiter.email,
+          label: `${recruiter.fullName} ${recruiter.role && recruiter.role.roleName.toUpperCase() == AccountRoleString.ADMIN ? " - Admin" : ""} ${recruiter.role && recruiter.role.roleName.toUpperCase() == AccountRoleString.MANAGER ? " - Quản lý" : ""} ${recruiter.role && recruiter.role.roleName.toUpperCase() == AccountRoleString.CATECHIST ? " - Giáo lý viên" : ""}`,
         }))
       );
       setMeetingTime(
@@ -263,9 +276,21 @@ export default function ApprovedRegistrationsTable() {
   };
 
   const handleCloseUpdateModal = () => {
+    setSelectedRegistrationOfModal(null);
     setOpenUpdateModal(false);
     setSelectedRecruiters([]);
     setMeetingTime("");
+  };
+
+  // Mở modal cập nhật phỏng vấn
+  const handleOpenDeleteModal = () => {
+    fetchSelectedRegistrationOfModal();
+    setOpenDeleteModal(true);
+  };
+
+  const handleCloseDeleteModal = () => {
+    setSelectedRegistrationOfModal(null);
+    setOpenDeleteModal(false);
   };
 
   // Xác nhận phỏng vấn
@@ -455,7 +480,7 @@ export default function ApprovedRegistrationsTable() {
               {selectedRegistrations.length === 1 && (
                 <>
                   <button
-                    className="btn btn-primary mx-2"
+                    className="btn btn-primary ml-1"
                     onClick={() =>
                       handleOpenApprovalModal(
                         selectedRegistrations[0].toString()
@@ -465,7 +490,7 @@ export default function ApprovedRegistrationsTable() {
                     Phê duyệt phỏng vấn
                   </button>
                   <button
-                    className="btn btn-warning mx-2"
+                    className="btn btn-warning ml-1"
                     onClick={() =>
                       handleOpenUpdateModal(selectedRegistrations[0].toString())
                     }
@@ -475,8 +500,8 @@ export default function ApprovedRegistrationsTable() {
                 </>
               )}
               <button
-                onClick={handleDeleteInterview}
-                className="btn btn-danger mx-2"
+                onClick={handleOpenDeleteModal}
+                className="btn btn-danger ml-1"
               >
                 Xóa lịch phỏng vấn
               </button>
@@ -490,10 +515,10 @@ export default function ApprovedRegistrationsTable() {
           rows={rows}
           columns={columns}
           paginationMode="server"
-          rowCount={rowCount}
+          rowCount={rowCount} // Đảm bảo rowCount là tổng số hàng từ server
           loading={loading}
           paginationModel={paginationModel}
-          onPaginationModelChange={setPaginationModel}
+          onPaginationModelChange={setPaginationModel} // Cập nhật paginationModel khi thay đổi
           pageSizeOptions={[8, 25, 50]}
           onRowSelectionModelChange={handleSelectionChange}
           rowSelectionModel={selectedRegistrations}
@@ -501,6 +526,7 @@ export default function ApprovedRegistrationsTable() {
           sx={{
             border: 0,
           }}
+          localeText={viVNGridTranslation}
         />
       </div>
 
@@ -508,15 +534,76 @@ export default function ApprovedRegistrationsTable() {
       <Modal open={openApprovalModal} onClose={handleCloseApprovalModal}>
         <div
           style={{
-            width: "400px",
-            padding: "20px",
+            width: "50%",
             margin: "auto",
-            marginTop: "10%",
             backgroundColor: "white",
             borderRadius: "8px",
           }}
+          className="py-5 px-5 mt-4"
         >
-          <h2>Kết quả phỏng vấn</h2>
+          <h1 className="text-center text-[2.2rem] text-primary py-2 pt-0 font-bold uppercase">
+            Phê duyệt phỏng vấn
+          </h1>
+
+          {selectedRegistrationOfModal ? (
+            <>
+              <div className="flex flex-wrap mt-3">
+                <h5 className="mt-2 w-[50%]">
+                  <strong>Tên ứng viên:</strong>{" "}
+                  {selectedRegistrationOfModal.fullName}
+                </h5>
+                <h5 className="mt-2 w-[50%]">
+                  <strong>Thời gian phỏng vấn:</strong>{" "}
+                  {formatDate.DD_MM_YYYY_Time(
+                    selectedRegistrationOfModal.interviews[0].meetingTime
+                  )}
+                </h5>
+                <h5 className="mt-2 w-[50%]">
+                  <strong>Giới tính:</strong>{" "}
+                  {selectedRegistrationOfModal.gender}
+                </h5>
+                <h5 className="mt-2 w-[50%]">
+                  <strong>Ngày sinh:</strong>{" "}
+                  {formatDate.DD_MM_YYYY(
+                    selectedRegistrationOfModal.dateOfBirth
+                  )}
+                </h5>
+                <h5 className="mt-2 w-[50%]">
+                  <strong>Số điện thoại:</strong>{" "}
+                  {selectedRegistrationOfModal.phone}
+                </h5>
+                <h5 className="mt-2 w-[50%]">
+                  <strong>Email:</strong> {selectedRegistrationOfModal.email}
+                </h5>
+                <h5 className="mt-2 w-[50%]">
+                  <strong>Kinh nghiệm:</strong>{" "}
+                  {selectedRegistrationOfModal.isTeachingBefore
+                    ? "Có"
+                    : "Không"}
+                </h5>
+                <h5 className="mt-2 w-[50%]">
+                  <strong>Số năm giảng dạy:</strong>{" "}
+                  {selectedRegistrationOfModal.yearOfTeaching}
+                </h5>
+                <h5 className="mt-2 w-[100%]">
+                  <strong>Địa chỉ:</strong>{" "}
+                  {selectedRegistrationOfModal.address}
+                </h5>
+                <h5 className="mt-2 w-[100%]">
+                  <strong>Người phỏng vấn:</strong>{" "}
+                  {selectedRegistrationOfModal.recruiters
+                    .map((recruiter: any) => recruiter.fullName)
+                    .join(", ")}
+                </h5>
+              </div>
+            </>
+          ) : (
+            <></>
+          )}
+
+          <h2 className="my-0 py-0 mt-3">
+            <strong>Ghi chú phỏng vấn</strong>
+          </h2>
 
           <TextField
             label="Ghi chú"
@@ -527,10 +614,13 @@ export default function ApprovedRegistrationsTable() {
             onChange={(e) => setInterviewNote(e.target.value)}
             placeholder="Nhập ghi chú phỏng vấn (không bắt buộc)"
             margin="normal"
+            className="my-0 mt-1"
           />
 
-          <FormControl fullWidth margin="normal">
-            <InputLabel id="result-label">Kết quả</InputLabel>
+          <FormControl fullWidth margin="normal" className="my-0 mt-4">
+            <InputLabel id="result-label">
+              <strong>Kết quả</strong>
+            </InputLabel>
             <MuiSelect
               labelId="result-label"
               value={interviewResult}
@@ -577,23 +667,80 @@ export default function ApprovedRegistrationsTable() {
       <Modal open={openUpdateModal} onClose={handleCloseUpdateModal}>
         <div
           style={{
-            width: "400px",
-            padding: "20px",
+            width: "50%",
             margin: "auto",
-            marginTop: "10%",
             backgroundColor: "white",
             borderRadius: "8px",
           }}
+          className="py-5 px-5 mt-4"
         >
-          <h2>Cập nhật lịch phỏng vấn</h2>
+          <h1 className="text-center text-[2.2rem] text-warning py-2 pt-0 font-bold uppercase">
+            Cập nhật lịch phỏng vấn
+          </h1>
+
+          {selectedRegistrationOfModal ? (
+            <>
+              <div className="flex flex-wrap mt-3">
+                <h5 className="mt-2 w-[50%]">
+                  <strong>Tên ứng viên:</strong>{" "}
+                  {selectedRegistrationOfModal.fullName}
+                </h5>
+                <h5 className="mt-2 w-[50%]">
+                  <strong>Thời gian phỏng vấn:</strong>{" "}
+                  {formatDate.DD_MM_YYYY_Time(
+                    selectedRegistrationOfModal.interviews[0].meetingTime
+                  )}
+                </h5>
+                <h5 className="mt-2 w-[50%]">
+                  <strong>Giới tính:</strong>{" "}
+                  {selectedRegistrationOfModal.gender}
+                </h5>
+                <h5 className="mt-2 w-[50%]">
+                  <strong>Ngày sinh:</strong>{" "}
+                  {formatDate.DD_MM_YYYY(
+                    selectedRegistrationOfModal.dateOfBirth
+                  )}
+                </h5>
+                <h5 className="mt-2 w-[50%]">
+                  <strong>Số điện thoại:</strong>{" "}
+                  {selectedRegistrationOfModal.phone}
+                </h5>
+                <h5 className="mt-2 w-[50%]">
+                  <strong>Email:</strong> {selectedRegistrationOfModal.email}
+                </h5>
+                <h5 className="mt-2 w-[50%]">
+                  <strong>Kinh nghiệm:</strong>{" "}
+                  {selectedRegistrationOfModal.isTeachingBefore
+                    ? "Có"
+                    : "Không"}
+                </h5>
+                <h5 className="mt-2 w-[50%]">
+                  <strong>Số năm giảng dạy:</strong>{" "}
+                  {selectedRegistrationOfModal.yearOfTeaching}
+                </h5>
+                <h5 className="mt-2 w-[100%]">
+                  <strong>Địa chỉ:</strong>{" "}
+                  {selectedRegistrationOfModal.address}
+                </h5>
+                <h5 className="mt-2 w-[100%]">
+                  <strong>Người phỏng vấn:</strong>{" "}
+                  {selectedRegistrationOfModal.recruiters
+                    .map((recruiter: any) => recruiter.fullName)
+                    .join(", ")}
+                </h5>
+              </div>
+            </>
+          ) : (
+            <></>
+          )}
 
           {/* Cập nhật người phỏng vấn */}
           <FormControl fullWidth margin="normal">
-            <label className="font-bold mt-3">Chọn người phỏng vấn</label>
+            <label className="font-bold mt-1">Cập nhật người phỏng vấn</label>
             <Select
               options={recruiters.map((acc: any) => ({
                 value: acc.id,
-                label: acc.email,
+                label: `${acc.fullName} ${acc.role && acc.role.roleName.toUpperCase() == AccountRoleString.ADMIN ? " - Admin" : ""} ${acc.role && acc.role.roleName.toUpperCase() == AccountRoleString.MANAGER ? " - Quản lý" : ""} ${acc.role && acc.role.roleName.toUpperCase() == AccountRoleString.CATECHIST ? " - Giáo lý viên" : ""}`,
               }))}
               isMulti
               value={selectedRecruiters}
@@ -609,7 +756,7 @@ export default function ApprovedRegistrationsTable() {
 
           {/* Cập nhật thời gian phỏng vấn */}
           <TextField
-            label="Thời gian phỏng vấn"
+            label="Cập nhật thời gian phỏng vấn"
             type="datetime-local"
             fullWidth
             value={meetingTime}
@@ -619,6 +766,19 @@ export default function ApprovedRegistrationsTable() {
               shrink: true,
             }}
           />
+
+          <div className="mt-2">
+            <h5 className="w-[100%] mb-1">
+              <strong>Lý do cập nhật phỏng vấn</strong>
+            </h5>
+            <textarea
+              name="updatedInterviewReason"
+              onChange={(e) => {
+                setUpdatedInterviewReason(e.target.value);
+              }}
+              className="block w-full p-2 border border-gray-700 rounded-lg"
+            />
+          </div>
 
           <div
             className="modal-buttons"
@@ -631,11 +791,125 @@ export default function ApprovedRegistrationsTable() {
             <Button
               onClick={handleUpdateInterview}
               variant="contained"
-              color="primary"
+              color="warning"
             >
               Cập nhật
             </Button>
-            <Button onClick={handleCloseUpdateModal} variant="outlined">
+            <Button
+              onClick={handleCloseUpdateModal}
+              variant="outlined"
+              color="warning"
+            >
+              Hủy bỏ
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Modal xóa phỏng vấn */}
+      <Modal open={openDeleteModal} onClose={handleCloseUpdateModal}>
+        <div
+          style={{
+            width: "50%",
+            margin: "auto",
+            backgroundColor: "white",
+            borderRadius: "8px",
+          }}
+          className="py-5 px-5 mt-4"
+        >
+          <h1 className="text-center text-[2.2rem] text-danger py-2 pt-0 font-bold uppercase">
+            Xóa lịch phỏng vấn
+          </h1>
+
+          {selectedRegistrationOfModal ? (
+            <>
+              <div className="flex flex-wrap mt-3">
+                <h5 className="mt-2 w-[50%]">
+                  <strong>Tên ứng viên:</strong>{" "}
+                  {selectedRegistrationOfModal.fullName}
+                </h5>
+                <h5 className="mt-2 w-[50%]">
+                  <strong>Thời gian phỏng vấn:</strong>{" "}
+                  {formatDate.DD_MM_YYYY_Time(
+                    selectedRegistrationOfModal.interviews[0].meetingTime
+                  )}
+                </h5>
+                <h5 className="mt-2 w-[50%]">
+                  <strong>Giới tính:</strong>{" "}
+                  {selectedRegistrationOfModal.gender}
+                </h5>
+                <h5 className="mt-2 w-[50%]">
+                  <strong>Ngày sinh:</strong>{" "}
+                  {formatDate.DD_MM_YYYY(
+                    selectedRegistrationOfModal.dateOfBirth
+                  )}
+                </h5>
+                <h5 className="mt-2 w-[50%]">
+                  <strong>Số điện thoại:</strong>{" "}
+                  {selectedRegistrationOfModal.phone}
+                </h5>
+                <h5 className="mt-2 w-[50%]">
+                  <strong>Email:</strong> {selectedRegistrationOfModal.email}
+                </h5>
+                <h5 className="mt-2 w-[50%]">
+                  <strong>Kinh nghiệm:</strong>{" "}
+                  {selectedRegistrationOfModal.isTeachingBefore
+                    ? "Có"
+                    : "Không"}
+                </h5>
+                <h5 className="mt-2 w-[50%]">
+                  <strong>Số năm giảng dạy:</strong>{" "}
+                  {selectedRegistrationOfModal.yearOfTeaching}
+                </h5>
+                <h5 className="mt-2 w-[100%]">
+                  <strong>Địa chỉ:</strong>{" "}
+                  {selectedRegistrationOfModal.address}
+                </h5>
+                <h5 className="mt-2 w-[100%]">
+                  <strong>Người phỏng vấn:</strong>{" "}
+                  {selectedRegistrationOfModal.recruiters
+                    .map((recruiter: any) => recruiter.fullName)
+                    .join(", ")}
+                </h5>
+              </div>
+            </>
+          ) : (
+            <></>
+          )}
+
+          <div className="mt-3">
+            <h5 className="w-[100%] mb-1">
+              <strong>Lý do xóa lịch phỏng vấn</strong>
+            </h5>
+            <textarea
+              name="deletedInterviewReason"
+              onChange={(e) => {
+                setDeletedInterviewReason(e.target.value);
+              }}
+              className="block w-full p-2 border border-gray-700 rounded-lg"
+            />
+          </div>
+
+          <div
+            className="modal-buttons"
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              marginTop: "20px",
+            }}
+          >
+            <Button
+              onClick={handleDeleteInterview}
+              variant="contained"
+              color="error"
+            >
+              Xác nhận
+            </Button>
+            <Button
+              onClick={handleCloseDeleteModal}
+              variant="outlined"
+              color="error"
+            >
               Hủy bỏ
             </Button>
           </div>

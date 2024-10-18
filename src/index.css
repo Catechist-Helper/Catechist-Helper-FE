@@ -85,12 +85,12 @@ button:focus-visible {
  
 /* Handle */
 ::-webkit-scrollbar-thumb {
-  background: rgb(106, 106, 106); 
+  background: rgb(156, 156, 156); 
   border-radius: 10px;
 }
 
 /* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
-  background: #824703;
+  background: rgb(100, 100, 100);
   cursor: pointer;
 }

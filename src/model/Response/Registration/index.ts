@@ -41,6 +41,7 @@ export type RegistrationItemResponse = {
   yearOfTeaching: number;
   note?: string;
   status: number;
+  createdAt: string;
   certificateOfCandidates: CertificateOfCandidateResponse[];
   interviews: InterviewResponse[];
   interviewProcesses: InterviewProcessResponse[];
