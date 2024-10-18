@@ -80,9 +80,9 @@ export default function Router() {
         {
           path: PATH_HOME.registration,
           element: (
-            <GuestGuard>
-              <RegisterForm />
-            </GuestGuard>
+            // <GuestGuard>
+            <RegisterForm />
+            // </GuestGuard>
           ),
         },
       ],
@@ -190,7 +190,8 @@ const ApprovedRegistrationPage = Loadable(
 const HomePost = Loadable(lazy(() => import("../pages/admin/posts/HomePost")));
 import RegisterForm from "./../pages/admin/Registration/RegisterForm";
 
-const HomeChristianName = Loadable(lazy(() => import("../pages/admin/ChristianName/HomeChristianName")));
-
+const HomeChristianName = Loadable(
+  lazy(() => import("../pages/admin/ChristianName/HomeChristianName"))
+);
 
 //-----------------------------
