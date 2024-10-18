@@ -24,18 +24,20 @@ const getAllRoom = (page?: number, size?: number) =>
 const createRoom = async (data: FormData) => {
     return await request.post<BasicResponse<RoomResponse>>(`${ROOT_ROOMS}`, data, {
         headers: {
-          'Content-Type': 'multipart/form-data', // Đảm bảo gửi với định dạng FormData
+          'Content-Type': 'multipart/form-data',
         },
       });
   };
       
         
-    const updateRoom = (id: string, name: string, description: string, image: string) : Promise<AxiosResponse<any>>=>
-        request.put(`${ROOT_ROOMS}/${id}`, {
-            name,
-            description,
-            image
+    const updateRoom = async (id: string, data: FormData): Promise<AxiosResponse<any>> => {
+        return await request.put(`${ROOT_ROOMS}/${id}`, data, {
+          headers: {
+            'Content-Type': 'multipart/form-data', 
+          },
         });
+      };
+      
         
     const deleteRoom = (id: string): Promise<AxiosResponse<any>> =>
             request.delete(`${ROOT_ROOMS}/${id}`);

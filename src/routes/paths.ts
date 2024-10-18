@@ -30,9 +30,13 @@ export const PATH_ADMIN = {
   christian_name: path(PATH_ROOT_ADMIN, '/christian-name'),
   rooms: path(PATH_ROOT_ADMIN, '/rooms'),
   create_room: path(PATH_ROOT_ADMIN, '/create-room'),
+  update_room: path(PATH_ROOT_ADMIN, '/update-room/:id'),
   pastoral_years: path(PATH_ROOT_ADMIN, '/pastoral-years'),
   create_pastoral_years: path(PATH_ROOT_ADMIN, '/create-pastoral-years'),
   update_pastoral_years: path(PATH_ROOT_ADMIN, '/update-pastoral-years/:id'),
+  system_configurations: path(PATH_ROOT_ADMIN, '/system-configurations'),
+  create_system_configurations: path(PATH_ROOT_ADMIN, '/create-system-configurations'),
+  update_system_configurations: path(PATH_ROOT_ADMIN, '/update-system-configurations/:id'),
   //---------------------
 };
 

@@ -20,8 +20,11 @@ import NewDetails from "../pages/common/News/NewDetails";
 import CreateChristianName from "../pages/admin/ChristianName/CreateChristianName";
 import UpdateChristianName from "../pages/admin/ChristianName/UpdateChristianName";
 import CreateRoom from "../pages/admin/Rooms/CreateRoom";
+import UpdateRoom from "../pages/admin/Rooms/UpdateRoom";
 import CreatePastoralYears from "../pages/admin/PastoralYears/CreatePastoralYears";
 import UpdatePastoralYears from "../pages/admin/PastoralYears/UpdatePastoralYears";
+import CreateConfig from "../pages/admin/SystemConfiguration/CreateConfig";
+import UpdateConfig from "../pages/admin/SystemConfiguration/UpdateConfig";
 // path
 
 // ----------------------------------------------------------------------
@@ -178,6 +181,22 @@ export default function Router() {
           path: PATH_ADMIN.update_pastoral_years,
           element: <UpdatePastoralYears />,
         },
+        {
+          path: PATH_ADMIN.update_room,
+          element: <UpdateRoom />,
+        },
+        {
+          path: PATH_ADMIN.system_configurations,
+          element: <HomeConfig />,
+        },
+        {
+          path: PATH_ADMIN.create_system_configurations,
+          element: <CreateConfig />,
+        },
+        {
+          path: PATH_ADMIN.update_system_configurations,
+          element: <UpdateConfig />,
+        },
       ],
     },
 
@@ -215,5 +234,6 @@ import RegisterForm from "./../pages/admin/Registration/RegisterForm";
 const HomeChristianName = Loadable(lazy(() => import("../pages/admin/ChristianName/HomeChristianName")));
 const HomeRoom = Loadable(lazy(() => import("../pages/admin/Rooms/HomeRoom")));
 const HomePastoralYears = Loadable(lazy(() => import("../pages/admin/PastoralYears/HomePastoralYears")));
+const HomeConfig = Loadable(lazy(() => import("../pages/admin/SystemConfiguration/HomeConfig")));
+//-----------------------------import CreateConfig from './../pages/admin/SystemConfiguration/CreateConfig';
 
-//-----------------------------

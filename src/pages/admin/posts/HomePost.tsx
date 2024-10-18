@@ -170,7 +170,7 @@ const HomePost: React.FC = () => {
                           {isPost.title}
                         </Link>
                       </th>
-                      <td className="px-6 py-4">
+                      <td className="px-4 py-4 space-x-2">
                         {isPost.content.replace(/<[^>]*>/g, '').split(" ").slice(0, 10).join(" ")}...
                       </td>
 
