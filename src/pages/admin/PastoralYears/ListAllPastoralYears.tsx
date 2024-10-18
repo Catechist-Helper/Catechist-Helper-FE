@@ -131,7 +131,7 @@ const ListAllPastoralYears: React.FC = () => {
                                         </label>
                                     </td>
 
-                                    <td className="px-6 py-4">
+                                    <td className="px-4 py-4 space-x-2">
                                         <button
                                             onClick={() => handleEditPastoralYearClick(year.id)}
                                             className="btn btn-info"

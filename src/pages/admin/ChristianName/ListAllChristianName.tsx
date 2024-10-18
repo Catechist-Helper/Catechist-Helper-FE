@@ -88,7 +88,7 @@ const ListAllChristianNames: React.FC = () => {
                   <td className="px-6 py-4">
                     <div className="text-dark text-decoration-none">{name.holyDay}</div>
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="px-4 py-4 space-x-2">
                     <button
                       onClick={() => handleEditNameClick(name.id)}
                       className="btn btn-info"
