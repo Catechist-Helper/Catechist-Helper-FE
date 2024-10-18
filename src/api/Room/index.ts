@@ -1,5 +1,7 @@
 import { AxiosResponse } from "axios";
 import axiosInstances from "../../config/axios"
+import { BasicResponse } from "../../model/Response/BasicResponse";
+import { RoomResponse } from "../../model/Response/Room";
 
 const request = axiosInstances.base
 
@@ -18,15 +20,14 @@ const getAllRoom = (page?: number, size?: number) =>
         request.get(`${ROOT_ROOMS}/${id}`);
     
     
-    const createRoom = (formData: FormData): Promise<AxiosResponse<any>> => 
-         request.post(`${ROOT_ROOMS}`, formData);
-    // const createRoom = async (formData: FormData): Promise<AxiosResponse<any>> => {
-    //     return request.post(`${ROOT_ROOMS}`, formData, {
-    //       headers: {
-    //         'Content-Type': 'multipart/form-data',
-    //       },
-    //     });
-    //   };
+    // POST: Tạo mới một room
+const createRoom = async (data: FormData) => {
+    return await request.post<BasicResponse<RoomResponse>>(`${ROOT_ROOMS}`, data, {
+        headers: {
+          'Content-Type': 'multipart/form-data', // Đảm bảo gửi với định dạng FormData
+        },
+      });
+  };
       
         
     const updateRoom = (id: string, name: string, description: string, image: string) : Promise<AxiosResponse<any>>=>
