@@ -6,7 +6,7 @@ import { BasicResponse } from "../../../model/Response/BasicResponse";
 import postsApi from "../../../api/Post";
 import { useNavigate, Link } from "react-router-dom";
 import AdminTemplate from "../../../components/Templates/AdminTemplate/AdminTemplate";
-import CreateChristianName from "../ChristianName/HomeChristianName";
+
 
 
 const HomePost: React.FC = () => {

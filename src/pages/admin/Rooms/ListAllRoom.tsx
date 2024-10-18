@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import christianNamesApi from "../../../api/ChristianName"; 
+import roomsApi from "../../../api/Room"; 
 import { AxiosResponse } from "axios";
 import { BasicResponse } from "../../../model/Response/BasicResponse";
 import { useNavigate } from "react-router-dom";
@@ -9,8 +9,8 @@ const ListAllChristianNames: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    christianNamesApi
-      .getAllChristianNames(1, 10) 
+    roomsApi
+      .getAllRoom(1, 10) 
       .then((axiosRes: AxiosResponse) => {
         const res: BasicResponse = axiosRes.data;
         console.log("Response data: ", res);
@@ -26,28 +26,28 @@ const ListAllChristianNames: React.FC = () => {
         }
       })
       .catch((err) => {
-        console.error("Không thấy danh sách tên thánh: ", err);
+        console.error("Không thấy danh sách phòng học: ", err);
       });
   }, []);
 
   const handleCreate = () => {
-    navigate("/admin/create-christian-name");
+    navigate("/admin/create-room");
   };
 
   const handleEditNameClick = (id: string): void => {
-    navigate(`/admin/update-christian-name/${id}`);
+    navigate(`/admin/update-room/${id}`);
   };
 
   const handleDeleteNameClick = (id: string): void => {
-    if (window.confirm("Bạn có chắc là muốn xóa tên thánh này không?")) {
-      christianNamesApi
-        .deleteChristianNames(id)
+    if (window.confirm("Bạn có chắc là muốn xóa phòng học này không?")) {
+      roomsApi
+        .deleteRoom(id)
         .then(() => {
-          console.log(`Tên Thánh với ID: ${id} đã xóa thành công.`);
+          console.log(`Lớp với ID: ${id} đã xóa thành công.`);
           window.location.reload();
         })
         .catch((err: Error) => {
-          console.error(`Không thể xóa tên thánh với ID: ${id}`, err);
+          console.error(`Không thể xóa phòng học với ID: ${id}`, err);
         });
     }
   };
@@ -55,12 +55,12 @@ const ListAllChristianNames: React.FC = () => {
   return (
     <div className="container mt-5 ">
       <div className="mb-10 text-center fw-bold">
-        <h1>DANH SÁCH TÊN THÁNH</h1>
+        <h1>DANH SÁCH PHÒNG HỌC</h1>
       </div>
       <div className="d-flex align-items-center mb-3 ">
         <div className="ml-6">
           <button className="px-4 py-2 border border-black text-black bg-white hover:bg-gray-200" onClick={handleCreate}>
-            Tạo tên thánh
+            Tạo phòng học
           </button>
         </div>
       </div>
@@ -69,9 +69,9 @@ const ListAllChristianNames: React.FC = () => {
         <table className="w-full text-sm text-left rtl:text-right text-gray-500">
           <thead className="text-xs text-white uppercase bg-[#422A14] h-20">
             <tr>
-              <th scope="col" className="px-6 py-3">Tên</th>
-              <th scope="col" className="px-6 py-3">Giới tính</th>
-              <th scope="col" className="px-6 py-3">Ngày thánh</th>
+              <th scope="col" className="px-6 py-3">Phòng học</th>
+              <th scope="col" className="px-6 py-3">Mô tả</th>
+              <th scope="col" className="px-6 py-3">Hình ảnh</th>
               <th scope="col" className="px-6 py-3">Action</th>
             </tr>
           </thead>
@@ -83,10 +83,10 @@ const ListAllChristianNames: React.FC = () => {
                     <div className="text-dark">{name.name}</div>
                   </th>
                   <td className="px-6 py-4">
-                    <div className="text-dark text-decoration-none">{name.gender}</div>
+                    <div className="text-dark text-decoration-none">{name.description}</div>
                   </td>
                   <td className="px-6 py-4">
-                    <div className="text-dark text-decoration-none">{name.holyDay}</div>
+                    <div className="text-dark text-decoration-none">{name.image}</div>
                   </td>
                   <td className="px-6 py-4">
                     <button

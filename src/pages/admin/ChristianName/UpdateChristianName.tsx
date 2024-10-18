@@ -19,11 +19,11 @@ const UpdateChristianName: React.FC = () => {
 
     onSubmit: async (values) => {
       setIsSubmitting(true);
-      try {
-        // Định dạng lại holyDay trước khi gửi dữ liệu
+      try {   
+
         const formattedHolyDay = values.holyDay
-          ? new Date(values.holyDay).toISOString() // Định dạng thành ISO string
-          : values.holyDay; // Giữ nguyên nếu không cần định dạng lại
+          ? new Date(values.holyDay).toISOString() 
+          : values.holyDay; 
 
         const response = await christianNamesApi.updateChristianNames(
           id!,
@@ -51,11 +51,11 @@ const UpdateChristianName: React.FC = () => {
         const response = await christianNamesApi.getById(id);
         const christianName = response.data;
 
-        // Xử lý holyDay cho phù hợp với định dạng input datetime-local
+        
         const formattedHolyDay = christianName.data.holyDay
           ? new Date(christianName.data.holyDay)
               .toISOString()
-              .slice(0, 16) // Cắt bỏ giây và múi giờ, giữ lại định dạng YYYY-MM-DDTHH:MM
+              .slice(0, 16) 
           : "";
 
         formik.setValues({
