@@ -25,6 +25,7 @@ import sweetAlert from "../../../utils/sweetAlert";
 import useAppContext from "../../../hooks/useAppContext";
 import dayjs, { Dayjs } from "dayjs";
 import { BasicResponse } from "../../../model/Response/BasicResponse";
+import { AccountRoleString } from "../../../enums/Account";
 
 const columns: GridColDef[] = [
   { field: "fullName", headerName: "Tên đầy đủ", width: 230 },
@@ -54,6 +55,14 @@ const columns: GridColDef[] = [
     renderCell: (params) => (params.value ? "Có" : "Không"),
   },
   { field: "yearOfTeaching", headerName: "Số năm giảng dạy", width: 150 },
+  {
+    field: "createdAt",
+    headerName: "Thời gian nộp đơn",
+    width: 150,
+    renderCell: (params) => {
+      return formatDate.DD_MM_YYYY_Time(params.value);
+    },
+  },
   { field: "note", headerName: "Ghi chú", width: 200 },
   {
     field: "status",
@@ -95,39 +104,66 @@ export default function RegistrationDataTable() {
   const [selectedIds, setSelectedIds] = useState<GridRowSelectionModel>([]); // Cập nhật kiểu dữ liệu
   const [hasFunction, setHasFunction] = useState<boolean>(false);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [isModalOpenRejected, setIsModalOpenRejected] =
+    useState<boolean>(false);
   const [accounts, setAccounts] = useState<any[]>([]);
   const [selectedAccounts, setSelectedAccounts] = useState<any[]>([]);
   const [meetingTime, setMeetingTime] = useState<string>("");
+  const [selectedRegistration, setSelectedRegistration] =
+    useState<RegistrationItemResponse | null>(null);
+  const [rejectedReason, setRejectedReason] = useState<string>("");
 
   const [viewMode, setViewMode] = useState<"pending" | "rejected">("pending"); // Trạng thái xem hiện tại
+
+  console.log("====================================");
+  console.log(selectedAccounts);
+  console.log(accounts);
+  console.log("====================================");
 
   // Hàm fetch các đơn đăng ký
   const fetchRegistrations = async () => {
     try {
       setLoading(true);
-      const { data } = await registrationApi.getAllRegistrations(1, 100); // Lấy 100 đơn
 
-      // Lọc các đơn theo chế độ xem hiện tại
-      const filteredRegistrations = data.data.items.filter(
-        (registration: RegistrationItemResponse) => {
-          if (viewMode === "pending") {
-            return registration.status === RegistrationStatus.Pending;
-          } else {
-            return (
-              registration.status === RegistrationStatus.Rejected_Duyet_Don
-            );
-          }
-        }
+      // Ví dụ: Xác định giá trị cho các tham số, bạn có thể điều chỉnh các giá trị này từ state hoặc form
+      const startDate = undefined; // Nếu cần có thể thay đổi, ví dụ "2024-01-01"
+      const endDate = undefined; // Nếu cần có thể thay đổi, ví dụ "2024-12-31"
+      const status =
+        viewMode === "pending"
+          ? RegistrationStatus.Pending
+          : RegistrationStatus.Rejected_Duyet_Don;
+
+      const page = paginationModel.page + 1; // Lấy số trang (MUI DataGrid sử dụng zero-based index)
+      const size = paginationModel.pageSize; // Lấy kích thước trang từ paginationModel
+
+      // Gọi API getAllRegistrations với các tham số cần thiết
+      const { data } = await registrationApi.getAllRegistrations(
+        startDate,
+        endDate,
+        status,
+        page,
+        size
       );
 
+      // Lọc các đơn theo chế độ xem hiện tại
+      const filteredRegistrations = data.data.items;
+
+      // Cập nhật state với dữ liệu mới
       setRows(filteredRegistrations);
-      setRowCount(filteredRegistrations.length); // Cập nhật tổng số hàng
+      setRowCount(data.data.total); // Cập nhật tổng số hàng từ phản hồi API
     } catch (error) {
       console.error("Lỗi khi tải danh sách registrations:", error);
     } finally {
       setLoading(false);
     }
   };
+
+  const element = document.querySelector<HTMLElement>(
+    ".MuiTablePagination-selectLabel"
+  );
+  if (element) {
+    element.innerHTML = "Số hàng mỗi trang";
+  }
 
   useEffect(() => {
     fetchRegistrations();
@@ -193,14 +229,41 @@ export default function RegistrationDataTable() {
     }
   };
 
+  const fetchSelectedRegistrationOfModal = async () => {
+    await registrationApi
+      .getRegistrationById(selectedIds[0].toString())
+      .then((res) => {
+        setSelectedRegistration(res.data.data);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+
   // Open modal for scheduling interview
   const handleOpenModal = () => {
     fetchAccounts(); // Load accounts before opening modal
+    fetchSelectedRegistrationOfModal();
     setIsModalOpen(true);
   };
 
+  useEffect(() => {
+    if (!isModalOpen) {
+      setSelectedRegistration(null);
+    }
+  }, [isModalOpen]);
+
   const handleCloseModal = () => {
     setIsModalOpen(false);
+  };
+
+  const handleOpenModalRejected = () => {
+    fetchSelectedRegistrationOfModal();
+    setIsModalOpenRejected(true);
+  };
+
+  const handleCloseModalRejected = () => {
+    setIsModalOpenRejected(false);
   };
 
   const handleScheduleInterview = async () => {
@@ -227,7 +290,7 @@ export default function RegistrationDataTable() {
         "Đã xếp lịch phỏng vấn thành công!",
         "",
         1000,
-        23
+        24
       );
       handleCloseModal();
       fetchRegistrations(); // Refresh registration data after scheduling
@@ -288,26 +351,27 @@ export default function RegistrationDataTable() {
                   >
                     Xếp lịch phỏng vấn
                   </button>
+
+                  {viewMode != "rejected" ? (
+                    <>
+                      <button
+                        className="mx-1 btn btn-danger"
+                        onClick={() => {
+                          handleOpenModalRejected();
+                        }}
+                        disabled={hasFunction}
+                      >
+                        Từ chối đơn
+                      </button>
+                    </>
+                  ) : (
+                    <></>
+                  )}
                 </>
               ) : (
                 <></>
               )}
-              {viewMode != "rejected" ? (
-                <>
-                  <button
-                    className="mx-1 btn btn-warning"
-                    onClick={() => {
-                      handleRejectApplications();
-                    }}
-                    disabled={hasFunction}
-                  >
-                    Từ chối đơn
-                  </button>
-                </>
-              ) : (
-                <></>
-              )}
-              <button
+              {/* <button
                 className="mx-1 btn btn-danger"
                 disabled={hasFunction}
                 onClick={() => {
@@ -315,7 +379,7 @@ export default function RegistrationDataTable() {
                 }}
               >
                 Xóa đơn
-              </button>
+              </button> */}
             </>
           ) : (
             <></>
@@ -363,15 +427,51 @@ export default function RegistrationDataTable() {
           className="modal-container bg-white py-5 px-5 rounded-lg
         w-[50%]"
         >
-          <h1 className="text-center text-[2.2rem] text-primary_color py-2 font-bold">
+          <h1 className="text-center text-[2.2rem] text-primary py-2 pt-0 font-bold uppercase">
             Xếp lịch phỏng vấn
           </h1>
 
-          <label className="font-bold mt-3">Chọn người phỏng vấn</label>
+          {selectedRegistration ? (
+            <>
+              <div className="flex flex-wrap mt-3">
+                <h5 className="mt-3 w-[100%]">
+                  <strong>Tên ứng viên:</strong> {selectedRegistration.fullName}
+                </h5>
+                <h5 className="mt-3 w-[50%]">
+                  <strong>Giới tính:</strong> {selectedRegistration.gender}
+                </h5>
+                <h5 className="mt-3 w-[50%]">
+                  <strong>Ngày sinh:</strong>{" "}
+                  {formatDate.DD_MM_YYYY(selectedRegistration.dateOfBirth)}
+                </h5>
+                <h5 className="mt-3 w-[50%]">
+                  <strong>Số điện thoại:</strong> {selectedRegistration.phone}
+                </h5>
+                <h5 className="mt-3 w-[50%]">
+                  <strong>Email:</strong> {selectedRegistration.email}
+                </h5>
+                <h5 className="mt-3 w-[50%]">
+                  <strong>Kinh nghiệm:</strong>{" "}
+                  {selectedRegistration.isTeachingBefore ? "Có" : "Không"}
+                </h5>
+                <h5 className="mt-3 w-[50%]">
+                  <strong>Số năm giảng dạy:</strong>{" "}
+                  {selectedRegistration.yearOfTeaching}
+                </h5>
+                <h5 className="mt-3 w-[100%]">
+                  <strong>Địa chỉ:</strong> {selectedRegistration.address}
+                </h5>
+              </div>
+            </>
+          ) : (
+            <></>
+          )}
+
+          <label className="font-bold mt-4">Chọn người phỏng vấn</label>
           <Select
             options={accounts.map((acc: any) => ({
               value: acc.id,
-              label: acc.email,
+              label: `${acc.fullName} ${acc.role && acc.role.roleName.toUpperCase() == AccountRoleString.ADMIN ? " - Admin" : ""} ${acc.role && acc.role.roleName.toUpperCase() == AccountRoleString.MANAGER ? " - Quản lý" : ""} ${acc.role && acc.role.roleName.toUpperCase() == AccountRoleString.CATECHIST ? " - Giáo lý viên" : ""}`,
             }))}
             isMulti
             onChange={(newValue) =>
@@ -383,7 +483,7 @@ export default function RegistrationDataTable() {
             className="mt-1"
           />
 
-          <label className="font-bold mt-3">Ngày phỏng vấn</label>
+          <label className="font-bold mt-4">Ngày phỏng vấn</label>
           <br />
           <input
             type="datetime-local"
@@ -394,10 +494,102 @@ export default function RegistrationDataTable() {
           />
 
           <div className="modal-buttons flex justify-center gap-x-3 mt-4">
-            <Button onClick={handleScheduleInterview} variant="contained">
+            <Button
+              onClick={() => {
+                handleScheduleInterview();
+              }}
+              variant="contained"
+            >
               Xác nhận
             </Button>
-            <Button onClick={handleCloseModal} variant="outlined">
+            <Button
+              onClick={() => {
+                handleCloseModal();
+              }}
+              variant="outlined"
+            >
+              Hủy bỏ
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      <Modal
+        open={isModalOpenRejected}
+        onClose={handleCloseModalRejected}
+        className="fixed z-[1000] flex justify-center items-center"
+      >
+        <div
+          className="modal-container bg-white py-5 px-5 rounded-lg
+        w-[50%]"
+        >
+          <h1 className="text-center text-[2.2rem] text-danger py-2 pt-0 font-bold uppercase">
+            Từ chối đơn
+          </h1>
+          {selectedRegistration ? (
+            <>
+              <div className="flex flex-wrap mt-3">
+                <h5 className="mt-3 w-[100%]">
+                  <strong>Tên ứng viên:</strong> {selectedRegistration.fullName}
+                </h5>
+                <h5 className="mt-3 w-[50%]">
+                  <strong>Giới tính:</strong> {selectedRegistration.gender}
+                </h5>
+                <h5 className="mt-3 w-[50%]">
+                  <strong>Ngày sinh:</strong>{" "}
+                  {formatDate.DD_MM_YYYY(selectedRegistration.dateOfBirth)}
+                </h5>
+                <h5 className="mt-3 w-[50%]">
+                  <strong>Số điện thoại:</strong> {selectedRegistration.phone}
+                </h5>
+                <h5 className="mt-3 w-[50%]">
+                  <strong>Email:</strong> {selectedRegistration.email}
+                </h5>
+                <h5 className="mt-3 w-[50%]">
+                  <strong>Kinh nghiệm:</strong>{" "}
+                  {selectedRegistration.isTeachingBefore ? "Có" : "Không"}
+                </h5>
+                <h5 className="mt-3 w-[50%]">
+                  <strong>Số năm giảng dạy:</strong>{" "}
+                  {selectedRegistration.yearOfTeaching}
+                </h5>
+                <h5 className="mt-3 w-[100%]">
+                  <strong>Địa chỉ:</strong> {selectedRegistration.address}
+                </h5>
+              </div>
+            </>
+          ) : (
+            <></>
+          )}
+          <div className="mt-3">
+            <h5 className="w-[100%] mb-1">
+              <strong>Lý do từ chối:</strong>
+            </h5>
+            <textarea
+              name="rejectedNote"
+              onChange={(e) => {
+                setRejectedReason(e.target.value);
+              }}
+              className="block w-full p-2 border border-gray-700 rounded-lg"
+            />
+          </div>
+          <div className="modal-buttons flex justify-center gap-x-3 mt-4">
+            <Button
+              onClick={() => {
+                handleRejectApplications();
+              }}
+              variant="contained"
+              className="bg-danger"
+            >
+              Xác nhận
+            </Button>
+            <Button
+              onClick={() => {
+                handleCloseModalRejected();
+              }}
+              variant="outlined"
+              className="border-danger text-danger"
+            >
               Hủy bỏ
             </Button>
           </div>
