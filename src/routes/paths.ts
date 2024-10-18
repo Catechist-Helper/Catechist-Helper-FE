@@ -28,6 +28,11 @@ export const PATH_ADMIN = {
   create_christian_name: path(PATH_ROOT_ADMIN, '/create-christian-name'),
   update_christian_name: path(PATH_ROOT_ADMIN, '/update-christian-name/:id'),
   christian_name: path(PATH_ROOT_ADMIN, '/christian-name'),
+  rooms: path(PATH_ROOT_ADMIN, '/rooms'),
+  create_room: path(PATH_ROOT_ADMIN, '/create-room'),
+  pastoral_years: path(PATH_ROOT_ADMIN, '/pastoral-years'),
+  create_pastoral_years: path(PATH_ROOT_ADMIN, '/create-pastoral-years'),
+  update_pastoral_years: path(PATH_ROOT_ADMIN, '/update-pastoral-years/:id'),
   //---------------------
 };
 
