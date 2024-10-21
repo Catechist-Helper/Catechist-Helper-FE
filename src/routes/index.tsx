@@ -1,13 +1,10 @@
 import { lazy, Suspense } from "react";
-import { Navigate, useLocation, useRoutes } from "react-router-dom";
+import { useRoutes } from "react-router-dom";
 // components
 import LoadingScreen from "../components/Organisms/LoadingScreen/LoadingScreen";
 // guards
 import AuthGuard from "../guards/AuthGuard";
 import GuestGuard from "../guards/GuestGuard";
-import RoleBasedGuard from "../guards/RoleBasedGuard";
-import { AccountRoleString } from "../enums/Account";
-import IdBasedGuard from "../guards/IdBasedGuard";
 import CreatePostCategory from "../pages/admin/posts/CreatePostCategory";
 import PostCategory from "../pages/admin/posts/PostCategory";
 import UpdatePostCategory from "../pages/admin/posts/UpdatePostCategory";
@@ -30,8 +27,6 @@ import UpdateConfig from "../pages/admin/SystemConfiguration/UpdateConfig";
 // ----------------------------------------------------------------------
 
 const Loadable = (Component: any) => (props: any) => {
-  const { pathname } = useLocation();
-
   return (
     <Suspense
       fallback={
@@ -108,6 +103,10 @@ export default function Router() {
           ),
         },
         // Thuận
+        {
+          path: PATH_ADMIN.catechist_management,
+          element: <CatechistManagement />,
+        },
         {
           path: PATH_ADMIN.admin_registration,
           element: <RegistrationAdminPage />,
@@ -226,14 +225,22 @@ const RegistrationAdminPage = Loadable(
 const ApprovedRegistrationPage = Loadable(
   lazy(() => import("../pages/admin/ApprovedRegistration/index"))
 );
+const CatechistManagement = Loadable(
+  lazy(() => import("../pages/admin/Catechists/index"))
+);
 //----------------------------
 
 // Chị Tâm
 const HomePost = Loadable(lazy(() => import("../pages/admin/posts/HomePost")));
 import RegisterForm from "./../pages/admin/Registration/RegisterForm";
-const HomeChristianName = Loadable(lazy(() => import("../pages/admin/ChristianName/HomeChristianName")));
+const HomeChristianName = Loadable(
+  lazy(() => import("../pages/admin/ChristianName/HomeChristianName"))
+);
 const HomeRoom = Loadable(lazy(() => import("../pages/admin/Rooms/HomeRoom")));
-const HomePastoralYears = Loadable(lazy(() => import("../pages/admin/PastoralYears/HomePastoralYears")));
-const HomeConfig = Loadable(lazy(() => import("../pages/admin/SystemConfiguration/HomeConfig")));
+const HomePastoralYears = Loadable(
+  lazy(() => import("../pages/admin/PastoralYears/HomePastoralYears"))
+);
+const HomeConfig = Loadable(
+  lazy(() => import("../pages/admin/SystemConfiguration/HomeConfig"))
+);
 //-----------------------------import CreateConfig from './../pages/admin/SystemConfiguration/CreateConfig';
-

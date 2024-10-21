@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   DataGrid,
   GridColDef,
@@ -27,6 +27,7 @@ import { RegistrationStatus } from "../../../enums/Registration";
 import sweetAlert from "../../../utils/sweetAlert";
 import { formatDate } from "../../../utils/formatDate";
 import { AccountRoleString } from "../../../enums/Account";
+import useAppContext from "../../../hooks/useAppContext";
 
 // Định dạng ngày và giờ
 const formatDateTime = {
@@ -118,10 +119,19 @@ const columns: GridColDef[] = [
     //   );
     // },
   },
+  {
+    field: "interviews",
+    headerName: "Ghi chú kết quả",
+    width: 200,
+    renderCell: (params) => {
+      return params.row.interviews[0]?.note || ""; // Hiển thị ghi chú nếu có
+    },
+  },
 ];
 
 // Hàm chính để hiển thị danh sách đơn
 export default function ApprovedRegistrationsTable() {
+  const { enableLoading, disableLoading } = useAppContext();
   const [rows, setRows] = useState<RegistrationItemResponse[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({
@@ -150,8 +160,8 @@ export default function ApprovedRegistrationsTable() {
   const [recruiters, setRecruiters] = useState<any[]>([]); // Lưu danh sách recruiter
   const [updatedInterviewReason, setUpdatedInterviewReason] =
     useState<string>("");
-  const [deletedInterviewReason, setDeletedInterviewReason] =
-    useState<string>("");
+  // const [deletedInterviewReason, setDeletedInterviewReason] =
+  //   useState<string>("");
 
   // State cho loại đơn hiện tại
   const [currentFilter, setCurrentFilter] = useState<
@@ -295,6 +305,7 @@ export default function ApprovedRegistrationsTable() {
 
   // Xác nhận phỏng vấn
   const handleConfirmInterview = async () => {
+    enableLoading();
     if (!interviewResult) {
       alert("Vui lòng chọn kết quả phỏng vấn.");
       return;
@@ -346,24 +357,34 @@ export default function ApprovedRegistrationsTable() {
       }
     } catch (error) {
       console.error("Lỗi khi cập nhật phỏng vấn:", error);
+    } finally {
+      disableLoading();
     }
   };
 
   // Xác nhận cập nhật phỏng vấn
   const handleUpdateInterview = async () => {
+    enableLoading();
     try {
       if (selectedRegistration) {
-        await registrationApi.updateRegistration(selectedRegistration.id, {
-          accounts: selectedRecruiters.map((rec: any) => rec.value),
-          status: selectedRegistration.status, // Thêm status hiện tại để giữ nguyên
-        });
+        // await registrationApi.updateRegistration(selectedRegistration.id, {
+        //   accounts: selectedRecruiters.map((rec: any) => rec.value),
+        //   status: selectedRegistration.status, // Thêm status hiện tại để giữ nguyên
+        // });
 
         const interviewId = selectedRegistration.interviews[0]?.id;
         if (interviewId) {
+          console.log({
+            meetingTime,
+            note: selectedRegistration.interviews[0].note,
+            isPassed: selectedRegistration.interviews[0].isPassed,
+            reason: updatedInterviewReason,
+          });
           await interviewApi.updateInterview(interviewId, {
             meetingTime,
             note: selectedRegistration.interviews[0].note,
             isPassed: selectedRegistration.interviews[0].isPassed,
+            reason: updatedInterviewReason,
           });
         }
 
@@ -371,13 +392,17 @@ export default function ApprovedRegistrationsTable() {
         sweetAlert.alertSuccess("Cập nhật thành công", "", 1000, 20);
         setSelectedRegistrations([]);
         fetchApprovedRegistrations();
+        setUpdatedInterviewReason("");
       }
     } catch (error) {
       console.error("Lỗi khi cập nhật phỏng vấn:", error);
+    } finally {
+      disableLoading();
     }
   };
 
   const handleDeleteInterview = async () => {
+    enableLoading();
     if (selectedRegistrations.length === 0) return;
 
     for (let registrationId of selectedRegistrations) {
@@ -410,6 +435,8 @@ export default function ApprovedRegistrationsTable() {
         setSelectedRegistrations([]);
       } catch (error) {
         console.error("Lỗi khi xóa phỏng vấn:", error);
+      } finally {
+        disableLoading();
       }
     }
 
@@ -883,8 +910,8 @@ export default function ApprovedRegistrationsTable() {
             </h5>
             <textarea
               name="deletedInterviewReason"
-              onChange={(e) => {
-                setDeletedInterviewReason(e.target.value);
+              onChange={() => {
+                // setDeletedInterviewReason(e.target.value);
               }}
               className="block w-full p-2 border border-gray-700 rounded-lg"
             />

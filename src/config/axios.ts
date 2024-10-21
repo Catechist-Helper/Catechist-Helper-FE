@@ -1,4 +1,4 @@
-import axios, { AxiosRequestConfig } from 'axios';
+import axios from 'axios';
 
 export enum AxiosClientFactoryEnum {
   BASE = '/',
@@ -27,7 +27,7 @@ export const parseParams = (params: any) => {
   return options ? options.slice(0, -1) : options;
 };
 
-const baseURL = `https://catechist-helper-api-v2.azurewebsites.net/api/v1/`;
+const baseURL = `https://localhost:7012/api/v1/`;
 
 const request = axios.create({
   baseURL: baseURL,
@@ -54,7 +54,7 @@ request.interceptors.response.use(
 );
 
 class AxiosClientFactory {
-  getAxiosClient(type?: AxiosClientFactoryEnum, config: AxiosRequestConfig = {}) {
+  getAxiosClient(type?: AxiosClientFactoryEnum) {
     switch (type) {
       case '/':
         return request;

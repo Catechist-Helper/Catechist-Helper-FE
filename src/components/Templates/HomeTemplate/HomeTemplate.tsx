@@ -1,10 +1,8 @@
-import React, { FC, useEffect, useState } from "react";
+import React, { FC } from "react";
 import HeaderHome from "../../Organisms/HeaderHome/HeaderHome";
 import FooterHome from "../../Organisms/FooterHome/FooterHome";
 import LoadingScreen from "../../Organisms/LoadingScreen/LoadingScreen";
 import useAppContext from "../../../hooks/useAppContext";
-import { getUserInfo } from "../../../utils/utils";
-import { AuthUser } from "../../../types/authentication";
 
 interface HomeTemplateProps {
   children: React.ReactNode;
@@ -12,14 +10,6 @@ interface HomeTemplateProps {
 
 const HomeTemplate: FC<HomeTemplateProps> = ({ children }) => {
   const { isLoading } = useAppContext();
-
-  const [userLogin, setUserLogin] = useState<AuthUser>({});
-  useEffect(() => {
-    const user: AuthUser = getUserInfo();
-    if (user && user.id) {
-      setUserLogin(user);
-    }
-  }, []);
 
   return (
     <>
@@ -35,7 +25,7 @@ const HomeTemplate: FC<HomeTemplateProps> = ({ children }) => {
           }}
         >
           <div
-            className="w-screen h-screen fixed z-[999]"
+            className="w-screen h-screen fixed z-[9999]"
             style={{
               display: `${isLoading ? "block" : "none"}`,
             }}
