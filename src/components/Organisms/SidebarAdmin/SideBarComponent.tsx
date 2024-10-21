@@ -1,22 +1,15 @@
 import "./SideBarComponent.scss";
-import { title } from "process";
 import { useState } from "react";
-import { LOCALSTORAGE_CONSTANTS } from "../../../constants/WebsiteConstant";
-// import { PATH_MAIN } from "@/routes/paths";
-import { useDispatch } from "react-redux";
+//import { LOCALSTORAGE_CONSTANTS } from "../../../constants/WebsiteConstant";
 import { Link } from "react-router-dom";
 import { PATH_ADMIN } from "../../../routes/paths";
 import useAuth from "../../../hooks/useAuth";
 
-interface SideBarProps {
-  activeItem?: string;
-  handleCategoryClick: () => void;
-}
-
-const SideBarComponent = (props: {}) => {
+const SideBarComponent = () => {
   const [isHovered, setIsHovered] = useState(false);
-  const { isAuthenticated, logout } = useAuth();
+  const { logout } = useAuth();
 
+  /*
   const navigateTo = (route: string) => {
     if (typeof window !== "undefined") {
       localStorage.setItem(LOCALSTORAGE_CONSTANTS.CURRENT_PAGE, route);
@@ -33,6 +26,7 @@ const SideBarComponent = (props: {}) => {
       localStorage.getItem(LOCALSTORAGE_CONSTANTS.CURRENT_PAGE) == route
     );
   };
+  */
 
   return (
     <div
@@ -52,7 +46,10 @@ const SideBarComponent = (props: {}) => {
         onMouseLeave={() => setIsHovered(false)}
         style={{ height: "100%" }}
       >
-        <div className="flex h-screen flex-col justify-between pt-2 pb-6">
+        <div
+          className="flex h-screen flex-col justify-between pt-2 pb-6"
+          style={{ overflowY: `${isHovered ? "scroll" : "hidden"}` }}
+        >
           <div>
             <div className={`w-max p-2.5 ${isHovered ? "block" : "hidden"}`}>
               <img
@@ -176,6 +173,43 @@ const SideBarComponent = (props: {}) => {
               <li className="min-w-max">
                 <div
                   onClick={() => {
+                    // navigateTo(PATH_MAIN.supplier);
+                  }}
+                  //   className={`links_hover ${
+                  //     typeof window !== "undefined" &&
+                  //     isActive(PATH_MAIN.supplier)
+                  //       ? "active_current_link"
+                  //       : ""
+                  //   }`}
+                >
+                  <Link
+                    to={PATH_ADMIN.catechist_management}
+                    className="relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-sky-600 hover:to-cyan-400 px-4 py-3 hover:text-white"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        className="fill-current text-gray-600 group-hover:text-cyan-600"
+                        d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z"
+                      />
+                      <path
+                        className="fill-current text-gray-300 group-hover:text-cyan-300"
+                        d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z"
+                      />
+                    </svg>
+                    <span className="group-hover:text-gray-700">
+                      Giáo lý viên
+                    </span>
+                  </Link>
+                </div>
+              </li>
+              <li className="min-w-max">
+                <div
+                  onClick={() => {
                     // navigateTo(PATH_MAIN.category);
                   }}
                   //   className={`links_hover ${
@@ -248,6 +282,154 @@ const SideBarComponent = (props: {}) => {
                   </Link>
                 </div>
               </li>
+
+              <li className="min-w-max">
+                <div
+                  onClick={() => {
+                    // navigateTo(PATH_MAIN.category);
+                  }}
+                  //   className={`links_hover ${
+                  //     typeof window !== "undefined" &&
+                  //     isActive(PATH_MAIN.category)
+                  //       ? "active_current_link"
+                  //       : ""
+                  //   }`}
+                >
+                  <Link
+                    to={PATH_ADMIN.christian_name}
+                    className="relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-sky-600 hover:to-cyan-400 px-4 py-3 hover:text-white"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        className="fill-current text-gray-300 group-hover:text-cyan-300"
+                        fillRule="evenodd"
+                        d="M2 6a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1H8a3 3 0 00-3 3v1.5a1.5 1.5 0 01-3 0V6z"
+                        clipRule="evenodd"
+                      />
+                      <path
+                        className="fill-current text-gray-600 group-hover:text-cyan-600"
+                        d="M6 12a2 2 0 012-2h8a2 2 0 012 2v2a2 2 0 01-2 2H2h2a2 2 0 002-2v-2z"
+                      />
+                    </svg>
+                    <span className="group-hover:text-gray-700">Tên Thánh</span>
+                  </Link>
+                </div>
+              </li>
+              <li className="min-w-max">
+                <div
+                  onClick={() => {
+                    // navigateTo(PATH_MAIN.order);
+                  }}
+                  //   className={`links_hover ${
+                  //     typeof window !== "undefined" && isActive(PATH_MAIN.order)
+                  //       ? "active_current_link"
+                  //       : ""
+                  //   }`}
+                >
+                  <Link
+                    to={PATH_ADMIN.rooms}
+                    className="relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-sky-600 hover:to-cyan-400 px-4 py-3 hover:text-white"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        className="fill-current text-gray-600 group-hover:text-cyan-600"
+                        fillRule="evenodd"
+                        d="M2 5a2 2 0 012-2h8a2 2 0 012 2v10a2 2 0 002 2H4a2 2 0 01-2-2V5zm3 1h6v4H5V6zm6 6H5v2h6v-2z"
+                        clipRule="evenodd"
+                      />
+                      <path
+                        className="fill-current text-gray-300 group-hover:text-cyan-300"
+                        d="M15 7h1a2 2 0 012 2v5.5a1.5 1.5 0 01-3 0V7z"
+                      />
+                    </svg>
+                    <span className="group-hover:text-gray-700">Phòng học</span>
+                  </Link>
+                </div>
+              </li>
+              <li className="min-w-max">
+                <div
+                  onClick={() => {
+                    // navigateTo(PATH_MAIN.category);
+                  }}
+                  //   className={`links_hover ${
+                  //     typeof window !== "undefined" &&
+                  //     isActive(PATH_MAIN.category)
+                  //       ? "active_current_link"
+                  //       : ""
+                  //   }`}
+                >
+                  <Link
+                    to={PATH_ADMIN.pastoral_years}
+                    className="relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-sky-600 hover:to-cyan-400 px-4 py-3 hover:text-white"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        className="fill-current text-gray-300 group-hover:text-cyan-300"
+                        fillRule="evenodd"
+                        d="M2 6a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1H8a3 3 0 00-3 3v1.5a1.5 1.5 0 01-3 0V6z"
+                        clipRule="evenodd"
+                      />
+                      <path
+                        className="fill-current text-gray-600 group-hover:text-cyan-600"
+                        d="M6 12a2 2 0 012-2h8a2 2 0 012 2v2a2 2 0 01-2 2H2h2a2 2 0 002-2v-2z"
+                      />
+                    </svg>
+                    <span className="group-hover:text-gray-700">Niên khóa</span>
+                  </Link>
+                </div>
+              </li>
+              <li className="min-w-max">
+                <div
+                  onClick={() => {
+                    // navigateTo(PATH_MAIN.order);
+                  }}
+                  //   className={`links_hover ${
+                  //     typeof window !== "undefined" && isActive(PATH_MAIN.order)
+                  //       ? "active_current_link"
+                  //       : ""
+                  //   }`}
+                >
+                  <Link
+                    to={PATH_ADMIN.system_configurations}
+                    className="relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-sky-600 hover:to-cyan-400 px-4 py-3 hover:text-white"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        className="fill-current text-gray-600 group-hover:text-cyan-600"
+                        fillRule="evenodd"
+                        d="M2 5a2 2 0 012-2h8a2 2 0 012 2v10a2 2 0 002 2H4a2 2 0 01-2-2V5zm3 1h6v4H5V6zm6 6H5v2h6v-2z"
+                        clipRule="evenodd"
+                      />
+                      <path
+                        className="fill-current text-gray-300 group-hover:text-cyan-300"
+                        d="M15 7h1a2 2 0 012 2v5.5a1.5 1.5 0 01-3 0V7z"
+                      />
+                    </svg>
+                    <span className="group-hover:text-gray-700">Thông số</span>
+                  </Link>
+                </div>
+              </li>
+
               {/* 
               <li className="min-w-max">
                 <a

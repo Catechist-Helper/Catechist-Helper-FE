@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
-import christianNamesApi from "../../../api/ChristianName"; 
+import christianNamesApi from "../../../api/ChristianName";
 import { AxiosResponse } from "axios";
 import { BasicResponse } from "../../../model/Response/BasicResponse";
 import { useNavigate } from "react-router-dom";
+import { formatDate } from "../../../utils/formatDate";
 
 const ListAllChristianNames: React.FC = () => {
   const [christianNames, setChristianNames] = useState([]);
@@ -10,7 +11,7 @@ const ListAllChristianNames: React.FC = () => {
 
   useEffect(() => {
     christianNamesApi
-      .getAllChristianNames(1, 10) 
+      .getAllChristianNames(1, 10)
       .then((axiosRes: AxiosResponse) => {
         const res: BasicResponse = axiosRes.data;
         console.log("Response data: ", res);
@@ -59,7 +60,10 @@ const ListAllChristianNames: React.FC = () => {
       </div>
       <div className="d-flex align-items-center mb-3 ">
         <div className="ml-6">
-          <button className="px-4 py-2 border border-black text-black bg-white hover:bg-gray-200" onClick={handleCreate}>
+          <button
+            className="px-4 py-2 border border-black text-black bg-white hover:bg-gray-200"
+            onClick={handleCreate}
+          >
             Tạo tên thánh
           </button>
         </div>
@@ -69,24 +73,42 @@ const ListAllChristianNames: React.FC = () => {
         <table className="w-full text-sm text-left rtl:text-right text-gray-500">
           <thead className="text-xs text-white uppercase bg-[#422A14] h-20">
             <tr>
-              <th scope="col" className="px-6 py-3">Tên</th>
-              <th scope="col" className="px-6 py-3">Giới tính</th>
-              <th scope="col" className="px-6 py-3">Ngày thánh</th>
-              <th scope="col" className="px-6 py-3">Action</th>
+              <th scope="col" className="px-6 py-3">
+                Tên
+              </th>
+              <th scope="col" className="px-6 py-3">
+                Giới tính
+              </th>
+              <th scope="col" className="px-6 py-3">
+                Ngày thánh
+              </th>
+              <th scope="col" className="px-6 py-3">
+                Action
+              </th>
             </tr>
           </thead>
           <tbody>
             {christianNames.length > 0 ? (
               christianNames.map((name: any) => (
-                <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700" key={name.id}>
-                  <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                <tr
+                  className="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
+                  key={name.id}
+                >
+                  <th
+                    scope="row"
+                    className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                  >
                     <div className="text-dark">{name.name}</div>
                   </th>
                   <td className="px-6 py-4">
-                    <div className="text-dark text-decoration-none">{name.gender}</div>
+                    <div className="text-dark text-decoration-none">
+                      {name.gender}
+                    </div>
                   </td>
                   <td className="px-6 py-4">
-                    <div className="text-dark text-decoration-none">{name.holyDay}</div>
+                    <div className="text-dark text-decoration-none">
+                      {formatDate.DD_MM_YYYY(name.holyDay)}
+                    </div>
                   </td>
                   <td className="px-4 py-4 space-x-2">
                     <button
@@ -106,7 +128,9 @@ const ListAllChristianNames: React.FC = () => {
               ))
             ) : (
               <tr>
-                <td colSpan={4} className="px-6 py-4 text-center">Không thấy danh sách tên thánh</td>
+                <td colSpan={4} className="px-6 py-4 text-center">
+                  Không thấy danh sách tên thánh
+                </td>
               </tr>
             )}
           </tbody>

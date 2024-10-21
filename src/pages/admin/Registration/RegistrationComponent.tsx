@@ -1,4 +1,3 @@
-import * as React from "react";
 import {
   DataGrid,
   GridColDef,
@@ -13,18 +12,13 @@ import registrationApi from "../../../api/Registration";
 import accountApi from "../../../api/Account";
 import interviewApi from "../../../api/Interview";
 import interviewProcessApi from "../../../api/InterviewProcess";
-import {
-  RegistrationItemResponse,
-  RegistrationResponse,
-} from "../../../model/Response/Registration";
+import { RegistrationItemResponse } from "../../../model/Response/Registration";
 import { RegistrationStatus } from "../../../enums/Registration";
 import viVNGridTranslation from "../../../locale/MUITable";
 import { formatDate } from "../../../utils/formatDate";
 import { formatPhone } from "../../../utils/utils";
 import sweetAlert from "../../../utils/sweetAlert";
 import useAppContext from "../../../hooks/useAppContext";
-import dayjs, { Dayjs } from "dayjs";
-import { BasicResponse } from "../../../model/Response/BasicResponse";
 import { AccountRoleString } from "../../../enums/Account";
 
 const columns: GridColDef[] = [
@@ -181,7 +175,7 @@ export default function RegistrationDataTable() {
   };
 
   // Hàm xóa các đơn đã chọn
-  const handleDeleteRegistrations = async () => {
+  /* const handleDeleteRegistrations = async () => {
     try {
       enableLoading();
       setHasFunction(true); // Bắt đầu quá trình xóa
@@ -199,23 +193,34 @@ export default function RegistrationDataTable() {
       setHasFunction(false); // Kết thúc quá trình xóa
       disableLoading();
     }
-  };
+  }; */
 
   // Hàm xử lý khi nhấn nút "Từ chối đơn"
   const handleRejectApplications = async () => {
     try {
+      enableLoading();
+      setHasFunction(true);
       await Promise.all(
         selectedIds.map((id) =>
-          registrationApi.updateRegistration(id.toString(), {
-            status: RegistrationStatus.Rejected_Duyet_Don,
-          })
+          registrationApi.updateRegistration(
+            id.toString(),
+            {
+              status: RegistrationStatus.Rejected_Duyet_Don,
+            },
+            rejectedReason
+          )
         )
       );
       sweetAlert.alertSuccess("Từ chối đơn thành công", "", 1000, 21);
       setSelectedIds([]); // Clear lựa chọn sau khi thực hiện
       fetchRegistrations(); // Reload danh sách
+      setRejectedReason("");
+      handleCloseModalRejected();
+      setHasFunction(false);
     } catch (error) {
       sweetAlert.alertFailed("Có lỗi xảy ra khi từ chối đơn!", "", 1000, 23);
+    } finally {
+      disableLoading();
     }
   };
 
@@ -268,6 +273,7 @@ export default function RegistrationDataTable() {
 
   const handleScheduleInterview = async () => {
     try {
+      enableLoading();
       const registrationId: string = selectedIds[0].toString(); // Only one registration at a time
       const selectedAccountIds = selectedAccounts.map((acc: any) => acc.value);
 
@@ -297,6 +303,8 @@ export default function RegistrationDataTable() {
       setSelectedIds([]);
     } catch (error) {
       console.error("Lỗi khi xếp lịch phỏng vấn:", error);
+    } finally {
+      disableLoading();
     }
   };
 

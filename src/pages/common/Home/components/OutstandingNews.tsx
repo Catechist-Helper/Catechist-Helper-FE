@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import postsApi from "../../../../api/Post";
-import dayjs from "dayjs";
 import { PATH_HOME } from "../../../../routes/paths";
 import { PostStatus } from "../../../../enums/Post";
 

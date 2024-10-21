@@ -14,11 +14,11 @@ import {
 import useAppContext from "../hooks/useAppContext";
 import { PATH_ADMIN, PATH_AUTH } from "../routes/paths";
 import { LOCALSTORAGE_CONSTANTS } from "../constants/WebsiteConstant";
-import Swal from "sweetalert2";
+// import Swal from "sweetalert2";
 import { BasicResponse } from "../model/Response/BasicResponse";
 import { useNavigate } from "react-router-dom";
 import { AxiosResponse } from "axios";
-import { AccountRoleEnum, AccountRoleString } from "../enums/Account";
+import { AccountRoleString } from "../enums/Account";
 // import authApi from "@/api/auth/authApi";
 
 // ----------------------------------------------------------------------
@@ -236,22 +236,6 @@ function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const loginWithEmail = async (email: string) => {
-    try {
-      enableLoading();
-    } catch (error) {
-      console.log(error);
-      disableLoading();
-      sweetAlert.alertFailed(
-        `Đăng nhập thất bại`,
-        `Xin bạn vui lòng kiểm tra email hoặc mật khẩu và đăng nhập lại`,
-        5000,
-        30
-      );
-      navigateToPage(PATH_AUTH.login);
-    }
-  };
-
   const logout = async () => {
     setSession(null);
     setUserInfo({});
@@ -260,7 +244,7 @@ function AuthProvider({ children }: { children: ReactNode }) {
     navigateToPage("/");
   };
 
-  const resetPassword = (email: string) => {};
+  // const resetPassword = () => {};
 
   const updateProfile = () => {};
 
@@ -270,9 +254,8 @@ function AuthProvider({ children }: { children: ReactNode }) {
         ...state,
         method: "jwt",
         login,
-        loginWithEmail,
         logout,
-        resetPassword,
+        // resetPassword,
         updateProfile,
       }}
     >

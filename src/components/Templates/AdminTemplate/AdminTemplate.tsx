@@ -17,7 +17,7 @@ export default function AdminTemplate({
   return (
     <>
       <div
-        className="w-screen h-screen fixed z-[999]"
+        className="w-screen h-screen fixed z-[9999]"
         style={{
           display: `${isLoading ? "block" : "none"}`,
         }}

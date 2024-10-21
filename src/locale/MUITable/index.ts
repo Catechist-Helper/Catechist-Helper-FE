@@ -1,5 +1,3 @@
-import { viVN as viVNCore } from '@mui/material/locale';
-
 const viVNGridTranslation = {
   // Root
   noRowsLabel: 'Không có dữ liệu',

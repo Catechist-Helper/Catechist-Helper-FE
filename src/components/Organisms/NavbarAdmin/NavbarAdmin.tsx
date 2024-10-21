@@ -1,21 +1,12 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import { useState } from "react";
 import "./NavbarAdmin.scss";
-import Search from "antd/es/input/Search";
-
-import { LOCALSTORAGE_CONSTANTS } from "../../../constants/WebsiteConstant";
+//import Search from "antd/es/input/Search";
 import Swal from "sweetalert2";
 
 const NavbarAdmin = () => {
   // State for managing the visibility of the user profile menu
   const [isUserProfileMenuOpen, setUserProfileMenuOpen] = useState(false);
-
-  const navigateTo = (route: string) => {
-    if (typeof window !== "undefined") {
-      localStorage.setItem(LOCALSTORAGE_CONSTANTS.CURRENT_PAGE, route);
-    }
-    // router.push(route);
-  };
 
   // Function to toggle the user profile menu
   const toggleUserProfileMenu = () => {

@@ -3,8 +3,6 @@
 import React from "react";
 import { Box, Typography, Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import HeaderHome from "../../components/Organisms/HeaderHome/HeaderHome";
-import FooterHome from "../../components/Organisms/FooterHome/FooterHome";
 import HomeTemplate from "../../components/Templates/HomeTemplate/HomeTemplate";
 
 const NotFoundPage: React.FC = () => {

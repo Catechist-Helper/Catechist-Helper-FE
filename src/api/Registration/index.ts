@@ -1,6 +1,5 @@
 import axiosInstances from "../../config/axios";
 import { BasicResponse } from "../../model/Response/BasicResponse";
-import { CreateRegistrationRequest } from "../../model/Request/Registration";
 import { RegistrationResponse, RegistrationItemResponse } from "../../model/Response/Registration";
 
 const request = axiosInstances.base;
@@ -31,10 +30,12 @@ const createRegistration = (data: FormData) => {
     },
   });
 };
+
 // PUT: Cập nhật thông tin của một registration (JSON, không có file)
-const updateRegistration = (id: string, data: { status: number; accounts?: string[] }) => {
+const updateRegistration = (id: string, data: { status: number; accounts?: string[] }, reason?: string) => {
   const updateData = {
     status: data.status,
+    ...(reason && { reason }),
     ...(data.accounts && { accounts: data.accounts }), // Chỉ thêm accounts nếu có
   };
   
