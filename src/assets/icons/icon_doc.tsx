@@ -1,28 +1,51 @@
 // material
-import { useTheme } from '@mui/material/styles';
-import { Box, BoxProps } from '@mui/material';
+import { useTheme } from "@mui/material/styles";
+import { Box, BoxProps } from "@mui/material";
 
 // ----------------------------------------------------------------------
 
 export default function DocIcon({ ...other }: BoxProps) {
   const theme = useTheme();
-  const PRIMARY_LIGHTER = theme.palette.primary.lighter;
+  const PRIMARY_LIGHTER = theme.palette.primary.light;
   const PRIMARY_LIGHT = theme.palette.primary.light;
   const PRIMARY_MAIN = theme.palette.primary.main;
 
   return (
     <Box {...other}>
-      <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="100%"
+        height="100%"
+        viewBox="0 0 24 24"
+      >
         <defs>
-          <linearGradient id="linearGradient-1" x1="50%" x2="50%" y1="0%" y2="105.236%">
+          <linearGradient
+            id="linearGradient-1"
+            x1="50%"
+            x2="50%"
+            y1="0%"
+            y2="105.236%"
+          >
             <stop offset="0%" />
             <stop offset="100%" stopOpacity="0" />
           </linearGradient>
-          <linearGradient id="linearGradient-2" x1="0%" x2="100%" y1=".736%" y2="99.264%">
+          <linearGradient
+            id="linearGradient-2"
+            x1="0%"
+            x2="100%"
+            y1=".736%"
+            y2="99.264%"
+          >
             <stop offset="0%" stopColor={PRIMARY_LIGHT} />
             <stop offset="100%" stopColor={PRIMARY_MAIN} />
           </linearGradient>
-          <linearGradient id="linearGradient-3" x1="50%" x2="50%" y1="105.236%" y2="0%">
+          <linearGradient
+            id="linearGradient-3"
+            x1="50%"
+            x2="50%"
+            y1="105.236%"
+            y2="0%"
+          >
             <stop offset="0%" />
             <stop offset="100%" stopOpacity="0" />
           </linearGradient>

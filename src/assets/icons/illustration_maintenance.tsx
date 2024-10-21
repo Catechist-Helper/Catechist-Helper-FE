@@ -1,13 +1,13 @@
 // material
-import { useTheme } from '@mui/material/styles';
-import { Box, BoxProps } from '@mui/material';
+import { useTheme } from "@mui/material/styles";
+import { Box, BoxProps } from "@mui/material";
 
 // ----------------------------------------------------------------------
 
 export default function MaintenanceIllustration({ ...other }: BoxProps) {
   const theme = useTheme();
   const PRIMARY_MAIN = theme.palette.primary.main;
-  const PRIMARY_DARKER = theme.palette.primary.darker;
+  const PRIMARY_DARKER = theme.palette.primary.dark;
 
   return (
     <Box {...other}>
@@ -19,20 +19,44 @@ export default function MaintenanceIllustration({ ...other }: BoxProps) {
         viewBox="0 0 480 360"
       >
         <defs>
-          <linearGradient id="linearGradient-1" x1="19.496%" x2="77.479%" y1="71.822%" y2="16.69%">
+          <linearGradient
+            id="linearGradient-1"
+            x1="19.496%"
+            x2="77.479%"
+            y1="71.822%"
+            y2="16.69%"
+          >
             <stop offset="0%" stopColor={PRIMARY_MAIN} />
             <stop offset="100%" stopColor={PRIMARY_MAIN} stopOpacity="0" />
           </linearGradient>
-          <linearGradient id="linearGradient-2" x1=".004%" x2="100.003%" y1="49.995%" y2="49.995%">
+          <linearGradient
+            id="linearGradient-2"
+            x1=".004%"
+            x2="100.003%"
+            y1="49.995%"
+            y2="49.995%"
+          >
             <stop offset="0%" stopColor="#FFC444" />
             <stop offset="100%" stopColor="#F36F56" />
           </linearGradient>
-          <linearGradient id="linearGradient-3" x1="57.305%" x2="50.966%" y1="48.97%" y2="55.004%">
+          <linearGradient
+            id="linearGradient-3"
+            x1="57.305%"
+            x2="50.966%"
+            y1="48.97%"
+            y2="55.004%"
+          >
             <stop offset="0%" stopColor="#FFC444" />
             <stop offset="59%" stopColor="#F8924F" />
             <stop offset="100%" stopColor="#F36F56" />
           </linearGradient>
-          <linearGradient id="linearGradient-4" x1="57.226%" x2="54.775%" y1="49.934%" y2="50.957%">
+          <linearGradient
+            id="linearGradient-4"
+            x1="57.226%"
+            x2="54.775%"
+            y1="49.934%"
+            y2="50.957%"
+          >
             <stop offset="0%" stopColor="#FFC444" />
             <stop offset="59%" stopColor="#F8924F" />
             <stop offset="100%" stopColor="#F36F56" />
@@ -47,7 +71,13 @@ export default function MaintenanceIllustration({ ...other }: BoxProps) {
             <stop offset="0%" stopColor="#FFC444" />
             <stop offset="100%" stopColor="#F36F56" />
           </linearGradient>
-          <linearGradient id="linearGradient-6" x1=".002%" x2="100%" y1="49.999%" y2="49.999%">
+          <linearGradient
+            id="linearGradient-6"
+            x1=".002%"
+            x2="100%"
+            y1="49.999%"
+            y2="49.999%"
+          >
             <stop offset="0%" stopColor="#FFC444" />
             <stop offset="100%" stopColor="#F36F56" />
           </linearGradient>
@@ -153,9 +183,27 @@ export default function MaintenanceIllustration({ ...other }: BoxProps) {
               opacity="0.2"
             />
 
-            <circle cx="52.108" cy="100.682" r="2.5" fill="#FF4842" fillRule="nonzero" />
-            <circle cx="60.108" cy="100.682" r="2.5" fill="#FFC107" fillRule="nonzero" />
-            <circle cx="68.108" cy="100.682" r="2.5" fill="#54D62C" fillRule="nonzero" />
+            <circle
+              cx="52.108"
+              cy="100.682"
+              r="2.5"
+              fill="#FF4842"
+              fillRule="nonzero"
+            />
+            <circle
+              cx="60.108"
+              cy="100.682"
+              r="2.5"
+              fill="#FFC107"
+              fillRule="nonzero"
+            />
+            <circle
+              cx="68.108"
+              cy="100.682"
+              r="2.5"
+              fill="#54D62C"
+              fillRule="nonzero"
+            />
             <image
               width="185"
               height="300"

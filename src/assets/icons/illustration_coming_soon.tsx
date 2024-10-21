@@ -1,6 +1,6 @@
 // material
-import { useTheme } from '@mui/material/styles';
-import { Box, BoxProps } from '@mui/material';
+import { useTheme } from "@mui/material/styles";
+import { Box, BoxProps } from "@mui/material";
 
 // ----------------------------------------------------------------------
 
@@ -8,7 +8,7 @@ export default function ComingSoonIllustration({ ...other }: BoxProps) {
   const theme = useTheme();
   const PRIMARY_MAIN = theme.palette.primary.main;
   const PRIMARY_DARK = theme.palette.primary.dark;
-  const PRIMARY_DARKER = theme.palette.primary.darker;
+  const PRIMARY_DARKER = theme.palette.primary.dark;
 
   return (
     <Box {...other}>
@@ -20,7 +20,13 @@ export default function ComingSoonIllustration({ ...other }: BoxProps) {
         viewBox="0 0 480 360"
       >
         <defs>
-          <linearGradient id="BG" x1="19.496%" x2="77.479%" y1="71.822%" y2="16.69%">
+          <linearGradient
+            id="BG"
+            x1="19.496%"
+            x2="77.479%"
+            y1="71.822%"
+            y2="16.69%"
+          >
             <stop offset="0%" stopColor={PRIMARY_MAIN} />
             <stop offset="100%" stopColor={PRIMARY_MAIN} stopOpacity="0" />
           </linearGradient>

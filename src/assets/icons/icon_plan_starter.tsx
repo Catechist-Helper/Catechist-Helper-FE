@@ -1,6 +1,6 @@
 // material
-import { useTheme } from '@mui/material/styles';
-import { Box, BoxProps } from '@mui/material';
+import { useTheme } from "@mui/material/styles";
+import { Box, BoxProps } from "@mui/material";
 
 // ----------------------------------------------------------------------
 
@@ -8,7 +8,7 @@ export default function PlanStarterIcon({ ...other }: BoxProps) {
   const theme = useTheme();
   const PRIMARY_MAIN = theme.palette.primary.main;
   const PRIMARY_DARK = theme.palette.primary.dark;
-  const PRIMARY_DARKER = theme.palette.primary.darker;
+  const PRIMARY_DARKER = theme.palette.primary.dark;
 
   return (
     <Box {...other}>
@@ -36,7 +36,10 @@ export default function PlanStarterIcon({ ...other }: BoxProps) {
                 </mask>
                 <g mask="url(#mask-4)">
                   <g transform="translate(9.167 19.963)">
-                    <path fill={PRIMARY_DARK} d="M53.333 17.467H61.666V24.953H53.333z" />
+                    <path
+                      fill={PRIMARY_DARK}
+                      d="M53.333 17.467H61.666V24.953H53.333z"
+                    />
                     <path
                       fill={PRIMARY_DARKER}
                       d="M.935 20.45L25.963 8.015a5.052 5.052 0 014.52.012L60.74 23.263a1.685 1.685 0 01.015 3.001L35.417 39.361a5.052 5.052 0 01-4.694-.029L.893 23.446a1.685 1.685 0 01.042-2.995z"
@@ -59,7 +62,10 @@ export default function PlanStarterIcon({ ...other }: BoxProps) {
                 </mask>
                 <g mask="url(#mask-6)">
                   <g transform="translate(9.167 19.963)">
-                    <path fill={PRIMARY_DARK} d="M53.333 17.467H61.666V24.953H53.333z" />
+                    <path
+                      fill={PRIMARY_DARK}
+                      d="M53.333 17.467H61.666V24.953H53.333z"
+                    />
                     <path
                       fill={PRIMARY_DARKER}
                       d="M.935 20.45L25.963 8.015a5.052 5.052 0 014.52.012L60.74 23.263a1.685 1.685 0 01.015 3.001L35.417 39.361a5.052 5.052 0 01-4.694-.029L.893 23.446a1.685 1.685 0 01.042-2.995z"
