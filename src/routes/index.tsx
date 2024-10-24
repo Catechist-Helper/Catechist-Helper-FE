@@ -210,7 +210,7 @@ export default function Router() {
         },
         {
           path: PATH_ADMIN.update_levels,
-          element: <UpdateLevel/>,
+          element: <UpdateLevel />,
         },
         {
           path: PATH_ADMIN.training_lists,
@@ -221,10 +221,9 @@ export default function Router() {
           element: <CreateTrain />,
         },
         {
-          path: PATH_ADMIN.update_training_lists, 
+          path: PATH_ADMIN.update_training_lists,
           element: <UpdateTrain />,
         },
-        
       ],
     },
 
@@ -266,20 +265,17 @@ const HomeChristianName = Loadable(
   lazy(() => import("../pages/admin/ChristianName/HomeChristianName"))
 );
 const HomeRoom = Loadable(lazy(() => import("../pages/admin/Rooms/HomeRoom")));
-<<<<<<< Updated upstream
+
 const HomePastoralYears = Loadable(
   lazy(() => import("../pages/admin/PastoralYears/HomePastoralYears"))
 );
 const HomeConfig = Loadable(
   lazy(() => import("../pages/admin/SystemConfiguration/HomeConfig"))
 );
+const HomeLevel = Loadable(
+  lazy(() => import("../pages/admin/Level/HomeLevel"))
+);
+const HomeTrain = Loadable(
+  lazy(() => import("../pages/admin/TrainingList/HomeTrain"))
+);
 //-----------------------------import CreateConfig from './../pages/admin/SystemConfiguration/CreateConfig';
-=======
-const HomePastoralYears = Loadable(lazy(() => import("../pages/admin/PastoralYears/HomePastoralYears")));
-const HomeConfig = Loadable(lazy(() => import("../pages/admin/SystemConfiguration/HomeConfig")));
-const HomeLevel = Loadable(lazy(() => import("../pages/admin/Level/HomeLevel")));
-const HomeTrain = Loadable(lazy(() => import("../pages/admin/TrainingList/HomeTrain")));
-//-----------------------------import CreateConfig from './../pages/admin/SystemConfiguration/CreateConfig';
-
-
->>>>>>> Stashed changes
