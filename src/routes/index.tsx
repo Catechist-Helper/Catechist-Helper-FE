@@ -22,6 +22,10 @@ import CreatePastoralYears from "../pages/admin/PastoralYears/CreatePastoralYear
 import UpdatePastoralYears from "../pages/admin/PastoralYears/UpdatePastoralYears";
 import CreateConfig from "../pages/admin/SystemConfiguration/CreateConfig";
 import UpdateConfig from "../pages/admin/SystemConfiguration/UpdateConfig";
+import CreateLevel from "../pages/admin/Level/CreateLevel";
+import UpdateLevel from "../pages/admin/Level/UpdateLevel";
+import CreateTrain from "../pages/admin/TrainingList/CreateTrain";
+import UpdateTrain from "../pages/admin/TrainingList/UpdateTrain";
 // path
 
 // ----------------------------------------------------------------------
@@ -196,6 +200,31 @@ export default function Router() {
           path: PATH_ADMIN.update_system_configurations,
           element: <UpdateConfig />,
         },
+        {
+          path: PATH_ADMIN.levels,
+          element: <HomeLevel />,
+        },
+        {
+          path: PATH_ADMIN.create_levels,
+          element: <CreateLevel />,
+        },
+        {
+          path: PATH_ADMIN.update_levels,
+          element: <UpdateLevel/>,
+        },
+        {
+          path: PATH_ADMIN.training_lists,
+          element: <HomeTrain />,
+        },
+        {
+          path: PATH_ADMIN.create_training_lists,
+          element: <CreateTrain />,
+        },
+        {
+          path: PATH_ADMIN.update_training_lists, 
+          element: <UpdateTrain />,
+        },
+        
       ],
     },
 
@@ -237,6 +266,7 @@ const HomeChristianName = Loadable(
   lazy(() => import("../pages/admin/ChristianName/HomeChristianName"))
 );
 const HomeRoom = Loadable(lazy(() => import("../pages/admin/Rooms/HomeRoom")));
+<<<<<<< Updated upstream
 const HomePastoralYears = Loadable(
   lazy(() => import("../pages/admin/PastoralYears/HomePastoralYears"))
 );
@@ -244,3 +274,12 @@ const HomeConfig = Loadable(
   lazy(() => import("../pages/admin/SystemConfiguration/HomeConfig"))
 );
 //-----------------------------import CreateConfig from './../pages/admin/SystemConfiguration/CreateConfig';
+=======
+const HomePastoralYears = Loadable(lazy(() => import("../pages/admin/PastoralYears/HomePastoralYears")));
+const HomeConfig = Loadable(lazy(() => import("../pages/admin/SystemConfiguration/HomeConfig")));
+const HomeLevel = Loadable(lazy(() => import("../pages/admin/Level/HomeLevel")));
+const HomeTrain = Loadable(lazy(() => import("../pages/admin/TrainingList/HomeTrain")));
+//-----------------------------import CreateConfig from './../pages/admin/SystemConfiguration/CreateConfig';
+
+
+>>>>>>> Stashed changes

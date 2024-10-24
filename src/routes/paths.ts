@@ -38,6 +38,12 @@ export const PATH_ADMIN = {
   system_configurations: path(PATH_ROOT_ADMIN, '/system-configurations'),
   create_system_configurations: path(PATH_ROOT_ADMIN, '/create-system-configurations'),
   update_system_configurations: path(PATH_ROOT_ADMIN, '/update-system-configurations/:id'),
+  create_levels: path(PATH_ROOT_ADMIN, '/create-levels'),
+  update_levels: path(PATH_ROOT_ADMIN, '/update-levels/:id'),
+  levels: path(PATH_ROOT_ADMIN, '/levels'),
+  training_lists: path(PATH_ROOT_ADMIN, '/training-lists'),
+  create_training_lists: path(PATH_ROOT_ADMIN, '/create-training-lists'),
+  update_training_lists: path(PATH_ROOT_ADMIN, '/update-training-lists/:id'),
   //---------------------
 };
 
