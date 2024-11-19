@@ -12,6 +12,12 @@ const sweetAlert = {
       timerProgressBar: true,
       showCloseButton: true,
       didOpen: (toast) => {
+        const swalElement = document.querySelector(
+        ".swal2-container"
+        ) as HTMLElement;
+        if (swalElement) {
+          swalElement.style.zIndex = "10000";
+        }
         toast.addEventListener("mouseenter", Swal.stopTimer);
         toast.addEventListener("mouseleave", Swal.resumeTimer);
       },
@@ -34,6 +40,12 @@ const sweetAlert = {
       timerProgressBar: true,
       showCloseButton: true,
       didOpen: (toast) => {
+        const swalElement = document.querySelector(
+        ".swal2-container"
+        ) as HTMLElement;
+        if (swalElement) {
+          swalElement.style.zIndex = "10000";
+        }
         toast.addEventListener("mouseenter", Swal.stopTimer);
         toast.addEventListener("mouseleave", Swal.resumeTimer);
       },
@@ -56,6 +68,12 @@ const sweetAlert = {
       timerProgressBar: true,
       showCloseButton: true,
       didOpen: (toast) => {
+        const swalElement = document.querySelector(
+        ".swal2-container"
+        ) as HTMLElement;
+        if (swalElement) {
+          swalElement.style.zIndex = "10000";
+        }
         toast.addEventListener("mouseenter", Swal.stopTimer);
         toast.addEventListener("mouseleave", Swal.resumeTimer);
       },
@@ -78,6 +96,12 @@ const sweetAlert = {
       timerProgressBar: true,
       showCloseButton: true,
       didOpen: (toast) => {
+        const swalElement = document.querySelector(
+        ".swal2-container"
+        ) as HTMLElement;
+        if (swalElement) {
+          swalElement.style.zIndex = "10000";
+        }
         toast.addEventListener("mouseenter", Swal.stopTimer);
         toast.addEventListener("mouseleave", Swal.resumeTimer);
       },
