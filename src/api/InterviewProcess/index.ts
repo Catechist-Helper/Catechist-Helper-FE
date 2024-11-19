@@ -3,7 +3,7 @@ import axiosInstances from "../../config/axios";
 import { BasicResponse } from "../../model/Response/BasicResponse";
 
 const request = axiosInstances.base;
-const ROOT_INTERVIEW_PROCESS = "/interview-processes";
+const ROOT_INTERVIEW_PROCESS = "/registration-processes";
 
 // POST: Tạo mới một interview process
 const createInterviewProcess = (data: { registrationId: string; name: string }) => {

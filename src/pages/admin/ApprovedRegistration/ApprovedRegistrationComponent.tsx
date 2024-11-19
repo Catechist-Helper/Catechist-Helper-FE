@@ -29,13 +29,6 @@ import { formatDate } from "../../../utils/formatDate";
 import { AccountRoleString } from "../../../enums/Account";
 import useAppContext from "../../../hooks/useAppContext";
 
-// Định dạng ngày và giờ
-const formatDateTime = {
-  DD_MM_YYYY_HH_mm: (date: string) => {
-    return dayjs(date).format("DD/MM/YYYY, HH:mm");
-  },
-};
-
 // Cấu hình các cột trong DataGrid
 const columns: GridColDef[] = [
   { field: "fullName", headerName: "Tên đầy đủ", width: 180 },
@@ -45,7 +38,7 @@ const columns: GridColDef[] = [
     headerName: "Ngày sinh",
     width: 110,
     renderCell: (params) => {
-      return formatDateTime.DD_MM_YYYY_HH_mm(params.value); // Format ngày tháng
+      return formatDate.DD_MM_YYYY(params.value); // Format ngày tháng
     },
   },
   { field: "email", headerName: "Email", width: 200 },
@@ -64,7 +57,7 @@ const columns: GridColDef[] = [
     width: 180,
     renderCell: (params) => {
       return params.row.interviews.length > 0
-        ? formatDateTime.DD_MM_YYYY_HH_mm(params.row.interviews[0].meetingTime)
+        ? formatDate.DD_MM_YYYY_Time(params.row.interviews[0].meetingTime)
         : "Chưa có lịch";
     },
     sortComparator: (a, b) => {
@@ -394,8 +387,20 @@ export default function ApprovedRegistrationsTable() {
         fetchApprovedRegistrations();
         setUpdatedInterviewReason("");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Lỗi khi cập nhật phỏng vấn:", error);
+      if (error && error.message) {
+        if (
+          error.message.toString().toLowerCase().includes("scheduled at least")
+        ) {
+          sweetAlert.alertFailed(
+            "Lỗi khi xếp lịch phỏng vấn",
+            `Lịch phỏng vấn phải cách ngày hiện tại ít nhất ${error.message.split("scheduled at least ")[1].split(" ")[0].trim()} ngày`,
+            10000,
+            24
+          );
+        }
+      }
     } finally {
       disableLoading();
     }

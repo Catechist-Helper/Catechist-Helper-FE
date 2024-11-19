@@ -301,8 +301,20 @@ export default function RegistrationDataTable() {
       handleCloseModal();
       fetchRegistrations(); // Refresh registration data after scheduling
       setSelectedIds([]);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Lỗi khi xếp lịch phỏng vấn:", error);
+      if (error && error.message) {
+        if (
+          error.message.toString().toLowerCase().includes("scheduled at least")
+        ) {
+          sweetAlert.alertFailed(
+            "Lỗi khi xếp lịch phỏng vấn",
+            `Lịch phỏng vấn phải cách ngày hiện tại ít nhất ${error.message.split("scheduled at least ")[1].split(" ")[0].trim()} ngày`,
+            10000,
+            24
+          );
+        }
+      }
     } finally {
       disableLoading();
     }
@@ -400,7 +412,7 @@ export default function RegistrationDataTable() {
             }}
             disabled={hasFunction}
           >
-            Refresh
+            Tải lại
           </button>
         </div>
       </div>
