@@ -1,5 +1,8 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import {
+  // useNavigate,
+  useLocation,
+} from "react-router-dom";
 import {
   DataGrid,
   GridColDef,
@@ -33,7 +36,7 @@ import useAppContext from "../../../hooks/useAppContext";
 
 export default function ClassComponent() {
   const location = useLocation();
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   // States for class data
   const [rows, setRows] = useState<any[]>([]);
@@ -75,14 +78,13 @@ export default function ClassComponent() {
       page: 0,
       pageSize: 8,
     });
-  const [rowCountCatechists, setRowCountCatechists] = useState<number>(0);
+  // const [rowCountCatechists, setRowCountCatechists] = useState<number>(0);
   const [selectedRowsCatechists, setSelectedRowsCatechists] =
     useState<GridRowSelectionModel>([]);
 
   // States for slots
   const [openSlotsDialog, setOpenSlotsDialog] = useState<boolean>(false);
   const [slots, setSlots] = useState<any[]>([]); // Slots list
-  const [loadingSlots, setLoadingSlots] = useState<boolean>(false); // Loading state for slots
   const [selectedClassView, setSelectedClassView] = useState<any>(null); // Loading state for slots
 
   useEffect(() => {
@@ -223,7 +225,7 @@ export default function ClassComponent() {
     }
   };
 
-  const fetchPastoralYears = async (defaultValue?: boolean) => {
+  const fetchPastoralYears = async () => {
     try {
       const { data } = await pastoralYearsApi.getAllPastoralYears();
       // Sắp xếp theo niên khóa gần nhất tới xa nhất
@@ -918,7 +920,6 @@ export default function ClassComponent() {
             ]}
             paginationMode="server"
             rowCount={slots.length}
-            loading={loadingSlots}
             sx={{
               border: 0,
             }}

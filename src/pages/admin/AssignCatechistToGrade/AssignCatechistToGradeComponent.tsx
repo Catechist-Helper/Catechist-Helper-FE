@@ -1,21 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import {
-  DataGrid,
-  GridColDef,
-  GridPaginationModel,
-  GridRowSelectionModel,
-} from "@mui/x-data-grid";
+import { DataGrid, GridColDef, GridPaginationModel } from "@mui/x-data-grid";
 import Paper from "@mui/material/Paper";
-import {
-  Button,
-  Dialog,
-  TextField,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-} from "@mui/material";
+import { Button } from "@mui/material";
 import majorApi from "../../../api/Major";
 import gradeApi from "../../../api/Grade";
 import sweetAlert from "../../../utils/sweetAlert";
@@ -31,9 +18,9 @@ export default function AssignCatechistToGradeComponent() {
   const [loading, setLoading] = useState<boolean>(true);
   const [catechists, setCatechists] = useState<any[]>([]); // Bảng catechist chưa được assign
   const [assignedCatechists, setAssignedCatechists] = useState<any[]>([]); // Bảng catechist đã được assign
-  const [selectedMajor, setSelectedMajor] = useState<string>("");
+  // const [selectedMajor, setSelectedMajor] = useState<string>("");
   const [selectedGrade, setSelectedGrade] = useState<string>("");
-  const [totalCatechist, setTotalCatechist] = useState<number>(0);
+  // const [totalCatechist, setTotalCatechist] = useState<number>(0);
 
   const [mainCatechistId, setMainCatechistId] = useState<string | null>(null); // ID của trưởng khối
   const [gradeName, setGradeName] = useState<string>("");
@@ -53,11 +40,13 @@ export default function AssignCatechistToGradeComponent() {
   useEffect(() => {
     const { majorId, gradeId, gradeName, majorName, totalCatechist } =
       location.state;
-    setSelectedMajor(majorId);
+    // setSelectedMajor(majorId);
     setSelectedGrade(gradeId);
     setGradeName(gradeName);
     setMajorName(majorName);
-    setTotalCatechist(totalCatechist);
+    if (totalCatechist) {
+    }
+    // setTotalCatechist(totalCatechist);
 
     fetchCatechists(majorId); // Lấy danh sách catechists chưa được assign
     fetchAssignedCatechists(gradeId); // Lấy danh sách catechists đã được assign
