@@ -14,8 +14,10 @@ const HomeTemplate: FC<HomeTemplateProps> = ({ children }) => {
   return (
     <>
       <div className="overflow-hidden flex flex-col min-h-screen">
+        {/* Add role="banner" for Header */}
         <HeaderHome />
         <main
+          role="main" // Main role
           className="overflow-hidden flex-grow w-[100vw] bg-[url(../src/assets/images/HomeTemplate/background.png)] relative"
           style={{
             backgroundPosition: "center",
@@ -24,8 +26,10 @@ const HomeTemplate: FC<HomeTemplateProps> = ({ children }) => {
             backgroundSize: "cover",
           }}
         >
+          {/* Loading screen */}
           <div
             className="w-screen h-screen fixed z-[9999]"
+            data-testid="loading-screen" // For testing
             style={{
               display: `${isLoading ? "block" : "none"}`,
             }}
@@ -36,16 +40,17 @@ const HomeTemplate: FC<HomeTemplateProps> = ({ children }) => {
             className="w-full h-full absolute z-1"
             style={{
               background: `linear-gradient(
-  to right, 
-  rgba(0, 0, 0, 0.8) 0%, 
-  rgba(0, 0, 0, 0.75) 4%, 
-  rgba(0, 0, 0, 0.7) 18%, 
-  rgba(0, 0, 0, 0.75) 100%
-)`,
+                to right, 
+                rgba(0, 0, 0, 0.8) 0%, 
+                rgba(0, 0, 0, 0.75) 4%, 
+                rgba(0, 0, 0, 0.7) 18%, 
+                rgba(0, 0, 0, 0.75) 100%
+              )`,
             }}
           ></div>
           <div className="z-[100] relative h-full">{children}</div>
         </main>
+        {/* Add role="contentinfo" for Footer */}
         <FooterHome />
       </div>
     </>

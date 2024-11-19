@@ -3,5 +3,15 @@
   "references": [
     { "path": "./tsconfig.app.json" },
     { "path": "./tsconfig.node.json" }
-  ]
+  ],
+  "compilerOptions": {
+    "jsx": "react-jsx", // Hoặc "react" tùy thuộc vào phiên bản React
+    "moduleResolution": "node", // Đảm bảo TypeScript xử lý module đúng cách
+    "target": "ESNext", // Hỗ trợ cú pháp hiện đại
+    "module": "ESNext",
+    "strict": true, // Khuyến nghị bật chế độ nghiêm ngặt
+    "esModuleInterop": true, // Hỗ trợ import đúng cách
+    "skipLibCheck": true, // Bỏ qua kiểm tra kiểu trong các thư viện
+    "types": ["jest", "@testing-library/jest-dom"] // Thêm Jest và Testing Library
+  },
 }
