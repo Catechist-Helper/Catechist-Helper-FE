@@ -153,7 +153,7 @@ export default function CatechistComponent() {
             color="primary"
             style={{ marginBottom: "16px" }}
           >
-            Refresh
+            Tải lại
           </Button>
         </div>
       </div>
