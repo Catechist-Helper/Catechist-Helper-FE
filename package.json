@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "jest --coverage",
+    "test:ci": "jest --ci"
   },
   "dependencies": {
     "@ckeditor/ckeditor5-build-classic": "^43.2.0",
