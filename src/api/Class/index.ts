@@ -1,6 +1,6 @@
 import axiosInstances from "../../config/axios";
 import { BasicResponse } from "../../model/Response/BasicResponse";
-import { ClassResponse, CatechistResponse, SlotResponse,GetClassResponse, GetSlotResponse } from "../../model/Response/Class";
+import { CatechistResponse,GetClassResponse, GetSlotResponse } from "../../model/Response/Class";
 
 // Tạo URL gốc cho API Class
 const request = axiosInstances.base;

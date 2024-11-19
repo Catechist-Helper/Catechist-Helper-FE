@@ -1,7 +1,7 @@
 import axiosInstances from "../../config/axios";
 import { BasicResponse } from "../../model/Response/BasicResponse";
 import { CreateMajorRequest, UpdateMajorRequest } from "../../model/Request/Major";
-import { MajorResponse, CatechistResponse, LevelResponse, GetMajorResponse, GetCatechistResponse } from "../../model/Response/Major";
+import { MajorResponse, LevelResponse, GetMajorResponse, GetCatechistResponse } from "../../model/Response/Major";
 
 // Tạo URL gốc cho API Major
 const request = axiosInstances.base;

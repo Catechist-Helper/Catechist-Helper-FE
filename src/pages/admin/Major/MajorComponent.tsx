@@ -5,18 +5,10 @@ import {
   GridRowSelectionModel,
 } from "@mui/x-data-grid";
 import Paper from "@mui/material/Paper";
-import {
-  Button,
-  Dialog,
-  TextField,
-  Select,
-  MenuItem,
-  Modal,
-} from "@mui/material";
+import { Button, Dialog } from "@mui/material";
 import { useState, useEffect } from "react";
 import majorApi from "../../../api/Major"; // Import API Major
 import gradeApi from "../../../api/Grade";
-import timetableApi from "../../../api/Timetable"; // Import API Timetable
 import { MajorResponse } from "../../../model/Response/Major";
 import viVNGridTranslation from "../../../locale/MUITable";
 import sweetAlert from "../../../utils/sweetAlert";
