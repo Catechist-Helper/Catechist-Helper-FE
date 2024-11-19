@@ -16,6 +16,10 @@ export const PATH_ADMIN = {
   catechist_management: path(PATH_ROOT_ADMIN, '/catechists'),
   admin_registration: path(PATH_ROOT_ADMIN, '/registration'),
   approved_registration: path(PATH_ROOT_ADMIN, '/interview'),
+  major_management: path(PATH_ROOT_ADMIN, '/majors'),
+  grade_management: path(PATH_ROOT_ADMIN, '/grades'),
+  class_management: path(PATH_ROOT_ADMIN, '/classes'),
+  assign_catechist_to_grade: path(PATH_ROOT_ADMIN, '/grades/assign-catechists'),
           //----------
 
           // Chị Tâm
