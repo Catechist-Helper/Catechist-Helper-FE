@@ -119,6 +119,22 @@ export default function Router() {
           path: PATH_ADMIN.approved_registration,
           element: <ApprovedRegistrationPage />,
         },
+        {
+          path: PATH_ADMIN.major_management,
+          element: <MajorManagement />,
+        },
+        {
+          path: PATH_ADMIN.grade_management,
+          element: <GradeManagement />,
+        },
+        {
+          path: PATH_ADMIN.class_management,
+          element: <ClassManagement />,
+        },
+        {
+          path: PATH_ADMIN.assign_catechist_to_grade,
+          element: <AssignCatechistToGrade />,
+        },
         //--------------------
 
         // Chị Tâm
@@ -255,6 +271,18 @@ const ApprovedRegistrationPage = Loadable(
 );
 const CatechistManagement = Loadable(
   lazy(() => import("../pages/admin/Catechists/index"))
+);
+const MajorManagement = Loadable(
+  lazy(() => import("../pages/admin/Major/index"))
+);
+const GradeManagement = Loadable(
+  lazy(() => import("../pages/admin/Grade/index"))
+);
+const ClassManagement = Loadable(
+  lazy(() => import("../pages/admin/Class/index"))
+);
+const AssignCatechistToGrade = Loadable(
+  lazy(() => import("../pages/admin/AssignCatechistToGrade/index"))
 );
 //----------------------------
 
