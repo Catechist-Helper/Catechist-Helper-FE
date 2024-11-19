@@ -3,6 +3,7 @@ import { BasicResponse } from "../../model/Response/BasicResponse";
 import { CatechistResponse, CatechistItemResponse } from "../../model/Response/Catechist";
 
 // Tạo URL gốc cho API Catechist
+const request = axiosInstances.base;
 const ROOT_CATECHIST = "/catechists";
 
 // GET: Lấy danh sách tất cả catechists với tham số mới
@@ -11,17 +12,17 @@ const getAllCatechists = (page?: number, size?: number) => {
     ...(page !== undefined && { page }),
     ...(size !== undefined && { size }),
   };
-  return axiosInstances.base.get<BasicResponse<CatechistResponse>>(`${ROOT_CATECHIST}`, { params });
+  return request.get<BasicResponse<CatechistResponse>>(`${ROOT_CATECHIST}`, { params });
 };
 
 // GET: Lấy thông tin chi tiết của một catechist
 const getCatechistById = (id: string) => {
-  return axiosInstances.base.get<BasicResponse<CatechistItemResponse>>(`${ROOT_CATECHIST}/${id}`);
+  return request.get<BasicResponse<CatechistItemResponse>>(`${ROOT_CATECHIST}/${id}`);
 };
 
 // POST: Tạo mới một catechist sử dụng form-data
 const createCatechist = (data: FormData) => {
-  return axiosInstances.base.post<BasicResponse<CatechistItemResponse>>(`${ROOT_CATECHIST}`, data, {
+  return request.post<BasicResponse<CatechistItemResponse>>(`${ROOT_CATECHIST}`, data, {
     headers: {
       "Content-Type": "multipart/form-data",
     },
@@ -30,7 +31,7 @@ const createCatechist = (data: FormData) => {
 
 // PUT: Cập nhật thông tin của một catechist sử dụng form-data
 const updateCatechist = (id: string, data: FormData) => {
-  return axiosInstances.base.put<BasicResponse<boolean>>(`${ROOT_CATECHIST}/${id}`, data, {
+  return request.put<BasicResponse<boolean>>(`${ROOT_CATECHIST}/${id}`, data, {
     headers: {
       "Content-Type": "multipart/form-data",
     },
@@ -39,16 +40,45 @@ const updateCatechist = (id: string, data: FormData) => {
 
 // DELETE: Xóa một catechist
 const deleteCatechist = (id: string) => {
-  return axiosInstances.base.delete<BasicResponse<boolean>>(`${ROOT_CATECHIST}/${id}`);
+  return request.delete<BasicResponse<boolean>>(`${ROOT_CATECHIST}/${id}`);
 };
 
 // PUT: Cập nhật hình ảnh của catechist (chỉ truyền ảnh)
 const updateCatechistImage = (id: string, imageData: FormData) => {
-  return axiosInstances.base.put<BasicResponse<boolean>>(`${ROOT_CATECHIST}/image/${id}`, imageData, {
+  return request.put<BasicResponse<boolean>>(`${ROOT_CATECHIST}/image/${id}`, imageData, {
     headers: {
       "Content-Type": "multipart/form-data",
     },
   });
+};
+
+// GET: Lấy danh sách chứng chỉ của một catechist
+const getCatechistCertificates = (id: string, page?: number, size?: number) => {
+  const params = {
+    ...(page !== undefined && { page }),
+    ...(size !== undefined && { size }),
+  };
+  return request.get<BasicResponse<any>>(`${ROOT_CATECHIST}/${id}/certificates`, { params });
+};
+
+// GET: Lấy danh sách lớp của một catechist
+const getCatechistClasses = (id: string, pastoralYear?: string, page?: number, size?: number) => {
+  const params = {
+    ...(pastoralYear !== undefined && { pastoralYear }),
+    ...(page !== undefined && { page }),
+    ...(size !== undefined && { size }),
+  };
+  return request.get<BasicResponse<any>>(`${ROOT_CATECHIST}/${id}/classes`, { params });
+};
+
+// GET: Lấy danh sách điểm số của một catechist
+const getCatechistGrades = (id: string, pastoralYear?: string, page?: number, size?: number) => {
+  const params = {
+    ...(pastoralYear !== undefined && { pastoralYear }),
+    ...(page !== undefined && { page }),
+    ...(size !== undefined && { size }),
+  };
+  return request.get<BasicResponse<any>>(`${ROOT_CATECHIST}/${id}/grades`, { params });
 };
 
 const catechistApi = {
@@ -58,6 +88,9 @@ const catechistApi = {
   updateCatechist,
   deleteCatechist,
   updateCatechistImage,
+  getCatechistCertificates,
+  getCatechistClasses,
+  getCatechistGrades
 };
 
 export default catechistApi;
