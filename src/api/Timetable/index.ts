@@ -8,6 +8,7 @@ const ROOT_TIMETABLE = "/timetable";
 const ROOT_SLOTS = "/slots";
 const ROOT_CLASSES_EXPORT = "/classes/export";
 const ROOT_PASTORAL_YEAR_EXPORT = "/pastoral-years/export";
+const ROOT_CATECHISTS_EXPORT = "/catechists/export";
 
 // POST: Tạo mới Timetable, nhận file .xlsx
 const createTimetable = (file: File) => {
@@ -42,6 +43,13 @@ const exportPastoralYearData = (year: string) => {
     params: { year },
     responseType: "blob", // Nhận về file Excel
   });
+};ROOT_CATECHISTS_EXPORT
+
+// GET: Export data của catechists dưới dạng file .xlsx
+const exportCatechistData = () => {
+  return request.get(`${ROOT_CATECHISTS_EXPORT}`, {
+    responseType: "blob", // Nhận về file Excel
+  });
 };
 
 const timetableApi = {
@@ -49,6 +57,7 @@ const timetableApi = {
   createSlot,
   exportClassData,
   exportPastoralYearData,
+  exportCatechistData
 };
 
 export default timetableApi;

@@ -116,7 +116,7 @@ export default function GradeComponent() {
         majorId,
         false,
         1,
-        100
+        1000
       );
       return data.data.total; // Trả về số lượng khối
     } catch (error) {

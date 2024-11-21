@@ -29,12 +29,25 @@ const columns: GridColDef[] = [
     ),
   },
   { field: "fullName", headerName: "Tên đầy đủ", width: 200 },
+  {
+    field: "christianName",
+    headerName: "Tên thánh",
+    width: 150,
+    renderCell: (params) => params.row.christianName || "N/A", // Chỉnh sửa hiển thị tên thánh
+  },
   { field: "gender", headerName: "Giới tính", width: 100 },
   {
     field: "dateOfBirth",
     headerName: "Ngày sinh",
     width: 120,
     renderCell: (params) => formatDate.DD_MM_YYYY(params.value),
+  },
+  { field: "qualification", headerName: "Trình độ", width: 120 },
+  {
+    field: "level",
+    headerName: "Cấp bậc",
+    width: 120,
+    renderCell: (params) => (params.row.level ? params.row.level.name : "N/A"),
   },
   {
     field: "email",
@@ -49,19 +62,6 @@ const columns: GridColDef[] = [
     renderCell: (params) => formatPhone(params.value),
   },
   { field: "address", headerName: "Địa chỉ", width: 200 },
-  { field: "qualification", headerName: "Trình độ", width: 150 },
-  {
-    field: "christianName",
-    headerName: "Tên thánh",
-    width: 150,
-    renderCell: (params) => params.row.christianName || "N/A", // Chỉnh sửa hiển thị tên thánh
-  },
-  {
-    field: "level",
-    headerName: "Cấp bậc",
-    width: 150,
-    renderCell: (params) => (params.row.level ? params.row.level.name : "N/A"),
-  },
   { field: "fatherName", headerName: "Tên cha", width: 150 },
   { field: "motherName", headerName: "Tên mẹ", width: 150 },
   { field: "note", headerName: "Ghi chú", width: 200 },
