@@ -32,11 +32,14 @@ const deleteGrade = (id: string) => {
 };
 
 // GET: Lấy danh sách tất cả các catechists của một grade
-const getCatechistsOfGrade = (id: string, excludeClassAssigned?: boolean, page?: number, size?: number) => {
+const getCatechistsOfGrade = (id: string, excludeClassAssigned?: boolean, page?: number, size?: number,
+  pastoralYearId?:string
+) => {
   const params = {
     ...(page !== undefined && { page }),
     ...(size !== undefined && { size }),
     ...(excludeClassAssigned !== undefined && { excludeClassAssigned }),
+    ...(pastoralYearId !== undefined && { pastoralYearId }),
   };
   return request.get<BasicResponse<any>>(`${ROOT_GRADE}/${id}/catechists`, { params });
 };

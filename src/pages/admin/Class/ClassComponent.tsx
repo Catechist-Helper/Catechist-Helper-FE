@@ -291,9 +291,21 @@ export default function ClassComponent() {
     setOpenSlotDialog(true);
   };
 
+  useEffect(() => {
+    if (!openSlotDialog) {
+      setSelectedRoom(null);
+      setAssignedCatechists([]);
+    }
+  }, [openSlotDialog]);
+
   const fetchRooms = async () => {
     try {
-      const { data } = await roomApi.getAllRoom();
+      const { data } = await roomApi.getAllRoom(
+        1,
+        1000,
+        selectedPastoralYear,
+        true
+      );
       setRooms(data.data.items);
     } catch (error) {
       console.error("Error loading rooms:", error);
@@ -302,7 +314,13 @@ export default function ClassComponent() {
 
   const fetchCatechists = async (gradeId: string) => {
     try {
-      const { data } = await gradeApi.getCatechistsOfGrade(gradeId, true);
+      const { data } = await gradeApi.getCatechistsOfGrade(
+        gradeId,
+        true,
+        1,
+        1000,
+        selectedPastoralYear
+      );
 
       const fetchItems: any[] = [];
       [...data.data.items].forEach((item) => {
@@ -540,7 +558,10 @@ export default function ClassComponent() {
         <input
           type="checkbox"
           checked={mainCatechistId === params.row.id}
-          onChange={() => handleMainCatechistChange(params.row.id)}
+          onChange={(e) => {
+            handleMainCatechistChange(params.row.id);
+            console.log(e);
+          }}
         />
       ),
     },

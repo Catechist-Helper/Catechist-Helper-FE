@@ -8,11 +8,13 @@ const request = axiosInstances.base
 
 const ROOT_ROOMS= "/rooms"
 
-const getAllRoom = (page?: number, size?: number) =>
+const getAllRoom = (page?: number, size?: number, pastoralYearId?: string, excludeRoomAssigned?: boolean) =>
     request.get(`${ROOT_ROOMS}`, {
         params: {
-            page,
-            size
+          ...(page !== undefined && { page }),
+          ...(size !== undefined && { size }),
+            ...(pastoralYearId !== undefined && { pastoralYearId }),
+            ...(excludeRoomAssigned !== undefined && { excludeRoomAssigned }),
         }
     });
 

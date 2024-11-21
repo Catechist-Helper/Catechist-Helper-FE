@@ -135,6 +135,10 @@ export default function Router() {
           path: PATH_ADMIN.assign_catechist_to_grade,
           element: <AssignCatechistToGrade />,
         },
+        {
+          path: PATH_ADMIN.admin_management_file,
+          element: <AdminFileManagement />,
+        },
         //--------------------
 
         // Chị Tâm
@@ -283,6 +287,9 @@ const ClassManagement = Loadable(
 );
 const AssignCatechistToGrade = Loadable(
   lazy(() => import("../pages/admin/AssignCatechistToGrade/index"))
+);
+const AdminFileManagement = Loadable(
+  lazy(() => import("../pages/admin/File/index"))
 );
 //----------------------------
 
