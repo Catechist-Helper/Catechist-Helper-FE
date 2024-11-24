@@ -27,7 +27,7 @@ const NavbarAdmin = () => {
         <div className="ml-auto">
           <ul className="flex items-center space-x-6 justify-end">
             <li>
-              <svg
+              {/* <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-6 w-6"
                 fill="none"
@@ -40,7 +40,7 @@ const NavbarAdmin = () => {
                   strokeWidth="2"
                   d="M20 4H4C2.89543 4 2 4.89543 2 6V18C2 19.1046 2.89543 20 4 20H20C21.1046 20 22 19.1046 22 18V6C22 4.89543 21.1046 4 20 4ZM20 8L12 13L4 8"
                 />
-              </svg>
+              </svg> */}
             </li>
             <div className="text-black user-profile flex">
               <div style={{ marginRight: "0.5rem", textAlign: "right" }}>
@@ -50,10 +50,10 @@ const NavbarAdmin = () => {
                 </ul>
               </div>
               {/* Profile Picture */}
-              <img
+              {/* <img
                 src="https://wac-cdn.atlassian.com/dam/jcr:ba03a215-2f45-40f5-8540-b2015223c918/Max-R_Headshot%20(1).jpg?cdnVersion=1605"
                 alt="User"
-              />
+              /> */}
               {/* User Profile Menu Dropdown */}
               {isUserProfileMenuOpen && (
                 <div

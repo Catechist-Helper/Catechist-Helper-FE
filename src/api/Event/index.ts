@@ -15,8 +15,9 @@ const request = axiosInstances.base;
 const ROOT_EVENT = "/events";
 
 // GET: Lấy danh sách tất cả events (page và size không bắt buộc)
-const getAllEvents = (page?: number, size?: number) => {
+const getAllEvents = (eventCategoryId?:string, page?: number, size?: number) => {
   const params = {
+    ...(eventCategoryId !== undefined && { eventCategoryId }),
     ...(page !== undefined && { page }),
     ...(size !== undefined && { size }),
   };

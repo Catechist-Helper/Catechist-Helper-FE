@@ -20,6 +20,8 @@ export const PATH_ADMIN = {
   grade_management: path(PATH_ROOT_ADMIN, '/grades'),
   class_management: path(PATH_ROOT_ADMIN, '/classes'),
   assign_catechist_to_grade: path(PATH_ROOT_ADMIN, '/grades/assign-catechists'),
+  admin_event_category_management: path(PATH_ROOT_ADMIN, '/event-categories'),
+  admin_event_management: path(PATH_ROOT_ADMIN, '/events'),
   admin_management_file: path(PATH_ROOT_ADMIN, '/files'),
           //----------
 

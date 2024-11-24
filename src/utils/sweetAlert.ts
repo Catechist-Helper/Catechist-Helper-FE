@@ -113,6 +113,26 @@ const sweetAlert = {
       html: `${html}`,
     })
   },
+  confirm: async function (
+    title: string,
+    text: string,
+    confirmButtonText: string = "Xác nhận",
+    cancelButtonText: string = "Hủy",
+    icon: "warning" | "info" | "question" | "success" | "error" = "warning"
+  ): Promise<boolean> {
+    const result = await Swal.fire({
+      title: title,
+      text: text,
+      icon: icon,
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: confirmButtonText,
+      cancelButtonText: cancelButtonText,
+    });
+
+    return result.isConfirmed; // Trả về true nếu người dùng nhấn "Xác nhận"
+  },
 };
 
 export default sweetAlert;
