@@ -132,6 +132,14 @@ export default function Router() {
           element: <ClassManagement />,
         },
         {
+          path: PATH_ADMIN.admin_event_category_management,
+          element: <AdminEventCategoryManagement />,
+        },
+        {
+          path: PATH_ADMIN.admin_event_management,
+          element: <AdminEventManagement />,
+        },
+        {
           path: PATH_ADMIN.assign_catechist_to_grade,
           element: <AssignCatechistToGrade />,
         },
@@ -287,6 +295,12 @@ const ClassManagement = Loadable(
 );
 const AssignCatechistToGrade = Loadable(
   lazy(() => import("../pages/admin/AssignCatechistToGrade/index"))
+);
+const AdminEventCategoryManagement = Loadable(
+  lazy(() => import("../pages/admin/EventCategory/index"))
+);
+const AdminEventManagement = Loadable(
+  lazy(() => import("../pages/admin/Event/index"))
 );
 const AdminFileManagement = Loadable(
   lazy(() => import("../pages/admin/File/index"))
