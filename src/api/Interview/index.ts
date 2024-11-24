@@ -6,7 +6,7 @@ const request = axiosInstances.base;
 const ROOT_INTERVIEW = "/interviews";
 
 // POST: Tạo mới một interview
-const createInterview = (data: { registrationId: string; meetingTime: string }) => {
+const createInterview = (data: { registrationId: string; meetingTime: string, interviewType: number }) => {
   return request.post<BasicResponse<any>>(`${ROOT_INTERVIEW}`, data);
 };
 
