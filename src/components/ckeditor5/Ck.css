@@ -8,14 +8,14 @@
 }
 
 .main-container {
-	font-family: 'Lato';
+	font-family: "Poppins", sans-serif;
 	width: fit-content;
 	margin-left: auto;
 	margin-right: auto;
 }
 
 .ck-content {
-	font-family: 'Lato';
+	font-family: "Poppins", sans-serif;
 	line-height: 1.6;
 	word-break: break-word;
 }
@@ -30,7 +30,7 @@
 }
 
 .ck-content h3.category {
-	font-family: 'Oswald';
+	font-family: "Poppins", sans-serif;
 	font-size: 20px;
 	font-weight: bold;
 	color: #555;
@@ -40,7 +40,7 @@
 }
 
 .ck-content h2.document-title {
-	font-family: 'Oswald';
+	font-family: "Poppins", sans-serif;
 	font-size: 50px;
 	font-weight: bold;
 	margin: 0;
@@ -49,7 +49,7 @@
 }
 
 .ck-content h3.document-subtitle {
-	font-family: 'Oswald';
+	font-family: "Poppins", sans-serif;
 	font-size: 20px;
 	color: #555;
 	margin: 0 0 1em;
@@ -80,7 +80,7 @@
 }
 
 .ck-content blockquote.side-quote {
-	font-family: 'Oswald';
+	font-family: "Poppins", sans-serif;
 	font-style: normal;
 	float: right;
 	width: 35%;
