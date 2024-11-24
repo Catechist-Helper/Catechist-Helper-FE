@@ -20,6 +20,10 @@ import { formatPhone } from "../../../utils/utils";
 import sweetAlert from "../../../utils/sweetAlert";
 import useAppContext from "../../../hooks/useAppContext";
 import { AccountRoleString } from "../../../enums/Account";
+import {
+  RegistrationProcessStatus,
+  RegistrationProcessTitle,
+} from "../../../enums/RegistrationProcess";
 
 const columns: GridColDef[] = [
   { field: "fullName", headerName: "Tên đầy đủ", width: 230 },
@@ -109,11 +113,6 @@ export default function RegistrationDataTable() {
 
   const [viewMode, setViewMode] = useState<"pending" | "rejected">("pending"); // Trạng thái xem hiện tại
 
-  console.log("====================================");
-  console.log(selectedAccounts);
-  console.log(accounts);
-  console.log("====================================");
-
   // Hàm fetch các đơn đăng ký
   const fetchRegistrations = async () => {
     try {
@@ -138,6 +137,8 @@ export default function RegistrationDataTable() {
         page,
         size
       );
+
+      console.log(data.data.items);
 
       // Lọc các đơn theo chế độ xem hiện tại
       const filteredRegistrations = data.data.items;
@@ -171,7 +172,6 @@ export default function RegistrationDataTable() {
   // Xử lý khi thay đổi các lựa chọn trong bảng
   const handleSelectionChange = (newSelectionModel: GridRowSelectionModel) => {
     setSelectedIds(newSelectionModel); // Cập nhật danh sách các ID được chọn
-    console.log("Selected IDs:", newSelectionModel);
   };
 
   // Hàm xóa các đơn đã chọn
@@ -201,15 +201,28 @@ export default function RegistrationDataTable() {
       enableLoading();
       setHasFunction(true);
       await Promise.all(
-        selectedIds.map((id) =>
-          registrationApi.updateRegistration(
+        selectedIds.map(async (id) => {
+          await registrationApi.updateRegistration(
             id.toString(),
             {
               status: RegistrationStatus.Rejected_Duyet_Don,
             },
             rejectedReason
-          )
-        )
+          );
+
+          let process = await interviewProcessApi.createInterviewProcess({
+            registrationId: id.toString(),
+            name: `${RegistrationProcessTitle.DUYET_DON}`,
+          });
+
+          await interviewProcessApi.updateInterviewProcess(
+            process.data.data.id,
+            {
+              name: `${RegistrationProcessTitle.DUYET_DON}`,
+              status: RegistrationProcessStatus.Rejected,
+            }
+          );
+        })
       );
       sweetAlert.alertSuccess("Từ chối đơn thành công", "", 1000, 21);
       setSelectedIds([]); // Clear lựa chọn sau khi thực hiện
@@ -221,6 +234,7 @@ export default function RegistrationDataTable() {
       sweetAlert.alertFailed("Có lỗi xảy ra khi từ chối đơn!", "", 1000, 23);
     } finally {
       disableLoading();
+      fetchRegistrations();
     }
   };
 
@@ -285,11 +299,17 @@ export default function RegistrationDataTable() {
       await interviewApi.createInterview({
         registrationId,
         meetingTime: meetingTime,
+        interviewType: 0,
       });
 
-      await interviewProcessApi.createInterviewProcess({
-        registrationId,
-        name: "Vòng duyệt đơn",
+      let process = await interviewProcessApi.createInterviewProcess({
+        registrationId: registrationId,
+        name: `${RegistrationProcessTitle.DUYET_DON}`,
+      });
+
+      await interviewProcessApi.updateInterviewProcess(process.data.data.id, {
+        name: `${RegistrationProcessTitle.DUYET_DON}`,
+        status: RegistrationProcessStatus.Approved,
       });
 
       sweetAlert.alertSuccess(
@@ -301,6 +321,7 @@ export default function RegistrationDataTable() {
       handleCloseModal();
       fetchRegistrations(); // Refresh registration data after scheduling
       setSelectedIds([]);
+      setMeetingTime("");
     } catch (error: any) {
       console.error("Lỗi khi xếp lịch phỏng vấn:", error);
       if (error && error.message) {
@@ -339,7 +360,6 @@ export default function RegistrationDataTable() {
               disabled={hasFunction}
               onClick={() => {
                 setViewMode("rejected");
-                fetchRegistrations();
               }}
             >
               Đơn bị từ chối
@@ -350,7 +370,6 @@ export default function RegistrationDataTable() {
               disabled={hasFunction}
               onClick={() => {
                 setViewMode("pending");
-                fetchRegistrations();
               }}
             >
               Đơn chờ duyệt

@@ -1,7 +1,12 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import registrationApi from "../../../api/Registration"; // Import API đã sửa để nhận FormData
+import interviewProcessApi from "../../../api/InterviewProcess";
 import Swal from "sweetalert2";
+import {
+  RegistrationProcessStatus,
+  RegistrationProcessTitle,
+} from "../../../enums/RegistrationProcess";
 
 const RegisterForm: React.FC = () => {
   const [step, setStep] = useState(1);
@@ -129,8 +134,19 @@ const RegisterForm: React.FC = () => {
         await registrationApi.createRegistration(formDataToSubmit);
       console.log("Registration Success", response);
       setSuccessMessage("Nộp đơn thành công!");
+      let process = await interviewProcessApi.createInterviewProcess({
+        registrationId: response.data.data.id,
+        name: RegistrationProcessTitle.NOP_HO_SO,
+      });
+      await interviewProcessApi.updateInterviewProcess(process.data.data.id, {
+        name: RegistrationProcessTitle.NOP_HO_SO,
+        status: RegistrationProcessStatus.Approved,
+      });
+      // await interviewProcessApi.createInterviewProcess({
+      //   registrationId: response.data.data.id,
+      //   name: RegistrationProcessTitle.DUYET_DON,
+      // });
       setTimeout(() => {
-        navigate("/");
         Swal.fire({
           icon: "success",
           title: `Nộp đơn đăng ký thành công`,
@@ -139,6 +155,8 @@ const RegisterForm: React.FC = () => {
           allowOutsideClick: false,
           confirmButtonColor: "green",
           confirmButtonText: "XÁC NHẬN",
+        }).then(() => {
+          navigate(-1);
         });
       }, 1000);
     } catch (error) {
