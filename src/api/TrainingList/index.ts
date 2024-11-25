@@ -18,19 +18,25 @@ const getById = (id: string) =>
     request.get(`${ROOT_TRAININGLIST}/${id}`);
 
 
-const createTrain = (previousLevel: string, nextLevel: string, startTime: string, endTime: string, trainingListStatus: number) =>
+const createTrain = (name: string, description: string, certificateId: string, previousLevelId: string, nextLevelId: string, startTime: string, endTime: string) =>
     request.post(`${ROOT_TRAININGLIST}`, {
-        previousLevel,
-        nextLevel,
+        name,
+        description,
+        certificateId,
+        previousLevelId,
+        nextLevelId,
         startTime,
         endTime,
-        trainingListStatus
+
     });
 
-const updateTrain = (id: string, previousLevel: string, nextLevel: string, startTime: string, endTime: string, trainingListStatus: number) =>
+const updateTrain = (id: string, name: string, description: string, certificateId: string, previousLevelId: string, nextLevelId: string, startTime: string, endTime: string, trainingListStatus:number) =>
     request.put(`${ROOT_TRAININGLIST}/${id}`, {
-        previousLevel,
-        nextLevel,
+        name,
+        description,
+        certificateId,
+        previousLevelId,
+        nextLevelId,
         startTime,
         endTime,
         trainingListStatus
@@ -39,14 +45,16 @@ const updateTrain = (id: string, previousLevel: string, nextLevel: string, start
 const deleteTrain = (id: string): Promise<AxiosResponse<any>> =>
     request.delete(`${ROOT_TRAININGLIST}/${id}`);
 
-
+const getCatechistsByTrainingListId = (id: string) =>
+    request.get(`${ROOT_TRAININGLIST}/${id}/catechists`);
 
 const trainApi = {
     getAllTrain,
     getById,
     createTrain,
     updateTrain,
-    deleteTrain
+    deleteTrain,
+    getCatechistsByTrainingListId
 };
 
 export default trainApi;

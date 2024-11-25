@@ -74,7 +74,7 @@ const ListAllPastoralYears: React.FC = () => {
             pastoralYearsApi
                 .deletePastoralYears(id)
                 .then(() => {
-                    console.log(`Năm niên khóa với ID: ${id} đã xóa thành công.`);
+                    console.log(`Năm niên khóa đã xóa thành công.`);
                     setPastoralYears(prevYears => prevYears.filter(y => y.id !== id));
                 })
                 .catch((err: Error) => {

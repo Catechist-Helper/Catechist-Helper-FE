@@ -36,14 +36,14 @@ const ListAllLevel: React.FC = () => {
     navigate(`/admin/update-levels/${id}`);
   };
 
-  
 
+  
   const handleDeleteLevelClick = (id: string): void => {
     if (window.confirm("Bạn có chắc là muốn xóa cấp bậc này không?")) {
         levelApi
         .deleteLevel(id)
         .then(() => {
-          console.log(`Level with ID: ${id} đã xóa thành công.`);
+          alert(`Level đã xóa thành công.`);
           window.location.reload();
         })
         .catch((err: Error) => {
@@ -88,7 +88,7 @@ const ListAllLevel: React.FC = () => {
                       <div className="text-dark text-decoration-none">{level.description}</div>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="text-dark text-decoration-none">{level.catechismLevel}</div>
+                      <div className="text-dark text-decoration-none">{level.hierarchyLevel}</div>
                     </td>
                     <td className="px-4 py-4 space-x-2">
                       <button

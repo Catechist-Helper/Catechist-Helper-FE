@@ -41,7 +41,7 @@ const ListAllPostCategory: React.FC = () => {
       postCategoryApi
         .deleteCategory(id)
         .then(() => {
-          console.log(`Category with ID: ${id} đã xóa thành công.`);
+          alert(`Category đã xóa thành công.`);
           window.location.reload();
         })
         .catch((err: Error) => {

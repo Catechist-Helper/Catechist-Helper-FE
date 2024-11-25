@@ -19,7 +19,7 @@ const CreateLevel: React.FC = () => {
         initialValues: {
             name: "",
             description: "",
-            catechismLevel: 0
+            hierarchyLevel: 0
         },
         onSubmit: async (values) => {
             setIsSubmitting(true);
@@ -27,7 +27,7 @@ const CreateLevel: React.FC = () => {
                 const response = await levelApi.createLevel(
                     values.name,
                     values.description,
-                    values.catechismLevel
+                    values.hierarchyLevel
                 );
                 
                
@@ -96,19 +96,19 @@ const CreateLevel: React.FC = () => {
                     </div>
                     <div className="mb-5">
                         <label
-                            htmlFor="catechismLevel"
+                            htmlFor="hierarchyLevel"
                             className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                         >
                             Cấp độ giáo lý
                         </label>
                         <input
-                            id="catechismLevel"
-                            name="catechismLevel"
+                            id="hierarchyLevel"
+                            name="hierarchyLevel"
                             type="number"
                             min="0"
                             className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                             onChange={formik.handleChange}
-                            value={formik.values.catechismLevel}
+                            value={formik.values.hierarchyLevel}
                         />
                     </div>
 
@@ -122,7 +122,7 @@ const CreateLevel: React.FC = () => {
                             {isSubmitting ? "Đang tạo" : "Tạo cấp bậc"}
                         </button>
                         <Link
-                            to={PATH_ADMIN.post_category}
+                            to={PATH_ADMIN.levels}
                             className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center ml-5"
                         >
                             Quay lại

@@ -43,7 +43,7 @@ const ListAllChristianNames: React.FC = () => {
       roomsApi
         .deleteRoom(id)
         .then(() => {
-          console.log(`Lớp với ID: ${id} đã xóa thành công.`);
+          alert(`Lớp học đã xóa thành công.`);
           window.location.reload();
         })
         .catch((err: Error) => {

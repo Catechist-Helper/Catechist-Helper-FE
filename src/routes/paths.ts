@@ -49,8 +49,11 @@ export const PATH_ADMIN = {
   update_levels: path(PATH_ROOT_ADMIN, '/update-levels/:id'),
   levels: path(PATH_ROOT_ADMIN, '/levels'),
   training_lists: path(PATH_ROOT_ADMIN, '/training-lists'),
+  training_catechist: path(PATH_ROOT_ADMIN, '/training-catechist'),
   create_training_lists: path(PATH_ROOT_ADMIN, '/create-training-lists'),
   update_training_lists: path(PATH_ROOT_ADMIN, '/update-training-lists/:id'),
+  create_certificates: path(PATH_ROOT_ADMIN, '/create-certificates'),
+  catechist_training: path(PATH_ROOT_ADMIN, '/training-list/:id/catechists'),
   //---------------------
 };
 
