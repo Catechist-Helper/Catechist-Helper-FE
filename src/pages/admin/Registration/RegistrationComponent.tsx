@@ -126,16 +126,24 @@ export default function RegistrationDataTable() {
           ? RegistrationStatus.Pending
           : RegistrationStatus.Rejected_Duyet_Don;
 
-      const page = paginationModel.page + 1; // Lấy số trang (MUI DataGrid sử dụng zero-based index)
-      const size = paginationModel.pageSize; // Lấy kích thước trang từ paginationModel
+      // const page = paginationModel.page + 1; // Lấy số trang (MUI DataGrid sử dụng zero-based index)
+      // const size = paginationModel.pageSize; // Lấy kích thước trang từ paginationModel
+
+      const firstResponse = await registrationApi.getAllRegistrations(
+        startDate,
+        endDate,
+        status,
+        1,
+        10000
+      );
 
       // Gọi API getAllRegistrations với các tham số cần thiết
       const { data } = await registrationApi.getAllRegistrations(
         startDate,
         endDate,
         status,
-        page,
-        size
+        1,
+        firstResponse.data.data.total
       );
 
       console.log(data.data.items);
@@ -159,6 +167,14 @@ export default function RegistrationDataTable() {
   if (element) {
     element.innerHTML = "Số hàng mỗi trang";
   }
+  const element2 = document.querySelector<HTMLElement>(
+    ".MuiTablePagination-displayedRows"
+  );
+  if (element2) {
+    let text = element2.innerHTML;
+    text = text.replace(/\bof\b/g, "trong");
+    element2.innerHTML = text;
+  }
 
   useEffect(() => {
     fetchRegistrations();
@@ -167,6 +183,14 @@ export default function RegistrationDataTable() {
   // Xử lý sự kiện khi thay đổi trang hoặc kích thước trang
   const handlePaginationChange = (newPaginationModel: GridPaginationModel) => {
     setPaginationModel(newPaginationModel); // Cập nhật model phân trang
+    const element2 = document.querySelector<HTMLElement>(
+      ".MuiTablePagination-displayedRows"
+    );
+    if (element2) {
+      let text = element2.innerHTML;
+      text = text.replace(/\bof\b/g, "trong");
+      element2.innerHTML = text;
+    }
   };
 
   // Xử lý khi thay đổi các lựa chọn trong bảng
@@ -206,6 +230,7 @@ export default function RegistrationDataTable() {
             id.toString(),
             {
               status: RegistrationStatus.Rejected_Duyet_Don,
+              note: `Lý do từ chối: ${rejectedReason}`,
             },
             rejectedReason
           );
@@ -440,9 +465,10 @@ export default function RegistrationDataTable() {
         <DataGrid
           rows={rows}
           columns={columns}
-          paginationMode="server"
+          paginationMode="client"
           rowCount={rowCount} // Đảm bảo rowCount là tổng số hàng từ server
           loading={loading}
+          initialState={{ pagination: { paginationModel } }}
           paginationModel={paginationModel}
           onPaginationModelChange={handlePaginationChange}
           pageSizeOptions={[8, 25, 50]} // Đặt pageSizeOptions đúng

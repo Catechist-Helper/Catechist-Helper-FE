@@ -15,6 +15,7 @@ import {
 } from "@mui/material";
 import eventApi from "../../../api/Event";
 import eventCategoryApi from "../../../api/EventCategory";
+import budgetTransactionApi from "../../../api/BudgetTransaction";
 import sweetAlert from "../../../utils/sweetAlert";
 import { EventItemResponse } from "../../../model/Response/Event";
 import { EventCategoryItemResponse } from "../../../model/Response/EventCategory";
@@ -29,7 +30,7 @@ const formatToDateInput = (isoString: string | undefined): string => {
 interface EventDialogProps {
   open: boolean;
   onClose: () => void;
-  event?: EventItemResponse | any; // null nếu thêm mới
+  event?: EventItemResponse | null; // null nếu thêm mới
   refresh: () => void; // Callback để làm mới danh sách
 }
 
@@ -139,9 +140,9 @@ const EventDialog: React.FC<EventDialogProps> = ({
         isPeriodic,
         isCheckedIn,
         address,
-        startTime: new Date(startTime).toISOString(), // Chuyển đổi về ISO trước khi gửi
-        endTime: new Date(endTime).toISOString(), // Chuyển đổi về ISO trước khi gửi
-        currentBudget: currentBudget,
+        startTime: new Date(startTime).toISOString(),
+        endTime: new Date(endTime).toISOString(),
+        current_budget: currentBudget,
         eventStatus: 0,
         eventCategoryId: selectedCategoryId,
       };
@@ -149,10 +150,29 @@ const EventDialog: React.FC<EventDialogProps> = ({
       if (event) {
         // Nếu chỉnh sửa
         await eventApi.updateEvent(event.id, dataToSend);
+        console.log(event);
+        if (event.current_budget != currentBudget) {
+          await budgetTransactionApi.createBudgetTransaction({
+            eventId: event.id,
+            fromBudget: event.current_budget,
+            toBudget: currentBudget,
+          });
+        }
         sweetAlert.alertSuccess("Cập nhật sự kiện thành công!", "", 1000, 22);
       } else {
         // Nếu thêm mới
-        await eventApi.createEvent(dataToSend);
+        console.log(dataToSend);
+        let newEvent = await eventApi.createEvent(dataToSend);
+        console.log({
+          eventId: newEvent.data.data.id,
+          fromBudget: 0,
+          toBudget: currentBudget,
+        });
+        await budgetTransactionApi.createBudgetTransaction({
+          eventId: newEvent.data.data.id,
+          fromBudget: 0,
+          toBudget: currentBudget,
+        });
         sweetAlert.alertSuccess("Thêm sự kiện mới thành công!", "", 1000, 22);
       }
       refresh(); // Làm mới danh sách sự kiện

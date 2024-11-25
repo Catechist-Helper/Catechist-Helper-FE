@@ -9,7 +9,7 @@ import { BasicResponse } from "../../../model/Response/BasicResponse";
 import CkEditor from "../../../components/ckeditor5/CkEditor";
 import { PostStatus } from "../../../enums/Post";
 import { PATH_ADMIN } from "../../../routes/paths";
-import axios from 'axios';
+import { getUserInfo } from "../../../utils/utils";
 
 interface UserLogin {
   id: string;
@@ -25,12 +25,12 @@ const CreatePost: React.FC = () => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const response = await axios.get('https://catechist-helper-api.azurewebsites.net/api/v1/accounts');
-        setUserLogin(response.data.data.items[0]);
+        let userLoggedin = getUserInfo();
+        setUserLogin(userLoggedin);
       } catch (error) {
-        console.error('Error fetching user info:', error);
+        console.error("Error fetching user info:", error);
       }
-    }
+    };
     fetchUser();
   }, []);
 
@@ -39,7 +39,10 @@ const CreatePost: React.FC = () => {
       .getAll(1, 5)
       .then((axiosRes: AxiosResponse) => {
         const res: BasicResponse = axiosRes.data;
-        if (res.statusCode.toString().trim().startsWith("2") && res.data.items) {
+        if (
+          res.statusCode.toString().trim().startsWith("2") &&
+          res.data.items
+        ) {
           setPostCategories(res.data.items);
         }
       })
@@ -57,6 +60,14 @@ const CreatePost: React.FC = () => {
     },
     onSubmit: async (values) => {
       setIsSubmitting(true);
+      console.log({
+        title: values.title,
+        content: values.content,
+        module: values.module,
+        accountId: "",
+        postCategoryId: values.postCategoryId,
+      });
+
       try {
         if (!userLogin || !userLogin.id) {
           console.error("Không tìm thấy thông tin người dùng.");
@@ -123,7 +134,8 @@ const CreatePost: React.FC = () => {
               <div className="border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400">
                 <CkEditor
                   data={formik.values.content}
-                  onChange={(data) => formik.setFieldValue('content', data)} />
+                  onChange={(data) => formik.setFieldValue("content", data)}
+                />
               </div>
             </div>
           </div>
@@ -144,7 +156,6 @@ const CreatePost: React.FC = () => {
               ))}
             </select>
           </div>
-
 
           <div className="mb-5">
             <label
@@ -181,7 +192,6 @@ const CreatePost: React.FC = () => {
           >
             Quay lại
           </Link>
-
         </form>
       </div>
     </AdminTemplate>

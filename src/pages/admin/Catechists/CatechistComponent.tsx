@@ -13,6 +13,7 @@ import { formatPhone } from "../../../utils/utils";
 import viVNGridTranslation from "../../../locale/MUITable";
 import sweetAlert from "../../../utils/sweetAlert";
 import { formatDate } from "../../../utils/formatDate";
+import CatechistDialog from "./CatechistDialog";
 
 const columns: GridColDef[] = [
   {
@@ -21,7 +22,11 @@ const columns: GridColDef[] = [
     width: 100,
     renderCell: (params) => (
       <img
-        src={params.row.imageUrl || "https://via.placeholder.com/150"}
+        src={
+          params.row.imageUrl && params.row.imageUrl != ""
+            ? params.row.imageUrl
+            : "https://via.placeholder.com/150"
+        }
         alt="Catechist"
         width="50"
         height="50"
@@ -102,6 +107,11 @@ export default function CatechistComponent() {
   });
   const [rowCount, setRowCount] = useState<number>(0);
   const [selectedIds] = useState<GridRowSelectionModel>([]);
+  const [openDialog, setOpenDialog] = useState<boolean>(false);
+
+  const handleAddCatechist = () => {
+    setOpenDialog(true);
+  };
 
   // Hàm fetch các catechist
   const fetchCatechists = async () => {
@@ -146,7 +156,15 @@ export default function CatechistComponent() {
       {/* Thêm nút Refresh ở đây */}
       <div className="my-2 flex justify-between mx-3">
         <div className="min-w-[10px]"></div>
-        <div className="">
+        <div className="flex gap-x-2">
+          <Button
+            onClick={handleAddCatechist} // Open dialog
+            variant="contained"
+            color="primary"
+            style={{ marginBottom: "16px" }}
+          >
+            Thêm giáo lý viên
+          </Button>
           <Button
             onClick={() => fetchCatechists()} // Gọi lại hàm fetchCatechists
             variant="contained"
@@ -172,7 +190,14 @@ export default function CatechistComponent() {
           border: 0,
         }}
         localeText={viVNGridTranslation}
-      />
+      />{" "}
+      {openDialog && (
+        <CatechistDialog
+          open={openDialog}
+          onClose={() => setOpenDialog(false)}
+          refresh={fetchCatechists}
+        />
+      )}
     </Paper>
   );
 }

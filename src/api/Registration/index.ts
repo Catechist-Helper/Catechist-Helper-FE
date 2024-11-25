@@ -32,10 +32,11 @@ const createRegistration = (data: FormData) => {
 };
 
 // PUT: Cập nhật thông tin của một registration (JSON, không có file)
-const updateRegistration = (id: string, data: { status: number; accounts?: string[] }, reason?: string) => {
+const updateRegistration = (id: string, data: { status: number; accounts?: string[], note?: string }, reason?: string,) => {
   const updateData = {
     status: data.status,
-    ...(reason && { reason }),
+    ...(reason && { reason: reason }),
+    ...(data.note && { note: data.note }),
     ...(data.accounts && { accounts: data.accounts }), // Chỉ thêm accounts nếu có
   };
   

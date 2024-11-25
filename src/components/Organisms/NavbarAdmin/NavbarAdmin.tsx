@@ -46,7 +46,7 @@ const NavbarAdmin = () => {
               <div style={{ marginRight: "0.5rem", textAlign: "right" }}>
                 <ul style={{ listStyle: "none", padding: 0 }}>
                   <li style={{ fontWeight: "600" }}>Admin</li>
-                  <li>Role: Admin</li>
+                  <li>Vai trò: Admin</li>
                 </ul>
               </div>
               {/* Profile Picture */}

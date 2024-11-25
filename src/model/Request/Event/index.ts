@@ -7,7 +7,7 @@ export interface CreateEventRequest {
   address: string;
   startTime: string; // ISO format
   endTime: string; // ISO format
-  currentBudget: number;
+  current_budget: number;
   eventStatus: number;
   eventCategoryId: string;
 }
