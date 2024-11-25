@@ -5,21 +5,39 @@ import trainApi from "../../../api/TrainingList";
 import AdminTemplate from "../../../components/Templates/AdminTemplate/AdminTemplate";
 import { PATH_ADMIN } from "../../../routes/paths";
 import sweetAlert from "../../../utils/sweetAlert";
+import levelApi from "../../../api/Level";
+import { AxiosResponse } from "axios";
+import { BasicResponse } from "../../../model/Response/BasicResponse";
 import { trainingListStatus } from "../../../enums/TrainingList";
 import { message } from "antd";
 const UpdateTrain: React.FC = () => {
     const { id } = useParams<{ id: string }>();
+    const [levels, setLevels] = useState<any[]>([]);
+    const [levelMap, setLevelMap] = useState<{ [key: string]: string }>({});
     console.log(id);
     const navigate = useNavigate();
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [certificates, setCertificates] = useState<any[]>([]);
+
+    const fetchCertificatesByNextLevel = async (nextLevelId: string) => {
+        try {
+          const res = await levelApi.certificatesByLevelId(nextLevelId);
+          setCertificates(res.data.data.items || []);
+        } catch (error) {
+          console.error("Error fetching certificates:", error);
+        }
+      };
 
     const formik = useFormik({
         initialValues: {
-            previousLevel: "",
-            nextLevel: "",
+            name:"",
+            description: "",
+            certificateId: "",
+            previousLevelId: "",
+            nextLevelId: "",
             startTime: "",
             endTime: "",
-            trainingListStatus: trainingListStatus.START
+            trainingListStatus: trainingListStatus.Training
         },
 
         onSubmit: async (values) => {
@@ -27,8 +45,11 @@ const UpdateTrain: React.FC = () => {
             try {
                 const response = await trainApi.updateTrain(
                     id!,
-                    values.previousLevel,
-                    values.nextLevel,
+                    values.name,
+                    values.description,
+                    values.certificateId,
+                    values.previousLevelId,
+                    values.nextLevelId,
                     values.startTime,
                     values.endTime,
                     values.trainingListStatus
@@ -70,8 +91,13 @@ const UpdateTrain: React.FC = () => {
                 const train = response.data;
 
                 formik.setValues({
-                    previousLevel: train.data.previousLevel,
-                    nextLevel: train.data.nextLevel,
+                    name: train.data.name,
+                    description: train.data.description,
+                    certificateId: train.data.certificateId,
+                    previousLevelId: train.previousLevel?.hierarchyLevel 
+                    ? `Cấp ${train.previousLevel.hierarchyLevel}` 
+                    : levelMap[train.data.previousLevelId] || "Không xác định",
+                    nextLevelId: train.data.nextLevelId,
                     startTime: train.data.startTime,
                     endTime: train.data.endTime,
                     trainingListStatus: train.data.trainingListStatus,
@@ -86,41 +112,156 @@ const UpdateTrain: React.FC = () => {
 
         fetchTrain();
     }, [id]);
+
+    useEffect(() => {
+        levelApi
+            .getAllLevel()
+            .then((axiosRes: AxiosResponse) => {
+                const res: BasicResponse = axiosRes.data;
+                if (res.statusCode.toString().trim().startsWith("2") && res.data.items != null) {
+                    setLevels(res.data.items);
+                    const map: { [key: string]: string } = {};
+                    res.data.items.forEach((level: any) => {
+                        map[level.id] = level.name;
+                    });
+                    setLevelMap(map);
+                }
+            })
+            .catch((err) => {
+                console.error("Không thấy danh mục: ", err);
+            });
+    }, []);
+
+    const handlePreviousLevelChange = (
+        e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+      ) => {
+        const previousLevelId = e.target.value;
+        const selectedLevel = levels.find((level) => level.id === previousLevelId);
+    
+        if (selectedLevel) {
+          const currentHierarchyLevel = selectedLevel.hierarchyLevel;
+          const nextLevel = levels.find(
+            (level) => level.hierarchyLevel === currentHierarchyLevel + 1
+          );
+    
+          formik.setFieldValue("previousLevelId", previousLevelId);
+          formik.setFieldValue("nextLevelId", nextLevel ? nextLevel.id : "");
+    
+          if (nextLevel) {
+            fetchCertificatesByNextLevel(nextLevel.id);
+          } else {
+            setCertificates([]);
+          }
+        } else {
+          formik.setFieldValue("previousLevelId", "");
+          formik.setFieldValue("nextLevelId", "");
+          setCertificates([]);
+        }
+      };
+
     return (
         <AdminTemplate>
             <div>
                 <h3 className="text-center pt-10 fw-bold">TẠO DANH SÁCH ĐÀO TẠO</h3>
                 <form onSubmit={formik.handleSubmit} className="max-w-sm mx-auto mt-5">
-                    <div className="mb-5">
+                <div className="mb-5">
                         <label
-                            htmlFor="previousLevel"
+                            htmlFor="name"
                             className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                         >
-                            Bậc cấp trước
+                            Tên
                         </label>
                         <input
-                            id="previousLevel"
-                            name="previousLevel"
+                            id="name"
+                            name="name"
                             type="text"
                             className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                             onChange={formik.handleChange}
-                            value={formik.values.previousLevel}
+                            value={formik.values.name}
                         />
                     </div>
                     <div className="mb-5">
                         <label
-                            htmlFor="nextLevel"
+                            htmlFor="description"
+                            className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                        >
+                            Mô tả
+                        </label>
+                        <input
+                            id="description"
+                            name="description"
+                            type="text"
+                            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                            onChange={formik.handleChange}
+                            value={formik.values.description}
+                        />
+                    </div>
+                    <div className="mb-5">
+                        <label
+                            htmlFor="certificateId"
+                            className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                        >
+                            Chứng chỉ
+                        </label>
+                        <select
+                            id="certificateId"
+                            name="certificateId"
+                            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                            onChange={formik.handleChange}
+                            value={formik.values.certificateId}
+                        >
+                            <option value="">Chọn chứng chỉ</option>
+                            {certificates.map((certificate: any) => (
+                                <option key={certificate.id} value={certificate.id}>
+                                    {certificate.name} - {levelMap[certificate.levelId]} {/* Hiển thị tên cấp */}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                    <div className="mb-5">
+                        <label
+                            htmlFor="previousLevelId"
+                            className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                        >
+                            Bậc cấp trước
+                        </label>
+                        <select
+                            id="previousLevelId"
+                            name="previousLevelId"
+                            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                            onChange={handlePreviousLevelChange}
+                            value={formik.values.previousLevelId}
+                        >
+                            <option value="" disabled>Chọn cấp độ</option>
+                            {levels.map((level: any) => (
+                                <option key={level.id} value={level.id}>
+                                    {level.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                    <div className="mb-5">
+                        <label
+                            htmlFor="nextLevelId"
                             className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                         >
                             Bậc cấp tiếp theo
                         </label>
                         <input
-                            id="nextLevel"
-                            name="nextLevel"
+                            id="nextLevelId"
+                            name="nextLevelId"
                             type="text"
                             className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                            onChange={formik.handleChange}
-                            value={formik.values.nextLevel}
+                            value={
+                                formik.values.previousLevelId
+                                    ? levels.find(
+                                        (level: any) =>
+                                            level.hierarchyLevel ===
+                                            levels.find((prev: any) => prev.id === formik.values.previousLevelId)?.hierarchyLevel + 1
+                                    )?.name || "Không có cấp tiếp theo"
+                                    : "Vui lòng chọn cấp trước"
+                            }
+                            readOnly
                         />
                     </div>
                     <div className="mb-5">
@@ -166,9 +307,9 @@ const UpdateTrain: React.FC = () => {
                                 <input
                                     type="radio"
                                     name="trainingListStatus"
-                                    value={trainingListStatus.START}
-                                    checked={formik.values.trainingListStatus === trainingListStatus.START}
-                                    onChange={() => formik.setFieldValue('trainingListStatus', trainingListStatus.START)}
+                                    value={trainingListStatus.Training}
+                                    checked={formik.values.trainingListStatus === trainingListStatus.Training}
+                                    onChange={() => formik.setFieldValue('trainingListStatus', trainingListStatus.Training)}
                                     className="w-4 h-4 text-blue-600"
                                 />
                                 <label className="ml-2">Đào tạo</label>
@@ -177,9 +318,9 @@ const UpdateTrain: React.FC = () => {
                                 <input
                                     type="radio"
                                     name="trainingListStatus"
-                                    value={trainingListStatus.FINISH}
-                                    checked={formik.values.trainingListStatus === trainingListStatus.FINISH}
-                                    onChange={() => formik.setFieldValue('trainingListStatus', trainingListStatus.FINISH)}
+                                    value={trainingListStatus.Finished}
+                                    checked={formik.values.trainingListStatus === trainingListStatus.Finished}
+                                    onChange={() => formik.setFieldValue('trainingListStatus', trainingListStatus.Finished)}
                                     className="w-4 h-4 text-blue-600"
                                 />
                                 <label className="ml-2">Kết thúc</label>

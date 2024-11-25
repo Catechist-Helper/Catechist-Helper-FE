@@ -44,7 +44,7 @@ const ListAllChristianNames: React.FC = () => {
       christianNamesApi
         .deleteChristianNames(id)
         .then(() => {
-          console.log(`Tên Thánh với ID: ${id} đã xóa thành công.`);
+          alert(`Tên Thánh đã xóa thành công.`);
           window.location.reload();
         })
         .catch((err: Error) => {

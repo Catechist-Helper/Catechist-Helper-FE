@@ -76,7 +76,7 @@ const HomePost: React.FC = () => {
       postsApi
         .deletePosts(id)
         .then(() => {
-          console.log(`Post with ID: ${id} đã xóa thành công.`);
+          alert(`Post đã xóa thành công!`);
           window.location.reload();
         })
         .catch((err: Error) => {
@@ -151,7 +151,7 @@ const HomePost: React.FC = () => {
                 <th scope="col" className="px-6 py-3">Tiêu đề</th>
                 <th scope="col" className="px-6 py-3">Nội dung</th>
                 <th scope="col" className="px-6 py-3">Module</th>
-                {/* <th scope="col" className="px-6 py-3">Người đăng</th> */}
+                <th scope="col" className="px-6 py-3">Ngày đăng</th>
                 <th scope="col" className="px-6 py-3">Danh mục</th>
                 <th scope="col" className="px-6 py-3">Action</th>
               </tr>
@@ -175,6 +175,7 @@ const HomePost: React.FC = () => {
                       </td>
 
                       <td className="px-6 py-4">{isPost.module}</td>
+                      <td className="px-6 py-4">{new Date(isPost.createdAt).toLocaleDateString()}</td> 
                       <td className="px-6 py-4">{category ? category.name : 'Không có danh mục'}</td>
                       <td>
                         <button onClick={() => handleEditPostClick(isPost.id)} className="btn btn-info">

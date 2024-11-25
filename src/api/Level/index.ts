@@ -18,29 +18,33 @@ const getById = (id: string) =>
     request.get(`${ROOT_LEVEL}/${id}`);
 
 
-const createLevel = (name: string, description: string, catechismLevel: number) =>
+const createLevel = (name: string, description: string, hierarchyLevel: number) =>
     request.post(`${ROOT_LEVEL}`, {
         name, 
         description,
-        catechismLevel
+        hierarchyLevel
     });
 
-const updateLevel = (id: string, name: string, description: string, catechismLevel: number) =>
+const updateLevel = (id: string, name: string, description: string, hierarchyLevel: number) =>
     request.put(`${ROOT_LEVEL}/${id}`, {
         name, 
         description,
-        catechismLevel
+        hierarchyLevel
     });
     
 const deleteLevel = (id: string): Promise<AxiosResponse<any>> =>
         request.delete(`${ROOT_LEVEL}/${id}`);
+
+const certificatesByLevelId = (id: string) =>
+    request.get(`${ROOT_LEVEL}/${id}/certificates`);
 
 const levelApi = {
     getAllLevel,
     getById,
     createLevel,
     updateLevel,
-    deleteLevel
+    deleteLevel,
+    certificatesByLevelId
 };
 
 export default levelApi;

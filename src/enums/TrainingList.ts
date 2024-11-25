@@ -1,10 +1,12 @@
 export enum trainingListStatus {
-    START = 0, 
-    FINISH = 1, 
+    NotStarted = 0,
+    Training = 1, 
+    Finished = 2, 
   }
   
   export const trainingListStatusLabel: { [key in trainingListStatus]: string } = {
-    [trainingListStatus.START]: "Đào tạo",
-    [trainingListStatus.FINISH]: "Kết thúc",
+    [trainingListStatus.NotStarted]: "Chưa bắt đầu",
+    [trainingListStatus.Training]: "Đào tạo",
+    [trainingListStatus.Finished]: "Kết thúc",
   };
   

@@ -26,6 +26,8 @@ import CreateLevel from "../pages/admin/Level/CreateLevel";
 import UpdateLevel from "../pages/admin/Level/UpdateLevel";
 import CreateTrain from "../pages/admin/TrainingList/CreateTrain";
 import UpdateTrain from "../pages/admin/TrainingList/UpdateTrain";
+import ListAllCatechistByLevel from "../pages/admin/TrainingList/ListAllCatechistByLevel";
+import CreateCertificate from "../pages/admin/Certificate/CreateCertificate";
 // path
 
 // ----------------------------------------------------------------------
@@ -217,12 +219,24 @@ export default function Router() {
           element: <HomeTrain />,
         },
         {
+          path: PATH_ADMIN.training_catechist,
+          element: <ListAllCatechistByLevel />,
+        },
+        {
           path: PATH_ADMIN.create_training_lists,
           element: <CreateTrain />,
         },
         {
           path: PATH_ADMIN.update_training_lists,
           element: <UpdateTrain />,
+        },
+        {
+          path: PATH_ADMIN.create_certificates,
+          element: <CreateCertificate />,
+        },
+        {
+          path: PATH_ADMIN.catechist_training,
+          element: <ListAllTrainCatechist />,
         },
       ],
     },
@@ -261,6 +275,7 @@ const CatechistManagement = Loadable(
 // Chị Tâm
 const HomePost = Loadable(lazy(() => import("../pages/admin/posts/HomePost")));
 import RegisterForm from "./../pages/admin/Registration/RegisterForm";
+import ListAllTrainCatechist from "../pages/admin/TrainingList/ListAllTrainCatechist";
 const HomeChristianName = Loadable(
   lazy(() => import("../pages/admin/ChristianName/HomeChristianName"))
 );
