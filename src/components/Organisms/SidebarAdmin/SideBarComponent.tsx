@@ -63,7 +63,7 @@ const SideBarComponent = () => {
               />
             </div>
             <ul className="mt-6 space-y-2 tracking-wide">
-              <li className="min-w-max">
+              {/* <li className="min-w-max">
                 <div
                   onClick={() => {
                     // navigateTo(PATH_MAIN.dashboard);
@@ -105,6 +105,48 @@ const SideBarComponent = () => {
                       ></path>
                     </svg>
                     <span className="-mr-1 font-medium">Dashboard</span>
+                  </Link>
+                </div>
+              </li> */}
+              <li className="min-w-max">
+                <div
+                  onClick={() => {
+                    // navigateTo(PATH_MAIN.supplier);
+                  }}
+                  //   className={`links_hover ${
+                  //     typeof window !== "undefined" &&
+                  //     isActive(PATH_MAIN.supplier)
+                  //       ? "active_current_link"
+                  //       : ""
+                  //   }`}
+                >
+                  <Link
+                    style={{
+                      opacity: `${isHovered ? "1" : "0"}`,
+                      transition: "all ease 0.2s",
+                    }}
+                    to={PATH_ADMIN.catechist_management}
+                    className="relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-primary_color hover:to-amber-600 px-4 py-3 hover:text-white"
+                  >
+                    <svg
+                      style={{ display: "none" }}
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        className="fill-current text-gray-600 group-hover:text-cyan-600"
+                        d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z"
+                      />
+                      <path
+                        className="fill-current text-gray-300 group-hover:text-cyan-300"
+                        d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z"
+                      />
+                    </svg>
+                    <span className="group-hover:text-gray-700">
+                      Giáo lý viên
+                    </span>
                   </Link>
                 </div>
               </li>
@@ -270,48 +312,6 @@ const SideBarComponent = () => {
                       />
                     </svg>
                     <span className="group-hover:text-gray-700">Phỏng vấn</span>
-                  </Link>
-                </div>
-              </li>
-              <li className="min-w-max">
-                <div
-                  onClick={() => {
-                    // navigateTo(PATH_MAIN.supplier);
-                  }}
-                  //   className={`links_hover ${
-                  //     typeof window !== "undefined" &&
-                  //     isActive(PATH_MAIN.supplier)
-                  //       ? "active_current_link"
-                  //       : ""
-                  //   }`}
-                >
-                  <Link
-                    style={{
-                      opacity: `${isHovered ? "1" : "0"}`,
-                      transition: "all ease 0.2s",
-                    }}
-                    to={PATH_ADMIN.catechist_management}
-                    className="relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-primary_color hover:to-amber-600 px-4 py-3 hover:text-white"
-                  >
-                    <svg
-                      style={{ display: "none" }}
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-5 w-5"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                    >
-                      <path
-                        className="fill-current text-gray-600 group-hover:text-cyan-600"
-                        d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z"
-                      />
-                      <path
-                        className="fill-current text-gray-300 group-hover:text-cyan-300"
-                        d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z"
-                      />
-                    </svg>
-                    <span className="group-hover:text-gray-700">
-                      Giáo lý viên
-                    </span>
                   </Link>
                 </div>
               </li>

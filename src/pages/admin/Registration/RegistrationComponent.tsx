@@ -24,6 +24,8 @@ import {
   RegistrationProcessStatus,
   RegistrationProcessTitle,
 } from "../../../enums/RegistrationProcess";
+import { RoleNameEnum } from "../../../enums/RoleEnum";
+import RegistrationDetailDialog from "../ApprovedRegistration/RegistrationDetailDialog";
 
 const columns: GridColDef[] = [
   { field: "fullName", headerName: "Tên đầy đủ", width: 230 },
@@ -110,6 +112,8 @@ export default function RegistrationDataTable() {
   const [selectedRegistration, setSelectedRegistration] =
     useState<RegistrationItemResponse | null>(null);
   const [rejectedReason, setRejectedReason] = useState<string>("");
+  const [openDialogRegisDetail, setOpenDialogRegisDetail] =
+    useState<boolean>(false);
 
   const [viewMode, setViewMode] = useState<"pending" | "rejected">("pending"); // Trạng thái xem hiện tại
 
@@ -266,8 +270,12 @@ export default function RegistrationDataTable() {
   // Fetch Account data
   const fetchAccounts = async () => {
     try {
-      const { data } = await accountApi.getAllAccounts();
-      setAccounts(data.data.items);
+      const { data } = await accountApi.getAllAccounts(1, 10000);
+      setAccounts(
+        data.data.items.filter(
+          (item: any) => item.role.roleName == RoleNameEnum.Catechist
+        )
+      );
     } catch (error) {
       console.error("Lỗi khi tải danh sách accounts:", error);
     }
@@ -407,7 +415,7 @@ export default function RegistrationDataTable() {
               {selectedIds.length <= 1 ? (
                 <>
                   <button
-                    className="mx-1 btn btn-primary"
+                    className="ml-1 btn btn-primary"
                     disabled={hasFunction}
                     onClick={() => {
                       handleOpenModal();
@@ -419,7 +427,7 @@ export default function RegistrationDataTable() {
                   {viewMode != "rejected" ? (
                     <>
                       <button
-                        className="mx-1 btn btn-danger"
+                        className="ml-1 btn btn-danger"
                         onClick={() => {
                           handleOpenModalRejected();
                         }}
@@ -444,6 +452,18 @@ export default function RegistrationDataTable() {
               >
                 Xóa đơn
               </button> */}
+            </>
+          ) : (
+            <></>
+          )}
+          {selectedIds.length == 1 ? (
+            <>
+              <button
+                className="btn btn-info ml-1"
+                onClick={() => setOpenDialogRegisDetail(true)}
+              >
+                Xem chi tiết
+              </button>
             </>
           ) : (
             <></>
@@ -660,6 +680,17 @@ export default function RegistrationDataTable() {
           </div>
         </div>
       </Modal>
+      {openDialogRegisDetail ? (
+        <>
+          <RegistrationDetailDialog
+            open={openDialogRegisDetail}
+            onClose={() => setOpenDialogRegisDetail(false)}
+            id={selectedIds[0].toString()}
+          />
+        </>
+      ) : (
+        <></>
+      )}
     </Paper>
   );
 }

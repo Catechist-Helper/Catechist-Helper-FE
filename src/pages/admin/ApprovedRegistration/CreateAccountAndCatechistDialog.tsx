@@ -27,6 +27,7 @@ import {
   RegistrationProcessStatus,
   RegistrationProcessTitle,
 } from "../../../enums/RegistrationProcess";
+import useAppContext from "../../../hooks/useAppContext";
 
 interface CreateAccountAndCatechistDialogProps {
   open: boolean;
@@ -59,6 +60,7 @@ const CreateAccountAndCatechistDialog: React.FC<
   const [levels, setLevels] = useState([]);
   const [selectedChristianNameId, setSelectedChristianNameId] = useState(null);
   const [selectedLevelId, setSelectedLevelId] = useState(null);
+  const { enableLoading, disableLoading } = useAppContext();
 
   useEffect(() => {
     // Điền dữ liệu từ hàng được chọn
@@ -179,6 +181,7 @@ const CreateAccountAndCatechistDialog: React.FC<
     }
 
     try {
+      enableLoading();
       const generateRandomPassword = (): string => {
         const upperCaseChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         const lowerCaseChars = "abcdefghijklmnopqrstuvwxyz";
@@ -220,7 +223,7 @@ const CreateAccountAndCatechistDialog: React.FC<
 
       // Tạo tài khoản
       const accountFormData = new FormData();
-      accountFormData.append("email", "abc@gmail.com");
+      accountFormData.append("email", "abwktba@gmail.com");
       accountFormData.append("password", password);
       accountFormData.append("fullName", formData.fullName);
       accountFormData.append("gender", formData.gender);
@@ -267,13 +270,13 @@ const CreateAccountAndCatechistDialog: React.FC<
 
       let processRes = await interviewProcessApi.createInterviewProcess({
         registrationId: registrationItem.id,
-        name: RegistrationProcessTitle.NOP_HO_SO,
+        name: RegistrationProcessTitle.TAO_TAI_KHOAN,
       });
 
       await interviewProcessApi.updateInterviewProcess(
         processRes.data.data.id,
         {
-          name: RegistrationProcessTitle.NOP_HO_SO,
+          name: RegistrationProcessTitle.TAO_TAI_KHOAN,
           status: RegistrationProcessStatus.Approved,
         }
       );
@@ -283,6 +286,8 @@ const CreateAccountAndCatechistDialog: React.FC<
     } catch (error) {
       console.error("Lỗi khi tạo tài khoản và giáo lý viên:", error);
       sweetAlert.alertFailed("Không thể thêm giáo lý viên!", "", 1000, 22);
+    } finally {
+      disableLoading();
     }
   };
 
