@@ -21,7 +21,7 @@ const ListAllTrainCatechist: React.FC = () => {
 
   const handleGoBack = () => {
     navigate(-1);
- };
+  };
   // Fetch all catechists and training details
   const fetchCatechists = async () => {
     try {
@@ -33,6 +33,7 @@ const ListAllTrainCatechist: React.FC = () => {
 
       setTrainingStartDate(startDate);
       setTrainingEndDate(endDate);
+      console.log(trainingEndDate);
 
       // Fetch catechists in the training list
       const response = await trainApi.getCatechistsByTrainingListId(id!);
@@ -45,13 +46,15 @@ const ListAllTrainCatechist: React.FC = () => {
       const now = new Date();
 
       // Filter catechists based on status and training dates
-      const filteredCatechists = fetchedCatechists.filter((catechist: Catechist) => {
-        if (now < startDate && catechist.status === 2) {
-          // Remove Failed catechists before training starts
-          return false;
+      const filteredCatechists = fetchedCatechists.filter(
+        (catechist: Catechist) => {
+          if (now < startDate && catechist.status === 2) {
+            // Remove Failed catechists before training starts
+            return false;
+          }
+          return true; // Keep all other catechists
         }
-        return true; // Keep all other catechists
-      });
+      );
 
       setCatechists(filteredCatechists);
     } catch (error) {
@@ -66,7 +69,9 @@ const ListAllTrainCatechist: React.FC = () => {
     // Ngăn không cho đổi trạng thái thành Completed trước ngày bắt đầu
     if (trainingStartDate && now < trainingStartDate && newStatus === 1) {
       console.error("Cannot set status to 'Completed' before training starts.");
-      alert("Không thể đặt trạng thái thành 'Hoàn thành' trước khi khóa đào tạo bắt đầu.");
+      alert(
+        "Không thể đặt trạng thái thành 'Hoàn thành' trước khi khóa đào tạo bắt đầu."
+      );
       return;
     }
 
@@ -77,7 +82,9 @@ const ListAllTrainCatechist: React.FC = () => {
       console.log("Status updated successfully.");
 
       const updatedCatechists = catechists.map((catechist) =>
-        catechist.id === catechistId ? { ...catechist, status: newStatus } : catechist
+        catechist.id === catechistId
+          ? { ...catechist, status: newStatus }
+          : catechist
       );
 
       // Áp dụng bộ lọc sau khi cập nhật
@@ -93,7 +100,6 @@ const ListAllTrainCatechist: React.FC = () => {
       console.error("Error updating status:", error);
     }
   };
-
 
   // Fetch catechists when the component mounts or when the training ID changes
   useEffect(() => {
@@ -130,19 +136,21 @@ const ListAllTrainCatechist: React.FC = () => {
                           )
                         }
                       >
-                        {Object.entries(catechistInTrainingStatusLabel).map(([key, label]) => (
-                          <option
-                            key={key}
-                            value={key}
-                            disabled={
-                              !!trainingStartDate && // Chuyển trainingStartDate thành boolean
-                              new Date() < trainingStartDate &&
-                              parseInt(key, 10) === 1 // Vô hiệu hóa tùy chọn Completed trước khi đào tạo bắt đầu
-                            }
-                          >
-                            {label}
-                          </option>
-                        ))}
+                        {Object.entries(catechistInTrainingStatusLabel).map(
+                          ([key, label]) => (
+                            <option
+                              key={key}
+                              value={key}
+                              disabled={
+                                !!trainingStartDate && // Chuyển trainingStartDate thành boolean
+                                new Date() < trainingStartDate &&
+                                parseInt(key, 10) === 1 // Vô hiệu hóa tùy chọn Completed trước khi đào tạo bắt đầu
+                              }
+                            >
+                              {label}
+                            </option>
+                          )
+                        )}
                       </select>
                     </td>
                   </tr>
