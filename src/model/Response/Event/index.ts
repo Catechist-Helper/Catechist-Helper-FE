@@ -8,9 +8,10 @@ export interface EventItemResponse {
   address: string;
   startTime: string;
   endTime: string;
-  currentBudget: number;
+  current_budget: number;
   eventStatus: number;
   eventCategoryId: string;
+  eventCategory?: any;
 }
 
 export interface EventResponse {

@@ -186,7 +186,7 @@ const RegisterForm: React.FC = () => {
   };
 
   return (
-    <div className="max-w-lg mx-auto">
+    <div className="w-full px-40 mt-5 mb-5">
       <h2 className="text-center text-2xl font-bold mb-5">
         Đăng kí ứng tuyển Huynh Trưởng - Giáo Lý Viên
       </h2>
@@ -312,13 +312,24 @@ const RegisterForm: React.FC = () => {
               )}
             </div>
 
-            <button
-              type="button"
-              onClick={nextStep}
-              className="text-white bg-blue-500 px-4 py-2 rounded-lg"
-            >
-              Tiếp theo
-            </button>
+            <div className="w-full flex justify-between">
+              <button
+                type="button"
+                onClick={() => {
+                  navigate(-1);
+                }}
+                className="text-white bg-gray-500 px-4 py-2 rounded-lg"
+              >
+                Hủy bỏ
+              </button>
+              <button
+                type="button"
+                onClick={nextStep}
+                className="text-white bg-blue-500 px-4 py-2 rounded-lg"
+              >
+                Tiếp theo
+              </button>
+            </div>
           </>
         )}
 
@@ -429,7 +440,7 @@ const RegisterForm: React.FC = () => {
             </div>
 
             {/* Ghi chú */}
-            <div className="mb-3">
+            {/* <div className="mb-3">
               <label className="block mb-1 text-sm font-medium">
                 Ghi chú thêm{" "}
               </label>
@@ -439,21 +450,23 @@ const RegisterForm: React.FC = () => {
                 onChange={handleChange}
                 className="block w-full p-2 border border-gray-300 rounded-lg"
               />
-            </div>
+            </div> */}
 
-            <button
-              type="button"
-              onClick={prevStep}
-              className="text-white bg-gray-500 px-4 py-2 rounded-lg"
-            >
-              Quay lại bước trước
-            </button>
-            <button
-              type="submit"
-              className="text-white bg-green-500 px-4 py-2 rounded-lg"
-            >
-              Nộp đơn ứng tuyển
-            </button>
+            <div className="w-full flex justify-between">
+              <button
+                type="button"
+                onClick={prevStep}
+                className="text-white bg-gray-500 px-4 py-2 rounded-lg"
+              >
+                Quay lại bước trước
+              </button>
+              <button
+                type="submit"
+                className="text-white bg-green-500 px-4 py-2 rounded-lg"
+              >
+                Nộp đơn ứng tuyển
+              </button>
+            </div>
           </>
         )}
       </form>

@@ -28,6 +28,12 @@ import sweetAlert from "../../../utils/sweetAlert";
 import { formatDate } from "../../../utils/formatDate";
 import { AccountRoleString } from "../../../enums/Account";
 import useAppContext from "../../../hooks/useAppContext";
+import CreateAccountAndCatechistDialog from "./CreateAccountAndCatechistDialog";
+import {
+  RegistrationProcessStatus,
+  RegistrationProcessTitle,
+} from "../../../enums/RegistrationProcess";
+// import { RegistrationProcessTitle } from "../../../enums/RegistrationProcess";
 
 // Cấu hình các cột trong DataGrid
 const columns: GridColDef[] = [
@@ -75,6 +81,20 @@ const columns: GridColDef[] = [
         .join(", ");
     },
   },
+
+  {
+    field: "note",
+    headerName: "Ghi chú",
+    width: 200,
+  },
+  {
+    field: "interviews",
+    headerName: "Kết quả phỏng vấn",
+    width: 200,
+    renderCell: (params) => {
+      return params.row.interviews[0]?.note || ""; // Hiển thị ghi chú nếu có
+    },
+  },
   {
     field: "status",
     headerName: "Trạng thái",
@@ -111,14 +131,6 @@ const columns: GridColDef[] = [
     //     </span>
     //   );
     // },
-  },
-  {
-    field: "interviews",
-    headerName: "Ghi chú kết quả",
-    width: 200,
-    renderCell: (params) => {
-      return params.row.interviews[0]?.note || ""; // Hiển thị ghi chú nếu có
-    },
   },
 ];
 
@@ -160,6 +172,7 @@ export default function ApprovedRegistrationsTable() {
   const [currentFilter, setCurrentFilter] = useState<
     "waiting" | "accepted" | "rejected"
   >("waiting");
+  const [openDialog, setOpenDialog] = useState<boolean>(false);
 
   // Lấy danh sách accounts (recruiters)
   const fetchRecruiters = async () => {
@@ -195,12 +208,20 @@ export default function ApprovedRegistrationsTable() {
       const endDate = selectedDate ? selectedDate : undefined;
 
       // Gọi API getAllRegistrations với các tham số
+      const firstResponse = await registrationApi.getAllRegistrations(
+        startDate,
+        endDate,
+        status,
+        1, // Sử dụng paginationModel.page + 1 vì API có thể sử dụng số trang bắt đầu từ 1
+        2 // Sử dụng kích thước trang từ paginationModel
+      );
+
       const { data } = await registrationApi.getAllRegistrations(
         startDate,
         endDate,
         status,
-        paginationModel.page + 1, // Sử dụng paginationModel.page + 1 vì API có thể sử dụng số trang bắt đầu từ 1
-        paginationModel.pageSize // Sử dụng kích thước trang từ paginationModel
+        1, // Sử dụng paginationModel.page + 1 vì API có thể sử dụng số trang bắt đầu từ 1
+        firstResponse.data.data.total // Sử dụng kích thước trang từ paginationModel
       );
 
       // Cập nhật tổng số hàng
@@ -213,6 +234,14 @@ export default function ApprovedRegistrationsTable() {
     }
   };
 
+  const handleRefresh = () => {
+    fetchApprovedRegistrations();
+  };
+
+  useEffect(() => {
+    handleRefresh();
+  }, [openDialog]);
+
   const element = document.querySelector<HTMLElement>(
     ".MuiTablePagination-selectLabel"
   );
@@ -223,7 +252,7 @@ export default function ApprovedRegistrationsTable() {
   // Gọi API khi component được render
   useEffect(() => {
     fetchApprovedRegistrations();
-  }, [paginationModel, selectedDate, currentFilter]);
+  }, [selectedDate, currentFilter]);
 
   // Xử lý khi thay đổi các lựa chọn trong bảng
   const handleSelectionChange = (newSelectionModel: GridRowSelectionModel) => {
@@ -285,11 +314,11 @@ export default function ApprovedRegistrationsTable() {
     setMeetingTime("");
   };
 
-  // Mở modal cập nhật phỏng vấn
-  const handleOpenDeleteModal = () => {
-    fetchSelectedRegistrationOfModal();
-    setOpenDeleteModal(true);
-  };
+  // Mở modal xóa phỏng vấn
+  // const handleOpenDeleteModal = () => {
+  //   fetchSelectedRegistrationOfModal();
+  //   setOpenDeleteModal(true);
+  // };
 
   const handleCloseDeleteModal = () => {
     setSelectedRegistrationOfModal(null);
@@ -325,22 +354,34 @@ export default function ApprovedRegistrationsTable() {
         }
 
         const interviewProcess = selectedRegistration.interviewProcesses.find(
-          (process) => process.name === "Vòng phỏng vấn"
+          (process) => process.name === RegistrationProcessTitle.PHONG_VAN
         );
 
         if (interviewProcess) {
           await interviewProcessApi.updateInterviewProcess(
             interviewProcess.id,
             {
-              name: "Vòng phỏng vấn",
-              status: isPassed ? 1 : 2,
+              name: RegistrationProcessTitle.PHONG_VAN,
+              status: isPassed
+                ? RegistrationProcessStatus.Approved
+                : RegistrationProcessStatus.Rejected,
             }
           );
         } else {
-          await interviewProcessApi.createInterviewProcess({
+          let processRes = await interviewProcessApi.createInterviewProcess({
             registrationId: selectedRegistration.id,
-            name: "Vòng phỏng vấn",
+            name: RegistrationProcessTitle.PHONG_VAN,
           });
+
+          await interviewProcessApi.updateInterviewProcess(
+            processRes.data.data.id,
+            {
+              name: RegistrationProcessTitle.PHONG_VAN,
+              status: isPassed
+                ? RegistrationProcessStatus.Approved
+                : RegistrationProcessStatus.Rejected,
+            }
+          );
         }
 
         handleCloseApprovalModal();
@@ -407,7 +448,7 @@ export default function ApprovedRegistrationsTable() {
   };
 
   const handleDeleteInterview = async () => {
-    enableLoading();
+    // enableLoading();
     if (selectedRegistrations.length === 0) return;
 
     for (let registrationId of selectedRegistrations) {
@@ -424,14 +465,22 @@ export default function ApprovedRegistrationsTable() {
         // Xóa interview của đơn đăng ký
         await interviewApi.deleteInterview(interviewId);
 
-        // Cập nhật status của Interview Process
-        const interviewProcessId = selectedRow.interviewProcesses[0]?.id;
-        if (interviewProcessId) {
-          await interviewProcessApi.updateInterviewProcess(interviewProcessId, {
-            name: "Vòng duyệt đơn",
-            status: 0, // Đặt lại trạng thái là 0
-          });
-        }
+        // if (selectedRow.interviewProcesses) {
+        //   // Cập nhật status của Interview Process
+        //   const interviewProcessId = selectedRow.interviewProcesses.filter(
+        //     (process: any) =>
+        //       process.name.startsWith(RegistrationProcessTitle.DUYET_DON)
+        //   )[0]?.id;
+        //   if (interviewProcessId) {
+        //     await interviewProcessApi.updateInterviewProcess(
+        //       interviewProcessId,
+        //       {
+        //         name: RegistrationProcessTitle.DUYET_DON,
+        //         status: 0,
+        //       }
+        //     );
+        //   }
+        // }
 
         // Cập nhật trạng thái đơn đăng ký thành Pending
         await registrationApi.updateRegistration(registrationId.toString(), {
@@ -483,6 +532,7 @@ export default function ApprovedRegistrationsTable() {
 
   // Vô hiệu hóa các hành động khi không ở trạng thái "waiting"
   const disableActions = currentFilter !== "waiting";
+  const disableActionsApproved = currentFilter !== "accepted";
 
   return (
     <Paper
@@ -491,8 +541,15 @@ export default function ApprovedRegistrationsTable() {
         position: "absolute",
       }}
     >
-      <h1 className="text-center text-[2.2rem] bg-info text-text_primary_dark py-2 font-bold">
-        Danh sách phỏng vấn ứng viên
+      <h1
+        className={`text-center text-[2rem] py-2 font-bold 
+        ${currentFilter == "waiting" ? "bg-info text-text_primary_dark" : ""} 
+        ${currentFilter == "accepted" ? "bg-success text-text_primary_light" : ""} 
+        ${currentFilter == "rejected" ? "bg-danger text-text_primary_light" : ""}`}
+      >
+        {currentFilter == "waiting" ? "Danh sách phỏng vấn ứng viên" : ""}
+        {currentFilter == "accepted" ? "Danh sách ứng viên đậu phỏng vấn" : ""}
+        {currentFilter == "rejected" ? "Danh sách ứng viên bị từ chối" : ""}
       </h1>
 
       <div className="flex justify-between items-center w-full my-3">
@@ -509,10 +566,10 @@ export default function ApprovedRegistrationsTable() {
         <div>
           {selectedRegistrations.length > 0 && !disableActions && (
             <div className="flex justify-end px-3">
-              {selectedRegistrations.length === 1 && (
+              {selectedRegistrations.length === 1 ? (
                 <>
                   <button
-                    className="btn btn-primary ml-1"
+                    className="btn btn-success ml-1"
                     onClick={() =>
                       handleOpenApprovalModal(
                         selectedRegistrations[0].toString()
@@ -530,36 +587,79 @@ export default function ApprovedRegistrationsTable() {
                     Cập nhật lịch phỏng vấn
                   </button>
                 </>
+              ) : (
+                <></>
               )}
-              <button
+              {/* <button
                 onClick={handleOpenDeleteModal}
                 className="btn btn-danger ml-1"
               >
                 Xóa lịch phỏng vấn
-              </button>
+              </button> */}
             </div>
           )}
+          {selectedRegistrations.length > 0 && !disableActionsApproved && (
+            <div className="flex justify-end px-3">
+              {selectedRegistrations.length === 1 ? (
+                <>
+                  <button
+                    className="btn btn-success ml-1"
+                    onClick={() => setOpenDialog(true)}
+                  >
+                    Tạo tài khoản
+                  </button>
+                </>
+              ) : (
+                <></>
+              )}
+              {/* <button
+                onClick={handleOpenDeleteModal}
+                className="btn btn-danger ml-1"
+              >
+                Xóa lịch phỏng vấn
+              </button> */}
+            </div>
+          )}
+          <button
+            className="btn btn-primary ml-1 mr-2"
+            onClick={() => {
+              handleRefresh();
+            }}
+          >
+            Tải lại
+          </button>
         </div>
       </div>
 
       <div className="px-2">
-        <DataGrid
-          rows={rows}
-          columns={columns}
-          paginationMode="server"
-          rowCount={rowCount} // Đảm bảo rowCount là tổng số hàng từ server
-          loading={loading}
-          paginationModel={paginationModel}
-          onPaginationModelChange={setPaginationModel} // Cập nhật paginationModel khi thay đổi
-          pageSizeOptions={[8, 25, 50]}
-          onRowSelectionModelChange={handleSelectionChange}
-          rowSelectionModel={selectedRegistrations}
-          checkboxSelection
-          sx={{
-            border: 0,
-          }}
-          localeText={viVNGridTranslation}
-        />
+        {rows.length <= 0 ? (
+          <>
+            <h1 className="text-[1.2rem] mb-2">
+              <strong>Không có ứng viên nào</strong>
+            </h1>
+          </>
+        ) : (
+          <>
+            <DataGrid
+              rows={rows}
+              columns={columns}
+              paginationMode="client"
+              rowCount={rowCount} // Đảm bảo rowCount là tổng số hàng từ server
+              loading={loading}
+              initialState={{ pagination: { paginationModel } }}
+              paginationModel={paginationModel}
+              onPaginationModelChange={setPaginationModel} // Cập nhật paginationModel khi thay đổi
+              pageSizeOptions={[8, 25, 50]}
+              onRowSelectionModelChange={handleSelectionChange}
+              rowSelectionModel={selectedRegistrations}
+              checkboxSelection
+              sx={{
+                border: 0,
+              }}
+              localeText={viVNGridTranslation}
+            />
+          </>
+        )}
       </div>
 
       {/* Modal phê duyệt phỏng vấn */}
@@ -947,6 +1047,25 @@ export default function ApprovedRegistrationsTable() {
           </div>
         </div>
       </Modal>
+
+      {openDialog ? (
+        <>
+          <CreateAccountAndCatechistDialog
+            open={openDialog}
+            onClose={() => setOpenDialog(false)}
+            registrationItem={rows.find(
+              (row) =>
+                row.id ===
+                (selectedRegistrations[0]
+                  ? selectedRegistrations[0].toString()
+                  : "")
+            )} // Đưa item được chọn
+            refresh={fetchApprovedRegistrations}
+          />
+        </>
+      ) : (
+        <></>
+      )}
     </Paper>
   );
 }

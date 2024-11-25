@@ -77,11 +77,16 @@ const SideBarComponent = () => {
                   }`}
                 >
                   <Link
+                    style={{
+                      opacity: `${isHovered ? "1" : "0"}`,
+                      transition: "all ease 0.2s",
+                    }}
                     to={PATH_ADMIN.root}
                     aria-label="dashboard"
-                    className="relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-sky-600 hover:to-cyan-400 px-4 py-3 hover:text-white"
+                    className="relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-primary_color hover:to-amber-600 px-4 py-3 hover:text-white"
                   >
                     <svg
+                      style={{ display: "none" }}
                       className="-ml-1 h-6 w-6"
                       viewBox="0 0 24 24"
                       fill="none"
@@ -116,10 +121,15 @@ const SideBarComponent = () => {
                   //   }`}
                 >
                   <Link
+                    style={{
+                      opacity: `${isHovered ? "1" : "0"}`,
+                      transition: "all ease 0.2s",
+                    }}
                     to={PATH_ADMIN.admin_event_category_management}
-                    className="relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-sky-600 hover:to-cyan-400 px-4 py-3 hover:text-white"
+                    className="relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-primary_color hover:to-amber-600 px-4 py-3 hover:text-white"
                   >
                     <svg
+                      style={{ display: "none" }}
                       xmlns="http://www.w3.org/2000/svg"
                       className="h-5 w-5"
                       viewBox="0 0 20 20"
@@ -154,10 +164,15 @@ const SideBarComponent = () => {
                   //   }`}
                 >
                   <Link
+                    style={{
+                      opacity: `${isHovered ? "1" : "0"}`,
+                      transition: "all ease 0.2s",
+                    }}
                     to={PATH_ADMIN.admin_event_management}
-                    className="relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-sky-600 hover:to-cyan-400 px-4 py-3 hover:text-white"
+                    className="relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-primary_color hover:to-amber-600 px-4 py-3 hover:text-white"
                   >
                     <svg
+                      style={{ display: "none" }}
                       xmlns="http://www.w3.org/2000/svg"
                       className="h-5 w-5"
                       viewBox="0 0 20 20"
@@ -191,10 +206,15 @@ const SideBarComponent = () => {
                   //   }`}
                 >
                   <Link
+                    style={{
+                      opacity: `${isHovered ? "1" : "0"}`,
+                      transition: "all ease 0.2s",
+                    }}
                     to={PATH_ADMIN.admin_registration}
-                    className="relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-sky-600 hover:to-cyan-400 px-4 py-3 hover:text-white"
+                    className="relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-primary_color hover:to-amber-600 px-4 py-3 hover:text-white"
                   >
                     <svg
+                      style={{ display: "none" }}
                       xmlns="http://www.w3.org/2000/svg"
                       className="h-5 w-5"
                       viewBox="0 0 20 20"
@@ -226,10 +246,15 @@ const SideBarComponent = () => {
                   //   }`}
                 >
                   <Link
+                    style={{
+                      opacity: `${isHovered ? "1" : "0"}`,
+                      transition: "all ease 0.2s",
+                    }}
                     to={PATH_ADMIN.approved_registration}
-                    className="relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-sky-600 hover:to-cyan-400 px-4 py-3 hover:text-white"
+                    className="relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-primary_color hover:to-amber-600 px-4 py-3 hover:text-white"
                   >
                     <svg
+                      style={{ display: "none" }}
                       xmlns="http://www.w3.org/2000/svg"
                       className="h-5 w-5"
                       viewBox="0 0 20 20"
@@ -261,10 +286,15 @@ const SideBarComponent = () => {
                   //   }`}
                 >
                   <Link
+                    style={{
+                      opacity: `${isHovered ? "1" : "0"}`,
+                      transition: "all ease 0.2s",
+                    }}
                     to={PATH_ADMIN.catechist_management}
-                    className="relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-sky-600 hover:to-cyan-400 px-4 py-3 hover:text-white"
+                    className="relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-primary_color hover:to-amber-600 px-4 py-3 hover:text-white"
                   >
                     <svg
+                      style={{ display: "none" }}
                       xmlns="http://www.w3.org/2000/svg"
                       className="h-5 w-5"
                       viewBox="0 0 20 20"
@@ -298,10 +328,15 @@ const SideBarComponent = () => {
                   //   }`}
                 >
                   <Link
+                    style={{
+                      opacity: `${isHovered ? "1" : "0"}`,
+                      transition: "all ease 0.2s",
+                    }}
                     to={PATH_ADMIN.post_category}
-                    className="relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-sky-600 hover:to-cyan-400 px-4 py-3 hover:text-white"
+                    className="relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-primary_color hover:to-amber-600 px-4 py-3 hover:text-white"
                   >
                     <svg
+                      style={{ display: "none" }}
                       xmlns="http://www.w3.org/2000/svg"
                       className="h-5 w-5"
                       viewBox="0 0 20 20"
@@ -336,10 +371,15 @@ const SideBarComponent = () => {
                   //   }`}
                 >
                   <Link
+                    style={{
+                      opacity: `${isHovered ? "1" : "0"}`,
+                      transition: "all ease 0.2s",
+                    }}
                     to={PATH_ADMIN.post}
-                    className="relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-sky-600 hover:to-cyan-400 px-4 py-3 hover:text-white"
+                    className="relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-primary_color hover:to-amber-600 px-4 py-3 hover:text-white"
                   >
                     <svg
+                      style={{ display: "none" }}
                       xmlns="http://www.w3.org/2000/svg"
                       className="h-5 w-5"
                       viewBox="0 0 20 20"
@@ -374,10 +414,15 @@ const SideBarComponent = () => {
                   //   }`}
                 >
                   <Link
+                    style={{
+                      opacity: `${isHovered ? "1" : "0"}`,
+                      transition: "all ease 0.2s",
+                    }}
                     to={PATH_ADMIN.christian_name}
-                    className="relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-sky-600 hover:to-cyan-400 px-4 py-3 hover:text-white"
+                    className="relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-primary_color hover:to-amber-600 px-4 py-3 hover:text-white"
                   >
                     <svg
+                      style={{ display: "none" }}
                       xmlns="http://www.w3.org/2000/svg"
                       className="h-5 w-5"
                       viewBox="0 0 20 20"
@@ -410,10 +455,15 @@ const SideBarComponent = () => {
                   //   }`}
                 >
                   <Link
+                    style={{
+                      opacity: `${isHovered ? "1" : "0"}`,
+                      transition: "all ease 0.2s",
+                    }}
                     to={PATH_ADMIN.rooms}
-                    className="relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-sky-600 hover:to-cyan-400 px-4 py-3 hover:text-white"
+                    className="relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-primary_color hover:to-amber-600 px-4 py-3 hover:text-white"
                   >
                     <svg
+                      style={{ display: "none" }}
                       xmlns="http://www.w3.org/2000/svg"
                       className="h-5 w-5"
                       viewBox="0 0 20 20"
@@ -447,10 +497,15 @@ const SideBarComponent = () => {
                   //   }`}
                 >
                   <Link
+                    style={{
+                      opacity: `${isHovered ? "1" : "0"}`,
+                      transition: "all ease 0.2s",
+                    }}
                     to={PATH_ADMIN.pastoral_years}
-                    className="relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-sky-600 hover:to-cyan-400 px-4 py-3 hover:text-white"
+                    className="relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-primary_color hover:to-amber-600 px-4 py-3 hover:text-white"
                   >
                     <svg
+                      style={{ display: "none" }}
                       xmlns="http://www.w3.org/2000/svg"
                       className="h-5 w-5"
                       viewBox="0 0 20 20"
@@ -485,10 +540,15 @@ const SideBarComponent = () => {
                   //   }`}
                 >
                   <Link
+                    style={{
+                      opacity: `${isHovered ? "1" : "0"}`,
+                      transition: "all ease 0.2s",
+                    }}
                     to={PATH_ADMIN.major_management}
-                    className="relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-sky-600 hover:to-cyan-400 px-4 py-3 hover:text-white"
+                    className="relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-primary_color hover:to-amber-600 px-4 py-3 hover:text-white"
                   >
                     <svg
+                      style={{ display: "none" }}
                       xmlns="http://www.w3.org/2000/svg"
                       className="h-5 w-5"
                       viewBox="0 0 20 20"
@@ -522,10 +582,15 @@ const SideBarComponent = () => {
                   //   }`}
                 >
                   <Link
+                    style={{
+                      opacity: `${isHovered ? "1" : "0"}`,
+                      transition: "all ease 0.2s",
+                    }}
                     to={PATH_ADMIN.grade_management}
-                    className="relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-sky-600 hover:to-cyan-400 px-4 py-3 hover:text-white"
+                    className="relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-primary_color hover:to-amber-600 px-4 py-3 hover:text-white"
                   >
                     <svg
+                      style={{ display: "none" }}
                       xmlns="http://www.w3.org/2000/svg"
                       className="h-5 w-5"
                       viewBox="0 0 20 20"
@@ -559,10 +624,15 @@ const SideBarComponent = () => {
                   //   }`}
                 >
                   <Link
+                    style={{
+                      opacity: `${isHovered ? "1" : "0"}`,
+                      transition: "all ease 0.2s",
+                    }}
                     to={PATH_ADMIN.class_management}
-                    className="relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-sky-600 hover:to-cyan-400 px-4 py-3 hover:text-white"
+                    className="relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-primary_color hover:to-amber-600 px-4 py-3 hover:text-white"
                   >
                     <svg
+                      style={{ display: "none" }}
                       xmlns="http://www.w3.org/2000/svg"
                       className="h-5 w-5"
                       viewBox="0 0 20 20"
@@ -596,10 +666,15 @@ const SideBarComponent = () => {
                   //   }`}
                 >
                   <Link
+                    style={{
+                      opacity: `${isHovered ? "1" : "0"}`,
+                      transition: "all ease 0.2s",
+                    }}
                     to={PATH_ADMIN.system_configurations}
-                    className="relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-sky-600 hover:to-cyan-400 px-4 py-3 hover:text-white"
+                    className="relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-primary_color hover:to-amber-600 px-4 py-3 hover:text-white"
                   >
                     <svg
+                      style={{ display: "none" }}
                       xmlns="http://www.w3.org/2000/svg"
                       className="h-5 w-5"
                       viewBox="0 0 20 20"
@@ -623,10 +698,15 @@ const SideBarComponent = () => {
 
               <li className="min-w-max">
                 <Link
+                  style={{
+                    opacity: `${isHovered ? "1" : "0"}`,
+                    transition: "all ease 0.2s",
+                  }}
                   to={PATH_ADMIN.admin_management_file}
-                  className="relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-sky-600 hover:to-cyan-400 px-4 py-3 hover:text-white"
+                  className="relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-primary_color hover:to-amber-600 px-4 py-3 hover:text-white"
                 >
                   <svg
+                    style={{ display: "none" }}
                     xmlns="http://www.w3.org/2000/svg"
                     className="h-5 w-5"
                     viewBox="0 0 20 20"
@@ -651,9 +731,9 @@ const SideBarComponent = () => {
               <li className="min-w-max">
                 <a
                   href="/report"
-                  className="relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-sky-600 hover:to-cyan-400 px-4 py-3 hover:text-white"
+                  className="relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-primary_color hover:to-amber-600 px-4 py-3 hover:text-white"
                 >
-                  <svg
+                  <svg style={{display:"none"}}
                     xmlns="http://www.w3.org/2000/svg"
                     className="h-5 w-5"
                     viewBox="0 0 20 20"
@@ -675,10 +755,15 @@ const SideBarComponent = () => {
               </li> */}
               <li className="min-w-max">
                 <Link
+                  style={{
+                    opacity: `${isHovered ? "1" : "0"}`,
+                    transition: "all ease 0.2s",
+                  }}
                   to={"/"}
-                  className="relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-sky-600 hover:to-cyan-400 px-4 py-3 hover:text-white"
+                  className="relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-primary_color hover:to-amber-600 px-4 py-3 hover:text-white"
                 >
                   <svg
+                    style={{ display: "none" }}
                     xmlns="http://www.w3.org/2000/svg"
                     className="h-5 w-5"
                     viewBox="0 0 20 20"
@@ -711,10 +796,15 @@ const SideBarComponent = () => {
                   //   }`}
                 >
                   <Link
+                    style={{
+                      opacity: `${isHovered ? "1" : "0"}`,
+                      transition: "all ease 0.2s",
+                    }}
                     to={"/"}
-                    className="relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-sky-600 hover:to-cyan-400 px-4 py-3 hover:text-white"
+                    className="relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-primary_color hover:to-amber-600 px-4 py-3 hover:text-white"
                   >
                     <svg
+                      style={{ display: "none" }}
                       xmlns="http://www.w3.org/2000/svg"
                       className="h-5 w-5"
                       viewBox="0 0 20 20"
@@ -740,9 +830,9 @@ const SideBarComponent = () => {
           {/* <div className="w-max -mb-3">
             <a
               href="#"
-              className="relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-sky-600 hover:to-cyan-400 px-4 py-3 hover:text-white"
+              className="relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-primary_color hover:to-amber-600 px-4 py-3 hover:text-white"
             >
-              <svg
+              <svg style={{display:"none"}}
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-5 w-5 group-hover:fill-cyan-600"
                 viewBox="0 0 20 20"
