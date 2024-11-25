@@ -16,6 +16,7 @@ import {
   InputLabel,
 } from "@mui/material";
 import viVNGridTranslation from "../../../locale/MUITable";
+import RegistrationDetailDialog from "./RegistrationDetailDialog";
 import Select from "react-select";
 import dayjs from "dayjs";
 import registrationApi from "../../../api/Registration";
@@ -33,6 +34,9 @@ import {
   RegistrationProcessStatus,
   RegistrationProcessTitle,
 } from "../../../enums/RegistrationProcess";
+import { RoleNameEnum } from "../../../enums/RoleEnum";
+import CkEditor from "../../../components/ckeditor5/CkEditor";
+
 // import { RegistrationProcessTitle } from "../../../enums/RegistrationProcess";
 
 // Cấu hình các cột trong DataGrid
@@ -87,14 +91,14 @@ const columns: GridColDef[] = [
     headerName: "Ghi chú",
     width: 200,
   },
-  {
-    field: "interviews",
-    headerName: "Kết quả phỏng vấn",
-    width: 200,
-    renderCell: (params) => {
-      return params.row.interviews[0]?.note || ""; // Hiển thị ghi chú nếu có
-    },
-  },
+  // {
+  //   field: "interviews",
+  //   headerName: "Kết quả phỏng vấn",
+  //   width: 200,
+  //   renderCell: (params) => {
+  //     return params.row.interviews[0]?.note || ""; // Hiển thị ghi chú nếu có
+  //   },
+  // },
   {
     field: "status",
     headerName: "Trạng thái",
@@ -173,12 +177,18 @@ export default function ApprovedRegistrationsTable() {
     "waiting" | "accepted" | "rejected"
   >("waiting");
   const [openDialog, setOpenDialog] = useState<boolean>(false);
+  const [openDialogRegisDetail, setOpenDialogRegisDetail] =
+    useState<boolean>(false);
 
   // Lấy danh sách accounts (recruiters)
   const fetchRecruiters = async () => {
     try {
-      const { data } = await accountApi.getAllAccounts();
-      setRecruiters(data.data.items);
+      const { data } = await accountApi.getAllAccounts(1, 10000);
+      setRecruiters(
+        data.data.items.filter(
+          (item: any) => item.role.roleName == RoleNameEnum.Catechist
+        )
+      );
     } catch (error) {
       console.error("Lỗi khi tải danh sách accounts:", error);
     }
@@ -253,6 +263,10 @@ export default function ApprovedRegistrationsTable() {
   useEffect(() => {
     fetchApprovedRegistrations();
   }, [selectedDate, currentFilter]);
+
+  useEffect(() => {
+    setSelectedRegistrations([]);
+  }, [currentFilter]);
 
   // Xử lý khi thay đổi các lựa chọn trong bảng
   const handleSelectionChange = (newSelectionModel: GridRowSelectionModel) => {
@@ -353,36 +367,20 @@ export default function ApprovedRegistrationsTable() {
           });
         }
 
-        const interviewProcess = selectedRegistration.interviewProcesses.find(
-          (process) => process.name === RegistrationProcessTitle.PHONG_VAN
-        );
+        let processRes = await interviewProcessApi.createInterviewProcess({
+          registrationId: selectedRegistration.id,
+          name: RegistrationProcessTitle.PHONG_VAN,
+        });
 
-        if (interviewProcess) {
-          await interviewProcessApi.updateInterviewProcess(
-            interviewProcess.id,
-            {
-              name: RegistrationProcessTitle.PHONG_VAN,
-              status: isPassed
-                ? RegistrationProcessStatus.Approved
-                : RegistrationProcessStatus.Rejected,
-            }
-          );
-        } else {
-          let processRes = await interviewProcessApi.createInterviewProcess({
-            registrationId: selectedRegistration.id,
+        await interviewProcessApi.updateInterviewProcess(
+          processRes.data.data.id,
+          {
             name: RegistrationProcessTitle.PHONG_VAN,
-          });
-
-          await interviewProcessApi.updateInterviewProcess(
-            processRes.data.data.id,
-            {
-              name: RegistrationProcessTitle.PHONG_VAN,
-              status: isPassed
-                ? RegistrationProcessStatus.Approved
-                : RegistrationProcessStatus.Rejected,
-            }
-          );
-        }
+            status: isPassed
+              ? RegistrationProcessStatus.Approved
+              : RegistrationProcessStatus.Rejected,
+          }
+        );
 
         handleCloseApprovalModal();
         setSelectedRegistrations([]);
@@ -563,9 +561,9 @@ export default function ApprovedRegistrationsTable() {
           />
           {renderFilterButtons()}
         </div>
-        <div>
+        <div className="flex">
           {selectedRegistrations.length > 0 && !disableActions && (
-            <div className="flex justify-end px-3">
+            <div className="flex justify-end">
               {selectedRegistrations.length === 1 ? (
                 <>
                   <button
@@ -599,7 +597,7 @@ export default function ApprovedRegistrationsTable() {
             </div>
           )}
           {selectedRegistrations.length > 0 && !disableActionsApproved && (
-            <div className="flex justify-end px-3">
+            <div className="flex justify-end">
               {selectedRegistrations.length === 1 ? (
                 <>
                   <button
@@ -620,6 +618,19 @@ export default function ApprovedRegistrationsTable() {
               </button> */}
             </div>
           )}
+          {selectedRegistrations.length == 1 ? (
+            <>
+              <button
+                className="btn btn-info ml-1"
+                onClick={() => setOpenDialogRegisDetail(true)}
+              >
+                Xem chi tiết
+              </button>
+            </>
+          ) : (
+            <></>
+          )}
+
           <button
             className="btn btn-primary ml-1 mr-2"
             onClick={() => {
@@ -734,10 +745,16 @@ export default function ApprovedRegistrationsTable() {
           )}
 
           <h2 className="my-0 py-0 mt-3">
-            <strong>Ghi chú phỏng vấn</strong>
+            <strong>Nhận xét ứng viên</strong>
           </h2>
 
-          <TextField
+          <CkEditor
+            data={interviewNote}
+            onChange={(data) => setInterviewNote(data)}
+            placeholder="Nhập nhận xét ứng viên tại đây..."
+          />
+
+          {/* <TextField
             label="Ghi chú"
             fullWidth
             multiline
@@ -747,7 +764,7 @@ export default function ApprovedRegistrationsTable() {
             placeholder="Nhập ghi chú phỏng vấn (không bắt buộc)"
             margin="normal"
             className="my-0 mt-1"
-          />
+          /> */}
 
           <FormControl fullWidth margin="normal" className="my-0 mt-4">
             <InputLabel id="result-label">
@@ -1061,6 +1078,17 @@ export default function ApprovedRegistrationsTable() {
                   : "")
             )} // Đưa item được chọn
             refresh={fetchApprovedRegistrations}
+          />
+        </>
+      ) : (
+        <></>
+      )}
+      {openDialogRegisDetail ? (
+        <>
+          <RegistrationDetailDialog
+            open={openDialogRegisDetail}
+            onClose={() => setOpenDialogRegisDetail(false)}
+            id={selectedRegistrations[0].toString()}
           />
         </>
       ) : (

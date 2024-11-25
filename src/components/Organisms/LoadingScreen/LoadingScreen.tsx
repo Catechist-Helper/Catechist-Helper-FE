@@ -2,7 +2,7 @@ import NProgress from "nprogress";
 import { useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 // material
-import { alpha, styled, useTheme } from "@mui/material/styles";
+import { styled, useTheme } from "@mui/material/styles";
 import { Box, GlobalStyles } from "@mui/material";
 //
 // import Logo from "./Logo";
@@ -119,8 +119,7 @@ rgba(0, 0, 0, 0.75) 100%
             height: 100,
             borderRadius: "25%",
             position: "absolute",
-            border: (theme: any) =>
-              `solid 3px ${alpha(theme.palette.primary.dark, 0.24)}`,
+            border: () => `solid 3px #957f5f`,
           }}
         />
 
@@ -142,8 +141,7 @@ rgba(0, 0, 0, 0.75) 100%
             height: 120,
             borderRadius: "25%",
             position: "absolute",
-            border: (theme: any) =>
-              `solid 8px ${alpha(theme.palette.primary.dark, 0.24)}`,
+            border: () => `solid 8px #957f5f`,
           }}
         />
       </RootStyle>

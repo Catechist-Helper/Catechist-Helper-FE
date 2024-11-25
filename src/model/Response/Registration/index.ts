@@ -19,13 +19,21 @@ export type InterviewProcessResponse = {
   id: string;
   name: string;
   status: number;
+  createdAt: string;
 };
 
 // Mô hình cho Recruiters
 export type RecruiterResponse = {
-  id: string;
-  email: string;
-  role: string | null;
+  id: string,
+  email: string,
+  fullName: string,
+  gender: string,
+  phone: string,
+  avatar: string,
+  role: {
+    id: string,
+    roleName: string
+  }
 };
 
 // Mô hình cho Registration Item (chi tiết từng mục)
@@ -44,7 +52,7 @@ export type RegistrationItemResponse = {
   createdAt: string;
   certificateOfCandidates: CertificateOfCandidateResponse[];
   interviews: InterviewResponse[];
-  interviewProcesses: InterviewProcessResponse[];
+  registrationProcesses: InterviewProcessResponse[];
   recruiters: RecruiterResponse[];
 };
 

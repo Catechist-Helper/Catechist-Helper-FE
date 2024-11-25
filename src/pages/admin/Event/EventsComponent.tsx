@@ -16,6 +16,7 @@ import sweetAlert from "../../../utils/sweetAlert";
 import viVNGridTranslation from "../../../locale/MUITable";
 import EventDialog from "./EventDialog"; // Dialog for Create/Update
 import { formatDate } from "../../../utils/formatDate";
+import OrganizersDialog from "./OrganizersDialog";
 
 export default function EventsComponent() {
   const [rows, setRows] = useState<EventItemResponse[]>([]);
@@ -31,6 +32,9 @@ export default function EventsComponent() {
   const [editingEvent, setEditingEvent] = useState<EventItemResponse | null>(
     null
   );
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(null); // ID của sự kiện được chọn
+  const [openOrganizersDialog, setOpenOrganizersDialog] =
+    useState<boolean>(false); // Trạng thái mở/đóng của dialog
 
   const columns: GridColDef[] = [
     { field: "name", headerName: "Tên sự kiện", width: 200 },
@@ -149,24 +153,12 @@ export default function EventsComponent() {
   };
 
   const handleOrganizers = (eventId: string, hasOrganizers: boolean) => {
-    console.log(eventId);
-
     if (hasOrganizers) {
-      // Điều hướng hoặc hiển thị giao diện cập nhật ban tổ chức
-      sweetAlert.alertInfo(
-        "Chức năng cập nhật ban tổ chức đang được phát triển!",
-        "",
-        1000,
-        22
-      );
+      setSelectedEventId(eventId); // Lưu lại ID sự kiện
+      setOpenOrganizersDialog(true); // Mở dialog
     } else {
-      // Điều hướng hoặc hiển thị giao diện thêm mới ban tổ chức
-      sweetAlert.alertInfo(
-        "Chức năng thêm ban tổ chức đang được phát triển!",
-        "",
-        1000,
-        22
-      );
+      setSelectedEventId(eventId); // Lưu lại ID sự kiện
+      setOpenOrganizersDialog(true); // Mở dialog
     }
   };
 
@@ -329,7 +321,9 @@ export default function EventsComponent() {
         rows={rows}
         columns={columns}
         loading={loading}
+        pageSizeOptions={[8, 25, 50]}
         checkboxSelection
+        disableRowSelectionOnClick
         onRowSelectionModelChange={(newSelection) =>
           setSelectedIds(newSelection)
         }
@@ -345,6 +339,17 @@ export default function EventsComponent() {
           onClose={() => setOpenDialog(false)}
           event={editingEvent}
           refresh={fetchEvents}
+        />
+      )}
+      {openOrganizersDialog && selectedEventId && (
+        <OrganizersDialog
+          open={openOrganizersDialog}
+          onClose={() => {
+            setOpenOrganizersDialog(false); // Đóng dialog
+            setSelectedEventId(null); // Xóa ID sự kiện sau khi đóng
+          }}
+          eventId={selectedEventId}
+          refresh={fetchEvents} // Hàm refresh danh sách sự kiện
         />
       )}
     </Paper>

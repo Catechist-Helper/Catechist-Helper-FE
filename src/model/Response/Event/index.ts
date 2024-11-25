@@ -109,6 +109,42 @@ export interface ParticipantResponse {
   items: ParticipantResponseItem[];
 }
 
+export interface RoleResponse {
+  id: string;
+  roleName: string;
+}
+
+interface AccountResponse {
+  id: string;
+  email: string;
+  fullName: string;
+  gender: string;
+  phone: string;
+  avatar: string;
+  role: RoleResponse;
+}
+
+interface RoleEventResponse {
+  id: string;
+  name: string;
+  description: string;
+}
+
+interface MemberItemResponse {
+  account: AccountResponse;
+  roleEvent: RoleEventResponse;
+  roleEventId: string;
+}
+
+export interface MemberResponse {
+  size: number;
+  page: number;
+  total: number;
+  totalPages: number;
+  items: MemberItemResponse[];
+}
+
+
 export interface BudgetTransactionResponse {
   size: number;
   page: number;

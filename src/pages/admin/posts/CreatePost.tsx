@@ -106,7 +106,10 @@ const CreatePost: React.FC = () => {
     <AdminTemplate>
       <div>
         <h2 className="text-center">Tạo bài viết mới</h2>
-        <form onSubmit={formik.handleSubmit} className="max-w-sm mx-auto mt-5">
+        <form
+          onSubmit={formik.handleSubmit}
+          className="w-full mx-auto px-20 mt-5"
+        >
           <div className="mb-5">
             <label
               htmlFor="name"

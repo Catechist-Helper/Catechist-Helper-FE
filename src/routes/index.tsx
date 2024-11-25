@@ -101,7 +101,7 @@ export default function Router() {
           element: (
             <AuthGuard>
               {/* <RoleBasedGuard accessibleRoles={[AccountRoleString.ADMIN]}> */}
-              <AdminLandingPage />
+              <CatechistManagement />
               {/* </RoleBasedGuard> */}
             </AuthGuard>
           ),
@@ -270,9 +270,9 @@ const Login = Loadable(lazy(() => import("../pages/common/Login/Login")));
 const NotFound = Loadable(lazy(() => import("../pages/error/BasicErrorPage")));
 
 //Admin
-const AdminLandingPage = Loadable(
-  lazy(() => import("../pages/admin/AdminLandingPage/index"))
-);
+// const AdminLandingPage = Loadable(
+//   lazy(() => import("../pages/admin/AdminLandingPage/index"))
+// );
 
 // Thuận
 const RegistrationAdminPage = Loadable(

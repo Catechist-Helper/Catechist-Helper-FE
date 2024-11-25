@@ -9,12 +9,12 @@ const request = axiosInstances.base;
 const ROOT_MEMBER = "/members";
 
 // PUT: Cập nhật thông tin thành viên của một event
-const updateEventMember = (eventId: string, data: UpdateMemberRequest) => {
+const updateEventMember = (eventId: string, data: UpdateMemberRequest[]) => {
   return request.put<BasicResponse<boolean>>(`${ROOT_MEMBER}/${eventId}`, data);
 };
 
 // PUT: Cập nhật thông tin thành viên của một process
-const updateProcessMember = (processId: string, data: UpdateMemberOfProcessRequest) => {
+const updateProcessMember = (processId: string, data: UpdateMemberOfProcessRequest[]) => {
   return request.put<BasicResponse<boolean>>(`${ROOT_MEMBER}/${processId}`, data);
 };
 
