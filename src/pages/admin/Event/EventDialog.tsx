@@ -19,6 +19,7 @@ import budgetTransactionApi from "../../../api/BudgetTransaction";
 import sweetAlert from "../../../utils/sweetAlert";
 import { EventItemResponse } from "../../../model/Response/Event";
 import { EventCategoryItemResponse } from "../../../model/Response/EventCategory";
+import ReasonDialog from "./ReasonDialog";
 
 // Hàm format từ ISO thành YYYY-MM-DD
 const formatToDateInput = (isoString: string | undefined): string => {
@@ -55,6 +56,11 @@ const EventDialog: React.FC<EventDialogProps> = ({
   const [isCheckedIn, setIsCheckedIn] = useState<boolean>(false);
   const [address, setAddress] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
+  const [openReasonDialog, setOpenReasonDialog] = useState<boolean>(false);
+  // const [budgetReason, setBudgetReason] = useState<string>(""); // Lý do thay đổi ngân sách
+  const [pendingBudgetChange, setPendingBudgetChange] = useState<number | null>(
+    null
+  ); // Giá trị ngân sách mới (chờ xử lý)
 
   // Fetch event categories
   const fetchEventCategories = async () => {
@@ -149,29 +155,22 @@ const EventDialog: React.FC<EventDialogProps> = ({
 
       if (event) {
         // Nếu chỉnh sửa
-        await eventApi.updateEvent(event.id, dataToSend);
-        console.log(event);
-        if (event.current_budget != currentBudget) {
-          await budgetTransactionApi.createBudgetTransaction({
-            eventId: event.id,
-            fromBudget: event.current_budget,
-            toBudget: currentBudget,
-          });
+        if (event.current_budget !== currentBudget) {
+          // Nếu ngân sách thay đổi, mở popup để nhập lý do
+          setPendingBudgetChange(currentBudget);
+          setOpenReasonDialog(true);
+          return;
         }
+        await eventApi.updateEvent(event.id, dataToSend);
         sweetAlert.alertSuccess("Cập nhật sự kiện thành công!", "", 1000, 22);
       } else {
         // Nếu thêm mới
-        console.log(dataToSend);
-        let newEvent = await eventApi.createEvent(dataToSend);
-        console.log({
-          eventId: newEvent.data.data.id,
-          fromBudget: 0,
-          toBudget: currentBudget,
-        });
+        const newEvent = await eventApi.createEvent(dataToSend);
         await budgetTransactionApi.createBudgetTransaction({
           eventId: newEvent.data.data.id,
           fromBudget: 0,
           toBudget: currentBudget,
+          note: "Ngân sách khởi tạo", // Ghi chú mặc định khi thêm mới
         });
         sweetAlert.alertSuccess("Thêm sự kiện mới thành công!", "", 1000, 22);
       }
@@ -294,6 +293,47 @@ const EventDialog: React.FC<EventDialogProps> = ({
           Lưu
         </Button>
       </DialogActions>
+
+      <ReasonDialog
+        open={openReasonDialog}
+        onClose={() => setOpenReasonDialog(false)}
+        onConfirm={async (reason) => {
+          if (!event) return;
+
+          try {
+            await eventApi.updateEvent(event.id, {
+              name,
+              description,
+              isPeriodic,
+              isCheckedIn,
+              address,
+              startTime: new Date(startTime).toISOString(),
+              endTime: new Date(endTime).toISOString(),
+              current_budget: currentBudget,
+              eventStatus: 0,
+              eventCategoryId: selectedCategoryId ?? "",
+            });
+
+            await budgetTransactionApi.createBudgetTransaction({
+              eventId: event.id,
+              fromBudget: event.current_budget,
+              toBudget: pendingBudgetChange!,
+              note: reason,
+            });
+
+            sweetAlert.alertSuccess("Cập nhật thành công!", "", 1000, 22);
+            refresh();
+            onClose();
+          } catch (error) {
+            console.error("Lỗi khi cập nhật:", error);
+            sweetAlert.alertFailed("Không thể cập nhật!", "", 1000, 22);
+          } finally {
+            setLoading(false);
+            setOpenReasonDialog(false);
+            setPendingBudgetChange(null);
+          }
+        }}
+      />
     </Dialog>
   );
 };

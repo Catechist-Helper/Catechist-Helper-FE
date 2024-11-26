@@ -36,6 +36,7 @@ const columns: GridColDef[] = [
       />
     ),
   },
+  { field: "code", headerName: "Mã giáo lý viên", width: 140 },
   { field: "fullName", headerName: "Tên đầy đủ", width: 200 },
   {
     field: "christianName",

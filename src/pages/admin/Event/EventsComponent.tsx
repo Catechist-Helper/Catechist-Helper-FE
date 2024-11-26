@@ -10,13 +10,21 @@ import {
 import { useState, useEffect } from "react";
 import eventApi from "../../../api/Event";
 import eventCategoryApi from "../../../api/EventCategory";
-import { EventItemResponse } from "../../../model/Response/Event";
+import {
+  BudgetTransactionResponseItem,
+  EventItemResponse,
+  ParticipantResponseItem,
+} from "../../../model/Response/Event";
 import { EventCategoryItemResponse } from "../../../model/Response/EventCategory";
 import sweetAlert from "../../../utils/sweetAlert";
 import viVNGridTranslation from "../../../locale/MUITable";
 import EventDialog from "./EventDialog"; // Dialog for Create/Update
 import { formatDate } from "../../../utils/formatDate";
+import { formatPrice } from "../../../utils/formatPrice";
 import OrganizersDialog from "./OrganizersDialog";
+import AddParticipantsDialog from "./AddParticipantsDialog";
+import ParticipantsDialog from "./ParticipantsDialog";
+import BudgetDialog from "./BudgetDialog";
 
 export default function EventsComponent() {
   const [rows, setRows] = useState<EventItemResponse[]>([]);
@@ -35,6 +43,21 @@ export default function EventsComponent() {
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null); // ID của sự kiện được chọn
   const [openOrganizersDialog, setOpenOrganizersDialog] =
     useState<boolean>(false); // Trạng thái mở/đóng của dialog
+  const [openAddDialog, setOpenAddDialog] = useState<boolean>(false);
+  const [selectedEventName, setSelectedEventName] = useState<string>("");
+
+  const openAddParticipantsDialog = (eventId: string, eventName: string) => {
+    console.log(eventId, eventName);
+    setSelectedEventId(eventId);
+    setSelectedEventName(eventName);
+    setOpenAddDialog(true);
+  };
+
+  const closeAddParticipantsDialog = () => {
+    setOpenAddDialog(false);
+    setSelectedEventId(null);
+    setSelectedEventName("");
+  };
 
   const columns: GridColDef[] = [
     { field: "name", headerName: "Tên sự kiện", width: 200 },
@@ -51,7 +74,28 @@ export default function EventsComponent() {
       width: 160,
       renderCell: (params) => formatDate.DD_MM_YYYY(params.row.endTime),
     },
-    { field: "current_budget", headerName: "Ngân sách hiện tại", width: 160 },
+    {
+      field: "current_budget",
+      headerName: "Ngân sách hiện tại",
+      width: 250,
+      renderCell: (params) => {
+        return (
+          <div style={{ display: "flex", alignItems: "center" }}>
+            <Button
+              variant="contained"
+              color={"info"}
+              style={{ marginRight: "10px" }}
+              onClick={() =>
+                handleBudgetTransactions(params.row.id, params.row.name)
+              }
+            >
+              Xem
+            </Button>{" "}
+            <span>{formatPrice(params.value)} ₫</span>
+          </div>
+        );
+      },
+    },
     {
       field: "eventCategory",
       headerName: "Danh mục",
@@ -84,7 +128,7 @@ export default function EventsComponent() {
     {
       field: "participants",
       headerName: "Số người tham gia",
-      width: 200,
+      width: 300,
       renderCell: (params) => {
         const participantsCount = params.row.participantsCount || 0;
         return (
@@ -94,9 +138,20 @@ export default function EventsComponent() {
               variant="contained"
               color="primary"
               style={{ marginLeft: "10px" }}
-              onClick={() => handleParticipants(params.row.id)}
+              onClick={() => handleParticipants(params.row.id, params.row.name)}
             >
               Xem
+            </Button>
+
+            <Button
+              variant="contained"
+              color="secondary"
+              style={{ marginLeft: "10px" }}
+              onClick={() =>
+                openAddParticipantsDialog(params.row.id, params.row.name)
+              }
+            >
+              Thêm danh sách
             </Button>
           </div>
         );
@@ -162,14 +217,76 @@ export default function EventsComponent() {
     }
   };
 
-  const handleParticipants = (eventId: string) => {
-    // Điều hướng hoặc hiển thị danh sách người tham gia
-    sweetAlert.alertInfo(
-      `Xem danh sách người tham gia cho sự kiện ID: ${eventId}`,
-      "",
-      1000,
-      22
-    );
+  const [openParticipantsDialog, setOpenParticipantsDialog] = useState(false);
+  const [participants, setParticipants] = useState<ParticipantResponseItem[]>(
+    []
+  );
+  const [
+    selectedEventNameForParticipants,
+    setSelectedEventNameForParticipants,
+  ] = useState<string>("");
+
+  const handleParticipants = async (eventId: string, eventName: string) => {
+    try {
+      setLoading(true);
+      setSelectedEventNameForParticipants(eventName);
+
+      const { data } = await eventApi.getEventParticipants(eventId, 1, 50); // Lấy dữ liệu với phân trang
+      setParticipants(data.data.items);
+
+      setOpenParticipantsDialog(true); // Mở dialog
+    } catch (error) {
+      console.error("Lỗi khi tải danh sách người tham gia:", error);
+      sweetAlert.alertFailed(
+        "Không thể tải danh sách người tham gia!",
+        "",
+        1000,
+        22
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const [openBudgetDialog, setOpenBudgetDialog] = useState(false);
+  const [budgetTransactions, setBudgetTransactions] = useState<
+    BudgetTransactionResponseItem[]
+  >([]);
+  const [selectedEventNameForBudget, setSelectedEventNameForBudget] =
+    useState<string>("");
+
+  const handleBudgetTransactions = async (
+    eventId: string,
+    eventName: string
+  ) => {
+    try {
+      setLoading(true);
+      setSelectedEventNameForBudget(eventName);
+
+      const { data } = await eventApi.getEventBudgetTransactions(
+        eventId,
+        1,
+        50
+      ); // Gọi API với phân trang
+      const sortedTransactions = data.data.items.sort(
+        (a, b) =>
+          new Date(b.transactionAt).getTime() -
+          new Date(a.transactionAt).getTime()
+      ); // Sắp xếp theo `transactionAt`
+
+      setBudgetTransactions(sortedTransactions);
+      setOpenBudgetDialog(true); // Mở dialog
+    } catch (error) {
+      console.error("Lỗi khi tải danh sách giao dịch ngân sách:", error);
+      sweetAlert.alertFailed(
+        "Không thể tải danh sách ngân sách!",
+        "",
+        1000,
+        22
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Fetch Event Categories
@@ -350,6 +467,31 @@ export default function EventsComponent() {
           }}
           eventId={selectedEventId}
           refresh={fetchEvents} // Hàm refresh danh sách sự kiện
+        />
+      )}
+      {openAddDialog && selectedEventId && (
+        <AddParticipantsDialog
+          open={openAddDialog}
+          onClose={closeAddParticipantsDialog}
+          eventId={selectedEventId || ""}
+          eventName={selectedEventName}
+          refresh={fetchEvents}
+        />
+      )}
+      {openParticipantsDialog && (
+        <ParticipantsDialog
+          open={openParticipantsDialog}
+          onClose={() => setOpenParticipantsDialog(false)}
+          participants={participants}
+          eventName={selectedEventNameForParticipants}
+        />
+      )}
+      {openBudgetDialog && (
+        <BudgetDialog
+          open={openBudgetDialog}
+          onClose={() => setOpenBudgetDialog(false)}
+          transactions={budgetTransactions}
+          eventName={selectedEventNameForBudget}
         />
       )}
     </Paper>

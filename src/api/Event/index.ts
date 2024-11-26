@@ -90,6 +90,14 @@ const getEventParticipants = (eventId: string, page?: number, size?: number) => 
   });
 };
 
+const addListParticipants = (eventId: string, data: FormData) => {
+  return request.post<BasicResponse<ParticipantResponse>>(`/events/${eventId}/participants`, data, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+};
+
 
 const eventApi = {
   getAllEvents,
@@ -101,6 +109,7 @@ const eventApi = {
   getEventBudgetTransactions,
   getEventProcesses,
   getEventParticipants,
+  addListParticipants
 };
 
 export default eventApi;

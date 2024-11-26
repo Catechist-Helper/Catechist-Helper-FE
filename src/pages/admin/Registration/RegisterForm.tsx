@@ -160,7 +160,7 @@ const RegisterForm: React.FC = () => {
           confirmButtonColor: "green",
           confirmButtonText: "XÁC NHẬN",
         }).then(() => {
-          navigate(-1);
+          navigate("/");
         });
       }, 1000);
     } catch (error) {

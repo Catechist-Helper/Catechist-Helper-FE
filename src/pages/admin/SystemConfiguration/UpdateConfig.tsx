@@ -5,6 +5,10 @@ import systemConfigApi from "../../../api/SystemConfiguration";
 import AdminTemplate from "../../../components/Templates/AdminTemplate/AdminTemplate";
 import { PATH_ADMIN } from "../../../routes/paths";
 import { message } from "antd";
+import {
+  getSystemConfigEnumDescription,
+  SystemConfigKey,
+} from "../../../enums/SystemConfig";
 const UpdateConfig: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -63,16 +67,14 @@ const UpdateConfig: React.FC = () => {
   return (
     <AdminTemplate>
       <div>
-        <h3 className="text-center pt-10 fw-bold">
-          CẬP NHẬT DANH MỤC BÀI VIẾT
-        </h3>
+        <h3 className="text-center pt-10 fw-bold">CẬP NHẬT THÔNG SỐ</h3>
         <form onSubmit={formik.handleSubmit} className="max-w-sm mx-auto mt-5">
           <div className="mb-5">
             <label
               htmlFor="key"
               className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
             >
-             Key 
+              Thông số
             </label>
             <input
               id="key"
@@ -80,7 +82,10 @@ const UpdateConfig: React.FC = () => {
               type="text"
               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               onChange={formik.handleChange}
-              value={formik.values.key}
+              value={getSystemConfigEnumDescription(
+                formik.values.key as SystemConfigKey
+              )}
+              disabled
             />
           </div>
           <div className="mb-5">
@@ -88,7 +93,7 @@ const UpdateConfig: React.FC = () => {
               htmlFor="value"
               className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
             >
-              Value
+              Giá trị
             </label>
             <input
               id="value"

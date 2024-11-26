@@ -79,6 +79,8 @@ export interface BudgetTransactionResponseItem {
   id: string;
   fromBudget: number;
   toBudget: number;
+  transactionAt: string;
+  note: string;
   event: {
     id: string;
     name: string;

@@ -33,6 +33,7 @@ import { CreateSlotRequest } from "../../../model/Request/Slot";
 import { formatDate } from "../../../utils/formatDate";
 import { ClassResponse } from "../../../model/Response/Class";
 import useAppContext from "../../../hooks/useAppContext";
+import FileSaver from "file-saver";
 
 export default function ClassComponent() {
   const location = useLocation();
@@ -183,6 +184,48 @@ export default function ClassComponent() {
       width: 180,
       renderCell: (params: any) => {
         return formatDate.DD_MM_YYYY(params.value);
+      },
+    },
+    {
+      field: "export",
+      headerName: "Xuất danh sách",
+      width: 180,
+      renderCell: (params: any) => {
+        return (
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => {
+              const action = async () => {
+                try {
+                  enableLoading();
+                  const { data } = await timetableApi.exportClassData(
+                    params.row.id
+                  );
+
+                  // Tạo Blob từ response và sử dụng FileSaver để tải xuống file
+                  const blob = new Blob([data], {
+                    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                  });
+                  FileSaver.saveAs(blob, `${params.row.name}.xlsx`);
+                } catch (error) {
+                  console.error("Lỗi khi xuất danh sách:", error);
+                  sweetAlert.alertFailed(
+                    "Có lỗi xảy ra khi xuất danh sách!",
+                    "",
+                    1000,
+                    22
+                  );
+                } finally {
+                  disableLoading();
+                }
+              };
+              action();
+            }}
+          >
+            Xuất danh sách
+          </Button>
+        );
       },
     },
   ];
@@ -704,12 +747,54 @@ export default function ClassComponent() {
             </div>
             <div>
               <Button
+                onClick={() => {
+                  const action = async () => {
+                    try {
+                      enableLoading();
+                      const yearName = pastoralYears.find(
+                        (item) => item.id == selectedPastoralYear
+                      ).name;
+
+                      const { data } =
+                        await timetableApi.exportPastoralYearData(yearName);
+
+                      // Tạo Blob từ response và sử dụng FileSaver để tải xuống file
+                      const blob = new Blob([data], {
+                        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                      });
+                      FileSaver.saveAs(
+                        blob,
+                        `Danh sách thông tin các lớp năm học ${yearName}.xlsx`
+                      );
+                    } catch (error) {
+                      console.error("Lỗi khi xuất danh sách:", error);
+                      sweetAlert.alertFailed(
+                        "Có lỗi xảy ra khi xuất danh sách!",
+                        "",
+                        1000,
+                        22
+                      );
+                    } finally {
+                      disableLoading();
+                    }
+                  };
+                  action();
+                }}
+                variant="contained"
+                color="primary"
+                style={{ marginBottom: "16px" }}
+              >
+                Xuất danh sách theo năm học
+              </Button>
+            </div>
+            <div>
+              <Button
                 onClick={() => fetchClasses()}
                 variant="contained"
                 color="secondary"
                 style={{ marginBottom: "16px" }}
               >
-                Refresh
+                Tải lại
               </Button>
             </div>
           </div>
