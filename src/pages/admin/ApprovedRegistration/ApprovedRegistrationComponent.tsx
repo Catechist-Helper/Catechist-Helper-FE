@@ -287,6 +287,32 @@ export default function ApprovedRegistrationsTable() {
   // Mở modal phê duyệt phỏng vấn
   const handleOpenApprovalModal = (registrationId: string) => {
     const selectedRow = rows.find((row) => row.id === registrationId);
+
+    if (!selectedRow || !selectedRow.interviews.length) {
+      sweetAlert.alertFailed(
+        "Không tìm thấy thông tin phỏng vấn!",
+        "",
+        1000,
+        22
+      );
+      return;
+    }
+
+    const meetingTime = new Date(selectedRow.interviews[0].meetingTime);
+    const currentTime = new Date();
+
+    if (currentTime < meetingTime) {
+      sweetAlert.alertFailed(
+        `Chưa đến thời điểm phỏng vấn. Vui lòng quay lại sau ${formatDate.DD_MM_YYYY_Time(
+          selectedRow.interviews[0].meetingTime
+        )}`,
+        "",
+        10000,
+        30
+      );
+      return;
+    }
+
     if (selectedRow) {
       setSelectedRegistration(selectedRow);
       fetchSelectedRegistrationOfModal();
