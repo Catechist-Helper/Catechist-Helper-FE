@@ -14,6 +14,7 @@ export type AuthUser =
     id: string;
     email?: string;
     role?: string;
+    catechistId?: string;
     [key: string]: any;
   }
   | null

@@ -19,6 +19,7 @@ import { BasicResponse } from "../model/Response/BasicResponse";
 import { useNavigate } from "react-router-dom";
 import { AxiosResponse } from "axios";
 import { AccountRoleString } from "../enums/Account";
+import catechistApi from "../api/Catechist";
 // import authApi from "@/api/auth/authApi";
 
 // ----------------------------------------------------------------------
@@ -151,6 +152,8 @@ function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const login = async (email: string, password: string) => {
+    const cateRes = await catechistApi.getAllCatechists(1, 100000);
+
     try {
       enableLoading();
       await axiosInstances.base
@@ -167,11 +170,22 @@ function AuthProvider({ children }: { children: ReactNode }) {
             res.data != null
           ) {
             const { id, email, role, token } = res.data;
-            const user = {
+            let user: any = {
               id: id,
               email: email,
               role: role,
             };
+
+            if (
+              role &&
+              role.trim().toLowerCase() ===
+                AccountRoleString.CATECHIST.trim().toLowerCase()
+            ) {
+              let cateId = cateRes.data.data.items.find(
+                (item) => item.email == user.email
+              )?.id;
+              user = { ...user, catechistId: cateId };
+            }
 
             setSession(token);
             setUserInfo(user);

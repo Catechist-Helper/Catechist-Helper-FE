@@ -1,16 +1,30 @@
-import { useState } from "react";
-import "./NavbarAdmin.scss";
+import { useState, useEffect } from "react";
+import "./NavbarCatechist.scss";
 //import Search from "antd/es/input/Search";
 import Swal from "sweetalert2";
+import { getUserInfo } from "../../../utils/utils";
 
-const NavbarAdmin = () => {
+const NavbarCatechist = () => {
   // State for managing the visibility of the user profile menu
   const [isUserProfileMenuOpen, setUserProfileMenuOpen] = useState(false);
+  const [userLogin, setUserLogin] = useState<any>(null);
 
   // Function to toggle the user profile menu
   const toggleUserProfileMenu = () => {
     setUserProfileMenuOpen(!isUserProfileMenuOpen);
   };
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        let userLoggedin = getUserInfo();
+        setUserLogin(userLoggedin);
+      } catch (error) {
+        console.error("Error fetching user info:", error);
+      }
+    };
+    fetchUser();
+  }, []);
 
   return (
     <nav className="flex-grow-0 justify-between px-10 py-2 items-center bg-white">
@@ -44,8 +58,10 @@ const NavbarAdmin = () => {
             <div className="text-black user-profile flex">
               <div style={{ marginRight: "0.5rem", textAlign: "right" }}>
                 <ul style={{ listStyle: "none", padding: 0 }}>
-                  <li style={{ fontWeight: "600" }}>Admin</li>
-                  <li>Vai trò: Admin</li>
+                  <li style={{ fontWeight: "600" }}>
+                    {userLogin && userLogin.email ? userLogin.email : ""}
+                  </li>
+                  <li>Vai trò: Giáo lý viên</li>
                 </ul>
               </div>
               {/* Profile Picture */}
@@ -131,4 +147,4 @@ const NavbarAdmin = () => {
   );
 };
 
-export default NavbarAdmin;
+export default NavbarCatechist;
