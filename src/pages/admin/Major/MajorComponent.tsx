@@ -52,7 +52,35 @@ export default function MajorComponent() {
         </div>
       ),
     },
+    {
+      field: "levels",
+      headerName: "Cấp độ giáo lý viên phù hợp",
+      width: 800,
+      renderCell: (params) => (
+        <div>
+          <p>{params.row.levels}</p>
+        </div>
+      ),
+    },
   ];
+
+  const fetchLevelsByMajor = async (majorId: string) => {
+    try {
+      const { data } = await majorApi.getLevelsOfMajor(majorId);
+      let sortedArr = data.data.items.sort((a: any, b: any) => {
+        return a.hierarchyLevel - b.hierarchyLevel;
+      });
+      return sortedArr
+        .map(
+          (level: any) =>
+            `${level.name} (${level.description} - Phân cấp: ${level.hierarchyLevel})`
+        )
+        .join(", "); // Trả về danh sách tên level nối bởi dấu phẩy
+    } catch (error) {
+      console.error("Error loading levels for major:", error);
+      return "N/A"; // Trả về "N/A" nếu lỗi xảy ra
+    }
+  };
 
   // Handle xem khối
   const handleViewGrades = (majorId: string) => {
@@ -82,7 +110,6 @@ export default function MajorComponent() {
       const page = paginationModel.page + 1;
       const size = paginationModel.pageSize;
 
-      // Gọi API major với điều kiện niên khóa
       const { data } = await majorApi.getAllMajors(page, size);
 
       const sortedArray = data.data.items.sort(
@@ -92,9 +119,11 @@ export default function MajorComponent() {
       const updatedRows = await Promise.all(
         sortedArray.map(async (major: MajorResponse) => {
           const gradeCount = await fetchGradeCountByMajor(major.id);
+          const levels = await fetchLevelsByMajor(major.id); // Gọi API để lấy danh sách level
           return {
             ...major,
             gradeCount,
+            levels, // Gán danh sách level vào row
           };
         })
       );

@@ -121,6 +121,11 @@ export default function ClassComponent() {
   const columns: GridColDef[] = [
     { field: "name", headerName: "Tên lớp", width: 200 },
     {
+      field: "numberOfCatechist",
+      headerName: "Số lượng giáo lý viên",
+      width: 180,
+    },
+    {
       field: "major",
       headerName: "Ngành",
       width: 150,
@@ -162,6 +167,22 @@ export default function ClassComponent() {
             )}
           </p>
         );
+      },
+    },
+    {
+      field: "startDate",
+      headerName: "Ngày bắt đầu",
+      width: 180,
+      renderCell: (params: any) => {
+        return formatDate.DD_MM_YYYY(params.value);
+      },
+    },
+    {
+      field: "endDate",
+      headerName: "Ngày kết thúc",
+      width: 180,
+      renderCell: (params: any) => {
+        return formatDate.DD_MM_YYYY(params.value);
       },
     },
   ];
@@ -376,7 +397,6 @@ export default function ClassComponent() {
   const handleViewSlots = async (classId: string) => {
     try {
       const { data } = await classApi.getSlotsOfClass(classId);
-      console.log("bbbbbbbb", data);
 
       const sortedArray = data.data.items.sort(
         (a: any, b: any) =>

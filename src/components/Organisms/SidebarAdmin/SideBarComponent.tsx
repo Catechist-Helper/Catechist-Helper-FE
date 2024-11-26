@@ -501,6 +501,48 @@ const SideBarComponent = () => {
                       opacity: `${isHovered ? "1" : "0"}`,
                       transition: "all ease 0.2s",
                     }}
+                    to={PATH_ADMIN.levels}
+                    className="relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-primary_color hover:to-amber-600 px-4 py-3 hover:text-white"
+                  >
+                    <svg
+                      style={{ display: "none" }}
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        className="fill-current text-gray-300 group-hover:text-cyan-300"
+                        fillRule="evenodd"
+                        d="M2 6a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1H8a3 3 0 00-3 3v1.5a1.5 1.5 0 01-3 0V6z"
+                        clipRule="evenodd"
+                      />
+                      <path
+                        className="fill-current text-gray-600 group-hover:text-cyan-600"
+                        d="M6 12a2 2 0 012-2h8a2 2 0 012 2v2a2 2 0 01-2 2H2h2a2 2 0 002-2v-2z"
+                      />
+                    </svg>
+                    <span className="group-hover:text-gray-700">Cấp độ</span>
+                  </Link>
+                </div>
+              </li>
+              <li className="min-w-max">
+                <div
+                  onClick={() => {
+                    // navigateTo(PATH_MAIN.category);
+                  }}
+                  //   className={`links_hover ${
+                  //     typeof window !== "undefined" &&
+                  //     isActive(PATH_MAIN.category)
+                  //       ? "active_current_link"
+                  //       : ""
+                  //   }`}
+                >
+                  <Link
+                    style={{
+                      opacity: `${isHovered ? "1" : "0"}`,
+                      transition: "all ease 0.2s",
+                    }}
                     to={PATH_ADMIN.pastoral_years}
                     className="relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-primary_color hover:to-amber-600 px-4 py-3 hover:text-white"
                   >
@@ -650,6 +692,48 @@ const SideBarComponent = () => {
                       />
                     </svg>
                     <span className="group-hover:text-gray-700">Lớp học</span>
+                  </Link>
+                </div>
+              </li>
+
+              <li className="min-w-max">
+                <div
+                  onClick={() => {
+                    // navigateTo(PATH_MAIN.order);
+                  }}
+                  //   className={`links_hover ${
+                  //     typeof window !== "undefined" && isActive(PATH_MAIN.order)
+                  //       ? "active_current_link"
+                  //       : ""
+                  //   }`}
+                >
+                  <Link
+                    style={{
+                      opacity: `${isHovered ? "1" : "0"}`,
+                      transition: "all ease 0.2s",
+                    }}
+                    to={PATH_ADMIN.training_lists}
+                    className="relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-primary_color hover:to-amber-600 px-4 py-3 hover:text-white"
+                  >
+                    <svg
+                      style={{ display: "none" }}
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        className="fill-current text-gray-600 group-hover:text-cyan-600"
+                        fillRule="evenodd"
+                        d="M2 5a2 2 0 012-2h8a2 2 0 012 2v10a2 2 0 002 2H4a2 2 0 01-2-2V5zm3 1h6v4H5V6zm6 6H5v2h6v-2z"
+                        clipRule="evenodd"
+                      />
+                      <path
+                        className="fill-current text-gray-300 group-hover:text-cyan-300"
+                        d="M15 7h1a2 2 0 012 2v5.5a1.5 1.5 0 01-3 0V7z"
+                      />
+                    </svg>
+                    <span className="group-hover:text-gray-700">Đào tạo</span>
                   </Link>
                 </div>
               </li>

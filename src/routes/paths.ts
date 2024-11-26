@@ -4,6 +4,7 @@ function path(root: string, sublink: string) {
 
 export const PATH_ROOT_HOME = "/";
 const PATH_ROOT_ADMIN = "/admin";
+const PATH_ROOT_CATECHIST = "/catechist";
 const ROOTS_AUTH = '/';
 
 export const PATH_AUTH = {
@@ -56,6 +57,12 @@ export const PATH_ADMIN = {
   catechist_training: path(PATH_ROOT_ADMIN, '/training-list/:id/catechists'),
   //---------------------
 };
+
+export const PATH_CATECHIST = {
+  root: PATH_ROOT_CATECHIST,
+  interview: path(PATH_ROOT_CATECHIST, '/interviews'),
+  class: path(PATH_ROOT_CATECHIST, '/classes'),
+}
 
 export const PATH_HOME = {
   root: PATH_ROOT_HOME, 

@@ -74,3 +74,11 @@ export type GetCatechistResponse = {
   totalPages: number,
   items: CatechistResponse[];
 };
+
+export type GetLevelResponse = {
+  size: number,
+  page: number,
+  total: number,
+  totalPages: number,
+  items: LevelResponse[];
+};
