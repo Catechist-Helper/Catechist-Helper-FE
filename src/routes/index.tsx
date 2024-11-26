@@ -9,7 +9,7 @@ import CreatePostCategory from "../pages/admin/posts/CreatePostCategory";
 import PostCategory from "../pages/admin/posts/PostCategory";
 import UpdatePostCategory from "../pages/admin/posts/UpdatePostCategory";
 import CreatePost from "../pages/admin/posts/CreatePost";
-import { PATH_ADMIN, PATH_HOME } from "./paths";
+import { PATH_ADMIN, PATH_CATECHIST, PATH_HOME } from "./paths";
 import PostDetails from "../pages/admin/posts/PostDetails";
 import UpdatePost from "../pages/admin/posts/UpdatePost";
 import New from "../pages/common/News/New";
@@ -269,6 +269,30 @@ export default function Router() {
       ],
     },
 
+    {
+      path: "/catechist",
+      children: [
+        {
+          path: "/catechist",
+          element: (
+            <AuthGuard>
+              {/* <RoleBasedGuard accessibleRoles={[AccountRoleString.ADMIN]}> */}
+              <CatechistClassPage />
+              {/* </RoleBasedGuard> */}
+            </AuthGuard>
+          ),
+        },
+        {
+          path: PATH_CATECHIST.class,
+          element: <CatechistClassPage />,
+        },
+        {
+          path: PATH_CATECHIST.interview,
+          element: <CatechistInterViewPage />,
+        },
+      ],
+    },
+
     { path: "*", element: <NotFound /> },
   ]);
 }
@@ -319,12 +343,22 @@ const AdminEventManagement = Loadable(
 const AdminFileManagement = Loadable(
   lazy(() => import("../pages/admin/File/index"))
 );
+const CatechistInterViewPage = Loadable(
+  lazy(() => import("../pages/catechist/Interview/index"))
+);
+const CatechistClassPage = Loadable(
+  lazy(() => import("../pages/catechist/Class/index"))
+);
 //----------------------------
 
 // Chị Tâm
 const HomePost = Loadable(lazy(() => import("../pages/admin/posts/HomePost")));
-import RegisterForm from "./../pages/admin/Registration/RegisterForm";
-import ListAllTrainCatechist from "../pages/admin/TrainingList/ListAllTrainCatechist";
+const RegisterForm = Loadable(
+  lazy(() => import("./../pages/admin/Registration/RegisterForm"))
+);
+const ListAllTrainCatechist = Loadable(
+  lazy(() => import("../pages/admin/TrainingList/ListAllTrainCatechist"))
+);
 const HomeChristianName = Loadable(
   lazy(() => import("../pages/admin/ChristianName/HomeChristianName"))
 );

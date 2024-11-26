@@ -14,6 +14,9 @@ import viVNGridTranslation from "../../../locale/MUITable";
 import sweetAlert from "../../../utils/sweetAlert";
 import { formatDate } from "../../../utils/formatDate";
 import CatechistDialog from "./CatechistDialog";
+import timetableApi from "../../../api/Timetable";
+import FileSaver from "file-saver";
+import useAppContext from "../../../hooks/useAppContext";
 
 const columns: GridColDef[] = [
   {
@@ -108,6 +111,7 @@ export default function CatechistComponent() {
   const [rowCount, setRowCount] = useState<number>(0);
   const [selectedIds] = useState<GridRowSelectionModel>([]);
   const [openDialog, setOpenDialog] = useState<boolean>(false);
+  const { enableLoading, disableLoading } = useAppContext();
 
   const handleAddCatechist = () => {
     setOpenDialog(true);
@@ -134,6 +138,24 @@ export default function CatechistComponent() {
     }
   };
 
+  const handleExportCatechists = async () => {
+    try {
+      enableLoading();
+      const { data } = await timetableApi.exportCatechistData();
+
+      // Tạo Blob từ response và sử dụng FileSaver để tải xuống file
+      const blob = new Blob([data], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+      FileSaver.saveAs(blob, "Danh_sach_giao_ly_vien.xlsx");
+    } catch (error) {
+      console.error("Lỗi khi xuất danh sách giáo lý viên:", error);
+      sweetAlert.alertFailed("Có lỗi xảy ra khi xuất danh sách!", "", 1000, 22);
+    } finally {
+      disableLoading();
+    }
+  };
+
   useEffect(() => {
     fetchCatechists();
   }, [paginationModel]); // Cập nhật lại khi paginationModel thay đổi
@@ -157,6 +179,14 @@ export default function CatechistComponent() {
       <div className="my-2 flex justify-between mx-3">
         <div className="min-w-[10px]"></div>
         <div className="flex gap-x-2">
+          <Button
+            onClick={handleExportCatechists} // Xuất danh sách
+            variant="contained"
+            color="secondary"
+            style={{ marginBottom: "16px" }}
+          >
+            Xuất danh sách
+          </Button>
           <Button
             onClick={handleAddCatechist} // Open dialog
             variant="contained"

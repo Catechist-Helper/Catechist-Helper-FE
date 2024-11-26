@@ -1,7 +1,7 @@
 import axiosInstances from "../../config/axios";
 import { BasicResponse } from "../../model/Response/BasicResponse";
 import { CreateMajorRequest, UpdateMajorRequest } from "../../model/Request/Major";
-import { MajorResponse, LevelResponse, GetMajorResponse, GetCatechistResponse } from "../../model/Response/Major";
+import { MajorResponse, GetLevelResponse, GetMajorResponse, GetCatechistResponse } from "../../model/Response/Major";
 
 // Tạo URL gốc cho API Major
 const request = axiosInstances.base;
@@ -52,7 +52,7 @@ const getLevelsOfMajor = (id: string, page?: number, size?: number) => {
     ...(page !== undefined && { page }),
     ...(size !== undefined && { size }),
   };
-  return request.get<BasicResponse<LevelResponse[]>>(`${ROOT_MAJOR}/${id}/levels`, { params });
+  return request.get<BasicResponse<GetLevelResponse>>(`${ROOT_MAJOR}/${id}/levels`, { params });
 };
 
 // PUT: Gán một level cho một major
