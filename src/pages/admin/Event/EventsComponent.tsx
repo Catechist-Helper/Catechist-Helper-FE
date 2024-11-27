@@ -25,6 +25,8 @@ import OrganizersDialog from "./OrganizersDialog";
 import AddParticipantsDialog from "./AddParticipantsDialog";
 import ParticipantsDialog from "./ParticipantsDialog";
 import BudgetDialog from "./BudgetDialog";
+import { PATH_ADMIN } from "../../../routes/paths";
+import { useNavigate } from "react-router-dom";
 
 export default function EventsComponent() {
   const [rows, setRows] = useState<EventItemResponse[]>([]);
@@ -45,6 +47,7 @@ export default function EventsComponent() {
     useState<boolean>(false); // Trạng thái mở/đóng của dialog
   const [openAddDialog, setOpenAddDialog] = useState<boolean>(false);
   const [selectedEventName, setSelectedEventName] = useState<string>("");
+  const navigate = useNavigate();
 
   const openAddParticipantsDialog = (eventId: string, eventName: string) => {
     console.log(eventId, eventName);
@@ -313,6 +316,17 @@ export default function EventsComponent() {
     setOpenDialog(true);
   };
 
+  const handleViewProcesses = () => {
+    if (selectedIds.length !== 1) {
+      sweetAlert.alertWarning("Vui lòng chọn 1 sự kiện để xem!", "", 1000, 22);
+      return;
+    }
+
+    navigate(PATH_ADMIN.admin_event_process, {
+      state: { eventId: selectedIds[0] },
+    });
+  };
+
   // Mở dialog để chỉnh sửa sự kiện
   const handleEditEvent = () => {
     if (selectedIds.length !== 1) {
@@ -425,6 +439,13 @@ export default function EventsComponent() {
             onClick={handleEditEvent}
           >
             Chỉnh sửa
+          </Button>
+          <Button
+            variant="contained"
+            color="info"
+            onClick={handleViewProcesses}
+          >
+            Xem hoạt động
           </Button>
           <Button variant="contained" color="error" onClick={handleDeleteEvent}>
             Xóa
