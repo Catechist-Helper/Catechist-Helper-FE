@@ -370,6 +370,7 @@ export default function ApprovedRegistrationsTable() {
     enableLoading();
     if (!interviewResult) {
       alert("Vui lòng chọn kết quả phỏng vấn.");
+      disableLoading();
       return;
     }
 
@@ -387,7 +388,7 @@ export default function ApprovedRegistrationsTable() {
         const interviewId = selectedRegistration.interviews[0]?.id;
         if (interviewId) {
           await interviewApi.updateInterview(interviewId, {
-            meetingTime: selectedRegistration.interviews[0].meetingTime,
+            meetingTime: null,
             note: interviewNote,
             isPassed,
           });
@@ -418,6 +419,7 @@ export default function ApprovedRegistrationsTable() {
     } finally {
       disableLoading();
     }
+    disableLoading();
   };
 
   // Xác nhận cập nhật phỏng vấn

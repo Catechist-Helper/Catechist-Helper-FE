@@ -1,6 +1,8 @@
 // src/model/Response/ClassResponse.ts
 
 export type CatechistResponse = {
+  catechist:
+  {
   id: string;
   code: string;
   fullName: string;
@@ -44,7 +46,16 @@ export type CatechistResponse = {
     description: string;
     imageUrl: string;
     levelId: string;
-  }[];
+  }}
+  isMain:boolean
+};
+
+export type GetCatechistClassResponse = {
+  size: number,
+  page: number,
+  total: number,
+  totalPages: number,
+  items: CatechistResponse[];
 };
 
 export type ClassResponse = {

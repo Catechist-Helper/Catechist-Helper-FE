@@ -8,6 +8,7 @@ import {
 import {
   EventResponse,
   EventItemResponse,
+  MemberResponse,
   ProcessResponse, ParticipantResponse, BudgetTransactionResponse
 } from "../../model/Response/Event";
 
@@ -52,7 +53,7 @@ const getEventMembers = (eventId: string, page?: number, size?: number) => {
     ...(page !== undefined && { page }),
     ...(size !== undefined && { size }),
   };
-  return request.get<BasicResponse<ParticipantResponse>>(`/events/${eventId}/members`, {
+  return request.get<BasicResponse<MemberResponse>>(`/events/${eventId}/members`, {
     params,
   });
 };

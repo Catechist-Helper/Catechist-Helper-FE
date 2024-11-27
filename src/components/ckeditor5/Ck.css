@@ -8,13 +8,13 @@
 }
 
 .main-container {
-  font-family: "Poppins", sans-serif !important;
+  font-family: "Open Sans", sans-serif !important;
   width: 100%;
   margin: 0;
 }
 
 .ck-content {
-  font-family: "Poppins", sans-serif !important;
+  font-family: "Open Sans", sans-serif !important;
   line-height: 1.6;
   word-break: break-word;
 }
@@ -27,7 +27,7 @@
   margin-top: 10px !important;
 }
 .ck-content h3.category {
-  font-family: "Poppins", sans-serif !important;
+  font-family: "Open Sans", sans-serif !important;
   font-size: 20px;
   font-weight: bold;
   color: #555;
@@ -37,7 +37,7 @@
 }
 
 .ck-content h2.document-title {
-  font-family: "Poppins", sans-serif !important;
+  font-family: "Open Sans", sans-serif !important;
   font-size: 50px;
   font-weight: bold;
   margin: 0;
@@ -46,7 +46,7 @@
 }
 
 .ck-content h3.document-subtitle {
-  font-family: "Poppins", sans-serif !important;
+  font-family: "Open Sans", sans-serif !important;
   font-size: 20px;
   color: #555;
   margin: 0 0 1em;
@@ -77,7 +77,7 @@
 }
 
 .ck-content blockquote.side-quote {
-  font-family: "Poppins", sans-serif !important;
+  font-family: "Open Sans", sans-serif !important;
   font-style: normal;
   float: right;
   width: 35%;
