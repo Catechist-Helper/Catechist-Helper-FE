@@ -139,7 +139,8 @@ const RegistrationDetailDialog: React.FC<RegistrationDetailDialogProps> = ({
                 </li>
                 {registration.note && (
                   <li>
-                    <strong>Ghi chú:</strong> {registration.note}
+                    <strong>Ghi chú:</strong> <br />
+                    <span className="ml-6">{registration.note}</span>
                   </li>
                 )}
                 <li>

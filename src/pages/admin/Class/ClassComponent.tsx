@@ -67,6 +67,8 @@ export default function ClassComponent() {
 
   // States for slot dialog
   const [openSlotDialog, setOpenSlotDialog] = useState<boolean>(false);
+  const [updateSlotMode, setUpdateSlotMode] = useState<boolean>(false);
+
   const [rooms, setRooms] = useState<any[]>([]); // Room list
   const [selectedRoom, setSelectedRoom] = useState<string | null>(null);
   const [assignedCatechists, setAssignedCatechists] = useState<any[]>([]); // Assigned catechists
@@ -139,6 +141,22 @@ export default function ClassComponent() {
       renderCell: (params) => params.row.gradeName,
     },
     {
+      field: "startDate",
+      headerName: "Ngày bắt đầu",
+      width: 180,
+      renderCell: (params: any) => {
+        return formatDate.DD_MM_YYYY(params.value);
+      },
+    },
+    {
+      field: "endDate",
+      headerName: "Ngày kết thúc",
+      width: 180,
+      renderCell: (params: any) => {
+        return formatDate.DD_MM_YYYY(params.value);
+      },
+    },
+    {
       field: "slotCount",
       headerName: "Tiết học",
       width: 180,
@@ -160,7 +178,6 @@ export default function ClassComponent() {
                 onClick={() => {
                   setSelectedClassView(params.row);
                   handleViewSlots(params.row.id);
-                  console.log(params.row);
                 }}
               >
                 Xem tiết học
@@ -168,22 +185,6 @@ export default function ClassComponent() {
             )}
           </p>
         );
-      },
-    },
-    {
-      field: "startDate",
-      headerName: "Ngày bắt đầu",
-      width: 180,
-      renderCell: (params: any) => {
-        return formatDate.DD_MM_YYYY(params.value);
-      },
-    },
-    {
-      field: "endDate",
-      headerName: "Ngày kết thúc",
-      width: 180,
-      renderCell: (params: any) => {
-        return formatDate.DD_MM_YYYY(params.value);
       },
     },
     {
@@ -348,10 +349,81 @@ export default function ClassComponent() {
     }
   }, [selectedPastoralYear, selectedMajor, selectedGrade, paginationModel]);
 
-  const handleOpenSlotDialog = async (selectedClass: ClassResponse) => {
+  const handleAddCatechist = (selectedIds: string[]) => {
+    const selectedCatechists = catechists.filter((catechist) =>
+      selectedIds.includes(catechist.id)
+    );
+    setAssignedCatechists([...assignedCatechists, ...selectedCatechists]);
+    setCatechists(
+      catechists.filter((catechist) => !selectedIds.includes(catechist.id))
+    ); // Remove from unassigned list
+  };
+
+  const handleRemoveCatechist = (selectedIds: string[]) => {
+    const removedCatechists = assignedCatechists.filter(
+      (catechist) => !selectedIds.includes(catechist.id)
+    );
+    setAssignedCatechists(removedCatechists);
+    setCatechists([
+      ...catechists,
+      ...assignedCatechists.filter((catechist) =>
+        selectedIds.includes(catechist.id)
+      ),
+    ]); // Add back to unassigned list
+  };
+
+  const handleOpenSlotDialog = async (
+    selectedClass: ClassResponse,
+    updateMode?: boolean
+  ) => {
+    setUpdateSlotMode(false);
     setSelectedClass(selectedClass);
     await fetchRooms();
-    await fetchCatechists(selectedGrade); // Fetch catechists when opening the dialog
+    await fetchCatechists(selectedClass.gradeId); // Fetch catechists when opening the dialog
+    if (updateMode) {
+      setUpdateSlotMode(true);
+      const res = await classApi.getCatechistsOfClass(
+        selectedClass.id,
+        1,
+        1000
+      );
+      const secondRes = await gradeApi.getCatechistsOfGrade(
+        selectedClass.gradeId,
+        false,
+        1,
+        1000,
+        selectedPastoralYear
+      );
+
+      // const fetchItems: any[] = [];
+      // [...data.data.items].forEach((item) => {
+      //   fetchItems.push({ ...item, id: item.catechist.id });
+      // });
+
+      // setCatechists(fetchItems);
+      const catechistInClassUpdate = res.data.data.items;
+      const catechistInGradeUpdate = secondRes.data.data.items;
+
+      let selectedIds: string[] = [];
+      catechistInClassUpdate.forEach((item) => {
+        selectedIds.push(item.catechist.id);
+        if (item.isMain) {
+          setMainCatechistId(item.catechist.id);
+        }
+      });
+
+      const selectedCatechists = catechistInGradeUpdate.filter(
+        (catechist: any) => selectedIds.includes(catechist.catechist.id)
+      );
+      const fetchItems: any[] = [];
+      [...selectedCatechists].forEach((item) => {
+        fetchItems.push({ ...item, id: item.catechist.id });
+      });
+      setAssignedCatechists([...assignedCatechists, ...fetchItems]);
+      // setCatechists(
+      //   catechists.filter((catechist) => !selectedIds.includes(catechist.id))
+      // );
+    }
     setOpenSlotDialog(true);
   };
 
@@ -398,42 +470,87 @@ export default function ClassComponent() {
   };
 
   const handleConfirm = async () => {
-    if (!selectedRoom || assignedCatechists.length === 0) {
-      sweetAlert.alertFailed(
-        "Vui lòng chọn phòng và giáo lý viên!",
-        "",
-        1000,
-        22
-      );
+    if (updateSlotMode) {
+      try {
+        enableLoading();
+        if (selectedRoom) {
+          classApi.updateRoomOfClass(
+            selectedClass ? selectedClass.id : "",
+            selectedRoom
+          );
+        }
+        const updateCates = assignedCatechists.map((catechist: any) => ({
+          catechistId: catechist.id,
+          isMain: catechist.id === mainCatechistId,
+        }));
+        classApi.updateCatechitsOfClass(selectedClass ? selectedClass.id : "", {
+          catechists: updateCates,
+        });
+        console.log(selectedClass ? selectedClass.id : "", {
+          catechists: updateCates,
+        });
+        setTimeout(() => {
+          setOpenSlotDialog(false);
+          sweetAlert.alertSuccess(
+            "Cập nhật tiết học thành công!",
+            "",
+            1000,
+            22
+          );
+          handleViewSlots(selectedClass ? selectedClass.id : "");
+        }, 3000);
+      } catch (error) {
+        sweetAlert.alertFailed(
+          "Có lỗi xảy ra khi cập nhật tiết học!",
+          "",
+          1000,
+          22
+        );
+      } finally {
+        setTimeout(() => {
+          disableLoading();
+        }, 3000);
+      }
+
       return;
-    }
+    } else {
+      if (!selectedRoom || assignedCatechists.length === 0) {
+        sweetAlert.alertFailed(
+          "Vui lòng chọn phòng và giáo lý viên!",
+          "",
+          1000,
+          22
+        );
+        return;
+      }
 
-    const catechistsInClassData: CreateCatechistInClassRequest = {
-      classId: selectedClass ? selectedClass.id : "",
-      catechistIds: assignedCatechists.map((catechist) => catechist.id),
-      mainCatechistId: mainCatechistId!,
-    };
+      const catechistsInClassData: CreateCatechistInClassRequest = {
+        classId: selectedClass ? selectedClass.id : "",
+        catechistIds: assignedCatechists.map((catechist) => catechist.id),
+        mainCatechistId: mainCatechistId!,
+      };
 
-    const slotData: CreateSlotRequest = {
-      classId: selectedClass ? selectedClass.id : "",
-      roomId: selectedRoom,
-      catechists: assignedCatechists.map((catechist) => ({
-        catechistId: catechist.id,
-        isMain: catechist.id === mainCatechistId,
-      })),
-    };
+      const slotData: CreateSlotRequest = {
+        classId: selectedClass ? selectedClass.id : "",
+        roomId: selectedRoom,
+        catechists: assignedCatechists.map((catechist) => ({
+          catechistId: catechist.id,
+          isMain: catechist.id === mainCatechistId,
+        })),
+      };
 
-    try {
-      enableLoading();
-      await catechistInClassApi.createCatechistInClass(catechistsInClassData);
-      await timetableApi.createSlot(slotData);
-      sweetAlert.alertSuccess("Tạo tiết học thành công!", "", 1000, 22);
-      setOpenSlotDialog(false);
-      fetchClasses(); // Refresh classes
-    } catch (error) {
-      sweetAlert.alertFailed("Có lỗi xảy ra khi tạo tiết học!", "", 1000, 22);
-    } finally {
-      disableLoading();
+      try {
+        enableLoading();
+        await catechistInClassApi.createCatechistInClass(catechistsInClassData);
+        await timetableApi.createSlot(slotData);
+        sweetAlert.alertSuccess("Tạo tiết học thành công!", "", 1000, 22);
+        setOpenSlotDialog(false);
+        fetchClasses(); // Refresh classes
+      } catch (error) {
+        sweetAlert.alertFailed("Có lỗi xảy ra khi tạo tiết học!", "", 1000, 22);
+      } finally {
+        disableLoading();
+      }
     }
   };
 
@@ -447,6 +564,7 @@ export default function ClassComponent() {
       );
 
       setSlots(sortedArray);
+
       setOpenSlotsDialog(true);
     } catch (error) {
       console.error("Error loading slots:", error);
@@ -621,37 +739,13 @@ export default function ClassComponent() {
         <input
           type="checkbox"
           checked={mainCatechistId === params.row.id}
-          onChange={(e) => {
+          onChange={() => {
             handleMainCatechistChange(params.row.id);
-            console.log(e);
           }}
         />
       ),
     },
   ];
-
-  const handleAddCatechist = (selectedIds: string[]) => {
-    const selectedCatechists = catechists.filter((catechist) =>
-      selectedIds.includes(catechist.id)
-    );
-    setAssignedCatechists([...assignedCatechists, ...selectedCatechists]);
-    setCatechists(
-      catechists.filter((catechist) => !selectedIds.includes(catechist.id))
-    ); // Remove from unassigned list
-  };
-
-  const handleRemoveCatechist = (selectedIds: string[]) => {
-    const removedCatechists = assignedCatechists.filter(
-      (catechist) => !selectedIds.includes(catechist.id)
-    );
-    setAssignedCatechists(removedCatechists);
-    setCatechists([
-      ...catechists,
-      ...assignedCatechists.filter((catechist) =>
-        selectedIds.includes(catechist.id)
-      ),
-    ]); // Add back to unassigned list
-  };
 
   const handleMainCatechistChange = (id: string) => {
     setMainCatechistId(id); // Update main catechist ID
@@ -829,13 +923,20 @@ export default function ClassComponent() {
       >
         <div style={{ padding: "20px" }}>
           <h3 className="mb-3">
-            <strong>Tạo tiết học cho {selectedClass?.name}</strong>
+            <strong>
+              {updateSlotMode ? "Cập nhật" : "Tạo"} tiết học cho{" "}
+              {selectedClass?.name}
+            </strong>
           </h3>
           <h4 className="mb-2">
             <strong>Phòng học</strong>
           </h4>
           <FormControl fullWidth>
-            <InputLabel>Chọn phòng học</InputLabel>
+            <InputLabel>
+              {updateSlotMode
+                ? "Chọn phòng học mới (nếu muốn cập nhật)"
+                : "Chọn phòng học"}
+            </InputLabel>
             <Select
               value={selectedRoom}
               onChange={(e) => {
@@ -985,6 +1086,16 @@ export default function ClassComponent() {
               <></>
             )}
           </h3>
+          <div className="w-full flex justify-end">
+            <Button
+              variant="outlined"
+              onClick={() => {
+                handleOpenSlotDialog(selectedClassView, true);
+              }}
+            >
+              Cập nhật các tiết học
+            </Button>
+          </div>
           <DataGrid
             rows={slots}
             columns={[
