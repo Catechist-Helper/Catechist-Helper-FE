@@ -4,4 +4,3 @@ export type BasicResponse<T = any> = {
     message: string | null;
     data: T;
 };
-  
