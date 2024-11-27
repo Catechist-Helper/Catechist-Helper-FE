@@ -142,6 +142,10 @@ export default function Router() {
           element: <AdminEventManagement />,
         },
         {
+          path: PATH_ADMIN.admin_event_process,
+          element: <AdminEventProcessPage />,
+        },
+        {
           path: PATH_ADMIN.assign_catechist_to_grade,
           element: <AssignCatechistToGrade />,
         },
@@ -290,6 +294,14 @@ export default function Router() {
           path: PATH_CATECHIST.interview,
           element: <CatechistInterViewPage />,
         },
+        {
+          path: PATH_CATECHIST.event,
+          element: <CatechistEventPage />,
+        },
+        {
+          path: PATH_CATECHIST.event_process,
+          element: <CatechistEventProcessPage />,
+        },
       ],
     },
 
@@ -348,6 +360,15 @@ const CatechistInterViewPage = Loadable(
 );
 const CatechistClassPage = Loadable(
   lazy(() => import("../pages/catechist/Class/index"))
+);
+const CatechistEventPage = Loadable(
+  lazy(() => import("../pages/catechist/Event/index"))
+);
+const CatechistEventProcessPage = Loadable(
+  lazy(() => import("../pages/catechist/EventProcess/index"))
+);
+const AdminEventProcessPage = Loadable(
+  lazy(() => import("../pages/admin/EventProcess/index"))
 );
 //----------------------------
 
