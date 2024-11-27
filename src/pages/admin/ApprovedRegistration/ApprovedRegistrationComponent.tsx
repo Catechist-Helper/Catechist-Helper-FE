@@ -386,11 +386,8 @@ export default function ApprovedRegistrationsTable() {
 
         const interviewId = selectedRegistration.interviews[0]?.id;
         if (interviewId) {
-          await interviewApi.updateInterview(interviewId, {
-            meetingTime: selectedRegistration.interviews[0].meetingTime,
-            note: interviewNote,
-            isPassed,
-          });
+          await interviewApi.updateInterviewStatus(interviewId, 
+            isPassed);
         }
 
         let processRes = await interviewProcessApi.createInterviewProcess({

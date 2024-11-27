@@ -14,6 +14,11 @@ const createInterview = (data: { registrationId: string; meetingTime: string, in
 const updateInterview = (id: string, data: { meetingTime: string; note?: string | null; isPassed?: boolean; reason?: string }) => {
     return request.put<BasicResponse<any>>(`${ROOT_INTERVIEW}/${id}`, data);
   };
+
+  // PUT: Cập nhật thông tin của một interview
+const updateInterviewStatus = (id: string, isPassed?: boolean ) => {
+    return request.put<BasicResponse<any>>(`${ROOT_INTERVIEW}/${id}/status`, isPassed)
+  };
   
 // DELETE: Xóa một interview
 const deleteInterview = (id: string) => {
@@ -23,6 +28,7 @@ const deleteInterview = (id: string) => {
 const interviewApi = {
   createInterview,
   updateInterview,
+  updateInterviewStatus,
   deleteInterview,
 };
 
