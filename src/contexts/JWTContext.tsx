@@ -213,9 +213,9 @@ function AuthProvider({ children }: { children: ReactNode }) {
             disableLoading();
             sweetAlert.alertFailed(
               `Đăng nhập thất bại`,
-              `Xin bạn vui lòng kiểm tra email hoặc mật khẩu và đăng nhập lại`,
+              `Vui lòng kiểm tra email hoặc mật khẩu và đăng nhập lại`,
               5000,
-              30
+              26
             );
           }
         })
@@ -231,7 +231,7 @@ function AuthProvider({ children }: { children: ReactNode }) {
           navigateToPage(PATH_AUTH.login);
         })
         .finally(() => {
-          if (getUserInfo()) {
+          if (getUserInfo() && getUserInfo()?.id) {
             setTimeout(() => {
               sweetAlert.alertSuccess("Đăng nhập thành công", "", 1200, 22);
             }, 200);
@@ -242,9 +242,9 @@ function AuthProvider({ children }: { children: ReactNode }) {
       disableLoading();
       sweetAlert.alertFailed(
         `Đăng nhập thất bại`,
-        `Xin bạn vui lòng kiểm tra email hoặc mật khẩu và đăng nhập lại`,
+        `Vui lòng kiểm tra email hoặc mật khẩu và đăng nhập lại`,
         5000,
-        30
+        26
       );
       navigateToPage(PATH_AUTH.login);
     }
