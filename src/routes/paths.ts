@@ -15,14 +15,15 @@ export const PATH_ADMIN = {
   root: PATH_ROOT_ADMIN,
           // Thuan
   catechist_management: path(PATH_ROOT_ADMIN, '/catechists'),
-  admin_registration: path(PATH_ROOT_ADMIN, '/registration'),
-  approved_registration: path(PATH_ROOT_ADMIN, '/interview'),
+  admin_registration: path(PATH_ROOT_ADMIN, '/registrations'),
+  approved_registration: path(PATH_ROOT_ADMIN, '/interviews'),
   major_management: path(PATH_ROOT_ADMIN, '/majors'),
   grade_management: path(PATH_ROOT_ADMIN, '/grades'),
   class_management: path(PATH_ROOT_ADMIN, '/classes'),
   assign_catechist_to_grade: path(PATH_ROOT_ADMIN, '/grades/assign-catechists'),
   admin_event_category_management: path(PATH_ROOT_ADMIN, '/event-categories'),
   admin_event_management: path(PATH_ROOT_ADMIN, '/events'),
+  admin_event_process: path(PATH_ROOT_ADMIN, '/event-processes'),
   admin_management_file: path(PATH_ROOT_ADMIN, '/files'),
           //----------
 
@@ -62,6 +63,8 @@ export const PATH_CATECHIST = {
   root: PATH_ROOT_CATECHIST,
   interview: path(PATH_ROOT_CATECHIST, '/interviews'),
   class: path(PATH_ROOT_CATECHIST, '/classes'),
+  event: path(PATH_ROOT_CATECHIST, '/events'),
+  event_process: path(PATH_ROOT_CATECHIST, '/event-processes'),
 }
 
 export const PATH_HOME = {
