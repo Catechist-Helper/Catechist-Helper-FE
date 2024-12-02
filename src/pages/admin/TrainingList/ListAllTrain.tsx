@@ -226,7 +226,7 @@ const ListAllTrain: React.FC = () => {
                 .then(() => {
                     sweetAlert.alertSuccess(
                         "Xóa thành công!",
-                        `Train với ID: ${name} đã được xóa thành công.`,
+                        `Train đã được xóa thành công.`,
                         2000,
                         false
                     );
@@ -237,6 +237,74 @@ const ListAllTrain: React.FC = () => {
                 });
         }
     };
+
+    // const handleAddOrUpdateCatechist = (trainId: string, catechistCount: number) => {
+    //     if (catechistCount === 0) {
+    //         navigate(`/admin/training-catechist`);
+    //     } else {
+    //         navigate(`/admin/training-catechist`);
+    //     }
+    // };
+    // Trong ListAllTrain.tsx, thêm useEffect mới để lắng nghe sự thay đổi:
+
+    useEffect(() => {
+        const fetchCatechistsForTrain = async (trainId: string) => {
+            try {
+                const train = trains.find(t => t.id === trainId);
+                if (!train) return;
+
+                const response = await trainApi.getCatechistsByTrainingListId(trainId);
+                const items = response.data.data.items;
+
+                const now = new Date();
+                const startDate = new Date(train.startTime);
+
+                // Nếu khóa chưa bắt đầu, chỉ đếm những catechist không có status = 2
+                if (now < startDate) {
+                    const activeItems = items.filter(
+                        (item: any) => item.catechistInTrainingStatus !== 2
+                    );
+                    setCatechists(prev => ({
+                        ...prev,
+                        [trainId]: activeItems
+                    }));
+                } else {
+                    // Nếu khóa đã bắt đầu hoặc kết thúc, đếm tất cả
+                    setCatechists(prev => ({
+                        ...prev,
+                        [trainId]: items
+                    }));
+                }
+            } catch (err) {
+                console.error(`Failed to fetch catechists for train ID ${trainId}:`, err);
+            }
+        };
+
+        trains.forEach(train => {
+            fetchCatechistsForTrain(train.id);
+        });
+    }, [trains]);
+
+    const handleAddOrUpdateCatechist = (trainId: string, catechistCount: number) => {
+        const selectedTrain = trains.find(train => train.id === trainId);
+        if (selectedTrain) {
+            navigate('/admin/training-catechist', {
+                state: {
+                    trainingInfo: {
+                        id: selectedTrain.id,
+                        name: selectedTrain.name,
+                        previousLevel: selectedTrain.previousLevel?.hierarchyLevel || levelMap[selectedTrain.previousLevelId],
+                        nextLevel: selectedTrain.nextLevel?.hierarchyLevel || levelMap[selectedTrain.nextLevelId],
+                        startTime: selectedTrain.startTime,
+                        endTime: selectedTrain.endTime,
+                        description: selectedTrain.description,
+                        currentCatechistCount: catechistCount
+                    }
+                }
+            });
+        }
+    };
+
 
     return (
         <div className="container mt-5">
@@ -307,7 +375,17 @@ const ListAllTrain: React.FC = () => {
                                         </td>
                                         <td className="px-6 py-4 text-center">{formatDate(train.startTime)}</td>
                                         <td className="px-6 py-4 text-center">{formatDate(train.endTime)}</td>
-                                        <td className="px-6 py-4 text-center">{catechists[train.id]?.length || 0}</td>
+                                        <td className="px-6 py-4 text-center">
+                                            {catechists[train.id]?.length || 0}
+                                            {determineStatusLabel(train) === trainingListStatusLabel[trainingListStatus.NotStarted] && (
+                                                <button
+                                                    className="btn btn-primary ml-3"
+                                                    onClick={() => handleAddOrUpdateCatechist(train.id, catechists[train.id]?.length || 0)}
+                                                >
+                                                    {catechists[train.id]?.length === 0 ? "Thêm" : "Cập nhật"}
+                                                </button>
+                                            )}
+                                        </td>
                                         {/* <td className="px-6 py-4 text-center">
                                             {train.certificate ? (
                                                 <div>
