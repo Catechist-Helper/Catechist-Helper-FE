@@ -75,6 +75,7 @@ const ListCatechistByLevel: React.FC = () => {
         const data: BasicResponse = res.data;
         if (data.statusCode === 200) {
           setTrainings(data.data.items || []);
+          console.log(trainings)
         }
       })
       .catch((err) => {
@@ -125,7 +126,7 @@ const ListCatechistByLevel: React.FC = () => {
           setAssignedCatechists(mappedAssignedCatechists);
           setTrainingCatechists(mappedAssignedCatechists);
           setCatechists(unassignedCatechists);
-    
+          console.log(trainingCatechists);
         } catch (error) {
           console.error("Lỗi khi load dữ liệu ban đầu:", error);
         }
@@ -152,6 +153,7 @@ const ListCatechistByLevel: React.FC = () => {
         ...prev,
         { ...selectedCatechist, status: 0 },
       ]);
+      console.log(catechistsToAssign)
     }
   };
 

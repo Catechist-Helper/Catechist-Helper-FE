@@ -24,10 +24,8 @@ const ListAllTrainCatechist: React.FC = () => {
   const handleGoBack = () => {
     navigate(-1);
   };
-<<<<<<< Updated upstream
+  
   // Fetch all catechists and training details
-=======
->>>>>>> Stashed changes
   const fetchCatechists = async () => {
     try {
       // Get training details
@@ -40,15 +38,10 @@ const ListAllTrainCatechist: React.FC = () => {
 
       setTrainingStartDate(startDate);
       setTrainingEndDate(endDate);
-<<<<<<< Updated upstream
-      console.log(trainingEndDate);
 
-      // Fetch catechists in the training list
-=======
-  
+      console.log(trainingEndDate);
       
       // Get catechists in training list
->>>>>>> Stashed changes
       const response = await trainApi.getCatechistsByTrainingListId(id!);
       const items = response.data?.data?.items || [];
   
@@ -74,12 +67,8 @@ const ListAllTrainCatechist: React.FC = () => {
           return true; // Keep all other catechists
         }
       );
-<<<<<<< Updated upstream
-
-=======
   
       console.log('Processed catechists:', fetchedCatechists); // Debug processed data
->>>>>>> Stashed changes
       setCatechists(filteredCatechists);
     } catch (error) {
       console.error("Error fetching catechists:", error);
@@ -89,34 +78,6 @@ const ListAllTrainCatechist: React.FC = () => {
   
   const updateStatus = async (catechistId: string, newStatus: number) => {
     const now = new Date();
-<<<<<<< Updated upstream
-
-    // Ngăn không cho đổi trạng thái thành Completed trước ngày bắt đầu
-    if (trainingStartDate && now < trainingStartDate && newStatus === 1) {
-      console.error("Cannot set status to 'Completed' before training starts.");
-      alert(
-        "Không thể đặt trạng thái thành 'Hoàn thành' trước khi khóa đào tạo bắt đầu."
-      );
-      return;
-    }
-
-    const payload = [{ id: catechistId, status: newStatus }];
-    try {
-      console.log("Sending payload:", payload);
-      await catInTrainApi.updateCatInTrain(id!, payload); // Gửi API để cập nhật trạng thái
-      console.log("Status updated successfully.");
-
-      const updatedCatechists = catechists.map((catechist) =>
-        catechist.id === catechistId
-          ? { ...catechist, status: newStatus }
-          : catechist
-      );
-
-      // Áp dụng bộ lọc sau khi cập nhật
-      const filteredCatechists = updatedCatechists.filter((catechist) => {
-        if (now < (trainingStartDate ?? now) && catechist.status === 2) {
-          return false; // Loại bỏ catechist có trạng thái Failed trước khi đào tạo bắt đầu
-=======
   
     if (trainingStartDate && now < trainingStartDate) {
       if (newStatus === 1) {
@@ -130,7 +91,6 @@ const ListAllTrainCatechist: React.FC = () => {
         );
         if (!confirmRemove) {
           return;
->>>>>>> Stashed changes
         }
       }
     }
@@ -163,10 +123,6 @@ const ListAllTrainCatechist: React.FC = () => {
       console.error("Error updating status:", error);
     }
   };
-<<<<<<< Updated upstream
-=======
-  
->>>>>>> Stashed changes
 
   // Fetch catechists when the component mounts or when the training ID changes
   useEffect(() => {
