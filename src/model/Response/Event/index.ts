@@ -28,26 +28,12 @@ export interface ProcessResponseItem {
   id: string;
   name: string;
   description: string;
-  duration: {
-    ticks: number;
-    days: number;
-    hours: number;
-    milliseconds: number;
-    microseconds: number;
-    nanoseconds: number;
-    minutes: number;
-    seconds: number;
-    totalDays: number;
-    totalHours: number;
-    totalMilliseconds: number;
-    totalMicroseconds: number;
-    totalNanoseconds: number;
-    totalMinutes: number;
-    totalSeconds: number;
-  };
+  duration: number;
   startTime: string;
   endTime: string;
   fee: number;
+  actualFee: number;
+  note: string;
   status: number;
   eventId: string;
 }
@@ -93,6 +79,15 @@ export interface BudgetTransactionResponseItem {
     current_budget: number;
     eventStatus: number;
   };
+  transactionImages: 
+  BudgetTransactionImage[]
+}
+
+export interface BudgetTransactionImage {
+  id: string,
+  budgetTransactionId: string,
+  imageUrl: string,
+  uploadAt: string
 }
 
 export interface ProcessResponse {

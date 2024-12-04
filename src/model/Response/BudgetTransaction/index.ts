@@ -15,4 +15,11 @@ export interface BudgetTransactionResponseItem {
     current_budget: number;
     eventStatus: number;
   };
+  transactionImages: 
+  {
+      id: string,
+      budgetTransactionId: string,
+      imageUrl: string,
+      uploadAt: string
+  }[]
 }

@@ -16,6 +16,7 @@ export default function AssignCatechistToGradeComponent() {
 
   // State
   const [loading, setLoading] = useState<boolean>(true);
+  // const [upadteMode, setUpadteMode] = useState<boolean>(false);
   const [catechists, setCatechists] = useState<any[]>([]); // Bảng catechist chưa được assign
   const [assignedCatechists, setAssignedCatechists] = useState<any[]>([]); // Bảng catechist đã được assign
   // const [selectedMajor, setSelectedMajor] = useState<string>("");
@@ -145,6 +146,7 @@ export default function AssignCatechistToGradeComponent() {
     };
 
     try {
+      console.log(requestData);
       await catechistInGradeApi.createCatechistInGrade(requestData);
       sweetAlert.alertSuccess("Gán giáo lý viên thành công!", "", 1000, 22);
       navigate(-1);

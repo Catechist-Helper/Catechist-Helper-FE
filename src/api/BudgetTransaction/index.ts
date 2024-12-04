@@ -21,9 +21,24 @@ const getBudgetTransactionById = (id: string) => {
 
 // POST: Tạo mới một budget transaction
 const createBudgetTransaction = (data: CreateBudgetTransactionRequest) => {
+  const form = new FormData();
+  form.append("eventId", data.eventId);
+  form.append("fromBudget", String(data.fromBudget));
+  form.append("toBudget", String(data.toBudget));
+  form.append("note", data.note ?? "");
+  if(data.transactionImages){
+    data.transactionImages.forEach((image) => {
+      form.append(`transactionImages`, image);
+    });
+  }
+
   return request.post<BasicResponse<BudgetTransactionResponseItem>>(
     `${ROOT_BUDGET_TRANSACTION}`,
-    data
+    form, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    }
   );
 };
 
@@ -32,9 +47,25 @@ const updateBudgetTransaction = (
   id: string,
   data: UpdateBudgetTransactionRequest
 ) => {
+
+  const form = new FormData();
+  form.append("eventId", data.eventId);
+  form.append("fromBudget", String(data.fromBudget));
+  form.append("toBudget", String(data.toBudget));
+  form.append("note", data.note ?? "");
+  if(data.transactionImages){
+    data.transactionImages.forEach((image) => {
+      form.append(`transactionImages`, image);
+    });
+  }
+
   return request.put<BasicResponse<boolean>>(
     `${ROOT_BUDGET_TRANSACTION}/${id}`,
-    data
+    form, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    }
   );
 };
 

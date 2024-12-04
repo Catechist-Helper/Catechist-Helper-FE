@@ -17,10 +17,12 @@ import {
 } from "../../../model/Response/Event";
 import EventProcessDialog from "./EventProcessDialog";
 import { formatPrice } from "../../../utils/formatPrice";
+import { RoleEventName } from "../../../enums/RoleEventEnum";
 
 const EventProcessManagement: React.FC = () => {
   const location = useLocation();
   const eventId = location.state?.eventId as string;
+  const userRole = location.state?.userRole as string;
   const navigate = useNavigate();
 
   const [selectedEvent, setSelectedEvent] = useState<EventItemResponse | null>(
@@ -31,6 +33,7 @@ const EventProcessManagement: React.FC = () => {
   );
   const [loading, setLoading] = useState<boolean>(true);
   const [openDialog, setOpenDialog] = useState<boolean>(false);
+  const [truongBTCRole, setTruongBTCRole] = useState<boolean>(false);
   const [selectedProcess, setSelectedProcess] =
     useState<ProcessResponseItem | null>(null);
   const [summaryFees, setSummaryFees] = useState<number>(0);
@@ -45,6 +48,7 @@ const EventProcessManagement: React.FC = () => {
         )
       );
       let sumFees = 0;
+      console.log("res", response.data.data.items);
       response.data.data.items.forEach((item) => {
         if (item.fee) {
           sumFees += item.fee;
@@ -72,7 +76,10 @@ const EventProcessManagement: React.FC = () => {
   useEffect(() => {
     fetchSelectedEvent();
     fetchEventProcesses();
-  }, [eventId]);
+    if (userRole && userRole == RoleEventName.TRUONG_BTC) {
+      setTruongBTCRole(true);
+    }
+  }, [eventId, userRole]);
 
   useEffect(() => {
     if (!openDialog) {
@@ -196,7 +203,7 @@ const EventProcessManagement: React.FC = () => {
             >
               Quay lại
             </Button>
-            Các hoạt động của sự kiện{" "}
+            Các hoạt động của{" "}
             <strong>{selectedEvent ? selectedEvent.name : ""}</strong>
           </Typography>
           <div className="w-full flex flex-wrap">
@@ -247,24 +254,31 @@ const EventProcessManagement: React.FC = () => {
         <></>
       )}
 
-      <div className="flex gap-x-2 mt-3 justify-end">
-        <Button
-          variant="contained"
-          color="secondary"
-          onClick={handleCreateProcess}
-          style={{ marginBottom: "20px" }}
-        >
-          Tạo quá trình
-        </Button>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleCreateProcess}
-          style={{ marginBottom: "20px" }}
-        >
-          Tải lại
-        </Button>
-      </div>
+      {truongBTCRole ? (
+        <>
+          <div className="flex gap-x-2 mt-3 justify-end">
+            <Button
+              variant="contained"
+              color="secondary"
+              onClick={handleCreateProcess}
+              style={{ marginBottom: "20px" }}
+            >
+              Tạo quá trình
+            </Button>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={fetchEventProcesses}
+              style={{ marginBottom: "20px" }}
+            >
+              Tải lại
+            </Button>
+          </div>
+        </>
+      ) : (
+        <></>
+      )}
+
       {eventProcesses.length === 0 ? (
         <Typography>Không có quá trình nào cho sự kiện này.</Typography>
       ) : (

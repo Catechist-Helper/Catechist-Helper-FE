@@ -9,6 +9,8 @@ import { formatDate } from "../../../utils/formatDate";
 import classApi from "../../../api/Class";
 import sweetAlert from "../../../utils/sweetAlert";
 import viVNGridTranslation from "../../../locale/MUITable";
+import RequestLeaveDialog from "./RequestLeaveDialog";
+import absenceApi from "../../../api/AbsenceRequest";
 
 const CatechistClassComponent = () => {
   const [userLogin, setUserLogin] = useState<any>(null);
@@ -19,6 +21,8 @@ const CatechistClassComponent = () => {
   const [selectedClassView, setSelectedClassView] = useState<any>(null);
   const [openSlotsDialog, setOpenSlotsDialog] = useState<boolean>(false);
   const [slots, setSlots] = useState<any[]>([]);
+  const [openLeaveDialog, setOpenLeaveDialog] = useState<boolean>(false);
+  const [slotAbsenceId, setSlotAbsenceId] = useState<string>("");
 
   // Fetch thông tin người dùng đã đăng nhập
   useEffect(() => {
@@ -199,6 +203,40 @@ const CatechistClassComponent = () => {
       );
     }
   };
+
+  const handleLeaveRequestSubmit = (reason: string, slotId: string) => {
+    try {
+      console.log({
+        catechistId: userLogin.catechistId,
+        reason: reason,
+        slotId: slotId,
+        replacementCatechistId: "",
+      });
+      const res = absenceApi.submitAbsence({
+        catechistId: userLogin.catechistId,
+        reason: reason,
+        slotId: slotId,
+        replacementCatechistId: "",
+      });
+      console.log("res", res);
+
+      // Đóng dialog
+      // setOpenLeaveDialog(false);
+
+      // Thông báo gửi yêu cầu thành công
+      sweetAlert.alertSuccess(
+        "Yêu cầu nghỉ phép đã được gửi thành công!",
+        "",
+        1000,
+        22
+      );
+    } catch (error) {
+      console.error("Error loading slots:", error);
+      sweetAlert.alertFailed("Có lỗi xảy ra khi gửi yêu cầu!", "", 1000, 22);
+    } finally {
+    }
+  };
+
   return (
     <Paper
       sx={{
@@ -304,6 +342,36 @@ const CatechistClassComponent = () => {
                     : "";
                 },
               },
+
+              {
+                field: "action",
+                headerName: "Hành động",
+                width: 180,
+                renderCell: (params: any) => {
+                  return (
+                    <>
+                      {new Date().getTime() -
+                        new Date(params.row.date).getTime() <
+                      0 ? (
+                        <>
+                          <Button
+                            color="secondary"
+                            variant="outlined"
+                            onClick={() => {
+                              setOpenLeaveDialog(true);
+                              setSlotAbsenceId(params.row.id);
+                            }} // Mở dialog khi nhấn
+                          >
+                            Xin nghỉ phép
+                          </Button>
+                        </>
+                      ) : (
+                        <></>
+                      )}
+                    </>
+                  );
+                },
+              },
               // {
               //   field: "mainCatechist",
               //   headerName: "Giáo lý viên chính",
@@ -318,6 +386,12 @@ const CatechistClassComponent = () => {
             localeText={viVNGridTranslation}
           />
         </div>
+        <RequestLeaveDialog
+          open={openLeaveDialog}
+          slotId={slotAbsenceId}
+          onClose={() => setOpenLeaveDialog(false)} // Đóng dialog
+          onSubmit={handleLeaveRequestSubmit} // Hàm xử lý khi gửi yêu cầu nghỉ phép
+        />
       </Dialog>
     </Paper>
   );

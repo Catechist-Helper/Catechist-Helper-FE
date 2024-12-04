@@ -1,7 +1,7 @@
 // src/api/Account/index.ts
 import axiosInstances from "../../config/axios";
 import { BasicResponse } from "../../model/Response/BasicResponse";
-import { AccountResponse, AccountItemResponse } from "../../model/Response/Account";
+import { AccountResponse, AccountItemResponse, RecruitersByMeetingTimeResponse } from "../../model/Response/Account";
 
 const request = axiosInstances.base;
 const ROOT_ACCOUNT = "/accounts";
@@ -43,12 +43,22 @@ const deleteAccount = (id: string) => {
   return request.delete<BasicResponse<boolean>>(`${ROOT_ACCOUNT}/${id}`);
 };
 
+const getRecruitersByMeetingTime = (meetingTime:string, page?: number, size?: number) => {
+  const params = {
+    ...(meetingTime !== undefined && { meetingTime }),
+    ...(page !== undefined && { page }),
+    ...(size !== undefined && { size }),
+  };
+  return request.get<BasicResponse<RecruitersByMeetingTimeResponse>>(`${ROOT_ACCOUNT}/recruiters`, { params });
+};
+
 const accountApi = {
   getAllAccounts,
   createAccount,
   getAccountById,
   updateAccount,
   deleteAccount,
+  getRecruitersByMeetingTime
 };
 
 export default accountApi;

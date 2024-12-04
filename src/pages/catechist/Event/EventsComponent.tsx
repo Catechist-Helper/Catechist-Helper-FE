@@ -134,7 +134,9 @@ export default function EventsComponent() {
               <Button
                 variant="contained"
                 color="primary"
-                onClick={() => handleEventManagement(params.row.id)}
+                onClick={() =>
+                  handleEventManagement(params.row.id, params.row.userRole)
+                }
               >
                 Quản lý sự kiện
               </Button>
@@ -143,7 +145,9 @@ export default function EventsComponent() {
               <Button
                 variant="contained"
                 color="primary"
-                onClick={() => handleEventManagement(params.row.id)}
+                onClick={() =>
+                  handleEventManagement(params.row.id, params.row.userRole)
+                }
               >
                 Xem sự kiện
               </Button>
@@ -154,8 +158,10 @@ export default function EventsComponent() {
     },
   ];
 
-  const handleEventManagement = (eventId: string) => {
-    navigate(PATH_CATECHIST.event_process, { state: { eventId } });
+  const handleEventManagement = (eventId: string, userRole: string) => {
+    navigate(PATH_CATECHIST.event_process, {
+      state: { eventId: eventId, userRole: userRole },
+    });
   };
 
   useEffect(() => {
@@ -176,7 +182,6 @@ export default function EventsComponent() {
           position: "absolute",
         }}
       >
-        {" "}
         <DataGrid
           rows={rows}
           columns={columns}

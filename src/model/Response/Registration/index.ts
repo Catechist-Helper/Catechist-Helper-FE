@@ -12,6 +12,7 @@ export type InterviewResponse = {
   meetingTime: string;
   note: string | null;
   isPassed: boolean;
+  recruiters: RecruiterResponse[];
 };
 
 // Mô hình cho InterviewProcesses
@@ -51,9 +52,8 @@ export type RegistrationItemResponse = {
   status: number;
   createdAt: string;
   certificateOfCandidates: CertificateOfCandidateResponse[];
-  interviews: InterviewResponse[];
+  interview: InterviewResponse;
   registrationProcesses: InterviewProcessResponse[];
-  recruiters: RecruiterResponse[];
 };
 
 // Mô hình cho phản hồi của danh sách Registration (hỗ trợ phân trang)

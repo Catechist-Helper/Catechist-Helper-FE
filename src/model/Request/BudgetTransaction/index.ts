@@ -4,6 +4,7 @@ export interface CreateBudgetTransactionRequest {
   toBudget: number;
   eventId: string;
   note?: string;
+  transactionImages: File[]
 }
 
 export interface UpdateBudgetTransactionRequest extends CreateBudgetTransactionRequest {}

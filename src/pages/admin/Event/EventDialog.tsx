@@ -171,6 +171,7 @@ const EventDialog: React.FC<EventDialogProps> = ({
           fromBudget: 0,
           toBudget: currentBudget,
           note: "Ngân sách khởi tạo", // Ghi chú mặc định khi thêm mới
+          transactionImages: [],
         });
         sweetAlert.alertSuccess("Thêm sự kiện mới thành công!", "", 1000, 22);
       }
@@ -297,7 +298,7 @@ const EventDialog: React.FC<EventDialogProps> = ({
       <ReasonDialog
         open={openReasonDialog}
         onClose={() => setOpenReasonDialog(false)}
-        onConfirm={async (reason) => {
+        onConfirm={async (reason, images) => {
           if (!event) return;
 
           try {
@@ -319,6 +320,7 @@ const EventDialog: React.FC<EventDialogProps> = ({
               fromBudget: event.current_budget,
               toBudget: pendingBudgetChange!,
               note: reason,
+              transactionImages: images,
             });
 
             sweetAlert.alertSuccess("Cập nhật thành công!", "", 1000, 22);

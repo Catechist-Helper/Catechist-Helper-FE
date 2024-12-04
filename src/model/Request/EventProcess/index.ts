@@ -3,12 +3,12 @@
 export interface CreateProcessRequest {
   name: string;
   description: string;
-  duration?: {
-    ticks: number;
-  };
+  duration?: number;
   startTime: string; // ISO format
   endTime: string;   // ISO format
   fee: number;
+  actualFee?: number;
+  note?: string;
   status: number;
   eventId: string;   // ID của sự kiện
 }

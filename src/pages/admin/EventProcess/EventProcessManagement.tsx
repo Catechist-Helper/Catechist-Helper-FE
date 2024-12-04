@@ -128,7 +128,7 @@ const EventProcessManagement: React.FC = () => {
             >
               Quay lại
             </Button>
-            Các hoạt động của sự kiện{" "}
+            Các hoạt động của{" "}
             <strong>{selectedEvent ? selectedEvent.name : ""}</strong>
           </Typography>
           <div className="w-full flex flex-wrap">

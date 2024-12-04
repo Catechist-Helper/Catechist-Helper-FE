@@ -215,14 +215,16 @@ const RegistrationDetailDialog: React.FC<RegistrationDetailDialogProps> = ({
                   <li>
                     <strong>Thời gian</strong>:{" "}
                     {formatDate.DD_MM_YYYY_Time(
-                      registration.interviews[0]?.meetingTime
+                      registration.interview?.meetingTime
                     )}
                   </li>
                   <li>
                     <strong>Người phỏng vấn</strong>:{" "}
-                    {registration.recruiters
-                      .map((recruiter) => recruiter.fullName)
-                      .join(", ")}
+                    {registration.interview && registration.interview.recruiters
+                      ? registration.interview.recruiters
+                          .map((recruiter) => recruiter.fullName)
+                          .join(", ")
+                      : ""}
                   </li>
                   <li>
                     <strong>Kết quả</strong>:{" "}
@@ -234,7 +236,7 @@ const RegistrationDetailDialog: React.FC<RegistrationDetailDialogProps> = ({
                       >
                         Chưa phỏng vấn
                       </span>
-                    ) : registration.interviews[0]?.isPassed ? (
+                    ) : registration.interview?.isPassed ? (
                       <span
                         className="text-success"
                         style={{ fontWeight: "600" }}
@@ -256,7 +258,7 @@ const RegistrationDetailDialog: React.FC<RegistrationDetailDialogProps> = ({
                       <strong>Nhận xét</strong>:
                       <div
                         dangerouslySetInnerHTML={{
-                          __html: registration.interviews[0]?.note || "",
+                          __html: registration.interview?.note || "",
                         }}
                       />
                     </li>

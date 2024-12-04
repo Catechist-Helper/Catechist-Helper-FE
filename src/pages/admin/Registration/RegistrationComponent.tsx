@@ -5,7 +5,7 @@ import {
   GridRowSelectionModel,
 } from "@mui/x-data-grid";
 import Select from "react-select";
-import { Modal, Button } from "@mui/material";
+import { Modal, Button, Dialog } from "@mui/material";
 import Paper from "@mui/material/Paper";
 import { useState, useEffect } from "react";
 import registrationApi from "../../../api/Registration";
@@ -13,6 +13,7 @@ import accountApi from "../../../api/Account";
 import interviewApi from "../../../api/Interview";
 import interviewProcessApi from "../../../api/InterviewProcess";
 import { RegistrationItemResponse } from "../../../model/Response/Registration";
+import { RecruitersByMeetingTimeItemResponse } from "../../../model/Response/Account";
 import { RegistrationStatus } from "../../../enums/Registration";
 import viVNGridTranslation from "../../../locale/MUITable";
 import { formatDate } from "../../../utils/formatDate";
@@ -108,6 +109,9 @@ export default function RegistrationDataTable() {
     useState<boolean>(false);
   const [accounts, setAccounts] = useState<any[]>([]);
   const [selectedAccounts, setSelectedAccounts] = useState<any[]>([]);
+  const [previewAccounts, setPreviewAccounts] = useState<
+    RecruitersByMeetingTimeItemResponse[]
+  >([]);
   const [meetingTime, setMeetingTime] = useState<string>("");
   const [selectedRegistration, setSelectedRegistration] =
     useState<RegistrationItemResponse | null>(null);
@@ -225,19 +229,26 @@ export default function RegistrationDataTable() {
 
   // Hàm xử lý khi nhấn nút "Từ chối đơn"
   const handleRejectApplications = async () => {
+    if (!rejectedReason || rejectedReason.trim() == "") {
+      sweetAlert.alertFailed(
+        "Lý do từ chối đang bị trống",
+        "Vui lòng nhập lý do để tiếp tục",
+        10000,
+        27
+      );
+      return;
+    }
+
     try {
       enableLoading();
       setHasFunction(true);
       await Promise.all(
         selectedIds.map(async (id) => {
-          await registrationApi.updateRegistration(
-            id.toString(),
-            {
-              status: RegistrationStatus.Rejected_Duyet_Don,
-              note: `Lý do từ chối: ${rejectedReason}`,
-            },
-            rejectedReason
-          );
+          await registrationApi.updateRegistration(id.toString(), {
+            status: RegistrationStatus.Rejected_Duyet_Don,
+            note: `Lý do từ chối: ${rejectedReason}`,
+            reason: rejectedReason,
+          });
 
           let process = await interviewProcessApi.createInterviewProcess({
             registrationId: id.toString(),
@@ -307,6 +318,7 @@ export default function RegistrationDataTable() {
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
+    setMeetingTime("");
   };
 
   const handleOpenModalRejected = () => {
@@ -325,14 +337,14 @@ export default function RegistrationDataTable() {
       const selectedAccountIds = selectedAccounts.map((acc: any) => acc.value);
 
       await registrationApi.updateRegistration(registrationId, {
-        status: RegistrationStatus.Approved_Duyet_Don,
-        accounts: selectedAccountIds, // optional accounts
+        status: RegistrationStatus.Approved_Duyet_Don, // optional accounts
       });
 
       await interviewApi.createInterview({
         registrationId,
         meetingTime: meetingTime,
         interviewType: 0,
+        accounts: selectedAccountIds,
       });
 
       let process = await interviewProcessApi.createInterviewProcess({
@@ -373,6 +385,26 @@ export default function RegistrationDataTable() {
       disableLoading();
     }
   };
+
+  useEffect(() => {
+    if (meetingTime == "") {
+      setSelectedAccounts([]);
+      setPreviewAccounts([]);
+    } else if (meetingTime && meetingTime != "") {
+      const action = async () => {
+        const res = await accountApi.getRecruitersByMeetingTime(meetingTime);
+        setPreviewAccounts(
+          res.data.data.items.sort((a: any, b: any) => {
+            if (a.interviews && b.interviews) {
+              return a.interviews.length - b.interviews.length;
+            }
+            return -1;
+          })
+        );
+      };
+      action();
+    }
+  }, [meetingTime]);
 
   return (
     <Paper
@@ -503,14 +535,17 @@ export default function RegistrationDataTable() {
       </div>
 
       {/* Dialog để xếp lịch phỏng vấn */}
-      <Modal
+      <Dialog
         open={isModalOpen}
         onClose={handleCloseModal}
-        className="fixed z-[1000] flex justify-center items-center"
+        className="z-[1000] flex justify-center items-center"
+        fullWidth
+        maxWidth="md"
       >
         <div
           className="modal-container bg-white py-5 px-5 rounded-lg
-        w-[50%]"
+        w-full"
+          style={{ scrollBehavior: "smooth", overflowY: "scroll" }}
         >
           <h1 className="text-center text-[2.2rem] text-primary py-2 pt-0 font-bold uppercase">
             Xếp lịch phỏng vấn
@@ -552,22 +587,6 @@ export default function RegistrationDataTable() {
             <></>
           )}
 
-          <label className="font-bold mt-4">Chọn người phỏng vấn</label>
-          <Select
-            options={accounts.map((acc: any) => ({
-              value: acc.id,
-              label: `${acc.fullName} ${acc.role && acc.role.roleName.toUpperCase() == AccountRoleString.ADMIN ? " - Admin" : ""} ${acc.role && acc.role.roleName.toUpperCase() == AccountRoleString.MANAGER ? " - Quản lý" : ""} ${acc.role && acc.role.roleName.toUpperCase() == AccountRoleString.CATECHIST ? " - Giáo lý viên" : ""}`,
-            }))}
-            isMulti
-            onChange={(newValue) =>
-              setSelectedAccounts(
-                newValue as { value: string; label: string }[]
-              )
-            }
-            placeholder="Tìm kiếm và chọn người phỏng vấn..."
-            className="mt-1"
-          />
-
           <label className="font-bold mt-4">Ngày phỏng vấn</label>
           <br />
           <input
@@ -577,6 +596,91 @@ export default function RegistrationDataTable() {
             value={meetingTime}
             onChange={(e) => setMeetingTime(e.target.value)}
           />
+
+          {meetingTime != "" ? (
+            <>
+              <label className="font-bold mt-4">Chọn người phỏng vấn</label>
+              <Select
+                options={accounts.map((acc: any) => ({
+                  value: acc.id,
+                  label: `${acc.fullName} ${acc.role && acc.role.roleName.toUpperCase() == AccountRoleString.ADMIN ? " - Admin" : ""} ${acc.role && acc.role.roleName.toUpperCase() == AccountRoleString.MANAGER ? " - Quản lý" : ""} ${acc.role && acc.role.roleName.toUpperCase() == AccountRoleString.CATECHIST ? " - Giáo lý viên" : ""}`,
+                }))}
+                isMulti
+                onChange={(newValue) =>
+                  setSelectedAccounts(
+                    newValue as { value: string; label: string }[]
+                  )
+                }
+                placeholder="Tìm kiếm và chọn người phỏng vấn..."
+                className="mt-1"
+              />
+
+              <label className="font-bold mt-4">
+                Danh sách lịch phân công phỏng vấn ngày{" "}
+                {formatDate.DD_MM_YYYY(meetingTime)}
+              </label>
+              <DataGrid
+                rows={previewAccounts}
+                columns={[
+                  {
+                    field: "avatar",
+                    headerName: "Ảnh",
+                    width: 100,
+                    renderCell: (params) => (
+                      <img
+                        src={
+                          params.row.avatar || "https://via.placeholder.com/50"
+                        }
+                        alt="Avatar"
+                        width={50}
+                        height={50}
+                        style={{ borderRadius: "3px" }}
+                      />
+                    ),
+                  },
+                  { field: "fullName", headerName: "Họ và Tên", width: 200 },
+                  { field: "gender", headerName: "Giới tính", width: 150 },
+                  {
+                    field: "interviewCount",
+                    headerName: "Số lượng phỏng vấn",
+                    width: 150,
+                    renderCell: (params) => (
+                      <>
+                        {params.row.interviews ? (
+                          <>
+                            {params.row.interviews.length}
+                            {params.row.interviews.length > 0 ? (
+                              <>{` (${params.row.interviews
+                                .map((item: any) =>
+                                  formatDate.HH_mm(item.meetingTime)
+                                )
+                                .join(", ")})`}</>
+                            ) : (
+                              <></>
+                            )}
+                          </>
+                        ) : (
+                          <>0</>
+                        )}
+                      </>
+                    ),
+                  },
+                ]}
+                paginationMode="client"
+                rowCount={previewAccounts.length}
+                loading={loading}
+                initialState={{ pagination: { paginationModel } }}
+                pageSizeOptions={[8, 25, 50]}
+                disableRowSelectionOnClick
+                sx={{
+                  border: 0,
+                }}
+                localeText={viVNGridTranslation}
+              />
+            </>
+          ) : (
+            <></>
+          )}
 
           <div className="modal-buttons flex justify-center gap-x-3 mt-4">
             <Button
@@ -597,7 +701,7 @@ export default function RegistrationDataTable() {
             </Button>
           </div>
         </div>
-      </Modal>
+      </Dialog>
 
       <Modal
         open={isModalOpenRejected}

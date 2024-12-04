@@ -66,8 +66,8 @@ const columns: GridColDef[] = [
     headerName: "Thời gian phỏng vấn",
     width: 180,
     renderCell: (params) => {
-      return params.row.interviews.length > 0
-        ? formatDate.DD_MM_YYYY_Time(params.row.interviews[0].meetingTime)
+      return params.row.interview
+        ? formatDate.DD_MM_YYYY_Time(params.row.interview.meetingTime)
         : "Chưa có lịch";
     },
     sortComparator: (a, b) => {
@@ -76,13 +76,15 @@ const columns: GridColDef[] = [
     },
   },
   {
-    field: "recruiters",
+    field: "interview.recruiters",
     headerName: "Người phỏng vấn",
     width: 200,
     renderCell: (params) => {
-      return params.row.recruiters
-        .map((recruiter: any) => recruiter.fullName)
-        .join(", ");
+      return params.row.interview.recruiters
+        ? params.row.interview.recruiters
+            .map((recruiter: any) => recruiter.fullName)
+            .join(", ")
+        : "";
     },
   },
 
@@ -96,7 +98,7 @@ const columns: GridColDef[] = [
   //   headerName: "Kết quả phỏng vấn",
   //   width: 200,
   //   renderCell: (params) => {
-  //     return params.row.interviews[0]?.note || ""; // Hiển thị ghi chú nếu có
+  //     return params.row.interview?.note || ""; // Hiển thị ghi chú nếu có
   //   },
   // },
   {
@@ -163,7 +165,7 @@ export default function ApprovedRegistrationsTable() {
 
   // Modal state cho cập nhật phỏng vấn
   const [openUpdateModal, setOpenUpdateModal] = useState<boolean>(false);
-  const [openDeleteModal, setOpenDeleteModal] = useState<boolean>(false);
+  // const [openDeleteModal, setOpenDeleteModal] = useState<boolean>(false);
   const [selectedRecruiters, setSelectedRecruiters] = useState<any[]>([]);
   const [meetingTime, setMeetingTime] = useState<string>("");
   const [recruiters, setRecruiters] = useState<any[]>([]); // Lưu danh sách recruiter
@@ -219,24 +221,45 @@ export default function ApprovedRegistrationsTable() {
 
       // Gọi API getAllRegistrations với các tham số
       const firstResponse = await registrationApi.getAllRegistrations(
-        startDate,
-        endDate,
+        undefined,
+        undefined,
         status,
         1, // Sử dụng paginationModel.page + 1 vì API có thể sử dụng số trang bắt đầu từ 1
-        2 // Sử dụng kích thước trang từ paginationModel
+        2, // Sử dụng kích thước trang từ paginationModel
+        startDate,
+        endDate
       );
 
       const { data } = await registrationApi.getAllRegistrations(
-        startDate,
-        endDate,
+        undefined,
+        undefined,
         status,
         1, // Sử dụng paginationModel.page + 1 vì API có thể sử dụng số trang bắt đầu từ 1
-        firstResponse.data.data.total // Sử dụng kích thước trang từ paginationModel
+        firstResponse.data.data.total, // Sử dụng kích thước trang từ paginationModel
+        startDate,
+        endDate
       );
 
       // Cập nhật tổng số hàng
       setRowCount(data.data.total); // Cập nhật tổng số hàng từ API
-      setRows(data.data.items); // Cập nhật hàng được trả về từ API
+      setRows(
+        data.data.items.sort(
+          (a: RegistrationItemResponse, b: RegistrationItemResponse) => {
+            if (
+              a.interview &&
+              a.interview.meetingTime &&
+              b.interview &&
+              b.interview.meetingTime
+            ) {
+              return (
+                new Date(a.interview.meetingTime).getTime() -
+                new Date(b.interview.meetingTime).getTime()
+              );
+            }
+            return -1;
+          }
+        )
+      ); // Cập nhật hàng được trả về từ API
     } catch (error) {
       console.error("Lỗi khi tải danh sách registrations:", error);
     } finally {
@@ -288,7 +311,7 @@ export default function ApprovedRegistrationsTable() {
   const handleOpenApprovalModal = (registrationId: string) => {
     const selectedRow = rows.find((row) => row.id === registrationId);
 
-    if (!selectedRow || !selectedRow.interviews.length) {
+    if (!selectedRow || !selectedRow.interview) {
       sweetAlert.alertFailed(
         "Không tìm thấy thông tin phỏng vấn!",
         "",
@@ -298,13 +321,13 @@ export default function ApprovedRegistrationsTable() {
       return;
     }
 
-    const meetingTime = new Date(selectedRow.interviews[0].meetingTime);
+    const meetingTime = new Date(selectedRow.interview.meetingTime);
     const currentTime = new Date();
 
     if (currentTime < meetingTime) {
       sweetAlert.alertFailed(
         `Chưa đến thời điểm phỏng vấn. Vui lòng quay lại sau ${formatDate.DD_MM_YYYY_Time(
-          selectedRow.interviews[0].meetingTime
+          selectedRow.interview.meetingTime
         )}`,
         "",
         10000,
@@ -326,7 +349,7 @@ export default function ApprovedRegistrationsTable() {
     setInterviewNote(""); // Reset các trường input
     setInterviewResult("");
   };
-
+  console.log(rows);
   // Mở modal cập nhật phỏng vấn
   const handleOpenUpdateModal = (registrationId: string) => {
     const selectedRow = rows.find((row) => row.id === registrationId);
@@ -334,13 +357,13 @@ export default function ApprovedRegistrationsTable() {
       setSelectedRegistration(selectedRow);
       fetchSelectedRegistrationOfModal();
       setSelectedRecruiters(
-        selectedRow.recruiters.map((recruiter: any) => ({
+        selectedRow.interview.recruiters.map((recruiter: any) => ({
           value: recruiter.id,
           label: `${recruiter.fullName} ${recruiter.role && recruiter.role.roleName.toUpperCase() == AccountRoleString.ADMIN ? " - Admin" : ""} ${recruiter.role && recruiter.role.roleName.toUpperCase() == AccountRoleString.MANAGER ? " - Quản lý" : ""} ${recruiter.role && recruiter.role.roleName.toUpperCase() == AccountRoleString.CATECHIST ? " - Giáo lý viên" : ""}`,
         }))
       );
       setMeetingTime(
-        selectedRow.interviews[0] ? selectedRow.interviews[0].meetingTime : ""
+        selectedRow.interview ? selectedRow.interview.meetingTime : ""
       );
       fetchRecruiters(); // Gọi API lấy danh sách recruiters
       setOpenUpdateModal(true);
@@ -360,10 +383,10 @@ export default function ApprovedRegistrationsTable() {
   //   setOpenDeleteModal(true);
   // };
 
-  const handleCloseDeleteModal = () => {
-    setSelectedRegistrationOfModal(null);
-    setOpenDeleteModal(false);
-  };
+  // const handleCloseDeleteModal = () => {
+  //   setSelectedRegistrationOfModal(null);
+  //   setOpenDeleteModal(false);
+  // };
 
   // Xác nhận phỏng vấn
   const handleConfirmInterview = async () => {
@@ -385,7 +408,7 @@ export default function ApprovedRegistrationsTable() {
           status: registrationStatus,
         });
 
-        const interviewId = selectedRegistration.interviews[0]?.id;
+        const interviewId = selectedRegistration.interview?.id;
         if (interviewId) {
           await interviewApi.updateInterview(interviewId, {
             meetingTime: null,
@@ -424,27 +447,32 @@ export default function ApprovedRegistrationsTable() {
 
   // Xác nhận cập nhật phỏng vấn
   const handleUpdateInterview = async () => {
+    if (!updatedInterviewReason || updatedInterviewReason.trim() == "") {
+      sweetAlert.alertFailed(
+        "Lý do cập nhật lịch đang bị trống",
+        "Vui lòng nhập lý do để tiếp tục",
+        10000,
+        27
+      );
+      return;
+    }
     enableLoading();
     try {
       if (selectedRegistration) {
-        // await registrationApi.updateRegistration(selectedRegistration.id, {
-        //   accounts: selectedRecruiters.map((rec: any) => rec.value),
-        //   status: selectedRegistration.status, // Thêm status hiện tại để giữ nguyên
-        // });
-
-        const interviewId = selectedRegistration.interviews[0]?.id;
+        const interviewId = selectedRegistration.interview?.id;
         if (interviewId) {
           console.log({
             meetingTime,
-            note: selectedRegistration.interviews[0].note,
-            isPassed: selectedRegistration.interviews[0].isPassed,
+            note: selectedRegistration.interview.note,
+            isPassed: selectedRegistration.interview.isPassed,
             reason: updatedInterviewReason,
           });
           await interviewApi.updateInterview(interviewId, {
             meetingTime,
-            note: selectedRegistration.interviews[0].note,
-            isPassed: selectedRegistration.interviews[0].isPassed,
+            note: selectedRegistration.interview.note,
+            isPassed: selectedRegistration.interview.isPassed,
             reason: updatedInterviewReason,
+            accounts: selectedRecruiters.map((rec: any) => rec.value),
           });
         }
 
@@ -473,56 +501,56 @@ export default function ApprovedRegistrationsTable() {
     }
   };
 
-  const handleDeleteInterview = async () => {
-    // enableLoading();
-    if (selectedRegistrations.length === 0) return;
+  // const handleDeleteInterview = async () => {
+  //   // enableLoading();
+  //   if (selectedRegistrations.length === 0) return;
 
-    for (let registrationId of selectedRegistrations) {
-      const selectedRow = rows.find((row) => row.id === registrationId);
+  //   for (let registrationId of selectedRegistrations) {
+  //     const selectedRow = rows.find((row) => row.id === registrationId);
 
-      if (!selectedRow || selectedRow.interviews.length === 0) {
-        console.error("Không tìm thấy phỏng vấn để xóa.");
-        continue;
-      }
+  //     if (!selectedRow || selectedRow.interview) {
+  //       console.error("Không tìm thấy phỏng vấn để xóa.");
+  //       continue;
+  //     }
 
-      const interviewId = selectedRow.interviews[0].id; // Lấy id của interview
+  //     const interviewId = selectedRow.interview.id; // Lấy id của interview
 
-      try {
-        // Xóa interview của đơn đăng ký
-        await interviewApi.deleteInterview(interviewId);
+  //     try {
+  //       // Xóa interview của đơn đăng ký
+  //       await interviewApi.deleteInterview(interviewId);
 
-        // if (selectedRow.interviewProcesses) {
-        //   // Cập nhật status của Interview Process
-        //   const interviewProcessId = selectedRow.interviewProcesses.filter(
-        //     (process: any) =>
-        //       process.name.startsWith(RegistrationProcessTitle.DUYET_DON)
-        //   )[0]?.id;
-        //   if (interviewProcessId) {
-        //     await interviewProcessApi.updateInterviewProcess(
-        //       interviewProcessId,
-        //       {
-        //         name: RegistrationProcessTitle.DUYET_DON,
-        //         status: 0,
-        //       }
-        //     );
-        //   }
-        // }
+  //       // if (selectedRow.interviewProcesses) {
+  //       //   // Cập nhật status của Interview Process
+  //       //   const interviewProcessId = selectedRow.interviewProcesses.filter(
+  //       //     (process: any) =>
+  //       //       process.name.startsWith(RegistrationProcessTitle.DUYET_DON)
+  //       //   )[0]?.id;
+  //       //   if (interviewProcessId) {
+  //       //     await interviewProcessApi.updateInterviewProcess(
+  //       //       interviewProcessId,
+  //       //       {
+  //       //         name: RegistrationProcessTitle.DUYET_DON,
+  //       //         status: 0,
+  //       //       }
+  //       //     );
+  //       //   }
+  //       // }
 
-        // Cập nhật trạng thái đơn đăng ký thành Pending
-        await registrationApi.updateRegistration(registrationId.toString(), {
-          status: RegistrationStatus.Pending,
-        });
-        setSelectedRegistrations([]);
-      } catch (error) {
-        console.error("Lỗi khi xóa phỏng vấn:", error);
-      } finally {
-        disableLoading();
-      }
-    }
+  //       // Cập nhật trạng thái đơn đăng ký thành Pending
+  //       await registrationApi.updateRegistration(registrationId.toString(), {
+  //         status: RegistrationStatus.Pending,
+  //       });
+  //       setSelectedRegistrations([]);
+  //     } catch (error) {
+  //       console.error("Lỗi khi xóa phỏng vấn:", error);
+  //     } finally {
+  //       disableLoading();
+  //     }
+  //   }
 
-    // Tải lại danh sách sau khi xóa
-    fetchApprovedRegistrations();
-  };
+  //   // Tải lại danh sách sau khi xóa
+  //   fetchApprovedRegistrations();
+  // };
 
   // Xử lý hiển thị các nút khi lọc
   const renderFilterButtons = () => {
@@ -726,7 +754,7 @@ export default function ApprovedRegistrationsTable() {
                 <h5 className="mt-2 w-[50%]">
                   <strong>Thời gian phỏng vấn:</strong>{" "}
                   {formatDate.DD_MM_YYYY_Time(
-                    selectedRegistrationOfModal.interviews[0].meetingTime
+                    selectedRegistrationOfModal.interview.meetingTime
                   )}
                 </h5>
                 <h5 className="mt-2 w-[50%]">
@@ -762,9 +790,11 @@ export default function ApprovedRegistrationsTable() {
                 </h5>
                 <h5 className="mt-2 w-[100%]">
                   <strong>Người phỏng vấn:</strong>{" "}
-                  {selectedRegistrationOfModal.recruiters
-                    .map((recruiter: any) => recruiter.fullName)
-                    .join(", ")}
+                  {selectedRegistrationOfModal.interview.recruiters
+                    ? selectedRegistrationOfModal.interview.recruiters
+                        .map((recruiter: any) => recruiter.fullName)
+                        .join(", ")
+                    : ""}
                 </h5>
               </div>
             </>
@@ -776,11 +806,13 @@ export default function ApprovedRegistrationsTable() {
             <strong>Nhận xét ứng viên</strong>
           </h2>
 
-          <CkEditor
-            data={interviewNote}
-            onChange={(data) => setInterviewNote(data)}
-            placeholder="Nhập nhận xét ứng viên tại đây..."
-          />
+          <div className="w-full">
+            <CkEditor
+              data={interviewNote}
+              onChange={(data) => setInterviewNote(data)}
+              placeholder="Nhập nhận xét ứng viên tại đây..."
+            />
+          </div>
 
           {/* <TextField
             label="Ghi chú"
@@ -865,7 +897,7 @@ export default function ApprovedRegistrationsTable() {
                 <h5 className="mt-2 w-[50%]">
                   <strong>Thời gian phỏng vấn:</strong>{" "}
                   {formatDate.DD_MM_YYYY_Time(
-                    selectedRegistrationOfModal.interviews[0].meetingTime
+                    selectedRegistrationOfModal.interview.meetingTime
                   )}
                 </h5>
                 <h5 className="mt-2 w-[50%]">
@@ -901,9 +933,11 @@ export default function ApprovedRegistrationsTable() {
                 </h5>
                 <h5 className="mt-2 w-[100%]">
                   <strong>Người phỏng vấn:</strong>{" "}
-                  {selectedRegistrationOfModal.recruiters
-                    .map((recruiter: any) => recruiter.fullName)
-                    .join(", ")}
+                  {selectedRegistrationOfModal.interview.recruiters
+                    ? selectedRegistrationOfModal.interview.recruiters
+                        .map((recruiter: any) => recruiter.fullName)
+                        .join(", ")
+                    : ""}
                 </h5>
               </div>
             </>
@@ -984,7 +1018,7 @@ export default function ApprovedRegistrationsTable() {
       </Modal>
 
       {/* Modal xóa phỏng vấn */}
-      <Modal open={openDeleteModal} onClose={handleCloseUpdateModal}>
+      {/* <Modal open={openDeleteModal} onClose={handleCloseUpdateModal}>
         <div
           style={{
             width: "50%",
@@ -1008,7 +1042,7 @@ export default function ApprovedRegistrationsTable() {
                 <h5 className="mt-2 w-[50%]">
                   <strong>Thời gian phỏng vấn:</strong>{" "}
                   {formatDate.DD_MM_YYYY_Time(
-                    selectedRegistrationOfModal.interviews[0].meetingTime
+                    selectedRegistrationOfModal.interview.meetingTime
                   )}
                 </h5>
                 <h5 className="mt-2 w-[50%]">
@@ -1044,9 +1078,11 @@ export default function ApprovedRegistrationsTable() {
                 </h5>
                 <h5 className="mt-2 w-[100%]">
                   <strong>Người phỏng vấn:</strong>{" "}
-                  {selectedRegistrationOfModal.recruiters
-                    .map((recruiter: any) => recruiter.fullName)
-                    .join(", ")}
+                  {selectedRegistrationOfModal.interview.recruiters
+                    ? selectedRegistrationOfModal.interview.recruiters
+                        .map((recruiter: any) => recruiter.fullName)
+                        .join(", ")
+                    : ""}
                 </h5>
               </div>
             </>
@@ -1091,7 +1127,7 @@ export default function ApprovedRegistrationsTable() {
             </Button>
           </div>
         </div>
-      </Modal>
+      </Modal> */}
 
       {openDialog ? (
         <>

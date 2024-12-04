@@ -6,13 +6,17 @@ const request = axiosInstances.base;
 const ROOT_REGISTRATION = "/registrations";
 
 // GET: Lấy danh sách tất cả registrations với tham số mới
-const getAllRegistrations = (startDate?: string, endDate?: string, status?: number, page?: number, size?: number) => {
+const getAllRegistrations = (startDate?: string, endDate?: string, status?: number, page?: number, size?: number,
+  interviewStartDate?: string, interviewEndDate?: string
+) => {
     const params = {
       ...(startDate && { startDate }),
       ...(endDate && { endDate }),
       ...(status !== undefined && { status }),
       ...(page !== undefined && { page }),
       ...(size !== undefined && { size }),
+      ...(interviewStartDate !== undefined && { interviewStartDate }),
+      ...(interviewEndDate !== undefined && { interviewEndDate }),
     };
     return request.get<BasicResponse<RegistrationResponse>>(`${ROOT_REGISTRATION}`, { params });
 };
@@ -32,12 +36,11 @@ const createRegistration = (data: FormData) => {
 };
 
 // PUT: Cập nhật thông tin của một registration (JSON, không có file)
-const updateRegistration = (id: string, data: { status: number; accounts?: string[], note?: string }, reason?: string,) => {
+const updateRegistration = (id: string, data: { status: number; note?: string; reason?: string },) => {
   const updateData = {
     status: data.status,
-    ...(reason && { reason: reason }),
+    ...(data.reason && { reason: data.reason }),
     ...(data.note && { note: data.note }),
-    ...(data.accounts && { accounts: data.accounts }), // Chỉ thêm accounts nếu có
   };
   
   return request.put<BasicResponse<boolean>>(`${ROOT_REGISTRATION}/${id}`, updateData, {

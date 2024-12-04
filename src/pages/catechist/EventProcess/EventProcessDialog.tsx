@@ -33,6 +33,8 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
   const [startTime, setStartTime] = useState<string | null>(null);
   const [endTime, setEndTime] = useState<string | null>(null);
   const [fee, setFee] = useState<number>(0);
+  const [actualFee, setActualFee] = useState<number>(0);
+  const [note, setNote] = useState<string>("");
   const [status, setStatus] = useState<number>(0);
   const [durationDays, setDurationDays] = useState<number>(0);
   const [durationHours, setDurationHours] = useState<number>(0);
@@ -46,6 +48,8 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
       setStartTime(processData.startTime);
       setEndTime(processData.endTime);
       setFee(processData.fee);
+      setActualFee(processData.actualFee);
+      setNote(processData.note);
       setStatus(processData.status);
       const duration =
         new Date(processData.endTime).getTime() -
@@ -133,6 +137,8 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
       fee,
       status,
       eventId,
+      actualFee,
+      note,
     };
     console.log(data);
 
@@ -142,6 +148,7 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
         await processApi.updateProcess(processData.id, data);
       } else {
         // Create new process
+        data.actualFee = data.fee;
         await processApi.createProcess(data);
       }
       onClose(); // Close the dialog after successful submission
@@ -161,6 +168,7 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
           <Grid item xs={12}>
             <TextField
               label="Process Name"
+              className="mt-2"
               fullWidth
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -223,6 +231,35 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
                   <InputAdornment position="start">₫</InputAdornment>
                 ),
               }}
+            />
+          </Grid>
+          {processData ? (
+            <>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  label="ActualFee"
+                  type="number"
+                  fullWidth
+                  value={actualFee}
+                  onChange={(e) => setActualFee(Number(e.target.value))}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">₫</InputAdornment>
+                    ),
+                  }}
+                />
+              </Grid>
+            </>
+          ) : (
+            <></>
+          )}
+          <Grid item xs={12} sm={12}>
+            <TextField
+              label="Note"
+              type="string"
+              fullWidth
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
             />
           </Grid>
           {/* <Grid item xs={12} sm={6}>
