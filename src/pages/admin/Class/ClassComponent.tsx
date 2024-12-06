@@ -34,6 +34,7 @@ import { formatDate } from "../../../utils/formatDate";
 import { ClassResponse } from "../../../model/Response/Class";
 import useAppContext from "../../../hooks/useAppContext";
 import FileSaver from "file-saver";
+import { ClassStatusEnum, ClassStatusString } from "../../../enums/Class";
 
 export default function ClassComponent() {
   const location = useLocation();
@@ -154,6 +155,29 @@ export default function ClassComponent() {
       width: 180,
       renderCell: (params: any) => {
         return formatDate.DD_MM_YYYY(params.value);
+      },
+    },
+    {
+      field: "classStatus",
+      headerName: "Trạng thái",
+      width: 180,
+      renderCell: (params) => {
+        switch (params.value) {
+          case ClassStatusEnum.Active:
+            return (
+              <span className="rounded py-1 px-2 bg-warning text-black">
+                {ClassStatusString.Active}
+              </span>
+            );
+          case ClassStatusEnum.Finished:
+            return (
+              <span className="rounded py-1 px-2 bg-success text-white">
+                {ClassStatusString.Finished}
+              </span>
+            );
+          default:
+            return <></>;
+        }
       },
     },
     {
@@ -598,6 +622,7 @@ export default function ClassComponent() {
     }
 
     try {
+      enableLoading();
       await timetableApi.createTimetable(file); // Gọi API để tạo timetable
       sweetAlert.alertSuccess(
         "Thêm dữ liệu năm học mới thành công!",
@@ -607,7 +632,8 @@ export default function ClassComponent() {
       );
       setOpenTimetableDialog(false); // Đóng modal
 
-      fetchMajors(); // Lấy danh sách các major
+      await fetchPastoralYears();
+      await fetchMajors(); // Lấy danh sách các major
     } catch (error) {
       sweetAlert.alertFailed(
         "Có lỗi xảy ra khi tạo năm học mới!",
@@ -615,6 +641,8 @@ export default function ClassComponent() {
         1000,
         22
       );
+    } finally {
+      disableLoading();
     }
   };
 
@@ -759,7 +787,7 @@ export default function ClassComponent() {
   return (
     <Paper sx={{ width: "calc(100% - 3.8rem)", position: "absolute" }}>
       <h1 className="text-center text-[2.2rem] bg-primary_color text-text_primary_light py-2 font-bold">
-        Danh sách lớp
+        Danh sách lớp học
       </h1>
 
       <div className="my-2 flex justify-between mx-3">

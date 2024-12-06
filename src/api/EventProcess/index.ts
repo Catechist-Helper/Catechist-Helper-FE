@@ -6,7 +6,7 @@ import {
 } from "../../model/Request/EventProcess";
 
 import {
-  ProcessResponseItem
+  ProcessResponseItem, GetMemberOfProcessResponse
 } from "../../model/Response/Event";
 
 const request = axiosInstances.base;
@@ -32,11 +32,23 @@ const deleteProcess = (processId: string) => {
   return request.delete<BasicResponse<boolean>>(`${ROOT_EVENT_PROCESS}/${processId}`);
 };
 
+const getMembersOfProcess = (id: string, processId: string, page?: number, size?: number) => {
+  const params = {
+    id: id,
+    ...(page !== undefined && { page }),
+    ...(size !== undefined && { size }),
+  };
+  return request.get<BasicResponse<GetMemberOfProcessResponse>>(`/members/${processId}`, {
+    params,
+  });
+};
+
 const processApi = {
   createProcess,
   getProcessById,
   updateProcess,
   deleteProcess,
+  getMembersOfProcess
 };
 
 export default processApi;

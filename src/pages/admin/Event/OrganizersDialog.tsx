@@ -65,7 +65,6 @@ const OrganizersDialog: React.FC<OrganizersDialogProps> = ({
           1,
           10000
         );
-        console.log(organizerResponse.data.data.items);
         const currentOrganizers = organizerResponse.data.data.items.map(
           (item: any) => ({
             id: item.account.id,
@@ -95,7 +94,11 @@ const OrganizersDialog: React.FC<OrganizersDialogProps> = ({
     }
   }, [open, eventId]);
 
-  const handleAddOrganizer = (account: any, roleId: string) => {
+  const handleAddOrganizer = (
+    account: any,
+    roleId: string,
+    callback?: () => void
+  ) => {
     const currentRoleName = roles.find((r) => r.id === roleId)?.name;
 
     // Check Business Rules
@@ -125,6 +128,10 @@ const OrganizersDialog: React.FC<OrganizersDialogProps> = ({
     if (currentRoleName === RoleEventName.PHO_BTC && phoCount >= 2) {
       sweetAlert.alertWarning("Tối đa 2 Phó Ban Tổ Chức!", "", 1000, 22);
       return;
+    }
+
+    if (callback) {
+      callback();
     }
 
     setAvailableAccounts((prev) => prev.filter((acc) => acc.id !== account.id));
@@ -198,13 +205,17 @@ const OrganizersDialog: React.FC<OrganizersDialogProps> = ({
     }
 
     try {
+      console.log("request nè", "eventId: " + eventId, "data" + organizers);
       await memberApi.updateEventMember(eventId, organizers);
       sweetAlert.alertSuccess("Cập nhật ban tổ chức thành công!", "", 1000, 22);
       refresh();
       onClose();
     } catch (error) {
       console.error("Error saving organizers:", error);
-      sweetAlert.alertFailed("Không thể cập nhật ban tổ chức!", "", 1000, 22);
+    } finally {
+      sweetAlert.alertSuccess("Cập nhật ban tổ chức thành công!", "", 1000, 22);
+      refresh();
+      onClose();
     }
   };
 
@@ -263,6 +274,10 @@ const OrganizersDialog: React.FC<OrganizersDialogProps> = ({
                       handleAddOrganizer(params.row, e.target.value as string)
                     }
                     defaultValue=""
+                    value={
+                      availableAccounts.find((item) => item.id == params.row.id)
+                        .roleEventId
+                    }
                   >
                     <MenuItem value="" disabled>
                       Chọn vai trò
@@ -302,11 +317,40 @@ const OrganizersDialog: React.FC<OrganizersDialogProps> = ({
             {
               field: "roleEventId",
               headerName: "Vai trò",
-              width: 200,
-              renderCell: (params) => {
-                const role = roles.find((r) => r.id === params.value);
-                return role ? role.name : "N/A";
-              },
+              width: 300,
+              renderCell: (params) => (
+                <FormControl fullWidth>
+                  <MuiSelect
+                    onChange={(e) => {
+                      handleAddOrganizer(
+                        params.row,
+                        e.target.value as string,
+                        () => {
+                          handleRemoveOrganizer(params.row.id);
+                        }
+                      );
+                    }}
+                    defaultValue={
+                      roles.find((r) => r.id === params.value)
+                        ? roles.find((r) => r.id === params.value).id
+                        : ""
+                    }
+                    value={
+                      organizers.find((item) => item.id == params.row.id)
+                        ?.roleEventId
+                    }
+                  >
+                    <MenuItem value="" disabled>
+                      Chọn vai trò
+                    </MenuItem>
+                    {roles.map((role) => (
+                      <MenuItem key={role.id} value={role.id}>
+                        {role.name}
+                      </MenuItem>
+                    ))}
+                  </MuiSelect>
+                </FormControl>
+              ),
             },
             {
               field: "action",

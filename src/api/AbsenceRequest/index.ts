@@ -1,5 +1,5 @@
 import axiosInstances from "../../config/axios";
-import { AbsenceResponse } from "../../model/Response/AbsenceRequest";
+import { AbsenceResponse, GetAbsenceItemResponse } from "../../model/Response/AbsenceRequest";
 import {
   SubmitAbsenceRequest,
   ProcessAbsenceRequest,
@@ -29,7 +29,7 @@ const getAbsences = (status?: number) => {
   const params = {
     ...(status !== undefined && { status }),
   };
-  return request.get<AbsenceResponse<any>>(`${ROOT_API}`, { params });
+  return request.get<AbsenceResponse<GetAbsenceItemResponse[]>>(`${ROOT_API}`, { params });
 };
 
 const absenceApi = {

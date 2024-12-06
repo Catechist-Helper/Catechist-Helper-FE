@@ -127,7 +127,7 @@ interface RoleEventResponse {
   description: string;
 }
 
-interface MemberItemResponse {
+export interface MemberItemResponse {
   account: AccountResponse;
   roleEvent: RoleEventResponse;
   roleEventId: string;
@@ -150,3 +150,28 @@ export interface BudgetTransactionResponse {
   items: BudgetTransactionResponseItem[];
 }
 
+
+export type RoleInAccountResponse = {
+  id: string;
+  roleName: string;
+};
+
+export type MemberOfProcessItemResponse = {
+  getAccountResponse:{
+  id: string;
+  email: string;
+  fullName: string,
+  gender: string,
+  phone: string,
+  avatar: string,
+  role: RoleInAccountResponse;},
+  isMain:boolean;
+};
+
+export type GetMemberOfProcessResponse = {
+  size: number,
+  page: number,
+  total: number,
+  totalPages: number,
+  items: MemberOfProcessItemResponse[];
+};

@@ -15,7 +15,7 @@ const updateEventMember = (eventId: string, data: UpdateMemberRequest[]) => {
 
 // PUT: Cập nhật thông tin thành viên của một process
 const updateProcessMember = (processId: string, data: UpdateMemberOfProcessRequest[]) => {
-  return request.put<BasicResponse<boolean>>(`${ROOT_MEMBER}/${processId}`, data);
+  return request.put<BasicResponse<boolean>>(`${ROOT_MEMBER}`, {params:{processId}, data});
 };
 
 const memberApi = {

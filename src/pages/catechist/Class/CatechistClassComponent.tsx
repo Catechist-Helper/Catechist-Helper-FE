@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Paper from "@mui/material/Paper";
-import { DataGrid } from "@mui/x-data-grid";
+import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { Button, Dialog } from "@mui/material";
 import pastoralYearApi from "../../../api/PastoralYear";
 import catechistApi from "../../../api/Catechist";
@@ -11,6 +11,8 @@ import sweetAlert from "../../../utils/sweetAlert";
 import viVNGridTranslation from "../../../locale/MUITable";
 import RequestLeaveDialog from "./RequestLeaveDialog";
 import absenceApi from "../../../api/AbsenceRequest";
+import { GetAbsenceItemResponse } from "../../../model/Response/AbsenceRequest";
+import { ClassStatusEnum, ClassStatusString } from "../../../enums/Class";
 
 const CatechistClassComponent = () => {
   const [userLogin, setUserLogin] = useState<any>(null);
@@ -23,6 +25,7 @@ const CatechistClassComponent = () => {
   const [slots, setSlots] = useState<any[]>([]);
   const [openLeaveDialog, setOpenLeaveDialog] = useState<boolean>(false);
   const [slotAbsenceId, setSlotAbsenceId] = useState<string>("");
+  const [absenceList, setAbsenceList] = useState<GetAbsenceItemResponse[]>([]);
 
   // Fetch thông tin người dùng đã đăng nhập
   useEffect(() => {
@@ -125,8 +128,25 @@ const CatechistClassComponent = () => {
   };
 
   // Columns cho DataGrid
-  const columns = [
+  const columns: GridColDef[] = [
     { field: "name", headerName: "Tên lớp", width: 200 },
+    {
+      field: "numberOfCatechist",
+      headerName: "Số lượng giáo lý viên",
+      width: 180,
+    },
+    // {
+    //   field: "major",
+    //   headerName: "Ngành",
+    //   width: 150,
+    //   renderCell: (params) => params.row.majorName,
+    // },
+    // {
+    //   field: "grade",
+    //   headerName: "Khối",
+    //   width: 150,
+    //   renderCell: (params) => params.row.gradeName,
+    // },
     {
       field: "startDate",
       headerName: "Ngày bắt đầu",
@@ -144,9 +164,27 @@ const CatechistClassComponent = () => {
       },
     },
     {
-      field: "numberOfCatechist",
-      headerName: "Số lượng giáo lý viên",
+      field: "classStatus",
+      headerName: "Trạng thái",
       width: 180,
+      renderCell: (params: any) => {
+        switch (params.value) {
+          case ClassStatusEnum.Active:
+            return (
+              <span className="rounded py-1 px-2 bg-warning text-black">
+                {ClassStatusString.Active}
+              </span>
+            );
+          case ClassStatusEnum.Finished:
+            return (
+              <span className="rounded py-1 px-2 bg-success text-white">
+                {ClassStatusString.Finished}
+              </span>
+            );
+          default:
+            return <></>;
+        }
+      },
     },
     {
       field: "pastoralYearName",
@@ -191,6 +229,9 @@ const CatechistClassComponent = () => {
           new Date(a.date).getTime() - new Date(b.date).getTime()
       );
 
+      const absenceRes = await absenceApi.getAbsences();
+      setAbsenceList(absenceRes.data.data ?? []);
+
       setSlots(sortedArray);
       setOpenSlotsDialog(true);
     } catch (error) {
@@ -210,13 +251,11 @@ const CatechistClassComponent = () => {
         catechistId: userLogin.catechistId,
         reason: reason,
         slotId: slotId,
-        replacementCatechistId: "",
       });
       const res = absenceApi.submitAbsence({
         catechistId: userLogin.catechistId,
         reason: reason,
         slotId: slotId,
-        replacementCatechistId: "",
       });
       console.log("res", res);
 
@@ -346,7 +385,7 @@ const CatechistClassComponent = () => {
               {
                 field: "action",
                 headerName: "Hành động",
-                width: 180,
+                width: 250,
                 renderCell: (params: any) => {
                   return (
                     <>
@@ -354,16 +393,38 @@ const CatechistClassComponent = () => {
                         new Date(params.row.date).getTime() <
                       0 ? (
                         <>
-                          <Button
-                            color="secondary"
-                            variant="outlined"
-                            onClick={() => {
-                              setOpenLeaveDialog(true);
-                              setSlotAbsenceId(params.row.id);
-                            }} // Mở dialog khi nhấn
-                          >
-                            Xin nghỉ phép
-                          </Button>
+                          {absenceList.length > 0 &&
+                          absenceList.find(
+                            (item) =>
+                              item.slotId == params.row.id &&
+                              item.catechistId == userLogin.catechistId
+                          ) ? (
+                            <>
+                              <Button
+                                color="secondary"
+                                variant="contained"
+                                onClick={() => {
+                                  setOpenLeaveDialog(true);
+                                  setSlotAbsenceId(params.row.id);
+                                }} // Mở dialog khi nhấn
+                              >
+                                Xem nghỉ phép
+                              </Button>
+                            </>
+                          ) : (
+                            <>
+                              <Button
+                                color="secondary"
+                                variant="outlined"
+                                onClick={() => {
+                                  setOpenLeaveDialog(true);
+                                  setSlotAbsenceId(params.row.id);
+                                }} // Mở dialog khi nhấn
+                              >
+                                Xin nghỉ phép
+                              </Button>
+                            </>
+                          )}
                         </>
                       ) : (
                         <></>

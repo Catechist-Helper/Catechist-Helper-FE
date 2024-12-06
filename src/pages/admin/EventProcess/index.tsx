@@ -1,13 +1,13 @@
 import React from "react";
-import CatechistTemplate from "../../../components/Templates/CatechistTemplate/CatechistTemplate";
+import AdminTemplate from "../../../components/Templates/AdminTemplate/AdminTemplate";
 import EventProcessManagement from "./EventProcessManagement";
 
 const CatechistEventProcessPage: React.FC = () => {
   return (
     <>
-      <CatechistTemplate>
+      <AdminTemplate>
         <EventProcessManagement />
-      </CatechistTemplate>
+      </AdminTemplate>
     </>
   );
 };

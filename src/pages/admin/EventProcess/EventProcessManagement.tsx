@@ -15,6 +15,10 @@ import {
   ProcessResponseItem,
 } from "../../../model/Response/Event";
 import { formatPrice } from "../../../utils/formatPrice";
+import {
+  EventProcessStatus,
+  EventProcessStringStatus,
+} from "../../../enums/Event";
 
 const EventProcessManagement: React.FC = () => {
   const location = useLocation();
@@ -29,6 +33,7 @@ const EventProcessManagement: React.FC = () => {
   );
   const [loading, setLoading] = useState<boolean>(true);
   const [summaryFees, setSummaryFees] = useState<number>(0);
+  const [actualSummaryFees, setActualSummaryFees] = useState<number>(0);
 
   const fetchEventProcesses = async () => {
     try {
@@ -40,12 +45,17 @@ const EventProcessManagement: React.FC = () => {
         )
       );
       let sumFees = 0;
+      let actualSumFees = 0;
       response.data.data.items.forEach((item) => {
         if (item.fee) {
           sumFees += item.fee;
         }
+        if (item.actualFee) {
+          actualSumFees += item.actualFee;
+        }
       });
       setSummaryFees(sumFees);
+      setActualSummaryFees(actualSumFees);
     } catch (error) {
       console.error("Lỗi khi lấy dữ liệu quá trình sự kiện:", error);
     } finally {
@@ -86,9 +96,55 @@ const EventProcessManagement: React.FC = () => {
     },
     {
       field: "fee",
-      headerName: "Chi phí",
-      width: 180,
+      headerName: "Chi phí dự tính",
+      width: 150,
       renderCell: (params) => formatPrice(params.value),
+    },
+    {
+      field: "actualFee",
+      headerName: "Chi phí thực tế",
+      width: 150,
+      renderCell: (params) => formatPrice(params.value),
+    },
+    {
+      field: "note",
+      headerName: "Ghi chú",
+      width: 180,
+    },
+    {
+      field: "status",
+      headerName: "Trạng thái",
+      width: 180,
+      renderCell: (params) => {
+        switch (params.value) {
+          case EventProcessStatus.Not_Started:
+            return (
+              <span className="rounded py-1 px-2 bg-warning text-black">
+                {EventProcessStringStatus.Not_Started}
+              </span>
+            );
+          case EventProcessStatus.In_Progress:
+            return (
+              <span className="rounded py-1 px-2 bg-primary text-white">
+                {EventProcessStringStatus.In_Progress}
+              </span>
+            );
+          case EventProcessStatus.Completed:
+            return (
+              <span className="rounded py-1 px-2 bg-success text-white">
+                {EventProcessStringStatus.Completed}
+              </span>
+            );
+          case EventProcessStatus.Cancelled:
+            return (
+              <span className="rounded py-1 px-2 bg-danger text-white">
+                {EventProcessStringStatus.Cancelled}
+              </span>
+            );
+          default:
+            return <></>;
+        }
+      },
     },
   ];
 
@@ -132,59 +188,113 @@ const EventProcessManagement: React.FC = () => {
             <strong>{selectedEvent ? selectedEvent.name : ""}</strong>
           </Typography>
           <div className="w-full flex flex-wrap">
-            <div className="w-[100%] flex flex-wrap">
-              <div className="mt-2 w-[100%]">
-                <strong>Mô tả sự kiện:</strong> {selectedEvent.description}
-              </div>
-              <div className="mt-2 w-[50%]">
-                <strong>Thời gian bắt đầu:</strong>{" "}
-                {formatDate.DD_MM_YYYY_Time(selectedEvent.startTime)}
-              </div>
-              <div className="mt-2 w-[50%]">
-                <strong>Thời gian kết thúc:</strong>{" "}
-                {formatDate.DD_MM_YYYY_Time(selectedEvent.endTime)}
-              </div>
+            <div className="mt-2 w-[100%]">
+              <strong>Mô tả sự kiện:</strong> {selectedEvent.description}
+            </div>
+            <div className="mt-2 w-[34%]">
+              <strong>Thời gian bắt đầu:</strong>{" "}
+              {formatDate.DD_MM_YYYY(selectedEvent.startTime)}
+            </div>
+            <div className="mt-2 w-[34%]">
+              <strong>Thời gian kết thúc:</strong>{" "}
+              {formatDate.DD_MM_YYYY(selectedEvent.endTime)}
             </div>
             <div className="mt-2 w-[100%]">
+              <div className="w-[34%]">
+                <strong>
+                  <div className="flex justify-between w-[70%]">
+                    <p>Ngân sách hiện tại:</p>
+                    <p> ₫ {formatPrice(selectedEvent.current_budget)}</p>
+                  </div>
+                </strong>
+              </div>
+            </div>
+            <div className="mt-2 w-[34%]">
               <strong>
-                Ngân sách hiện tại: ₫{" "}
-                {formatPrice(selectedEvent.current_budget)}
-              </strong>
-            </div>{" "}
-            <div className="mt-2 w-[100%]">
-              <strong>
-                Tổng chi phí hiện tại: ₫ {formatPrice(summaryFees)}
+                <div className="flex justify-between w-[70%]">
+                  <p>Tổng chi phí dự tính:</p>
+                  <p> ₫ {formatPrice(summaryFees)}</p>
+                </div>
               </strong>
             </div>
-            <div className="mt-2 w-[100%]">
-              <strong>Tình trạng: ₫</strong>{" "}
-              {selectedEvent.current_budget - summaryFees >= 0 ? (
-                <>
-                  <span className="font-bold text-success">
-                    Dư {formatPrice(selectedEvent.current_budget - summaryFees)}
-                  </span>
-                </>
-              ) : (
-                <>
-                  <span className="font-bold text-danger">
-                    Thiếu{" "}
-                    {formatPrice(summaryFees - selectedEvent.current_budget)}
-                  </span>
-                </>
-              )}
+            <div className="mt-2 w-[34%]">
+              <strong>
+                <div className="flex justify-between w-[70%]">
+                  <p>Tổng chi phí thực tế:</p>
+                  <p> ₫ {formatPrice(actualSummaryFees)}</p>
+                </div>
+              </strong>
+            </div>
+            <div className="mt-2 w-[34%]">
+              <strong>
+                <div className="flex justify-between w-[70%]">
+                  <p>{"Tình trạng số dư (dự tính):"}</p>
+                  <p>
+                    {selectedEvent.current_budget - summaryFees >= 0 ? (
+                      <>
+                        <span className="font-bold text-success">
+                          Dư ₫{" "}
+                          {formatPrice(
+                            selectedEvent.current_budget - summaryFees
+                          )}
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="font-bold text-danger">
+                          Thiếu{" "}
+                          {formatPrice(
+                            summaryFees - selectedEvent.current_budget
+                          )}
+                        </span>
+                      </>
+                    )}
+                  </p>
+                </div>
+              </strong>
+            </div>
+            <div className="mt-2 w-[34%]">
+              <strong>
+                <div className="flex justify-between w-[70%]">
+                  <p>{"Tình trạng số dư (thực tế):"}</p>
+                  <p>
+                    {selectedEvent.current_budget - actualSummaryFees >= 0 ? (
+                      <>
+                        <span className="font-bold text-success">
+                          Dư ₫{" "}
+                          {formatPrice(
+                            selectedEvent.current_budget - actualSummaryFees
+                          )}
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="font-bold text-danger">
+                          Thiếu{" "}
+                          {formatPrice(
+                            actualSummaryFees - selectedEvent.current_budget
+                          )}
+                        </span>
+                      </>
+                    )}
+                  </p>
+                </div>
+              </strong>
             </div>
           </div>
         </>
       ) : (
         <></>
       )}
-      {eventProcesses.length === 0 ? (
-        <Typography>Không có quá trình nào cho sự kiện này.</Typography>
-      ) : (
-        <div style={{ height: 400, width: "100%" }}>
-          <DataGrid rows={rows} columns={columns} />
-        </div>
-      )}
+      <div className="w-full mt-3">
+        {eventProcesses.length === 0 ? (
+          <Typography>Không có quá trình nào cho sự kiện này.</Typography>
+        ) : (
+          <div style={{ height: 400, width: "100%" }}>
+            <DataGrid rows={rows} columns={columns} />
+          </div>
+        )}
+      </div>
     </Paper>
   );
 };

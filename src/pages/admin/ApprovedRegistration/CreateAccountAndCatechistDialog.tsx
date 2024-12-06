@@ -223,12 +223,14 @@ const CreateAccountAndCatechistDialog: React.FC<
 
       // Tạo tài khoản
       const accountFormData = new FormData();
-      accountFormData.append("email", "abwktba@gmail.com");
+      accountFormData.append("email", formData.email);
       accountFormData.append("password", password);
       accountFormData.append("fullName", formData.fullName);
       accountFormData.append("gender", formData.gender);
       accountFormData.append("phone", formData.phone);
-      if (formData.avatar) accountFormData.append("avatar", formData.avatar);
+      if (formData.avatar) {
+        accountFormData.append("avatar", formData.avatar);
+      }
       accountFormData.append("RoleName", "Catechist");
 
       const accountResponse = await accountApi.createAccount(accountFormData);
