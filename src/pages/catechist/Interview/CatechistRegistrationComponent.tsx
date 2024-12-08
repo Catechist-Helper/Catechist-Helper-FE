@@ -190,32 +190,36 @@ export default function CatechistRegistrationsTable() {
             item.interview.recruiters &&
             item.interview.recruiters &&
             item.interview.recruiters.find((item) => {
-              return item.id == userLogin.id;
+              if (userLogin && userLogin.id) {
+                return item.id == userLogin.id;
+              }
+              return true;
             })
           );
         }
       );
 
-      // Cập nhật tổng số hàng
-      setRowCount(finalData.length); // Cập nhật tổng số hàng từ API
-      setRows(
-        finalData.sort(
-          (a: RegistrationItemResponse, b: RegistrationItemResponse) => {
-            if (
-              a.interview &&
-              a.interview.meetingTime &&
-              b.interview &&
-              b.interview.meetingTime
-            ) {
-              return (
-                new Date(a.interview.meetingTime).getTime() -
-                new Date(b.interview.meetingTime).getTime()
-              );
+      if (userLogin && userLogin.id) {
+        setRowCount(finalData.length);
+        setRows(
+          finalData.sort(
+            (a: RegistrationItemResponse, b: RegistrationItemResponse) => {
+              if (
+                a.interview &&
+                a.interview.meetingTime &&
+                b.interview &&
+                b.interview.meetingTime
+              ) {
+                return (
+                  new Date(a.interview.meetingTime).getTime() -
+                  new Date(b.interview.meetingTime).getTime()
+                );
+              }
+              return -1;
             }
-            return -1;
-          }
-        )
-      ); // Cập nhật hàng được trả về từ API
+          )
+        );
+      }
     } catch (error) {
       console.error("Lỗi khi tải danh sách registrations:", error);
     } finally {
