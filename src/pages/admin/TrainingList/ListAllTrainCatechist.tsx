@@ -20,11 +20,11 @@ const ListAllTrainCatechist: React.FC = () => {
   const [trainingStartDate, setTrainingStartDate] = useState<Date | null>(null);
   const [trainingEndDate, setTrainingEndDate] = useState<Date | null>(null);
   const navigate = useNavigate();
- 
+
   const handleGoBack = () => {
     navigate(-1);
   };
-  
+
   // Fetch all catechists and training details
   const fetchCatechists = async () => {
     try {
@@ -40,13 +40,13 @@ const ListAllTrainCatechist: React.FC = () => {
       setTrainingEndDate(endDate);
 
       console.log(trainingEndDate);
-      
+
       // Get catechists in training list
       const response = await trainApi.getCatechistsByTrainingListId(id!);
       const items = response.data?.data?.items || [];
-  
+
       console.log('Raw API Response:', response.data.data.items); // Debug raw response
-  
+
       // Map toàn bộ danh sách và bảo đảm giữ lại tất cả
       const fetchedCatechists = items.filter((item: { catechist: any; }) => item && item.catechist).map((item: any) => ({
         id: item.catechist.id,
@@ -67,7 +67,7 @@ const ListAllTrainCatechist: React.FC = () => {
           return true; // Keep all other catechists
         }
       );
-  
+
       console.log('Processed catechists:', fetchedCatechists); // Debug processed data
       setCatechists(filteredCatechists);
     } catch (error) {
@@ -75,10 +75,10 @@ const ListAllTrainCatechist: React.FC = () => {
     }
   };
 
-  
+
   const updateStatus = async (catechistId: string, newStatus: number) => {
     const now = new Date();
-  
+
     if (trainingStartDate && now < trainingStartDate) {
       if (newStatus === 1) {
         alert("Không thể đặt trạng thái thành 'Hoàn thành' trước khi khóa đào tạo bắt đầu.");
@@ -94,22 +94,38 @@ const ListAllTrainCatechist: React.FC = () => {
         }
       }
     }
-  
+
+    if (trainingEndDate && now > trainingEndDate) {
+      const currentStatus = catechists.find(cat => cat.id === catechistId)?.status;
+
+      // Nếu đang ở trạng thái Hoàn thành, không cho chuyển về 0 hoặc 2
+      if (currentStatus === 1 && (newStatus === 0 || newStatus === 2)) {
+        alert("Không thể thay đổi trạng thái sau khi đã Hoàn thành khóa đào tạo.");
+        return;
+      }
+
+      // Nếu đang ở trạng thái Không Đạt, không cho chuyển về 0 hoặc 1
+      if (currentStatus === 2 && (newStatus === 0 || newStatus === 1)) {
+        alert("Không thể thay đổi trạng thái sau khi đã được đánh giá Không Đạt.");
+        return;
+      }
+    }
+
     try {
       // Chuẩn bị payload cho API
       const payload = catechists.map((cat) => ({
         id: cat.id,
         status: cat.id === catechistId ? newStatus : cat.status,
       }));
-  
+
       // Gửi PUT request
       const response = await catInTrainApi.updateCatInTrain(id!, payload);
-  
+
       if (response.status === 200 || response.status === 201) {
         if (newStatus === 2 && trainingStartDate && new Date() < trainingStartDate) {
           // Nếu đánh giá "Không Đạt" trước khi khóa học bắt đầu, 
           // cập nhật state để loại bỏ Catechist khỏi danh sách
-          setCatechists(prevCatechists => 
+          setCatechists(prevCatechists =>
             prevCatechists.filter(cat => cat.id !== catechistId)
           );
         } else {
@@ -133,14 +149,14 @@ const ListAllTrainCatechist: React.FC = () => {
     <AdminTemplate>
       <div className="container mt-5">
         <h1 className="text-center fw-bold mb-10">
-          Danh sách Catechist trong Training
+          Danh sách Giáo lý viên trong khóa đào tạo
         </h1>
         <div className="mt-4">
           {catechists.length > 0 ? (
             <table className="table">
               <thead>
                 <tr>
-                  <th>Tên Catechist</th>
+                  <th>Tên giáo lý viên</th>
                   <th>Trạng thái</th>
                 </tr>
               </thead>
@@ -159,21 +175,29 @@ const ListAllTrainCatechist: React.FC = () => {
                           )
                         }
                       >
-                        {Object.entries(catechistInTrainingStatusLabel).map(
-                          ([key, label]) => (
+                        {Object.entries(catechistInTrainingStatusLabel).map(([key, label]) => {
+                          const keyNum = parseInt(key, 10);
+                          const isDisabled =
+                            // Điều kiện cũ cho khóa chưa bắt đầu
+                            (!!trainingStartDate && new Date() < trainingStartDate && keyNum === 1) ||
+                            // Thêm điều kiện mới cho khóa đã kết thúc
+                            (!!trainingEndDate && new Date() > trainingEndDate && (
+                              // Nếu đang ở trạng thái Hoàn thành (1), disable options 0 và 2
+                              (catechist.status === 1 && (keyNum === 0 || keyNum === 2)) ||
+                              // Nếu đang ở trạng thái Không Đạt (2), disable options 0 và 1
+                              (catechist.status === 2 && (keyNum === 0 || keyNum === 1))
+                            ));
+
+                          return (
                             <option
                               key={key}
                               value={key}
-                              disabled={
-                                !!trainingStartDate && // Chuyển trainingStartDate thành boolean
-                                new Date() < trainingStartDate &&
-                                parseInt(key, 10) === 1 // Vô hiệu hóa tùy chọn Completed trước khi đào tạo bắt đầu
-                              }
+                              disabled={isDisabled}
                             >
                               {label}
                             </option>
-                          )
-                        )}
+                          );
+                        })}
                       </select>
                     </td>
                   </tr>

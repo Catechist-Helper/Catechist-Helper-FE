@@ -38,7 +38,7 @@ const ListAllChristianNames: React.FC = () => {
     navigate(`/admin/update-room/${id}`);
   };
 
-  const handleDeleteNameClick = (id: string): void => {
+  const handleDeleteNameClick = (id: string, name: string): void => { // Thêm tham số name
     if (window.confirm("Bạn có chắc là muốn xóa phòng học này không?")) {
       roomsApi
         .deleteRoom(id)
@@ -46,8 +46,15 @@ const ListAllChristianNames: React.FC = () => {
           alert(`Lớp học đã xóa thành công.`);
           window.location.reload();
         })
-        .catch((err: Error) => {
+        .catch((err: any) => { // Đổi kiểu Error thành any để có thể truy cập response
           console.error(`Không thể xóa phòng học với ID: ${id}`, err);
+          
+          // Kiểm tra nếu lỗi là do phòng đang được sử dụng
+          if (err.response?.status === 400 || err.response?.status === 409) {
+            alert(`${name} đang được sử dụng và không xóa được!`);
+          } else {
+            alert('Có lỗi xảy ra khi xóa phòng học. Vui lòng thử lại sau.');
+          }
         });
     }
   };
@@ -131,7 +138,7 @@ const ListAllChristianNames: React.FC = () => {
                       Chỉnh sửa
                     </button>
                     <button
-                      onClick={() => handleDeleteNameClick(name.id)}
+                     onClick={() => handleDeleteNameClick(name.id, name.name)}
                       className="btn btn-warning"
                     >
                       Xóa
