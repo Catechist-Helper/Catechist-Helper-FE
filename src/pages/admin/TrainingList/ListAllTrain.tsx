@@ -122,7 +122,7 @@ const ListAllTrain: React.FC = () => {
                     className="btn btn-success"
                     onClick={() => handleComplete(train)}
                 >
-                    Complete
+                    Hoàn thành
                 </button>
             );
         }

@@ -128,7 +128,7 @@ const UpdateTrain: React.FC = () => {
                 }
             })
             .catch((err) => {
-                console.error("Không thấy danh mục: ", err);
+                console.error("Không thấy cấp độ: ", err);
             });
     }, []);
 

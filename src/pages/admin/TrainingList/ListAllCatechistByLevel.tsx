@@ -52,6 +52,9 @@ const ListCatechistByLevel: React.FC = () => {
     }
   }, [trainingInfo]);
 
+  const handleGoBack = () => {
+    navigate(-1);
+  };
   // Lấy danh sách catechists từ API
   useEffect(() => {
     catechistApi
@@ -94,7 +97,7 @@ const ListCatechistByLevel: React.FC = () => {
           levelResponse.data.data.items.forEach((level: Level) => {
             levelMap[level.id] = level.hierarchyLevel;
           });
-    
+
           // 2. Lấy danh sách catechists đã gán
           const assignedResponse = await trainApi.getCatechistsByTrainingListId(currentTraining.id);
           const assignedCatechists = assignedResponse.data.data.items.map((item: any) => ({
@@ -104,7 +107,7 @@ const ListCatechistByLevel: React.FC = () => {
             levelId: item.catechist.levelId,
             status: item.catechistInTrainingStatus
           }));
-    
+
           // 3. Map lại level
           const mappedAssignedCatechists = assignedCatechists.map((catechist: Catechist) => ({
             ...catechist,
@@ -112,16 +115,16 @@ const ListCatechistByLevel: React.FC = () => {
               hierarchyLevel: levelMap[catechist.levelId || ''] || currentTraining.previousLevel
             }
           }));
-    
+
           // 4. Xử lý catechists chưa gán
           const allCatechistsResponse = await catechistApi.getAllCatechists();
           const allCatechists = allCatechistsResponse.data.data.items || [];
-          
+
           const assignedIds = mappedAssignedCatechists.map((c: Catechist) => c.id);
           const unassignedCatechists = allCatechists.filter(
             catechist => !assignedIds.includes(catechist.id)
           );
-    
+
           // 5. Set state
           setAssignedCatechists(mappedAssignedCatechists);
           setTrainingCatechists(mappedAssignedCatechists);
@@ -162,7 +165,7 @@ const ListCatechistByLevel: React.FC = () => {
   };
 
   // Xóa catechist khỏi danh sách đã gán
- 
+
   // Xóa catechist khỏi danh sách đã gán
   const handleRemoveCatechistFromTraining = (catechistId: string) => {
     const removedCatechist = assignedCatechists.find((catechist) => catechist.id === catechistId);
@@ -236,21 +239,44 @@ const ListCatechistByLevel: React.FC = () => {
   const renderTrainingInfo = () => {
     if (!currentTraining) return null;
     return (
-      <div className="mb-4 p-4 border rounded">
-        <h2 className="text-center mb-4">Danh sách giáo lý viên tham gia khóa đào tạo ({currentTraining.name})</h2>
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <p><strong>Cấp bậc cần thiết tham gia:</strong> Cấp {currentTraining.previousLevel}</p>
-            <p><strong>Cấp bậc sau khi hoàn thành:</strong> Cấp {currentTraining.nextLevel}</p>
+      <div className="mb-6 p-6 border-4 border-[#AF8260] rounded-lg bg-white shadow-lg">
+        <h2 className="text-center mb-6 text-3xl font-bold text-[#422A14]">
+          Danh sách giáo lý viên tham gia khóa đào tạo ({currentTraining.name})
+        </h2>
+        <div className="flex flex-col md:flex-row justify-between gap-8 px-4 ">
+          <div className="flex-1 space-y-4 pl-10">
+            <p>
+              <span className="font-semibold text-[#6B4423] text-lg pl-20">Cấp bậc cần thiết tham gia:</span>
+              <span className="text-gray-700 ml-2">Cấp {currentTraining.previousLevel}</span>
+            </p>
+            <p>
+              <span className="font-semibold text-[#6B4423] text-lg pl-20">Cấp bậc sau khi hoàn thành:</span>
+              <span className="text-gray-700 ml-2">Cấp {currentTraining.nextLevel}</span>
+            </p>
+            <p>
+              <span className="font-semibold text-[#6B4423] text-lg pl-20">Số lượng giáo lý viên hiện tại:</span>
+              <span className="text-gray-700 ml-2">{currentTraining.currentCatechistCount}</span>
+            </p>
           </div>
-          <div>
-            <p><strong>Ngày bắt đầu:</strong> {new Date(currentTraining.startTime).toLocaleDateString('vi-VN')}</p>
-            <p><strong>Ngày kết thúc:</strong> {new Date(currentTraining.endTime).toLocaleDateString('vi-VN')}</p>
+          <div className="flex-1 space-y-4">
+            <p>
+              <span className="font-semibold text-[#6B4423] text-lg pl-20">Mô tả:</span>
+              <span className="text-gray-700 ml-2">{currentTraining.description}</span>
+            </p>
+            <p>
+              <span className="font-semibold text-[#6B4423] text-lg pl-20">Ngày bắt đầu:</span>
+              <span className="text-gray-700 ml-2">
+                {new Date(currentTraining.startTime).toLocaleDateString('vi-VN')}
+              </span>
+            </p>
+            <p>
+              <span className="font-semibold text-[#6B4423] text-lg pl-20">Ngày kết thúc:</span>
+              <span className="text-gray-700 ml-2">
+                {new Date(currentTraining.endTime).toLocaleDateString('vi-VN')}
+              </span>
+            </p>
           </div>
-        </div>
-        <div className="mt-2">
-          <p><strong>Mô tả:</strong> {currentTraining.description}</p>
-          <p><strong>Số lượng giáo lý viên hiện tại trong khóa đào tạo:</strong> {currentTraining.currentCatechistCount}</p>
+
         </div>
       </div>
     );
@@ -260,98 +286,115 @@ const ListCatechistByLevel: React.FC = () => {
     <AdminTemplate>
       <div className="container mt-5">
         {renderTrainingInfo()}
-        <div className="text-center fw-bold">
-          <h1>Danh sách Catechists</h1>
+        <div className="text-center text-l font-semibold">
+          <h1>Danh sách Giáo lý viên</h1>
         </div>
 
         {/* Danh sách catechists chưa gán */}
         <div className="mt-4">
-          <h3 className="text-center">Danh sách Catechists chưa gán</h3>
-          <table className="table">
-            <thead>
-              <tr>
-                <th>Tên</th>
-                <th>Cấp bậc</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {catechists.length === 0 ? (
-                <tr>
-                  <td colSpan={3} className="text-center">
-                    Không có Catechists nào
-                  </td>
+          <h4 className="text-center text-2xl font-semibold ">Danh sách Giáo lý viên chưa gán</h4>
+          <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
+            <table className="w-full text-sm text-left">
+              <thead className="text-sm text-white uppercase bg-[#422A14] h-12"> {/* Giảm height */}
+                <tr className="text-center">
+                  <th scope="col" className="px-6 py-3 w-1/3">Tên</th> {/* Thêm width cố định */}
+                  <th scope="col" className="px-6 py-3 w-1/3">Cấp bậc</th> {/* Căn giữa */}
+                  <th scope="col" className="px-6 py-3 w-1/3">Action</th> {/* Căn giữa */}
                 </tr>
-              ) : (
-                catechists.map((catechist) => (
-                  <tr key={catechist.id}>
-                    <td>{catechist.fullName}</td>
-                    <td>{catechist.level?.hierarchyLevel || "N/A"}</td>
-                    <td>
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={() => handleAddCatechistToTraining(catechist.id)}
-                        disabled={!isValidLevel(catechist.level?.hierarchyLevel)}
-                        style={{
-                          backgroundColor: isValidLevel(catechist.level?.hierarchyLevel)
-                            ? undefined
-                            : '#ccc'
-                        }}
-                      >
-                        Thêm
-                      </Button>
+              </thead>
+              <tbody className="divide-y divide-gray-200"> {/* Thêm divider giữa các hàng */}
+                {catechists.length === 0 ? (
+                  <tr>
+                    <td colSpan={3} className="px-6 py-3 text-center text-gray-500">
+                      Không có Giáo lý viên nào
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : (
+                  catechists.map((catechist) => (
+                    <tr key={catechist.id} className="bg-white hover:bg-gray-50">
+                      <td className="px-6 py-3 font-medium text-gray-900  text-center">
+                        {catechist.fullName}
+                      </td>
+                      <td className="px-6 py-3 text-center"> {/* Căn giữa */}
+                        {catechist.level?.hierarchyLevel || "N/A"}
+                      </td>
+                      <td className="px-6 py-3 text-center"> {/* Căn giữa */}
+                        <button
+                          onClick={() => handleAddCatechistToTraining(catechist.id)}
+                          disabled={!isValidLevel(catechist.level?.hierarchyLevel)}
+                          className={`px-4 py-1.5 rounded text-white font-medium text-sm min-w-[80px]
+                  ${isValidLevel(catechist.level?.hierarchyLevel)
+                              ? 'bg-blue-600 hover:bg-blue-700'
+                              : 'bg-gray-400 cursor-not-allowed'
+                            }`}
+                        >
+                          Thêm
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
 
         {/* Danh sách catechists đã gán */}
-        <div className="mt-5">
-          <h3 className="text-center">Danh sách Catechists đã gán</h3>
-          <table className="table">
-            <thead>
-              <tr>
-                <th>Tên</th>
-                <th>Cấp bậc</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {assignedCatechists.length === 0 ? (
-                <tr>
-                  <td colSpan={3} className="text-center">
-                    Không có Catechists nào đã gán
-                  </td>
+        <div className="mt-4">
+          <h3 className="text-center text-2xl font-semibold ">Danh sách Giáo lý viên đã gán</h3>
+          <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
+            <table className="w-full text-sm text-left">
+              <thead className="text-sm text-white uppercase bg-[#422A14] h-12">
+                <tr className="text-center">
+                  <th scope="col" className="px-6 py-3 w-1/3">Tên</th>
+                  <th scope="col" className="px-6 py-3 w-1/3">Cấp bậc</th>
+                  <th scope="col" className="px-6 py-3 w-1/3">Action</th>
                 </tr>
-              ) : (
-                assignedCatechists.map((catechist) => (
-                  <tr key={catechist.id}>
-                    <td>{catechist.fullName}</td>
-                    <td>{catechist.level?.hierarchyLevel || "N/A"}</td>
-                    <td>
-                      <Button
-                        variant="contained"
-                        color="secondary"
-                        onClick={() => handleRemoveCatechistFromTraining(catechist.id)}
-                      >
-                        Xóa
-                      </Button>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {assignedCatechists.length === 0 ? (
+                  <tr>
+                    <td colSpan={3} className="px-6 py-3 text-center text-gray-500">
+                      Không có Giáo lý viên nào đã gán
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : (
+                  assignedCatechists.map((catechist) => (
+                    <tr key={catechist.id} className="bg-white hover:bg-gray-50">
+                      <td className="px-6 py-3 font-medium text-gray-900">
+                        {catechist.fullName}
+                      </td>
+                      <td className="px-6 py-3 text-center">
+                        {catechist.level?.hierarchyLevel || "N/A"}
+                      </td>
+                      <td className="px-6 py-3 text-center">
+                        <button
+                          onClick={() => handleRemoveCatechistFromTraining(catechist.id)}
+                          className="px-4 py-1.5 rounded text-white font-medium text-sm min-w-[80px]
+                 bg-red-600 hover:bg-red-700 active:bg-red-800"
+                        >
+                          Xóa
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
 
         <div className="text-end mt-4">
           <Button variant="contained" color="success" onClick={handleConfirm}>
             Xác nhận
           </Button>
+          <button
+            type="button"
+            className="text-white bg-gray-700 hover:bg-gray-800 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center ml-5"
+            onClick={handleGoBack}
+          >
+            Quay lại
+          </button>
         </div>
       </div>
     </AdminTemplate>
