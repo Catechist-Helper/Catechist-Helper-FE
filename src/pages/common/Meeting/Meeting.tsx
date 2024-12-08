@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   CallClient,
   CallAgent,
@@ -9,7 +10,13 @@ import {
 } from "@azure/communication-calling";
 import { AzureCommunicationTokenCredential } from "@azure/communication-common";
 
+import { AppBar, IconButton, Toolbar, Box, Button } from "@mui/material";
+import CallEndIcon from "@mui/icons-material/CallEnd";
+import VideoCallIcon from "@mui/icons-material/VideoCall";
+import VideocamOffIcon from "@mui/icons-material/VideocamOff";
+
 const Meeting = () => {
+  const navigate = useNavigate();
   const [callAgent, setCallAgent] = useState<CallAgent | null>(null);
   const [deviceManager, setDeviceManager] = useState<DeviceManager | null>(
     null
@@ -20,7 +27,6 @@ const Meeting = () => {
   const [localVideoRenderer, setLocalVideoRenderer] =
     useState<VideoStreamRenderer | null>(null);
 
-  const [isCallConnected, setIsCallConnected] = useState(false);
   const [isStartCallEnabled, setIsStartCallEnabled] = useState(false);
   const [isHangUpEnabled, setIsHangUpEnabled] = useState(false);
   const [isVideoEnabled, setIsVideoEnabled] = useState(false);
@@ -29,7 +35,6 @@ const Meeting = () => {
   const remoteVideosGalleryRef = useRef<HTMLDivElement>(null);
 
   const [roomId, setRoomId] = useState<string>("");
-  const [token, setToken] = useState<string>("");
 
   useEffect(() => {
     // Extract query parameters from the URL
@@ -39,11 +44,11 @@ const Meeting = () => {
 
     if (roomIdParam && tokenParam) {
       setRoomId(roomIdParam);
-      setToken(tokenParam);
+      initializeCallAgent(tokenParam);
     }
   }, []);
 
-  const initializeCallAgent = async () => {
+  const initializeCallAgent = async (token: string) => {
     try {
       const callClient = new CallClient();
       const tokenCredential = new AzureCommunicationTokenCredential(token);
@@ -56,7 +61,6 @@ const Meeting = () => {
       await manager.askDevicePermission({ video: true, audio: true });
 
       setIsStartCallEnabled(true);
-      console.log("Call agent initialized.");
     } catch (error) {
       console.error("Failed to initialize call agent:", error);
     }
@@ -85,12 +89,9 @@ const Meeting = () => {
 
   const subscribeToCall = (call: Call) => {
     call.on("stateChanged", () => {
-      console.log(`Call state changed: ${call.state}`);
       if (call.state === "Connected") {
-        setIsCallConnected(true);
         setIsVideoEnabled(true);
       } else if (call.state === "Disconnected") {
-        setIsCallConnected(false);
         setIsStartCallEnabled(true);
         setIsHangUpEnabled(false);
         setIsVideoEnabled(false);
@@ -180,7 +181,6 @@ const Meeting = () => {
 
   const removeLocalVideoStream = () => {
     if (localVideoRenderer && localVideoContainerRef.current) {
-      localVideoRenderer.dispose();
       localVideoContainerRef.current.hidden = true;
       setLocalVideoRenderer(null);
     }
@@ -190,7 +190,7 @@ const Meeting = () => {
     if (call) {
       await call.hangUp();
       setCall(null);
-      setIsCallConnected(false);
+      navigate("/");
     }
   };
 
@@ -204,29 +204,115 @@ const Meeting = () => {
   }, [localVideoRenderer]);
 
   return (
-    <div>
-      <h1>Azure Communication Meeting</h1>
-      <button onClick={() => initializeCallAgent()}>
-        Initialize Call Agent
-      </button>
-      <button onClick={() => joinRoomCall()} disabled={!isStartCallEnabled}>
-        Join Room Call
-      </button>
-      <button onClick={hangUpCall} disabled={!isHangUpEnabled}>
-        Hang Up Call
-      </button>
-      <button onClick={displayLocalVideoStream} disabled={!isVideoEnabled}>
-        Start Video
-      </button>
-      <button onClick={removeLocalVideoStream} disabled={!isVideoEnabled}>
-        Stop Video
-      </button>
-      <div id="connectedLabel" hidden={!isCallConnected}>
-        Room Call is connected!
-      </div>
-      <div id="remoteVideosGallery" ref={remoteVideosGalleryRef}></div>
-      <div id="localVideoContainer" ref={localVideoContainerRef} hidden></div>
-    </div>
+    <>
+      {isStartCallEnabled ? (
+        <Box
+          sx={{
+            height: "100vh", // Full viewport height
+            display: "flex", // Flexbox for layout
+            justifyContent: "center", // Horizontally center
+            alignItems: "center", // Vertically center
+            backgroundColor: "#f5f5f5", // Light background
+          }}
+        >
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => joinRoomCall()}
+            disabled={!isStartCallEnabled}
+            sx={{
+              fontSize: "1.25rem", // Larger font size for text
+              padding: "12px 24px", // Padding inside the button
+              borderRadius: "8px", // Rounded corners
+              textTransform: "none", // Prevent uppercase transformation
+            }}
+          >
+            Join Meeting
+          </Button>
+        </Box>
+      ) : (
+        <Box sx={{ display: "flex", flexDirection: "column", height: "100vh" }}>
+          <Box
+            sx={{
+              flex: 1,
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <div id="localVideoContainer" ref={localVideoContainerRef}></div>
+            <div id="remoteVideosGallery" ref={remoteVideosGalleryRef}></div>
+          </Box>
+
+          <AppBar
+            position="fixed"
+            color="default"
+            sx={{
+              top: "auto",
+              bottom: 0,
+              backgroundColor: "transparent",
+              color: "white",
+              padding: "10px 0",
+              boxShadow: "none",
+            }}
+          >
+            <Toolbar
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                gap: 2, // Space between buttons
+              }}
+            >
+              {/* Hang Up Call Button */}
+              <IconButton
+                onClick={hangUpCall}
+                disabled={!isHangUpEnabled}
+                sx={{
+                  color: "#ff4d4d", // Red for hang-up
+                  fontSize: "1.5rem", // Adjust size
+                  backgroundColor: "rgba(255, 77, 77, 0.1)", // Semi-transparent background
+                  borderRadius: "50%", // Circle
+                  padding: "10px", // Adjust padding for circle
+                }}
+              >
+                <CallEndIcon fontSize="large" />
+              </IconButton>
+
+              {/* Start Video Button */}
+              <IconButton
+                onClick={displayLocalVideoStream}
+                disabled={!isVideoEnabled}
+                sx={{
+                  color: "black", // White icon color
+                  fontSize: "1.5rem",
+                  backgroundColor: "rgba(255, 255, 255, 0.1)", // Semi-transparent background
+                  borderRadius: "50%", // Circle
+                  padding: "10px", // Adjust padding for circle
+                }}
+              >
+                <VideoCallIcon fontSize="large" />
+              </IconButton>
+
+              {/* Stop Video Button */}
+              <IconButton
+                onClick={removeLocalVideoStream}
+                disabled={!isVideoEnabled}
+                sx={{
+                  color: "black", // White icon color
+                  fontSize: "1.5rem",
+                  backgroundColor: "rgba(255, 255, 255, 0.1)", // Semi-transparent background
+                  borderRadius: "50%", // Circle
+                  padding: "10px", // Adjust padding for circle
+                }}
+              >
+                <VideocamOffIcon fontSize="large" />
+              </IconButton>
+            </Toolbar>
+          </AppBar>
+        </Box>
+      )}
+    </>
   );
 };
 
