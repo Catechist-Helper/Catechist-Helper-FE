@@ -92,6 +92,22 @@ export default function Router() {
             // </GuestGuard>
           ),
         },
+        {
+          path: PATH_HOME.meeting,
+          element: (
+            // <GuestGuard>
+            <Meeting />
+            // </GuestGuard>
+          ),
+        },
+        {
+          path: PATH_HOME.room,
+          element: (
+            // <GuestGuard>
+            <Room />
+            // </GuestGuard>
+          ),
+        },
       ],
     },
 
@@ -319,6 +335,9 @@ const Login = Loadable(lazy(() => import("../pages/common/Login/Login")));
 //404
 const NotFound = Loadable(lazy(() => import("../pages/error/BasicErrorPage")));
 
+const Meeting = Loadable(lazy(() => import("../pages/common/Meeting/Meeting")));
+
+const Room = Loadable(lazy(() => import("../pages/common/Meeting/Room")));
 //Admin
 // const AdminLandingPage = Loadable(
 //   lazy(() => import("../pages/admin/AdminLandingPage/index"))
@@ -397,4 +416,5 @@ const HomeLevel = Loadable(
 const HomeTrain = Loadable(
   lazy(() => import("../pages/admin/TrainingList/HomeTrain"))
 );
+
 //-----------------------------import CreateConfig from './../pages/admin/SystemConfiguration/CreateConfig';

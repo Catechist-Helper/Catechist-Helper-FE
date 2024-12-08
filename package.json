@@ -12,6 +12,8 @@
     "test:ci": "jest --ci"
   },
   "dependencies": {
+    "@azure/communication-calling": "^1.14.1",
+    "@azure/communication-common": "^2.3.1",
     "@ckeditor/ckeditor5-build-classic": "^43.2.0",
     "@ckeditor/ckeditor5-react": "^9.3.0",
     "@emotion/cache": "^11.4.0",
