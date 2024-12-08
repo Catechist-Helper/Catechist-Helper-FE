@@ -1,17 +1,19 @@
-import axios from 'axios';
+import axios from "axios";
 
 export enum AxiosClientFactoryEnum {
-  BASE = '/',
+  BASE = "/",
 }
 
 export const parseParams = (params: any) => {
   const keys = Object.keys(params);
-  let options = '';
+  let options = "";
 
   keys.forEach((key) => {
-    const isParamTypeObject = typeof params[key] === 'object';
+    const isParamTypeObject = typeof params[key] === "object";
     const isParamTypeArray =
-      isParamTypeObject && Array.isArray(params[key]) && params[key].length >= 0;
+      isParamTypeObject &&
+      Array.isArray(params[key]) &&
+      params[key].length >= 0;
 
     if (!isParamTypeObject) {
       options += `${key}=${params[key]}&`;
@@ -37,10 +39,10 @@ request.interceptors.request.use((options) => {
   const { method } = options;
 
   // Với phương thức PUT và POST, kiểm tra headers để quyết định định dạng request
-  if (method === 'put' || method === 'post') {
-    if (!options.headers['Content-Type']) {
+  if (method === "put" || method === "post") {
+    if (!options.headers["Content-Type"]) {
       Object.assign(options.headers, {
-        'Content-Type': 'application/json;charset=UTF-8', // Mặc định là JSON
+        "Content-Type": "application/json;charset=UTF-8", // Mặc định là JSON
       });
     }
   }
@@ -50,13 +52,14 @@ request.interceptors.request.use((options) => {
 
 request.interceptors.response.use(
   (response) => response,
-  (error) => Promise.reject((error.response && error.response.data) || 'Có lỗi xảy ra')
+  (error) =>
+    Promise.reject((error.response && error.response.data) || "Có lỗi xảy ra")
 );
 
 class AxiosClientFactory {
   getAxiosClient(type?: AxiosClientFactoryEnum) {
     switch (type) {
-      case '/':
+      case "/":
         return request;
       default:
         return request;
