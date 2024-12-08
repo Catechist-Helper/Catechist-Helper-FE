@@ -129,9 +129,7 @@ const MemberOfProcessDialog = forwardRef<
         isMain: item.id === mainMember,
       };
     });
-
-    console.log("request nè - ", `processId:\n`, processId, "\ndata:", request);
-    await memberApi.updateProcessMember(processId, request);
+    await memberApi.updateProcessMember(processId.trim(), request);
   };
 
   useImperativeHandle(ref, () => ({

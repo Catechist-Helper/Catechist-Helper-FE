@@ -205,7 +205,6 @@ const OrganizersDialog: React.FC<OrganizersDialogProps> = ({
     }
 
     try {
-      console.log("request nè", "eventId: " + eventId, "data" + organizers);
       await memberApi.updateEventMember(eventId, organizers);
       sweetAlert.alertSuccess("Cập nhật ban tổ chức thành công!", "", 1000, 22);
       refresh();
