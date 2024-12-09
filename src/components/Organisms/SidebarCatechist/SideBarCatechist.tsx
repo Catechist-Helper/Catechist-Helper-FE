@@ -202,13 +202,7 @@ const SideBarCatechist = () => {
                 <div
                   onClick={() => {
                     logout();
-                    // navigateTo(PATH_MAIN.users);
                   }}
-                  //   className={`links_hover ${
-                  //     typeof window !== "undefined" && isActive(PATH_MAIN.users)
-                  //       ? "active_current_link"
-                  //       : ""
-                  //   }`}
                 >
                   <Link
                     style={{

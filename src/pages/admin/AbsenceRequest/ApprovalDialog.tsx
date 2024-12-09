@@ -122,6 +122,12 @@ const ApprovalDialog = ({
     },
   ];
 
+  useEffect(() => {
+    if (status != AbsenceRequestStatus.Approved) {
+      setSelectedReplacementId(null);
+    }
+  }, [status]);
+
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
       <DialogTitle>Phê duyệt đơn nghỉ phép</DialogTitle>
@@ -134,11 +140,19 @@ const ApprovalDialog = ({
           onChange={(e) => setStatus(Number(e.target.value))}
           fullWidth
           variant="outlined"
+          className={`${status == AbsenceRequestStatus.Approved ? "bg-success text-white" : ""}
+          ${status == AbsenceRequestStatus.Rejected ? "bg-danger text-white" : ""}`}
         >
-          <MenuItem value={AbsenceRequestStatus.Approved}>
+          <MenuItem
+            value={AbsenceRequestStatus.Approved}
+            className="bg-success text-white py-3"
+          >
             {AbsenceRequestStatusString.Approved}
           </MenuItem>
-          <MenuItem value={AbsenceRequestStatus.Rejected}>
+          <MenuItem
+            value={AbsenceRequestStatus.Rejected}
+            className="bg-danger text-white py-3"
+          >
             {AbsenceRequestStatusString.Rejected}
           </MenuItem>
         </Select>
@@ -153,17 +167,23 @@ const ApprovalDialog = ({
           rows={4}
           style={{ margin: "0", marginTop: "25px" }}
         />
-        <FormControl fullWidth margin="normal">
-          <label htmlFor="" className="mt-1 ml-1">
-            Chọn giáo lý viên thay thế
-          </label>
-          <DataGrid
-            rows={replacementCatechists}
-            columns={columns}
-            paginationMode="client"
-            disableRowSelectionOnClick
-          />
-        </FormControl>
+        {status == AbsenceRequestStatus.Approved ? (
+          <>
+            <FormControl fullWidth margin="normal">
+              <label htmlFor="" className="mt-1 ml-1">
+                Chọn giáo lý viên thay thế
+              </label>
+              <DataGrid
+                rows={replacementCatechists}
+                columns={columns}
+                paginationMode="client"
+                disableRowSelectionOnClick
+              />
+            </FormControl>
+          </>
+        ) : (
+          <></>
+        )}
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose} color="secondary">
