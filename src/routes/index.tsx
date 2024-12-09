@@ -237,6 +237,16 @@ export default function Router() {
           ),
         },
         {
+          path: PATH_ADMIN.admin_calendar,
+          element: (
+            <AuthGuard>
+              <RoleBasedGuard accessibleRoles={[RoleNameEnum.Admin]}>
+                <AdminCalendar />
+              </RoleBasedGuard>
+            </AuthGuard>
+          ),
+        },
+        {
           path: PATH_ADMIN.admin_management_file,
           element: (
             <AuthGuard>
@@ -582,6 +592,16 @@ export default function Router() {
             </AuthGuard>
           ),
         },
+        {
+          path: PATH_CATECHIST.catechist_calendar,
+          element: (
+            <AuthGuard>
+              <RoleBasedGuard accessibleRoles={[RoleNameEnum.Catechist]}>
+                <CatechistCalendar />
+              </RoleBasedGuard>
+            </AuthGuard>
+          ),
+        },
       ],
     },
 
@@ -638,6 +658,16 @@ const AdminEventManagement = Loadable(
 const AdminFileManagement = Loadable(
   lazy(() => import("../pages/admin/File/index"))
 );
+const AdminEventProcessPage = Loadable(
+  lazy(() => import("../pages/admin/EventProcess/index"))
+);
+const AbsenceRequestAdmin = Loadable(
+  lazy(() => import("../pages/admin/AbsenceRequest/index"))
+);
+const AdminCalendar = Loadable(
+  lazy(() => import("../pages/admin/Calendar/index"))
+);
+
 const CatechistInterViewPage = Loadable(
   lazy(() => import("../pages/catechist/Interview/index"))
 );
@@ -650,11 +680,8 @@ const CatechistEventPage = Loadable(
 const CatechistEventProcessPage = Loadable(
   lazy(() => import("../pages/catechist/EventProcess/index"))
 );
-const AdminEventProcessPage = Loadable(
-  lazy(() => import("../pages/admin/EventProcess/index"))
-);
-const AbsenceRequestAdmin = Loadable(
-  lazy(() => import("../pages/admin/AbsenceRequest/index"))
+const CatechistCalendar = Loadable(
+  lazy(() => import("../pages/catechist/Calendar/index"))
 );
 //----------------------------
 
