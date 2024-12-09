@@ -25,6 +25,7 @@ export const PATH_ADMIN = {
   admin_event_management: path(PATH_ROOT_ADMIN, "/events"),
   admin_event_process: path(PATH_ROOT_ADMIN, "/event-processes"),
   admin_management_absence: path(PATH_ROOT_ADMIN, "/absence"),
+  admin_calendar: path(PATH_ROOT_ADMIN, "/calendar"),
   admin_management_file: path(PATH_ROOT_ADMIN, "/files"),
   //----------
 
@@ -72,6 +73,7 @@ export const PATH_CATECHIST = {
   class: path(PATH_ROOT_CATECHIST, "/classes"),
   event: path(PATH_ROOT_CATECHIST, "/events"),
   event_process: path(PATH_ROOT_CATECHIST, "/event-processes"),
+  catechist_calendar: path(PATH_ROOT_CATECHIST, "/calendar"),
 };
 
 export const PATH_HOME = {
