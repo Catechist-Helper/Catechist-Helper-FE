@@ -16,8 +16,7 @@ const Room: React.FC = () => {
   const [deviceManager, setDeviceManager] = useState<any>(null);
   const [localVideoStream, setLocalVideoStream] =
     useState<LocalVideoStream | null>(null);
-  const [localVideoStreamRenderer, setLocalVideoStreamRenderer] =
-    useState<VideoStreamRenderer | null>(null);
+  const [localVideoStreamRenderer] = useState<VideoStreamRenderer | null>(null);
 
   const roomId = searchParams.get("roomid");
   const token = searchParams.get("token");
@@ -71,6 +70,7 @@ const Room: React.FC = () => {
     try {
       const stream = await createLocalVideoStream();
       setLocalVideoStream(stream);
+      console.log(localVideoStream);
 
       const videoOptions = stream ? { localVideoStreams: [stream] } : undefined;
 

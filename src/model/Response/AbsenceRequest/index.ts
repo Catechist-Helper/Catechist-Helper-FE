@@ -5,6 +5,17 @@ export interface AbsenceResponse<T = any> {
   data: T;
 }
 
+interface SlotResponse {
+  id: string,
+  date: string,
+  startTime: string,
+  endTime: string,
+  note: string | null,
+  classId: string,
+  className: string,
+  roomName: string
+}
+
 export interface GetAbsenceItemResponse {
   id: string,
       status: number,
@@ -19,5 +30,6 @@ export interface GetAbsenceItemResponse {
       catechistId: string,
       slotId: string,
       reason: string,
-      replacementCatechistId: string|null
+      replacementCatechistId: string|null,
+      slot: SlotResponse
 }
