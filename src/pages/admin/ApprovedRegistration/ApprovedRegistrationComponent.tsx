@@ -13,7 +13,6 @@ import {
   MenuItem,
   TextField,
   FormControl,
-  InputLabel,
 } from "@mui/material";
 import viVNGridTranslation from "../../../locale/MUITable";
 import RegistrationDetailDialog from "./RegistrationDetailDialog";
@@ -826,25 +825,24 @@ export default function ApprovedRegistrationsTable() {
             className="my-0 mt-1"
           /> */}
 
-          <FormControl fullWidth margin="normal" className="my-0 mt-4">
-            <InputLabel id="result-label">
-              <strong>Kết quả</strong>
-            </InputLabel>
+          <FormControl fullWidth margin="normal" className="my-0 mt-3">
+            <label id="result-label">
+              <strong>Kết quả phỏng vấn</strong>
+            </label>
             <MuiSelect
               labelId="result-label"
               value={interviewResult}
               onChange={(e) => setInterviewResult(e.target.value)}
+              className={`${interviewResult == "Chấp nhận" ? "bg-success text-white" : ""}
+              ${interviewResult == "Từ chối" ? "bg-danger text-white" : ""}`}
             >
               <MenuItem
                 value="Chấp nhận"
-                style={{ backgroundColor: "green", color: "white" }}
+                className="bg-success text-white py-3"
               >
                 Chấp nhận
               </MenuItem>
-              <MenuItem
-                value="Từ chối"
-                style={{ backgroundColor: "red", color: "white" }}
-              >
+              <MenuItem value="Từ chối" className="bg-danger text-white py-3">
                 Từ chối
               </MenuItem>
             </MuiSelect>
@@ -858,15 +856,15 @@ export default function ApprovedRegistrationsTable() {
               marginTop: "20px",
             }}
           >
+            <Button onClick={handleCloseApprovalModal} variant="outlined">
+              Hủy bỏ
+            </Button>
             <Button
               onClick={handleConfirmInterview}
               variant="contained"
               color="primary"
             >
               Xác nhận
-            </Button>
-            <Button onClick={handleCloseApprovalModal} variant="outlined">
-              Hủy bỏ
             </Button>
           </div>
         </div>

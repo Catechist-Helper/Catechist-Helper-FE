@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import postsApi from "../../../../api/Post";
 import { PATH_HOME } from "../../../../routes/paths";
 import { PostStatus } from "../../../../enums/Post";
+import { formatDate } from "../../../../utils/formatDate";
 
 interface Post {
   id: string;
@@ -24,9 +25,13 @@ const OutstandingNews: React.FC = () => {
       try {
         const response = await postsApi.getAll(1, 6); // Lấy 6 bài tin tức mới nhất
         // Lọc bài viết có module là PUBLIC
-        const publicPosts = response.data.data.items.filter(
-          (post: Post) => post.module === PostStatus.PUBLIC
-        );
+        const publicPosts = response.data.data.items
+          .filter((post: Post) => post.module === PostStatus.PUBLIC)
+          .sort((a: Post, b: Post) => {
+            return (
+              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+            );
+          });
         setPosts(publicPosts);
       } catch (error) {
         console.error("Lỗi khi tải tin tức:", error);
@@ -47,31 +52,45 @@ const OutstandingNews: React.FC = () => {
   };
 
   if (loading) {
-    return <p>Đang tải tin tức...</p>;
+    return (
+      <div className="outstanding-news px-20">
+        <h1
+          className="text-[1.5rem] text-gray-300 text-left mt-4"
+          style={{
+            lineHeight: "60px",
+            fontWeight: "600",
+            letterSpacing: "1px",
+          }}
+        >
+          Đang tải tin tức...
+        </h1>
+      </div>
+    );
   }
 
   return (
     <div className="outstanding-news px-20">
       <h1
         className="text-[2rem] text-text_primary_light text-left mt-4"
-        style={{ lineHeight: "60px", fontWeight: "600", letterSpacing: "3px" }}
+        style={{ lineHeight: "60px", fontWeight: "600", letterSpacing: "2px" }}
       >
         Tin Tức Mới
       </h1>
       <ul className="news-list">
         {posts.map((post) => (
-          <li key={post.id} className="news-item mb-1 w-full">
+          <li key={post.id} className="news-item mb-[10px] w-full">
             <Link
               to={PATH_HOME.news_detail_page(post.id)}
-              className="news-link  inline-block"
+              className="news-link inline-block"
               style={{ borderBottom: "1px solid #fff" }}
             >
-              <p className="text-[1.3rem] news-title text-text_primary_light">
+              <span className="text-[1.15rem] news-date text-gray-300 italic">
+                {formatDate.DD_MM_YYYY_Time(post.createdAt)}
+              </span>
+              <span className="text-[1.3rem] news-title text-gray-200">
+                {" - "}
                 {truncateTitle(post.title, 100)}
-              </p>
-              {/* <p className="news-date">
-                {dayjs(post.createdAt).format("DD/MM/YYYY")}
-              </p> */}
+              </span>
             </Link>
           </li>
         ))}
