@@ -6,13 +6,13 @@ import { AuthProvider } from "./contexts/JWTContext";
 function App() {
   return (
     <>
-      <AppProvider>
-        <AuthProvider>
-          <BrowserRouter>
+      <BrowserRouter>
+        <AppProvider>
+          <AuthProvider>
             <Router />
-          </BrowserRouter>
-        </AuthProvider>
-      </AppProvider>
+          </AuthProvider>
+        </AppProvider>
+      </BrowserRouter>
     </>
   );
 }

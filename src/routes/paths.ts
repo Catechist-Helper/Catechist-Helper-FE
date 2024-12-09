@@ -24,6 +24,7 @@ export const PATH_ADMIN = {
   admin_event_category_management: path(PATH_ROOT_ADMIN, "/event-categories"),
   admin_event_management: path(PATH_ROOT_ADMIN, "/events"),
   admin_event_process: path(PATH_ROOT_ADMIN, "/event-processes"),
+  admin_management_absence: path(PATH_ROOT_ADMIN, "/absence"),
   admin_management_file: path(PATH_ROOT_ADMIN, "/files"),
   //----------
 
