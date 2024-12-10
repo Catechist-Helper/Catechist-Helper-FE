@@ -15,102 +15,6 @@ import { RegistrationStatus } from "../../../enums/Registration";
 import { formatDate } from "../../../utils/formatDate";
 import { getUserInfo } from "../../../utils/utils";
 
-// import { RegistrationProcessTitle } from "../../../enums/RegistrationProcess";
-
-// Cấu hình các cột trong DataGrid
-const columns: GridColDef[] = [
-  { field: "fullName", headerName: "Tên đầy đủ", width: 180 },
-  { field: "gender", headerName: "Giới tính", width: 100 },
-  {
-    field: "dateOfBirth",
-    headerName: "Ngày sinh",
-    width: 110,
-    renderCell: (params) => {
-      return formatDate.DD_MM_YYYY(params.value); // Format ngày tháng
-    },
-  },
-  { field: "email", headerName: "Email", width: 200 },
-  { field: "phone", headerName: "Số điện thoại", width: 120 },
-  { field: "address", headerName: "Địa chỉ", width: 180 },
-  {
-    field: "isTeachingBefore",
-    headerName: "Đã từng dạy",
-    width: 120,
-    renderCell: (params) => (params.value ? "Có" : "Không"),
-  },
-  { field: "yearOfTeaching", headerName: "Số năm giảng dạy", width: 150 },
-  {
-    field: "meetingTime",
-    headerName: "Thời gian phỏng vấn",
-    width: 180,
-    renderCell: (params) => {
-      return params.row.interview
-        ? formatDate.DD_MM_YYYY_Time(params.row.interview.meetingTime)
-        : "Chưa có lịch";
-    },
-    sortComparator: (a, b) => {
-      if (!a || !b) return 0;
-      return dayjs(a).isBefore(dayjs(b)) ? -1 : 1; // Sắp xếp theo ngày giờ từ sớm tới muộn
-    },
-  },
-  {
-    field: "recruiters",
-    headerName: "Người phỏng vấn",
-    width: 200,
-    renderCell: (params) => {
-      return params.row.interview && params.row.interview.recruiters
-        ? params.row.interview.recruiters
-            .map((recruiter: any) => recruiter.fullName)
-            .join(", ")
-        : "";
-    },
-  },
-
-  {
-    field: "note",
-    headerName: "Ghi chú",
-    width: 200,
-  },
-  // {
-  //   field: "interviews",
-  //   headerName: "Kết quả phỏng vấn",
-  //   width: 200,
-  //   renderCell: (params) => {
-  //     return params.row.interviews[0]?.note || ""; // Hiển thị ghi chú nếu có
-  //   },
-  // },
-  {
-    field: "status",
-    headerName: "Trạng thái",
-    width: 150,
-    renderCell: (params) => {
-      const status = params.value as RegistrationStatus;
-      switch (status) {
-        case RegistrationStatus.Approved_Duyet_Don:
-          return (
-            <span className="inline px-2 py-1 bg-info text-text_primary_dark rounded-lg">
-              Chờ phỏng vấn
-            </span>
-          );
-        case RegistrationStatus.Approved_Phong_Van:
-          return (
-            <span className="inline px-2 py-1 bg-success text-text_primary_light rounded-lg">
-              Đã chấp nhận
-            </span>
-          );
-        case RegistrationStatus.Rejected_Phong_Van:
-          return (
-            <span className="inline px-2 py-1 bg-danger rounded-lg text-text_primary_light">
-              Bị từ chối
-            </span>
-          );
-        default:
-          return "Không xác định";
-      }
-    },
-  },
-];
-
 // Hàm chính để hiển thị danh sách đơn
 export default function CatechistRegistrationsTable() {
   const [rows, setRows] = useState<RegistrationItemResponse[]>([]);
@@ -163,28 +67,24 @@ export default function CatechistRegistrationsTable() {
           break;
       }
 
-      // Xác định ngày bắt đầu và kết thúc (lọc theo ngày nếu có selectedDate)
-      const startDate = selectedDate ? selectedDate : undefined;
-      const endDate = selectedDate ? selectedDate : undefined;
-
       // Gọi API getAllRegistrations với các tham số
       const firstResponse = await registrationApi.getAllRegistrations(
-        startDate,
-        endDate,
+        undefined,
+        undefined,
         status,
         1, // Sử dụng paginationModel.page + 1 vì API có thể sử dụng số trang bắt đầu từ 1
         2 // Sử dụng kích thước trang từ paginationModel
       );
 
       const { data } = await registrationApi.getAllRegistrations(
-        startDate,
-        endDate,
+        undefined,
+        undefined,
         status,
         1, // Sử dụng paginationModel.page + 1 vì API có thể sử dụng số trang bắt đầu từ 1
         firstResponse.data.data.total // Sử dụng kích thước trang từ paginationModel
       );
-      let finalData = data.data.items.filter(
-        (item: RegistrationItemResponse) => {
+      let finalData = data.data.items
+        .filter((item: RegistrationItemResponse) => {
           return (
             item.interview &&
             item.interview.recruiters &&
@@ -196,8 +96,21 @@ export default function CatechistRegistrationsTable() {
               return true;
             })
           );
-        }
-      );
+        })
+        .filter((item: RegistrationItemResponse) => {
+          if (
+            selectedDate &&
+            selectedDate != "" &&
+            item.interview &&
+            item.interview.meetingTime
+          ) {
+            return (
+              formatDate.DD_MM_YYYY(item.interview.meetingTime) ==
+              formatDate.DD_MM_YYYY(selectedDate)
+            );
+          }
+          return true;
+        });
 
       if (userLogin && userLogin.id) {
         setRowCount(finalData.length);
@@ -226,6 +139,137 @@ export default function CatechistRegistrationsTable() {
       setLoading(false);
     }
   };
+
+  const columns: GridColDef[] = [
+    { field: "fullName", headerName: "Tên đầy đủ", width: 180 },
+    { field: "gender", headerName: "Giới tính", width: 100 },
+    {
+      field: "dateOfBirth",
+      headerName: "Ngày sinh",
+      width: 110,
+      renderCell: (params) => {
+        return formatDate.DD_MM_YYYY(params.value); // Format ngày tháng
+      },
+    },
+    { field: "email", headerName: "Email", width: 200 },
+    { field: "phone", headerName: "Số điện thoại", width: 120 },
+    { field: "address", headerName: "Địa chỉ", width: 180 },
+    {
+      field: "isTeachingBefore",
+      headerName: "Đã từng dạy",
+      width: 120,
+      renderCell: (params) => (params.value ? "Có" : "Không"),
+    },
+    { field: "yearOfTeaching", headerName: "Số năm giảng dạy", width: 150 },
+    {
+      field: "meetingTime",
+      headerName: "Thời gian phỏng vấn",
+      width: 180,
+      renderCell: (params) => {
+        return params.row.interview
+          ? formatDate.DD_MM_YYYY_Time(params.row.interview.meetingTime)
+          : "Chưa có lịch";
+      },
+      sortComparator: (a, b) => {
+        if (!a || !b) return 0;
+        return dayjs(a).isBefore(dayjs(b)) ? -1 : 1; // Sắp xếp theo ngày giờ từ sớm tới muộn
+      },
+    },
+    {
+      field: "interviewType",
+      headerName: "Hình thức",
+      width: 120,
+      renderCell: (params) => {
+        return params.row.interview &&
+          params.row.interview.interviewType == 1 ? (
+          <>
+            <a
+              className="text-[1rem] border-2 border-green-700  text-green-700  rounded-xl px-2
+            hover:bg-green-700 hover:border-0 hover:text-white"
+              style={{ cursor: "pointer" }}
+              target="_blank"
+              href={
+                params.row.interview.recruiterInInterviews &&
+                params.row.interview.recruiterInInterviews.find(
+                  (item: any) => item.accountId == userLogin.id
+                )
+                  ? params.row.interview.recruiterInInterviews.find(
+                      (item: any) => item.accountId == userLogin.id
+                    ).onlineRoomUrl
+                  : ""
+              }
+            >
+              Online
+            </a>
+          </>
+        ) : (
+          <span className="text-white bg-black rounded-xl py-1 px-2">
+            Trực tiếp
+          </span>
+        );
+      },
+      sortComparator: (a, b) => {
+        if (!a || !b) return 0;
+        return dayjs(a).isBefore(dayjs(b)) ? -1 : 1; // Sắp xếp theo ngày giờ từ sớm tới muộn
+      },
+    },
+    {
+      field: "recruiters",
+      headerName: "Người phỏng vấn",
+      width: 200,
+      renderCell: (params) => {
+        return params.row.interview && params.row.interview.recruiters
+          ? params.row.interview.recruiters
+              .map((recruiter: any) => recruiter.fullName)
+              .join(", ")
+          : "";
+      },
+    },
+
+    {
+      field: "note",
+      headerName: "Ghi chú",
+      width: 200,
+    },
+    // {
+    //   field: "interviews",
+    //   headerName: "Kết quả phỏng vấn",
+    //   width: 200,
+    //   renderCell: (params) => {
+    //     return params.row.interviews[0]?.note || ""; // Hiển thị ghi chú nếu có
+    //   },
+    // },
+    {
+      field: "status",
+      headerName: "Trạng thái",
+      width: 150,
+      renderCell: (params) => {
+        const status = params.value as RegistrationStatus;
+        switch (status) {
+          case RegistrationStatus.Approved_Duyet_Don:
+            return (
+              <span className="inline px-2 py-1 bg-info text-text_primary_dark rounded-lg">
+                Chờ phỏng vấn
+              </span>
+            );
+          case RegistrationStatus.Approved_Phong_Van:
+            return (
+              <span className="inline px-2 py-1 bg-success text-text_primary_light rounded-lg">
+                Đã chấp nhận
+              </span>
+            );
+          case RegistrationStatus.Rejected_Phong_Van:
+            return (
+              <span className="inline px-2 py-1 bg-danger rounded-lg text-text_primary_light">
+                Bị từ chối
+              </span>
+            );
+          default:
+            return "Không xác định";
+        }
+      },
+    },
+  ];
 
   useEffect(() => {
     fetchApprovedRegistrations();
@@ -280,6 +324,10 @@ export default function CatechistRegistrationsTable() {
       </div>
     );
   };
+
+  if (!userLogin) {
+    return <></>;
+  }
 
   return (
     <Paper

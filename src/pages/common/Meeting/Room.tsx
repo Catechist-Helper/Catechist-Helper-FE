@@ -112,10 +112,10 @@ const Room: React.FC = () => {
   return (
     <Box sx={{ padding: 4 }}>
       <Typography variant="h4" gutterBottom>
-        Meeting Room
+        Phòng phỏng vấn
       </Typography>
       <Box sx={{ marginBottom: 2 }}>
-        <Typography variant="body1">Room ID: {roomId}</Typography>
+        <Typography variant="body1">ID của phòng: {roomId}</Typography>
       </Box>
       <Box sx={{ marginBottom: 4 }}>
         <Button
@@ -124,7 +124,7 @@ const Room: React.FC = () => {
           onClick={handleJoinRoom}
           sx={{ marginRight: 2 }}
         >
-          Join Room
+          Tham gia phòng
         </Button>
         <Button
           variant="contained"

@@ -25,7 +25,7 @@ export type EventCalendar = {
   widthDialog?: "md" | "lg" | "xs" | "sm" | "xl";
 };
 
-// const events: EventCalendar[] = [
+// const eventsInitData: EventCalendar[] = [
 //   {
 //     title: "Meeting with Team",
 //     description: "Discuss project progress",
@@ -56,7 +56,7 @@ const CalendarComponent: React.FC<CalendarComponentProps> = ({ events }) => {
   const [eventList, setEventList] = useState<EventCalendar[]>([]);
 
   useEffect(() => {
-    setEventList(events);
+    setEventList([...events]);
   }, [events]);
 
   const handleEventClick = (info: { event: any }) => {
@@ -114,9 +114,12 @@ const CalendarComponent: React.FC<CalendarComponentProps> = ({ events }) => {
           <Box display="flex" flexDirection="column" gap={2}>
             <Typography variant="h6">{selectedEvent?.title}</Typography>
             <Typography variant="body1" color="textSecondary">
-              <div style={{ whiteSpace: "pre-line" }}>
-                {selectedEvent?.description ?? ""}
-              </div>
+              <div
+                style={{ whiteSpace: "pre-line" }}
+                dangerouslySetInnerHTML={{
+                  __html: selectedEvent?.description ?? "",
+                }}
+              ></div>
             </Typography>
             <Divider />
             <Box>

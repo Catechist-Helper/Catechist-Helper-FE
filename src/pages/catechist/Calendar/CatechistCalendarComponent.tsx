@@ -5,13 +5,109 @@ import eventApi from "../../../api/Event";
 import classApi from "../../../api/Class";
 import catechistInClassApi from "../../../api/CatechistInClass";
 import processApi from "../../../api/EventProcess";
+import registrationApi from "../../../api/Registration";
 import useAppContext from "../../../hooks/useAppContext";
+import { RegistrationStatus } from "../../../enums/Registration";
 
 const CatechistCalendarComponent = () => {
   const [userLogin, setUserLogin] = useState<any>(null);
   const [finishFetchData, setFinishFetchData] = useState<boolean>(false);
   const [calendarEvents, setCalendarEvents] = useState<EventCalendar[]>([]);
   const { enableLoading, disableLoading } = useAppContext();
+
+  const fetchRegistrationsEvent = async () => {
+    try {
+      const firstRes = await registrationApi.getAllRegistrations(
+        undefined,
+        undefined,
+        RegistrationStatus.Approved_Duyet_Don
+      );
+      const secondRes = await registrationApi.getAllRegistrations(
+        undefined,
+        undefined,
+        RegistrationStatus.Approved_Duyet_Don,
+        1,
+        firstRes.data.data.total
+      );
+      console.log("secondRes.data.data.items", secondRes.data.data.items);
+      secondRes.data.data.items.forEach((item) => {
+        if (
+          item.interview &&
+          item.interview.recruiterInInterviews &&
+          item.interview.recruiterInInterviews.find(
+            (re) => re.accountId == userLogin.id
+          ) != undefined
+        ) {
+          console.log({
+            title: `[Phỏng vấn] - Lịch phỏng vấn`,
+            description:
+              item.interview.interviewType == 0
+                ? `- Ứng viên: ${item.fullName}
+            - Hình thức phỏng vấn: Trực tiếp
+            - Người phỏng vấn: ${
+              item.interview.recruiters
+                ? item.interview.recruiters
+                    .map((recruiter: any) => recruiter.fullName)
+                    .join(", ")
+                : ""
+            }`
+                : `- Ứng viên: ${item.fullName}
+            - Hình thức phỏng vấn: Online
+            - Link phỏng vấn: <a
+            href=${
+              item.interview.recruiterInInterviews.find(
+                (re) => re.accountId == userLogin.id
+              )?.onlineRoomUrl ?? ""
+            }  target="_blank" style="color:blue">Bấm vào đây để tham gia</a>
+            - Người phỏng vấn: ${
+              item.interview.recruiters
+                ? item.interview.recruiters
+                    .map((recruiter: any) => recruiter.fullName)
+                    .join(", ")
+                : ""
+            }`,
+            start: item.interview.meetingTime,
+          });
+          setCalendarEvents((prev) => [
+            ...prev,
+            {
+              title: `[Phỏng vấn] - Lịch phỏng vấn`,
+              description:
+                item.interview.interviewType == 0
+                  ? `- Ứng viên: ${item.fullName}
+              - Hình thức phỏng vấn: Trực tiếp
+              - Người phỏng vấn: ${
+                item.interview.recruiters
+                  ? item.interview.recruiters
+                      .map((recruiter: any) => recruiter.fullName)
+                      .join(", ")
+                  : ""
+              }`
+                  : `- Ứng viên: ${item.fullName}
+              - Hình thức phỏng vấn: Online
+              - Link phỏng vấn: <a href=${
+                item.interview.recruiterInInterviews.find(
+                  (re) => re.accountId == userLogin.id
+                )?.onlineRoomUrl ?? ""
+              }>Bấm vào đây để tham gia</a>
+              - Người phỏng vấn: ${
+                item.interview.recruiters
+                  ? item.interview.recruiters
+                      .map((recruiter: any) => recruiter.fullName)
+                      .join(", ")
+                  : ""
+              }`,
+              start: item.interview.meetingTime,
+            },
+          ]);
+        }
+      });
+    } catch (error) {
+      console.error("Error:", error);
+    } finally {
+      setFinishFetchData(true);
+    }
+  };
 
   const fetchClassesSlotData = async () => {
     try {
@@ -53,12 +149,11 @@ const CatechistCalendarComponent = () => {
     } catch (error) {
       console.error("Error:", error);
     } finally {
-      setFinishFetchData(true);
+      fetchRegistrationsEvent();
     }
   };
 
   const fetchAllEvents = async () => {
-    // let eventsList: EventItemResponse[] = [];
     try {
       const firstRes = await eventApi.getAllEvents();
       const secondRes = await eventApi.getAllEvents(

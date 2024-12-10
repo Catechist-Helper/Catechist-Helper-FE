@@ -2,6 +2,7 @@
 import axiosInstances from "../../config/axios";
 import { BasicResponse } from "../../model/Response/BasicResponse";
 import { AccountResponse, AccountItemResponse, RecruitersByMeetingTimeResponse } from "../../model/Response/Account";
+import { EventCalendar } from "../../pages/common/Calendar/Calendar";
 
 const request = axiosInstances.base;
 const ROOT_ACCOUNT = "/accounts";
@@ -52,13 +53,18 @@ const getRecruitersByMeetingTime = (meetingTime:string, page?: number, size?: nu
   return request.get<BasicResponse<RecruitersByMeetingTimeResponse>>(`${ROOT_ACCOUNT}/recruiters`, { params });
 };
 
+const getCalendarOfAccount = (id: string) => {
+  return request.get<BasicResponse<EventCalendar[]>>(`${ROOT_ACCOUNT}/${id}/calendar`);
+};
+
 const accountApi = {
   getAllAccounts,
   createAccount,
   getAccountById,
   updateAccount,
   deleteAccount,
-  getRecruitersByMeetingTime
+  getRecruitersByMeetingTime,
+  getCalendarOfAccount
 };
 
 export default accountApi;

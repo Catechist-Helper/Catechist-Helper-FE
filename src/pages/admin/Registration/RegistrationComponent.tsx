@@ -371,7 +371,7 @@ export default function RegistrationDataTable() {
         "Đã xếp lịch phỏng vấn thành công!",
         "",
         1000,
-        26
+        28
       );
       handleCloseModal();
       fetchRegistrations(); // Refresh registration data after scheduling
@@ -395,7 +395,6 @@ export default function RegistrationDataTable() {
       disableLoading();
     }
   };
-  sweetAlert.alertSuccess("Đã xếp lịch phỏng vấn thành công!", "", 1000, 28);
 
   useEffect(() => {
     if (meetingTime == "") {

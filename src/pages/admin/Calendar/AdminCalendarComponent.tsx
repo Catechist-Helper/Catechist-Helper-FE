@@ -71,7 +71,7 @@ const AdminCalendarComponent = () => {
     } finally {
       setTimeout(() => {
         fetchAllEvents();
-      }, 500);
+      }, 1000);
     }
   };
 

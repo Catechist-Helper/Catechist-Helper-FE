@@ -14,6 +14,7 @@ export type InterviewResponse = {
   isPassed: boolean;
   interviewType: number;
   recruiters: RecruiterResponse[];
+  recruiterInInterviews: recruiterInInterviewItemResponse[];
 };
 
 // Mô hình cho InterviewProcesses
@@ -56,6 +57,11 @@ export type RegistrationItemResponse = {
   interview: InterviewResponse;
   registrationProcesses: InterviewProcessResponse[];
 };
+
+export type recruiterInInterviewItemResponse= {
+  accountId:string,
+  onlineRoomUrl:string|null
+}
 
 // Mô hình cho phản hồi của danh sách Registration (hỗ trợ phân trang)
 export type RegistrationResponse = {

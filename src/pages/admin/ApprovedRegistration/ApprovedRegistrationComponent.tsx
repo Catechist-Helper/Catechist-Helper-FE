@@ -74,7 +74,6 @@ const columns: GridColDef[] = [
       return dayjs(a).isBefore(dayjs(b)) ? -1 : 1; // Sắp xếp theo ngày giờ từ sớm tới muộn
     },
   },
-
   {
     field: "interviewType",
     headerName: "Hình thức",
@@ -86,7 +85,7 @@ const columns: GridColDef[] = [
         </span>
       ) : (
         <span className="text-white bg-black rounded-xl py-1 px-2">
-          Offline
+          Trực tiếp
         </span>
       );
     },
@@ -235,51 +234,53 @@ export default function ApprovedRegistrationsTable() {
           break;
       }
 
-      // Xác định ngày bắt đầu và kết thúc (lọc theo ngày nếu có selectedDate)
-      const startDate = selectedDate ? selectedDate : undefined;
-      const endDate = selectedDate ? selectedDate : undefined;
-
       // Gọi API getAllRegistrations với các tham số
       const firstResponse = await registrationApi.getAllRegistrations(
         undefined,
         undefined,
-        status,
-        1, // Sử dụng paginationModel.page + 1 vì API có thể sử dụng số trang bắt đầu từ 1
-        2, // Sử dụng kích thước trang từ paginationModel
-        startDate,
-        endDate
+        status
       );
 
       const { data } = await registrationApi.getAllRegistrations(
         undefined,
         undefined,
         status,
-        1, // Sử dụng paginationModel.page + 1 vì API có thể sử dụng số trang bắt đầu từ 1
-        firstResponse.data.data.total, // Sử dụng kích thước trang từ paginationModel
-        startDate,
-        endDate
+        1,
+        firstResponse.data.data.total
       );
 
-      // Cập nhật tổng số hàng
-      setRowCount(data.data.total); // Cập nhật tổng số hàng từ API
-      setRows(
-        data.data.items.sort(
-          (a: RegistrationItemResponse, b: RegistrationItemResponse) => {
-            if (
-              a.interview &&
-              a.interview.meetingTime &&
-              b.interview &&
-              b.interview.meetingTime
-            ) {
-              return (
-                new Date(a.interview.meetingTime).getTime() -
-                new Date(b.interview.meetingTime).getTime()
-              );
-            }
-            return -1;
+      let finalData = data.data.items
+        .sort((a: RegistrationItemResponse, b: RegistrationItemResponse) => {
+          if (
+            a.interview &&
+            a.interview.meetingTime &&
+            b.interview &&
+            b.interview.meetingTime
+          ) {
+            return (
+              new Date(a.interview.meetingTime).getTime() -
+              new Date(b.interview.meetingTime).getTime()
+            );
           }
-        )
-      ); // Cập nhật hàng được trả về từ API
+          return -1;
+        })
+        .filter((item: RegistrationItemResponse) => {
+          if (
+            selectedDate &&
+            selectedDate != "" &&
+            item.interview &&
+            item.interview.meetingTime
+          ) {
+            return (
+              formatDate.DD_MM_YYYY(item.interview.meetingTime) ==
+              formatDate.DD_MM_YYYY(selectedDate)
+            );
+          }
+          return true;
+        });
+
+      setRowCount(finalData.length);
+      setRows(finalData);
     } catch (error) {
       console.error("Lỗi khi tải danh sách registrations:", error);
     } finally {
@@ -474,12 +475,6 @@ export default function ApprovedRegistrationsTable() {
       if (selectedRegistration) {
         const interviewId = selectedRegistration.interview?.id;
         if (interviewId) {
-          console.log({
-            meetingTime,
-            note: selectedRegistration.interview.note,
-            isPassed: selectedRegistration.interview.isPassed,
-            reason: updatedInterviewReason,
-          });
           await interviewApi.updateInterview(interviewId, {
             meetingTime,
             note: selectedRegistration.interview.note,
