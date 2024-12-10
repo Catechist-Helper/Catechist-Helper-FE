@@ -1,0 +1,36 @@
+/* Container for local and remote videos */
+.video-container {
+  display: flex;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+}
+
+/* Local video container */
+#localVideoContainer {
+  flex: 1; /* Equal width as the remoteVideosGallery */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box;
+  height: auto;
+}
+
+/* Remote videos gallery */
+#remoteVideosGallery {
+  flex: 1; /* Equal width as the localVideoContainer */
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(150px, 1fr)
+  ); /* Adjusts based on the number of children */
+  gap: 10px;
+  box-sizing: border-box;
+}
+
+/* Individual remote video containers */
+.remote-video-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 5px;
+}
