@@ -14,6 +14,7 @@ import { AppBar, IconButton, Toolbar, Box, Button } from "@mui/material";
 import CallEndIcon from "@mui/icons-material/CallEnd";
 import VideoCallIcon from "@mui/icons-material/VideoCall";
 import VideocamOffIcon from "@mui/icons-material/VideocamOff";
+import "./Meeting.css";
 
 const Meeting = () => {
   const navigate = useNavigate();
@@ -35,7 +36,7 @@ const Meeting = () => {
   const remoteVideosGalleryRef = useRef<HTMLDivElement>(null);
 
   const [roomId, setRoomId] = useState<string>("");
-
+  const [loading, setLoading] = useState(true);
   useEffect(() => {
     // Extract query parameters from the URL
     const searchParams = new URLSearchParams(window.location.search);
@@ -44,7 +45,7 @@ const Meeting = () => {
 
     if (roomIdParam && tokenParam) {
       setRoomId(roomIdParam);
-      initializeCallAgent(tokenParam);
+      initializeCallAgent(tokenParam).finally(() => setLoading(false));
     }
   }, []);
 
@@ -195,7 +196,6 @@ const Meeting = () => {
   };
 
   useEffect(() => {
-    // Cleanup on unmount
     return () => {
       if (localVideoRenderer) {
         localVideoRenderer.dispose();
@@ -203,17 +203,32 @@ const Meeting = () => {
     };
   }, [localVideoRenderer]);
 
-  return (
-    <>
-      {isStartCallEnabled ? (
+  if (loading) {
+    return (
+      <Box
+        sx={{
+          height: "100vh",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+        className="bg-[url(../src/assets/images/HomeTemplate/background.png)]"
+      ></Box>
+    );
+  }
+
+  const renderContent = () => {
+    if (isStartCallEnabled) {
+      return (
         <Box
           sx={{
-            height: "100vh", // Full viewport height
-            display: "flex", // Flexbox for layout
-            justifyContent: "center", // Horizontally center
-            alignItems: "center", // Vertically center
-            backgroundColor: "#f5f5f5", // Light background
+            height: "100vh",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundColor: "#f5f5f5",
           }}
+          className="bg-[url(../src/assets/images/HomeTemplate/background.png)]"
         >
           <Button
             variant="contained"
@@ -221,99 +236,121 @@ const Meeting = () => {
             onClick={() => joinRoomCall()}
             disabled={!isStartCallEnabled}
             sx={{
-              fontSize: "1.25rem", // Larger font size for text
-              padding: "12px 24px", // Padding inside the button
-              borderRadius: "8px", // Rounded corners
-              textTransform: "none", // Prevent uppercase transformation
+              fontSize: "1.25rem",
+              padding: "12px 24px",
+              borderRadius: "8px",
+              textTransform: "none",
             }}
           >
-            Join Meeting
+            Tham gia phỏng vấn
           </Button>
         </Box>
-      ) : (
-        <Box sx={{ display: "flex", flexDirection: "column", height: "100vh" }}>
-          <Box
-            sx={{
-              flex: 1,
+      );
+    }
+    return (
+      <Box
+        sx={{ display: "flex", flexDirection: "column", height: "100vh" }}
+        className="bg-[url(../src/assets/images/HomeTemplate/background.png)]"
+      >
+        <Box
+          className="video-container"
+          sx={{
+            flex: 1,
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+            gap: 10,
+            padding: 20,
+          }}
+        >
+          <div
+            id="localVideoContainer"
+            ref={localVideoContainerRef}
+            style={{
+              backgroundColor: "#000",
               display: "flex",
-              flexDirection: "column",
               justifyContent: "center",
               alignItems: "center",
+              borderRadius: 8,
+              overflow: "hidden",
             }}
-          >
-            <div id="localVideoContainer" ref={localVideoContainerRef}></div>
-            <div id="remoteVideosGallery" ref={remoteVideosGalleryRef}></div>
-          </Box>
-
-          <AppBar
-            position="fixed"
-            color="default"
-            sx={{
-              top: "auto",
-              bottom: 0,
+          ></div>
+          <div
+            id="remoteVideosGallery"
+            ref={remoteVideosGalleryRef}
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+              gap: 10,
               backgroundColor: "transparent",
-              color: "white",
-              padding: "10px 0",
-              boxShadow: "none",
+              borderRadius: 8,
+              overflow: "hidden",
+            }}
+          ></div>
+        </Box>
+        <AppBar
+          position="fixed"
+          color="default"
+          sx={{
+            top: "auto",
+            bottom: 0,
+            backgroundColor: "#1c1c1c",
+            color: "white",
+            padding: "10px 0",
+          }}
+        >
+          <Toolbar
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              gap: 2,
             }}
           >
-            <Toolbar
+            <IconButton
+              onClick={hangUpCall}
+              disabled={!isHangUpEnabled}
               sx={{
-                display: "flex",
-                justifyContent: "center",
-                gap: 2, // Space between buttons
+                color: "#ff4d4d",
+                fontSize: "1.5rem",
+                backgroundColor: "rgba(255, 77, 77, 0.1)",
+                borderRadius: "50%",
+                padding: "10px",
               }}
             >
-              {/* Hang Up Call Button */}
-              <IconButton
-                onClick={hangUpCall}
-                disabled={!isHangUpEnabled}
-                sx={{
-                  color: "#ff4d4d", // Red for hang-up
-                  fontSize: "1.5rem", // Adjust size
-                  backgroundColor: "rgba(255, 77, 77, 0.1)", // Semi-transparent background
-                  borderRadius: "50%", // Circle
-                  padding: "10px", // Adjust padding for circle
-                }}
-              >
-                <CallEndIcon fontSize="large" />
-              </IconButton>
+              <CallEndIcon fontSize="large" />
+            </IconButton>
+            <IconButton
+              onClick={displayLocalVideoStream}
+              disabled={!isVideoEnabled}
+              sx={{
+                color: "white",
+                fontSize: "1.5rem",
+                backgroundColor: "rgba(255, 255, 255, 0.1)",
+                borderRadius: "50%",
+                padding: "10px",
+              }}
+            >
+              <VideoCallIcon fontSize="large" />
+            </IconButton>
+            <IconButton
+              onClick={removeLocalVideoStream}
+              disabled={!isVideoEnabled}
+              sx={{
+                color: "white",
+                fontSize: "1.5rem",
+                backgroundColor: "rgba(255, 255, 255, 0.1)",
+                borderRadius: "50%",
+                padding: "10px",
+              }}
+            >
+              <VideocamOffIcon fontSize="large" />
+            </IconButton>
+          </Toolbar>
+        </AppBar>
+      </Box>
+    );
+  };
 
-              {/* Start Video Button */}
-              <IconButton
-                onClick={displayLocalVideoStream}
-                disabled={!isVideoEnabled}
-                sx={{
-                  color: "black", // White icon color
-                  fontSize: "1.5rem",
-                  backgroundColor: "rgba(255, 255, 255, 0.1)", // Semi-transparent background
-                  borderRadius: "50%", // Circle
-                  padding: "10px", // Adjust padding for circle
-                }}
-              >
-                <VideoCallIcon fontSize="large" />
-              </IconButton>
-
-              {/* Stop Video Button */}
-              <IconButton
-                onClick={removeLocalVideoStream}
-                disabled={!isVideoEnabled}
-                sx={{
-                  color: "black", // White icon color
-                  fontSize: "1.5rem",
-                  backgroundColor: "rgba(255, 255, 255, 0.1)", // Semi-transparent background
-                  borderRadius: "50%", // Circle
-                  padding: "10px", // Adjust padding for circle
-                }}
-              >
-                <VideocamOffIcon fontSize="large" />
-              </IconButton>
-            </Toolbar>
-          </AppBar>
-        </Box>
-      )}
-    </>
-  );
+  return <>{renderContent()}</>;
 };
 
 export default Meeting;
