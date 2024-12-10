@@ -1,7 +1,13 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { DataGrid, GridColDef, GridPaginationModel } from "@mui/x-data-grid";
+import {
+  DataGrid,
+  GridColDef,
+  GridPaginationModel,
+  GridRowSelectionModel,
+} from "@mui/x-data-grid";
 import Paper from "@mui/material/Paper";
+import Select from "react-select";
 import { Button } from "@mui/material";
 import majorApi from "../../../api/Major";
 import gradeApi from "../../../api/Grade";
@@ -10,10 +16,12 @@ import { CreateCatechistInGradeRequest } from "../../../model/Request/CatechistI
 import viVNGridTranslation from "../../../locale/MUITable";
 import catechistInGradeApi from "../../../api/CatechistInGrade";
 import { LevelResponse } from "../../../model/Response/Major";
+import useAppContext from "../../../hooks/useAppContext";
 
 export default function AssignCatechistToGradeComponent() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { enableLoading, disableLoading } = useAppContext();
 
   // State
   const [loading, setLoading] = useState<boolean>(true);
@@ -21,9 +29,14 @@ export default function AssignCatechistToGradeComponent() {
   const [catechists, setCatechists] = useState<any[]>([]); // Bảng catechist chưa được assign
   const [assignedCatechists, setAssignedCatechists] = useState<any[]>([]); // Bảng catechist đã được assign
   const [overLevelCatechists, setOverLevelCatechists] = useState<any[]>([]);
+  const [selectedOverLevelCatechists, setSelectedOverLevelCatechists] =
+    useState<GridRowSelectionModel>([]);
+  const [suitableGradesToMove, setSuitableGradesToMove] = useState<any[]>([]);
+
   // const [selectedMajor, setSelectedMajor] = useState<string>("");
   const [selectedGrade, setSelectedGrade] = useState<string>("");
   // const [totalCatechist, setTotalCatechist] = useState<number>(0);
+  const [selectedGradeToMove, setSelectedGradeToMove] = useState<any>(null);
 
   const [mainCatechistId, setMainCatechistId] = useState<string | null>(null); // ID của trưởng khối
   const [gradeName, setGradeName] = useState<string>("");
@@ -33,7 +46,7 @@ export default function AssignCatechistToGradeComponent() {
   );
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({
     page: 0,
-    pageSize: 2,
+    pageSize: 4,
   });
   const [paginationModel2, setPaginationModel2] = useState<GridPaginationModel>(
     {
@@ -44,7 +57,7 @@ export default function AssignCatechistToGradeComponent() {
   const [paginationModel3, setPaginationModel3] = useState<GridPaginationModel>(
     {
       page: 0,
-      pageSize: 4,
+      pageSize: 100,
     }
   );
   const [viewMode, setViewMode] = useState<boolean>(false);
@@ -66,70 +79,65 @@ export default function AssignCatechistToGradeComponent() {
       fetchLevels(majorId);
     }
     if (levelOfGrade) {
-      const fetchCatechists = async (majorId: string) => {
-        try {
-          const { data } = await majorApi.getCatechistsOfMajor(
-            majorId,
-            true,
-            1,
-            10000
-          );
-          // Lọc bỏ catechists đã được assign
-          const unassignedCatechists = data.data.items.filter(
-            (catechist) =>
-              !assignedCatechists.some(
-                (assigned) => assigned.id === catechist.id
-              )
-          );
-          setCatechists(unassignedCatechists);
-        } catch (error) {
-          console.error("Error loading catechists:", error);
-        } finally {
-          setLoading(false);
-        }
-      };
-
-      const fetchAssignedCatechists = async (gradeId: string) => {
-        try {
-          // API để lấy danh sách catechist đã được assign ở grade
-          const { data } = await gradeApi.getCatechistsOfGrade(gradeId);
-          const fetchItems: any[] = [];
-          [...data.data.items].forEach((item) => {
-            fetchItems.push({ ...item, id: item.catechist.id });
-          });
-          console.log("fetchItems", fetchItems);
-          setAssignedCatechists(
-            [...fetchItems].filter(
-              (item: any) =>
-                levelOfGrade &&
-                levelOfGrade.find(
-                  (level) => item.catechist.level.id == level.id
-                )
-            )
-          );
-          setOverLevelCatechists(
-            [...fetchItems].filter(
-              (item: any) =>
-                !(
-                  levelOfGrade &&
-                  levelOfGrade.find(
-                    (level) => item.catechist.level.id == level.id
-                  )
-                )
-            )
-          );
-          const main = data.data.items.find((item: any) => item.isMain);
-          if (main) {
-            setMainCatechistId(main.catechist.id);
-          }
-        } catch (error) {
-          console.error("Error loading assigned catechists:", error);
-        }
-      };
       fetchCatechists(majorId); // Lấy danh sách catechists chưa được assign
       fetchAssignedCatechists(gradeId); // Lấy danh sách catechists đã được assign
     }
   }, [levelOfGrade]);
+
+  const fetchCatechists = async (majorId: string) => {
+    try {
+      const { data } = await majorApi.getCatechistsOfMajor(
+        majorId,
+        true,
+        1,
+        10000
+      );
+      // Lọc bỏ catechists đã được assign
+      const unassignedCatechists = data.data.items.filter(
+        (catechist) =>
+          !assignedCatechists.some((assigned) => assigned.id === catechist.id)
+      );
+      setCatechists(unassignedCatechists);
+    } catch (error) {
+      console.error("Error loading catechists:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchAssignedCatechists = async (gradeId: string) => {
+    try {
+      // API để lấy danh sách catechist đã được assign ở grade
+      const { data } = await gradeApi.getCatechistsOfGrade(gradeId);
+      const fetchItems: any[] = [];
+      [...data.data.items].forEach((item) => {
+        fetchItems.push({ ...item, id: item.catechist.id });
+      });
+
+      setAssignedCatechists(
+        [...fetchItems].filter(
+          (item: any) =>
+            levelOfGrade &&
+            levelOfGrade.find((level) => item.catechist.level.id == level.id)
+        )
+      );
+      setOverLevelCatechists(
+        [...fetchItems].filter(
+          (item: any) =>
+            !(
+              levelOfGrade &&
+              levelOfGrade.find((level) => item.catechist.level.id == level.id)
+            )
+        )
+      );
+      const main = data.data.items.find((item: any) => item.isMain);
+      if (main) {
+        setMainCatechistId(main.catechist.id);
+      }
+    } catch (error) {
+      console.error("Error loading assigned catechists:", error);
+    }
+  };
 
   const fetchLevels = async (majorId: string) => {
     try {
@@ -189,14 +197,13 @@ export default function AssignCatechistToGradeComponent() {
 
     const requestData: CreateCatechistInGradeRequest = {
       gradeId: selectedGrade,
-      catechistIds: assignedCatechists.map(
+      catechistIds: [...assignedCatechists, ...overLevelCatechists].map(
         (catechist) => catechist.catechist.id
       ),
       mainCatechistId: mainCatechistId,
     };
 
     try {
-      console.log(requestData);
       await catechistInGradeApi.createCatechistInGrade(requestData);
       sweetAlert.alertSuccess("Gán giáo lý viên thành công!", "", 1000, 22);
       navigate(-1);
@@ -209,6 +216,52 @@ export default function AssignCatechistToGradeComponent() {
       );
     }
   };
+
+  useEffect(() => {
+    if (overLevelCatechists.length >= 0) {
+      const action = async () => {
+        let levelIds: string[] = [];
+        overLevelCatechists.forEach((item: any) => {
+          if (
+            levelIds.findIndex((level) => level == item.catechist.level.id) < 0
+          ) {
+            levelIds.push(item.catechist.level.id);
+          }
+        });
+
+        const res = await majorApi.getAllMajors();
+        res.data.data.items.forEach((major) => {
+          const action2 = async () => {
+            const res2 = await majorApi.getLevelsOfMajor(major.id);
+            if (
+              res2.data.data.items.findIndex(
+                (item2) => levelIds.findIndex((item3) => item3 == item2.id) >= 0
+              ) >= 0
+            ) {
+              const action3 = async () => {
+                const res3 = await gradeApi.getAllGrades(major.id);
+                res3.data.data.items.forEach((item) => {
+                  if (
+                    suitableGradesToMove.findIndex(
+                      (item4) => item4.id == item.id
+                    ) < 0
+                  ) {
+                    setSuitableGradesToMove((prev) => [...prev, item]);
+                  }
+                });
+              };
+              action3();
+            }
+          };
+          action2();
+        });
+      };
+      action();
+    }
+    if (overLevelCatechists.length <= 0) {
+      setSuitableGradesToMove([]);
+    }
+  }, [overLevelCatechists]);
 
   // Columns cho DataGrid
   const columns1: GridColDef[] = [
@@ -375,6 +428,45 @@ export default function AssignCatechistToGradeComponent() {
     },
   ];
 
+  const handleMoveGradesForCatechists = async () => {
+    try {
+      enableLoading();
+      if (!selectedGradeToMove) {
+        sweetAlert.alertFailed(
+          "Vui lòng chọn một khối để chuyển!",
+          "",
+          3000,
+          28
+        );
+        disableLoading();
+        return;
+      }
+
+      console.log("hehhehehehe", {
+        gradeId: selectedGradeToMove.value,
+        catechistIds: selectedOverLevelCatechists.map((item) => {
+          return item.toString();
+        }),
+      });
+      await catechistInGradeApi.replaceCatechistToAnotherGrade({
+        gradeId: selectedGradeToMove.value,
+        catechistIds: selectedOverLevelCatechists.map((item) => {
+          return item.toString();
+        }),
+      });
+      sweetAlert.alertSuccess("Chuyển khối thành công!", "", 3000, 24);
+      const { majorId, gradeId } = location.state;
+
+      fetchCatechists(majorId);
+      fetchAssignedCatechists(gradeId);
+    } catch (error) {
+      console.error("Error:", error);
+    } finally {
+      setLoading(false);
+      disableLoading();
+    }
+  };
+
   return (
     <Paper sx={{ width: "calc(100% - 3.8rem)", position: "absolute" }}>
       <h1 className="text-center text-[2.2rem] bg-primary_color text-text_primary_light py-2 font-bold">
@@ -407,21 +499,56 @@ export default function AssignCatechistToGradeComponent() {
           <strong>Số lượng giáo lý viên cần thiết: {totalCatechist}</strong>
         </p> */}
 
-        {/* Bảng DataGrid chưa gán */}
-        {!viewMode ? (
+        {overLevelCatechists.length <= 0 ? (
           <>
+            {" "}
+            {/* Bảng DataGrid chưa gán */}
+            {!viewMode ? (
+              <>
+                <h3 className="mt-3">
+                  <strong>Danh sách giáo lý viên chưa gán</strong>
+                </h3>
+                <DataGrid
+                  rows={catechists}
+                  columns={columns1}
+                  paginationMode="client"
+                  rowCount={catechists.length}
+                  loading={loading}
+                  paginationModel={paginationModel}
+                  pageSizeOptions={[2, 25, 50]}
+                  onPaginationModelChange={setPaginationModel}
+                  checkboxSelection
+                  sx={{ border: 0 }}
+                  localeText={viVNGridTranslation}
+                  disableRowSelectionOnClick
+                />
+              </>
+            ) : (
+              <></>
+            )}
+            {/* Bảng DataGrid đã gán */}
             <h3 className="mt-3">
-              <strong>Danh sách giáo lý viên chưa gán</strong>
+              <strong>
+                {viewMode
+                  ? "Danh sách giáo lý viên trong khối"
+                  : "Danh sách giáo lý viên đã gán"}
+                <br />
+                <span className="inline-block mt-2">
+                  Số lượng hiện tại: {assignedCatechists.length}
+                </span>
+              </strong>
             </h3>
             <DataGrid
-              rows={catechists}
-              columns={columns1}
+              rows={assignedCatechists}
+              columns={columns2}
               paginationMode="client"
-              rowCount={catechists.length}
+              rowCount={assignedCatechists.length}
               loading={loading}
-              paginationModel={paginationModel}
-              pageSizeOptions={[2, 25, 50]}
-              onPaginationModelChange={setPaginationModel}
+              paginationModel={paginationModel2}
+              onPaginationModelChange={(newModel) =>
+                setPaginationModel2(newModel)
+              }
+              pageSizeOptions={[4, 25, 50]}
               checkboxSelection
               sx={{ border: 0 }}
               localeText={viVNGridTranslation}
@@ -429,73 +556,100 @@ export default function AssignCatechistToGradeComponent() {
             />
           </>
         ) : (
-          <></>
+          <>
+            <h3 className="mt-3">
+              <strong>
+                <span className="text-danger">
+                  Cần phải chuyển các giáo lý viên này sang khối khác trước khi
+                  xếp giáo lý viên vào khối{" "}
+                </span>
+              </strong>
+            </h3>
+            <h3 className="mt-3 flex gap-x-5 items-center">
+              <p>
+                <strong>
+                  <span className="text-purple-900">
+                    Danh sách giáo lý viên cần chuyển khối
+                  </span>
+                </strong>
+              </p>
+              {selectedOverLevelCatechists.length > 0 ? (
+                <>
+                  <div>
+                    <Select
+                      options={suitableGradesToMove.map((item: any) => ({
+                        value: item.id,
+                        label: `${item.name} - Ngành: ${item.major.name}`,
+                      }))}
+                      value={selectedGradeToMove}
+                      onChange={(newValue: any) =>
+                        setSelectedGradeToMove(
+                          newValue as { value: string; label: string }[]
+                        )
+                      }
+                      placeholder="Chọn khối để chuyển..."
+                      className="mt-1 min-w-[400px]"
+                    />
+                  </div>
+                  <div>
+                    <Button
+                      variant="contained"
+                      color="secondary"
+                      onClick={() => {
+                        handleMoveGradesForCatechists();
+                      }}
+                    >
+                      Chuyển khối
+                    </Button>
+                  </div>
+                </>
+              ) : (
+                <></>
+              )}
+            </h3>
+            <DataGrid
+              rows={overLevelCatechists}
+              columns={columns3}
+              paginationMode="client"
+              rowCount={overLevelCatechists.length}
+              loading={loading}
+              paginationModel={paginationModel3}
+              onPaginationModelChange={(newModel) =>
+                setPaginationModel3(newModel)
+              }
+              pageSizeOptions={[100, 250, 500]}
+              checkboxSelection
+              sx={{ border: 0 }}
+              localeText={viVNGridTranslation}
+              onRowSelectionModelChange={(newSelection) => {
+                setSelectedOverLevelCatechists(newSelection);
+              }}
+            />
+          </>
         )}
-
-        {/* Bảng DataGrid đã gán */}
-        <h3 className="mt-3">
-          <strong>
-            {viewMode
-              ? "Danh sách giáo lý viên trong khối"
-              : "Danh sách giáo lý viên đã gán"}
-            <br />
-            <span className="inline-block mt-2">
-              Số lượng hiện tại: {assignedCatechists.length}
-            </span>
-          </strong>
-        </h3>
-        <DataGrid
-          rows={assignedCatechists}
-          columns={columns2}
-          paginationMode="client"
-          rowCount={assignedCatechists.length}
-          loading={loading}
-          paginationModel={paginationModel2}
-          onPaginationModelChange={(newModel) => setPaginationModel2(newModel)}
-          pageSizeOptions={[4, 25, 50]}
-          checkboxSelection
-          sx={{ border: 0 }}
-          localeText={viVNGridTranslation}
-          disableRowSelectionOnClick
-        />
-
-        <h3 className="mt-3">
-          <strong>
-            <span className="text-purple-900">
-              Danh sách giáo lý viên cần chuyển khối
-            </span>
-          </strong>
-        </h3>
-        <DataGrid
-          rows={overLevelCatechists}
-          columns={columns3}
-          paginationMode="client"
-          rowCount={overLevelCatechists.length}
-          loading={loading}
-          paginationModel={paginationModel3}
-          onPaginationModelChange={(newModel) => setPaginationModel3(newModel)}
-          pageSizeOptions={[8, 25, 50]}
-          checkboxSelection
-          sx={{ border: 0 }}
-          localeText={viVNGridTranslation}
-          disableRowSelectionOnClick
-        />
 
         <div className="flex justify-end mt-3 gap-x-2">
           {viewMode ? (
             <>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={() => {
-                  setViewMode(false);
-                }}
-              >
-                Cập nhật
-              </Button>
+              {overLevelCatechists.length <= 0 ? (
+                <>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => {
+                      setViewMode(false);
+                    }}
+                  >
+                    Cập nhật
+                  </Button>
+                </>
+              ) : (
+                <></>
+              )}
+
               <Button
                 variant="outlined"
-                color="error"
+                color="primary"
                 onClick={() => navigate(-1)}
               >
                 Quay lại

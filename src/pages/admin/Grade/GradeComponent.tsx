@@ -179,7 +179,7 @@ export default function GradeComponent() {
       field: "catechistsCount",
       headerName: "Số lượng giáo lý viên",
       align: "left",
-      width: 250,
+      width: 180,
       renderCell: (params) => {
         return (
           <div className="flex">
@@ -201,14 +201,6 @@ export default function GradeComponent() {
                     onClick={() => handleUpdateCatechist(params.row.id)}
                   >
                     Xem
-                  </Button>
-                  <Button
-                    sx={{ marginLeft: "10px" }}
-                    variant="contained"
-                    color="secondary"
-                    onClick={() => handleUpdateCatechist(params.row.id)}
-                  >
-                    Chuyển Khối
                   </Button>
                 </>
               )}

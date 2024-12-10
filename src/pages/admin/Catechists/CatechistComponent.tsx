@@ -17,8 +17,32 @@ import CatechistDialog from "./CatechistDialog";
 import timetableApi from "../../../api/Timetable";
 import FileSaver from "file-saver";
 import useAppContext from "../../../hooks/useAppContext";
+import CatechistLeaveRequestDialog from "./CatechistLeaveRequestDialog";
 
 export default function CatechistComponent() {
+  const [rows, setRows] = useState<CatechistItemResponse[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({
+    page: 0, // zero-based index for MUI DataGrid
+    pageSize: 8, // Default page size
+  });
+  const [rowCount, setRowCount] = useState<number>(0);
+  const [selectedIds] = useState<GridRowSelectionModel>([]);
+  const [openDialog, setOpenDialog] = useState<boolean>(false);
+  const { enableLoading, disableLoading } = useAppContext();
+  const [selectedCatechist, setSelectedCatechist] =
+    useState<CatechistItemResponse | null>(null); // Catechist đang chọn
+  const [dialogOpen, setDialogOpen] = useState<boolean>(false); // Mở dialog
+
+  const handleOpenDialog = (catechist: CatechistItemResponse) => {
+    setSelectedCatechist(catechist); // Lưu id của catechist
+    setDialogOpen(true); // Mở dialog
+  };
+
+  const handleCloseDialog = () => {
+    setDialogOpen(false); // Đóng dialog
+    setSelectedCatechist(null); // Reset selectedCatechist
+  };
   const columns: GridColDef[] = [
     {
       field: "imageUrl",
@@ -98,7 +122,12 @@ export default function CatechistComponent() {
               </span>
             </div>
             <div>
-              <Button color="secondary">Thay đổi</Button>
+              <Button
+                color="secondary"
+                onClick={() => handleOpenDialog(params.row)}
+              >
+                Thay đổi
+              </Button>{" "}
             </div>
           </div>
         ) : (
@@ -110,17 +139,6 @@ export default function CatechistComponent() {
         ),
     },
   ];
-  const [rows, setRows] = useState<CatechistItemResponse[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({
-    page: 0, // zero-based index for MUI DataGrid
-    pageSize: 8, // Default page size
-  });
-  const [rowCount, setRowCount] = useState<number>(0);
-  const [selectedIds] = useState<GridRowSelectionModel>([]);
-  const [openDialog, setOpenDialog] = useState<boolean>(false);
-  const { enableLoading, disableLoading } = useAppContext();
-
   const handleAddCatechist = () => {
     setOpenDialog(true);
   };
@@ -234,6 +252,14 @@ export default function CatechistComponent() {
           open={openDialog}
           onClose={() => setOpenDialog(false)}
           refresh={fetchCatechists}
+        />
+      )}
+      {selectedCatechist && (
+        <CatechistLeaveRequestDialog
+          open={dialogOpen}
+          onClose={handleCloseDialog}
+          catechistId={selectedCatechist.id}
+          refreshCatechists={fetchCatechists} // Cập nhật lại danh sách catechists sau khi phê duyệt
         />
       )}
     </Paper>
