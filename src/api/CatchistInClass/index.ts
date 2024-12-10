@@ -1,6 +1,7 @@
 import axiosInstances from "../../config/axios";
 import { BasicResponse } from "../../model/Response/BasicResponse";
 import { CreateCatechistInClassRequest } from "../../model/Request/CatechistInClass";
+import { ClassResponse } from "../../model/Response/Class";
 
 // Tạo URL gốc cho API CatechistInClass
 const request = axiosInstances.base;
@@ -45,9 +46,14 @@ const getAbsenceReplacementAvailableCatechists = (id: string, excludeId?: string
   return request.get<BasicResponse<GetAbsenceReplacementAvailableCatechistsResponse>>(`${ROOT_CATECHIST_IN_CLASS}/${id}/search`, { params });
 };
 
+const getClassesRemainingSlotsOfCatechist = (id: string) => {
+  return request.get<BasicResponse<ClassResponse[]>>(`${ROOT_CATECHIST_IN_CLASS}/catechist/${id}/slots`);
+};
+
 const catechistInClassApi = {
   createCatechistInClass,
-  getAbsenceReplacementAvailableCatechists
+  getAbsenceReplacementAvailableCatechists,
+  getClassesRemainingSlotsOfCatechist
 };
 
 export default catechistInClassApi;

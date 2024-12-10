@@ -280,7 +280,7 @@ export default function GradeComponent() {
 
       <div className="my-2 flex justify-between mx-3">
         {/* Select cho Major */}
-        <div className="flex">
+        <div className="flex mt-1">
           {/* Select cho Pastoral Year */}
           {/* <FormControl fullWidth sx={{ minWidth: 200, marginRight: 2 }}>
             <InputLabel>Chọn Niên Khóa</InputLabel>
@@ -295,7 +295,22 @@ export default function GradeComponent() {
               ))}
             </Select>
           </FormControl> */}
-          <FormControl fullWidth sx={{ minWidth: 200 }}>
+          <FormControl
+            fullWidth
+            sx={{
+              minWidth: 180,
+              marginTop: 1.5,
+              "& .MuiInputLabel-root": {
+                transform: "translateY(-20px)",
+                fontSize: "14px",
+                marginLeft: "8px",
+              },
+              "& .MuiSelect-select": {
+                paddingTop: "10px",
+                paddingBottom: "10px",
+              },
+            }}
+          >
             <InputLabel>Chọn Ngành</InputLabel>
             <Select value={selectedMajor} onChange={handleMajorChange}>
               <MenuItem key="all" value="all">
@@ -345,16 +360,26 @@ export default function GradeComponent() {
       />
 
       {/* Dialog for creating new Grade */}
-      <Dialog
-        open={openDialog}
-        onClose={() => setOpenDialog(false)}
-        maxWidth="lg"
-        fullWidth={true}
-      >
+      <Dialog open={openDialog} maxWidth="lg" fullWidth={true}>
         <div className="w-full" style={{ padding: "20px" }}>
           <h2>Tạo khối học mới</h2>
-          <div className="my-2">
-            <FormControl fullWidth sx={{ minWidth: 200 }}>
+          <div className="my-2 mt-3">
+            <FormControl
+              fullWidth
+              sx={{
+                minWidth: 180,
+                marginTop: 1.5,
+                "& .MuiInputLabel-root": {
+                  transform: "translateY(-20px)",
+                  fontSize: "14px",
+                  marginLeft: "8px",
+                },
+                "& .MuiSelect-select": {
+                  paddingTop: "10px",
+                  paddingBottom: "10px",
+                },
+              }}
+            >
               <InputLabel>Chọn Ngành</InputLabel>
               <Select
                 value={selectedMajorCreateGrade}
@@ -370,7 +395,7 @@ export default function GradeComponent() {
               </Select>
             </FormControl>
           </div>
-          <div className="my-2">
+          <div className="my-2 mt-3">
             <TextField
               label="Tên khối"
               value={gradeName}
@@ -378,13 +403,22 @@ export default function GradeComponent() {
               fullWidth
             />
           </div>
-          <Button
-            onClick={handleCreateGrade}
-            variant="contained"
-            color="primary"
-          >
-            Lưu
-          </Button>
+          <div className="w-full flex mt-3 gap-x-2">
+            <Button
+              onClick={handleCreateGrade}
+              variant="contained"
+              color="primary"
+            >
+              Xác nhận
+            </Button>
+            <Button
+              onClick={() => setOpenDialog(false)}
+              variant="outlined"
+              color="primary"
+            >
+              Hủy bỏ
+            </Button>
+          </div>
         </div>
       </Dialog>
     </Paper>

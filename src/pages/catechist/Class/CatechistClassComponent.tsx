@@ -13,6 +13,10 @@ import RequestLeaveDialog from "./RequestLeaveDialog";
 import absenceApi from "../../../api/AbsenceRequest";
 import { GetAbsenceItemResponse } from "../../../model/Response/AbsenceRequest";
 import { ClassStatusEnum, ClassStatusString } from "../../../enums/Class";
+import {
+  CatechistInSlotTypeEnum,
+  CatechistInSlotTypeEnumString,
+} from "../../../enums/CatechistInSlot";
 
 const CatechistClassComponent = () => {
   const [userLogin, setUserLogin] = useState<any>(null);
@@ -388,14 +392,33 @@ const CatechistClassComponent = () => {
               {
                 field: "catechists",
                 headerName: "Giáo lý viên",
-                width: 300,
+                width: 500,
+
                 renderCell: (params) => {
+                  const priority: Record<CatechistInSlotTypeEnum, number> = {
+                    [CatechistInSlotTypeEnum.Main]: 1,
+                    [CatechistInSlotTypeEnum.Assistant]: 2,
+                    [CatechistInSlotTypeEnum.Substitute]: 3,
+                  };
+
                   return params.row.catechistInSlots
                     ? params.row.catechistInSlots
+                        .sort(
+                          (
+                            a: { type: CatechistInSlotTypeEnum },
+                            b: { type: CatechistInSlotTypeEnum }
+                          ) => priority[a.type] - priority[b.type]
+                        )
                         .map((item: any) =>
                           item.catechist
-                            ? item.catechist.fullName +
-                              (item.type == "Main" ? " (Chính)" : "")
+                            ? item.catechist.code +
+                              ` (${
+                                CatechistInSlotTypeEnumString[
+                                  CatechistInSlotTypeEnum[
+                                    item.type as keyof typeof CatechistInSlotTypeEnum
+                                  ]
+                                ]
+                              })`
                             : ""
                         )
                         .join(", ")

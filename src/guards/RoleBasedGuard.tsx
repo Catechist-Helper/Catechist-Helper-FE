@@ -22,7 +22,7 @@ export default function RoleBasedGuard({
   children,
 }: RoleBasedGuardProp) {
   const currentRole = useCurrentRole();
-  const { logout } = useAuth();
+  // const { logout } = useAuth();
   const navigate = useNavigate();
 
   if (
@@ -48,13 +48,15 @@ export default function RoleBasedGuard({
         </Alert>
         <Stack direction="row" justifyContent="center">
           <Button
-            className="mx-1"
+            className="mx-1 mt-2"
             onClick={() => navigate("/")}
             variant="contained"
+            color="error"
+            sx={{ fontSize: "1.2rem" }}
           >
             Quay lại trang chính
           </Button>
-          <Button
+          {/* <Button
             className="mx-1"
             onClick={() => {
               logout();
@@ -63,7 +65,7 @@ export default function RoleBasedGuard({
             color="error"
           >
             Đăng xuất tài khoản
-          </Button>
+          </Button> */}
         </Stack>
       </Container>
     );
