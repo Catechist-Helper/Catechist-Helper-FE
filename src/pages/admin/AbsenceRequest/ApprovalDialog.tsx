@@ -18,9 +18,10 @@ import {
 } from "../../../enums/AbsenceRequest";
 import absenceApi from "../../../api/AbsenceRequest";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
-import catechistInClassApi from "../../../api/CatchistInClass";
+import catechistInClassApi from "../../../api/CatechistInClass";
 import { AssignReplacementRequest } from "../../../model/Request/AbsenceRequest";
 import sweetAlert from "../../../utils/sweetAlert";
+import { CatechistInSlotTypeEnumNumber } from "../../../enums/CatechistInSlot";
 
 interface ApprovalDialogProps {
   open: boolean;
@@ -68,7 +69,7 @@ const ApprovalDialog = ({
   const handleApproval = async () => {
     try {
       // Gọi API phê duyệt đơn
-      const res1 = await absenceApi.processAbsence({
+      await absenceApi.processAbsence({
         requestId: absence.id,
         approverId: approverId,
         status: status,
@@ -80,19 +81,9 @@ const ApprovalDialog = ({
         const assignRequest: AssignReplacementRequest = {
           requestId: absence.id,
           replacementCatechistId: selectedReplacementId,
+          type: CatechistInSlotTypeEnumNumber.Substitute,
         };
-        const res2 = await absenceApi.assignReplacement(assignRequest);
-        console.log(
-          {
-            requestId: absence.id,
-            approverId: approverId,
-            status: status,
-            comment: comment,
-          },
-          assignRequest,
-          res1,
-          res2
-        );
+        await absenceApi.assignReplacement(assignRequest);
       }
 
       // Đóng dialog và thực hiện các hành động cần thiết sau khi phê duyệt và chỉ định người thay thế

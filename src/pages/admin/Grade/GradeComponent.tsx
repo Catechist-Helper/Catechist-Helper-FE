@@ -93,10 +93,17 @@ export default function GradeComponent() {
 
       const updatedRows = await Promise.all(
         sortedArray.map(async (grade: GradeResponse) => {
-          const catechistsCount = await fetchCatechistCountByGrade(grade.id);
+          const fetchCatechistRes = await fetchCatechistCountByGrade(grade.id);
           return {
             ...grade,
-            catechistsCount,
+            catechistsCount:
+              fetchCatechistRes && fetchCatechistRes.total
+                ? fetchCatechistRes.total
+                : 0,
+            catechistItems:
+              fetchCatechistRes && fetchCatechistRes.items
+                ? fetchCatechistRes.items
+                : null,
           };
         })
       );
@@ -118,10 +125,13 @@ export default function GradeComponent() {
         1,
         1000
       );
-      return data.data.total; // Trả về số lượng khối
+      return {
+        total: data.data.total,
+        items: data.data.items,
+      }; // Trả về số lượng khối
     } catch (error) {
       console.error("Error loading grades:", error);
-      return "N/A";
+      return {};
     }
   };
 
@@ -169,7 +179,7 @@ export default function GradeComponent() {
       field: "catechistsCount",
       headerName: "Số lượng giáo lý viên",
       align: "left",
-      width: 220,
+      width: 250,
       renderCell: (params) => {
         return (
           <div className="flex">
@@ -184,13 +194,23 @@ export default function GradeComponent() {
                   Thêm
                 </Button>
               ) : (
-                <Button
-                  variant="contained"
-                  color="warning"
-                  onClick={() => handleUpdateCatechist(params.row.id)}
-                >
-                  Cập nhật
-                </Button>
+                <>
+                  <Button
+                    variant="contained"
+                    color="warning"
+                    onClick={() => handleUpdateCatechist(params.row.id)}
+                  >
+                    Xem
+                  </Button>
+                  <Button
+                    sx={{ marginLeft: "10px" }}
+                    variant="contained"
+                    color="secondary"
+                    onClick={() => handleUpdateCatechist(params.row.id)}
+                  >
+                    Chuyển Khối
+                  </Button>
+                </>
               )}
             </div>
           </div>
@@ -240,6 +260,7 @@ export default function GradeComponent() {
           gradeName: selectedGrade.name,
           majorName: selectedGrade.major.name,
           totalCatechist: selectedGrade.totalCatechist,
+          viewMode: true,
         },
       });
     }

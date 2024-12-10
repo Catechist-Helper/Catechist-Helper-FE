@@ -18,98 +18,98 @@ import timetableApi from "../../../api/Timetable";
 import FileSaver from "file-saver";
 import useAppContext from "../../../hooks/useAppContext";
 
-const columns: GridColDef[] = [
-  {
-    field: "imageUrl",
-    headerName: "Ảnh",
-    width: 100,
-    renderCell: (params) => (
-      <img
-        src={
-          params.row.imageUrl && params.row.imageUrl != ""
-            ? params.row.imageUrl
-            : "https://via.placeholder.com/150"
-        }
-        alt="Catechist"
-        width="50"
-        height="50"
-      />
-    ),
-  },
-  { field: "code", headerName: "Mã giáo lý viên", width: 140 },
-  { field: "fullName", headerName: "Tên đầy đủ", width: 200 },
-  {
-    field: "christianName",
-    headerName: "Tên thánh",
-    width: 150,
-    renderCell: (params) => params.row.christianName || "N/A", // Chỉnh sửa hiển thị tên thánh
-  },
-  { field: "gender", headerName: "Giới tính", width: 100 },
-  {
-    field: "dateOfBirth",
-    headerName: "Ngày sinh",
-    width: 120,
-    renderCell: (params) => formatDate.DD_MM_YYYY(params.value),
-  },
-  { field: "qualification", headerName: "Trình độ", width: 120 },
-  {
-    field: "level",
-    headerName: "Cấp bậc",
-    width: 120,
-    renderCell: (params) => (params.row.level ? params.row.level.name : "N/A"),
-  },
-  {
-    field: "email",
-    headerName: "Email",
-    width: 200,
-    renderCell: (params) => params.row.email || "N/A", // Hiển thị email nếu có
-  },
-  {
-    field: "phone",
-    headerName: "Số điện thoại",
-    width: 150,
-    renderCell: (params) => formatPhone(params.value),
-  },
-  { field: "address", headerName: "Địa chỉ", width: 200 },
-  { field: "fatherName", headerName: "Tên cha", width: 150 },
-  { field: "motherName", headerName: "Tên mẹ", width: 150 },
-  { field: "note", headerName: "Ghi chú", width: 200 },
-  {
-    field: "certificates",
-    headerName: "Chứng chỉ",
-    width: 250,
-    renderCell: (params) =>
-      params.row.certificates.length > 0
-        ? params.row.certificates.map((cert: any) => cert.name).join(", ")
-        : "N/A", // Hiển thị danh sách chứng chỉ
-  },
-  {
-    field: "isTeaching",
-    headerName: "Đang giảng dạy",
-    width: 150,
-    renderCell: (params) =>
-      params.value ? (
-        <div className="flex gap-x-1">
-          <div>
-            <span className="bg-success text-white px-2 py-1 rounded-xl">
-              Có
-            </span>
-          </div>
-          <div>
-            <Button color="secondary">Thay đổi</Button>
-          </div>
-        </div>
-      ) : (
-        <>
-          <span className="bg-danger text-white px-2 py-1 rounded-xl">
-            Không
-          </span>
-        </>
-      ),
-  },
-];
-
 export default function CatechistComponent() {
+  const columns: GridColDef[] = [
+    {
+      field: "imageUrl",
+      headerName: "Ảnh",
+      width: 100,
+      renderCell: (params) => (
+        <img
+          src={
+            params.row.imageUrl && params.row.imageUrl != ""
+              ? params.row.imageUrl
+              : "https://via.placeholder.com/150"
+          }
+          alt="Catechist"
+          width="50"
+          height="50"
+        />
+      ),
+    },
+    { field: "code", headerName: "Mã giáo lý viên", width: 140 },
+    { field: "fullName", headerName: "Tên đầy đủ", width: 200 },
+    {
+      field: "christianName",
+      headerName: "Tên thánh",
+      width: 150,
+      renderCell: (params) => params.row.christianName || "N/A", // Chỉnh sửa hiển thị tên thánh
+    },
+    { field: "gender", headerName: "Giới tính", width: 100 },
+    {
+      field: "dateOfBirth",
+      headerName: "Ngày sinh",
+      width: 120,
+      renderCell: (params) => formatDate.DD_MM_YYYY(params.value),
+    },
+    { field: "qualification", headerName: "Trình độ", width: 120 },
+    {
+      field: "level",
+      headerName: "Cấp bậc",
+      width: 120,
+      renderCell: (params) =>
+        params.row.level ? params.row.level.name : "N/A",
+    },
+    {
+      field: "email",
+      headerName: "Email",
+      width: 200,
+      renderCell: (params) => params.row.email || "N/A", // Hiển thị email nếu có
+    },
+    {
+      field: "phone",
+      headerName: "Số điện thoại",
+      width: 150,
+      renderCell: (params) => formatPhone(params.value),
+    },
+    { field: "address", headerName: "Địa chỉ", width: 200 },
+    { field: "fatherName", headerName: "Tên cha", width: 150 },
+    { field: "motherName", headerName: "Tên mẹ", width: 150 },
+    { field: "note", headerName: "Ghi chú", width: 200 },
+    {
+      field: "certificates",
+      headerName: "Chứng chỉ",
+      width: 250,
+      renderCell: (params) =>
+        params.row.certificates.length > 0
+          ? params.row.certificates.map((cert: any) => cert.name).join(", ")
+          : "N/A", // Hiển thị danh sách chứng chỉ
+    },
+    {
+      field: "isTeaching",
+      headerName: "Đang giảng dạy",
+      width: 150,
+      renderCell: (params) =>
+        params.value ? (
+          <div className="flex gap-x-1">
+            <div>
+              <span className="bg-success text-white px-2 py-1 rounded-xl">
+                Có
+              </span>
+            </div>
+            <div>
+              <Button color="secondary">Thay đổi</Button>
+            </div>
+          </div>
+        ) : (
+          <>
+            <span className="bg-danger text-white px-2 py-1 rounded-xl">
+              Không
+            </span>
+          </>
+        ),
+    },
+  ];
   const [rows, setRows] = useState<CatechistItemResponse[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({

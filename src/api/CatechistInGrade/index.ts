@@ -1,6 +1,6 @@
 import axiosInstances from "../../config/axios";
 import { BasicResponse } from "../../model/Response/BasicResponse";
-import { CreateCatechistInGradeRequest } from "../../model/Request/CatchistInGrade";
+import { CreateCatechistInGradeRequest } from "../../model/Request/CatechistInGrade";
 
 // Tạo URL gốc cho API CatechistInGrade
 const request = axiosInstances.base;

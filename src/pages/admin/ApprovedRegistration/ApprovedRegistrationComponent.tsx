@@ -74,6 +74,27 @@ const columns: GridColDef[] = [
       return dayjs(a).isBefore(dayjs(b)) ? -1 : 1; // Sắp xếp theo ngày giờ từ sớm tới muộn
     },
   },
+
+  {
+    field: "interviewType",
+    headerName: "Hình thức",
+    width: 100,
+    renderCell: (params) => {
+      return params.row.interview && params.row.interview.interviewType == 1 ? (
+        <span className="text-white bg-success rounded-xl py-1 px-2">
+          Online
+        </span>
+      ) : (
+        <span className="text-white bg-black rounded-xl py-1 px-2">
+          Offline
+        </span>
+      );
+    },
+    sortComparator: (a, b) => {
+      if (!a || !b) return 0;
+      return dayjs(a).isBefore(dayjs(b)) ? -1 : 1; // Sắp xếp theo ngày giờ từ sớm tới muộn
+    },
+  },
   {
     field: "interview.recruiters",
     headerName: "Người phỏng vấn",
@@ -273,13 +294,6 @@ export default function ApprovedRegistrationsTable() {
   useEffect(() => {
     handleRefresh();
   }, [openDialog]);
-
-  const element = document.querySelector<HTMLElement>(
-    ".MuiTablePagination-selectLabel"
-  );
-  if (element) {
-    element.innerHTML = "Số hàng mỗi trang";
-  }
 
   // Gọi API khi component được render
   useEffect(() => {

@@ -5,7 +5,14 @@ import {
   GridRowSelectionModel,
 } from "@mui/x-data-grid";
 import Select from "react-select";
-import { Modal, Button, Dialog } from "@mui/material";
+import {
+  Modal,
+  Button,
+  Dialog,
+  RadioGroup,
+  FormControlLabel,
+  Radio,
+} from "@mui/material";
 import Paper from "@mui/material/Paper";
 import { useState, useEffect } from "react";
 import registrationApi from "../../../api/Registration";
@@ -169,36 +176,13 @@ export default function RegistrationDataTable() {
     }
   };
 
-  const element = document.querySelector<HTMLElement>(
-    ".MuiTablePagination-selectLabel"
-  );
-  if (element) {
-    element.innerHTML = "Số hàng mỗi trang";
-  }
-  const element2 = document.querySelector<HTMLElement>(
-    ".MuiTablePagination-displayedRows"
-  );
-  if (element2) {
-    let text = element2.innerHTML;
-    text = text.replace(/\bof\b/g, "trong");
-    element2.innerHTML = text;
-  }
-
   useEffect(() => {
     fetchRegistrations();
   }, [paginationModel, viewMode]); // Cập nhật lại khi paginationModel hoặc viewMode thay đổi
 
   // Xử lý sự kiện khi thay đổi trang hoặc kích thước trang
   const handlePaginationChange = (newPaginationModel: GridPaginationModel) => {
-    setPaginationModel(newPaginationModel); // Cập nhật model phân trang
-    const element2 = document.querySelector<HTMLElement>(
-      ".MuiTablePagination-displayedRows"
-    );
-    if (element2) {
-      let text = element2.innerHTML;
-      text = text.replace(/\bof\b/g, "trong");
-      element2.innerHTML = text;
-    }
+    setPaginationModel(newPaginationModel);
   };
 
   // Xử lý khi thay đổi các lựa chọn trong bảng
@@ -330,20 +314,46 @@ export default function RegistrationDataTable() {
     setIsModalOpenRejected(false);
   };
 
+  const [interviewTypeOption, setInterviewTypeOption] = useState<number>(-1);
   const handleScheduleInterview = async () => {
     try {
       enableLoading();
-      const registrationId: string = selectedIds[0].toString(); // Only one registration at a time
+      const registrationId: string = selectedIds[0].toString();
       const selectedAccountIds = selectedAccounts.map((acc: any) => acc.value);
 
+      if (meetingTime == "") {
+        sweetAlert.alertFailed(
+          "Vui lòng chọn thời gian phỏng vấn",
+          "",
+          6000,
+          27
+        );
+        return;
+      }
+
+      if (interviewTypeOption < 0) {
+        sweetAlert.alertFailed(
+          "Vui lòng chọn hình thức phỏng vấn",
+          "",
+          6000,
+          27
+        );
+        return;
+      }
+
+      if (selectedAccountIds.length <= 0) {
+        sweetAlert.alertFailed("Vui lòng chọn người phỏng vấn", "", 6000, 26);
+        return;
+      }
+
       await registrationApi.updateRegistration(registrationId, {
-        status: RegistrationStatus.Approved_Duyet_Don, // optional accounts
+        status: RegistrationStatus.Approved_Duyet_Don,
       });
 
       await interviewApi.createInterview({
         registrationId,
         meetingTime: meetingTime,
-        interviewType: 0,
+        interviewType: interviewTypeOption,
         accounts: selectedAccountIds,
       });
 
@@ -361,7 +371,7 @@ export default function RegistrationDataTable() {
         "Đã xếp lịch phỏng vấn thành công!",
         "",
         1000,
-        24
+        26
       );
       handleCloseModal();
       fetchRegistrations(); // Refresh registration data after scheduling
@@ -385,11 +395,13 @@ export default function RegistrationDataTable() {
       disableLoading();
     }
   };
+  sweetAlert.alertSuccess("Đã xếp lịch phỏng vấn thành công!", "", 1000, 28);
 
   useEffect(() => {
     if (meetingTime == "") {
       setSelectedAccounts([]);
       setPreviewAccounts([]);
+      setInterviewTypeOption(-1);
     } else if (meetingTime && meetingTime != "") {
       const action = async () => {
         const res = await accountApi.getRecruitersByMeetingTime(meetingTime);
@@ -523,7 +535,7 @@ export default function RegistrationDataTable() {
           initialState={{ pagination: { paginationModel } }}
           paginationModel={paginationModel}
           onPaginationModelChange={handlePaginationChange}
-          pageSizeOptions={[8, 25, 50]} // Đặt pageSizeOptions đúng
+          pageSizeOptions={[3, 25, 50]} // Đặt pageSizeOptions đúng
           checkboxSelection
           rowSelectionModel={selectedIds}
           onRowSelectionModelChange={handleSelectionChange} // Gọi hàm khi thay đổi lựa chọn
@@ -599,6 +611,26 @@ export default function RegistrationDataTable() {
 
           {meetingTime != "" ? (
             <>
+              <label className="font-bold mt-4">Chọn hình thức phỏng vấn</label>
+              <RadioGroup
+                aria-labelledby="demo-radio-buttons-group-label"
+                name="radio-buttons-group"
+                value={interviewTypeOption}
+                onChange={(event) => {
+                  setInterviewTypeOption(Number(event.target.value));
+                }}
+              >
+                <FormControlLabel
+                  value={0}
+                  control={<Radio />}
+                  label="Offline"
+                />
+                <FormControlLabel
+                  value={1}
+                  control={<Radio />}
+                  label="Online"
+                />
+              </RadioGroup>
               <label className="font-bold mt-4">Chọn người phỏng vấn</label>
               <Select
                 options={accounts.map((acc: any) => ({
@@ -614,7 +646,6 @@ export default function RegistrationDataTable() {
                 placeholder="Tìm kiếm và chọn người phỏng vấn..."
                 className="mt-1"
               />
-
               <label className="font-bold mt-4">
                 Danh sách lịch phân công phỏng vấn ngày{" "}
                 {formatDate.DD_MM_YYYY(meetingTime)}

@@ -235,13 +235,6 @@ export default function CatechistRegistrationsTable() {
     fetchApprovedRegistrations();
   };
 
-  const element = document.querySelector<HTMLElement>(
-    ".MuiTablePagination-selectLabel"
-  );
-  if (element) {
-    element.innerHTML = "Số hàng mỗi trang";
-  }
-
   // Gọi API khi component được render
   useEffect(() => {
     fetchApprovedRegistrations();

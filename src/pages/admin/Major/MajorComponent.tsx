@@ -55,7 +55,7 @@ export default function MajorComponent() {
     {
       field: "levels",
       headerName: "Cấp độ giáo lý viên phù hợp",
-      width: 800,
+      width: 830,
       renderCell: (params) => (
         <div>
           <p>{params.row.levels}</p>
