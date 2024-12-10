@@ -50,6 +50,56 @@ export type CatechistResponse = {
   isMain:boolean
 };
 
+export type CatechistSlotResponse = {
+  catechist:
+  {
+  id: string;
+  code: string;
+  fullName: string;
+  gender: string;
+  dateOfBirth: string;
+  birthPlace: string;
+  address: string;
+  phone: string;
+  qualification: string;
+  isTeaching: boolean;
+  account: {
+    id: string;
+    email: string;
+    fullName: string;
+    gender: string;
+    phone: string;
+    avatar: string;
+    role: {
+      id: string;
+      roleName: string;
+    };
+  };
+  christianNameId: string;
+  christianName: string;
+  levelId: string;
+  level: {
+    id: string;
+    name: string;
+    description: string;
+    catechismLevel: number;
+  };
+  imageUrl: string;
+  fatherName: string;
+  motherName: string;
+  note: string;
+  email: string;
+  levelName: string;
+  certificates: {
+    id: string;
+    name: string;
+    description: string;
+    imageUrl: string;
+    levelId: string;
+  }}
+  type:string
+};
+
 export type GetCatechistClassResponse = {
   size: number,
   page: number,
@@ -76,11 +126,18 @@ export type ClassResponse = {
 
 export type SlotResponse = {
   id: string;
-  name: string;
   startTime: string;
   endTime: string;
+  date: string;
+  note: string|null;
   catechistId: string;
-  catechist: CatechistResponse;
+  catechistInSlots: CatechistSlotResponse[];
+  room:{
+    id: string,
+    name: string,
+    description: string,
+    image: string
+}
 };
 
 export type GetClassResponse = {

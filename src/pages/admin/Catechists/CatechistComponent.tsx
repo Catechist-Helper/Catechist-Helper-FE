@@ -89,12 +89,19 @@ const columns: GridColDef[] = [
     width: 150,
     renderCell: (params) =>
       params.value ? (
-        <>
-          <span className="bg-success text-white px-2 py-1 rounded-md">Có</span>
-        </>
+        <div className="flex gap-x-1">
+          <div>
+            <span className="bg-success text-white px-2 py-1 rounded-xl">
+              Có
+            </span>
+          </div>
+          <div>
+            <Button color="secondary">Thay đổi</Button>
+          </div>
+        </div>
       ) : (
         <>
-          <span className="bg-danger text-white px-2 py-1 rounded-md">
+          <span className="bg-danger text-white px-2 py-1 rounded-xl">
             Không
           </span>
         </>

@@ -25,21 +25,21 @@ const NotFoundPage: React.FC = () => {
           >
             <Typography
               variant="h1"
-              sx={{ fontSize: "10rem", fontWeight: "bold" }}
+              sx={{ fontSize: "6rem", fontWeight: "bold" }}
             >
-              404
+              Trang không tìm thấy
             </Typography>
             <Typography
               variant="h5"
-              sx={{ fontSize: "3rem", fontWeight: "bold" }}
+              sx={{ fontSize: "1.9rem", fontWeight: "bold", marginTop: "10px" }}
             >
-              Trang không tìm thấy
+              Rất tiếc! Trang bạn đang truy cập hiện không được tìm thấy
             </Typography>
             <Button
               variant="contained"
               sx={{ mt: 3, fontSize: "1.5rem" }}
-              onClick={() => navigate("/")} // Chuyển hướng về trang chính
-              style={{ background: "#000" }}
+              onClick={() => navigate("/")}
+              className="bg-black hover:bg-primary_color"
             >
               Quay lại trang chính
             </Button>

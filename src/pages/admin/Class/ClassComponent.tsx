@@ -35,6 +35,10 @@ import { ClassResponse } from "../../../model/Response/Class";
 import useAppContext from "../../../hooks/useAppContext";
 import FileSaver from "file-saver";
 import { ClassStatusEnum, ClassStatusString } from "../../../enums/Class";
+import {
+  CatechistInSlotTypeEnum,
+  CatechistInSlotTypeEnumString,
+} from "../../../enums/CatechistInSlot";
 
 export default function ClassComponent() {
   const location = useLocation();
@@ -791,10 +795,25 @@ export default function ClassComponent() {
       </h1>
 
       <div className="my-2 flex justify-between mx-3">
-        <div className="flex items-center justify-between w-full">
+        <div className="flex items-center justify-between w-full mt-1">
           <div className="flex gap-x-[5px]">
             {/* Select for Pastoral Year */}
-            <FormControl fullWidth sx={{ minWidth: 180 }}>
+            <FormControl
+              fullWidth
+              sx={{
+                minWidth: 180,
+                marginTop: 1.5,
+                "& .MuiInputLabel-root": {
+                  transform: "translateY(-20px)",
+                  fontSize: "14px",
+                  marginLeft: "8px",
+                },
+                "& .MuiSelect-select": {
+                  paddingTop: "10px",
+                  paddingBottom: "10px",
+                },
+              }}
+            >
               <InputLabel>Chọn Niên Khóa</InputLabel>
               <Select
                 value={selectedPastoralYear}
@@ -815,7 +834,22 @@ export default function ClassComponent() {
             </FormControl>
 
             {/* Select for Major */}
-            <FormControl fullWidth sx={{ minWidth: 180 }}>
+            <FormControl
+              fullWidth
+              sx={{
+                minWidth: 180,
+                marginTop: 1.5,
+                "& .MuiInputLabel-root": {
+                  transform: "translateY(-20px)",
+                  fontSize: "14px",
+                  marginLeft: "8px",
+                },
+                "& .MuiSelect-select": {
+                  paddingTop: "10px",
+                  paddingBottom: "10px",
+                },
+              }}
+            >
               <InputLabel>Chọn Ngành</InputLabel>
               <Select
                 value={selectedMajor}
@@ -837,7 +871,22 @@ export default function ClassComponent() {
             </FormControl>
 
             {selectedMajor && selectedMajor != "all" && (
-              <FormControl fullWidth sx={{ minWidth: 180 }}>
+              <FormControl
+                fullWidth
+                sx={{
+                  minWidth: 180,
+                  marginTop: 1.5,
+                  "& .MuiInputLabel-root": {
+                    transform: "translateY(-20px)",
+                    fontSize: "14px",
+                    marginLeft: "8px",
+                  },
+                  "& .MuiSelect-select": {
+                    paddingTop: "10px",
+                    paddingBottom: "10px",
+                  },
+                }}
+              >
                 <InputLabel>Chọn Khối</InputLabel>
                 <Select
                   value={selectedGrade}
@@ -1163,14 +1212,32 @@ export default function ClassComponent() {
               {
                 field: "catechists",
                 headerName: "Giáo lý viên",
-                width: 300,
+                width: 500,
                 renderCell: (params) => {
+                  const priority: Record<CatechistInSlotTypeEnum, number> = {
+                    [CatechistInSlotTypeEnum.Main]: 1,
+                    [CatechistInSlotTypeEnum.Assistant]: 2,
+                    [CatechistInSlotTypeEnum.Substitute]: 3,
+                  };
+
                   return params.row.catechistInSlots
                     ? params.row.catechistInSlots
+                        .sort(
+                          (
+                            a: { type: CatechistInSlotTypeEnum },
+                            b: { type: CatechistInSlotTypeEnum }
+                          ) => priority[a.type] - priority[b.type]
+                        )
                         .map((item: any) =>
                           item.catechist
-                            ? item.catechist.fullName +
-                              (item.type == "Main" ? " (Chính)" : "")
+                            ? item.catechist.code +
+                              ` (${
+                                CatechistInSlotTypeEnumString[
+                                  CatechistInSlotTypeEnum[
+                                    item.type as keyof typeof CatechistInSlotTypeEnum
+                                  ]
+                                ]
+                              })`
                             : ""
                         )
                         .join(", ")

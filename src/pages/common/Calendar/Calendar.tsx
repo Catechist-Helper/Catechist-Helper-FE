@@ -15,39 +15,47 @@ import {
   Divider,
 } from "@mui/material";
 import "./Calendar.css";
+import { formatDate } from "../../../utils/formatDate";
 
-type Event = {
+export type EventCalendar = {
   title: string;
   description: string;
   start: string;
   end?: string;
+  widthDialog?: "md" | "lg" | "xs" | "sm" | "xl";
 };
 
-const events: Event[] = [
-  {
-    title: "Meeting with Team",
-    description: "Discuss project progress",
-    start: "2024-12-10T10:00:00",
-  },
-  {
-    title: "Project Deadline",
-    description: "Submit final report",
-    start: "2024-12-15",
-  },
-  {
-    title: "Conference",
-    description: "Attend tech conference",
-    start: "2024-12-20",
-    end: "2024-12-22",
-  },
-];
+// const events: EventCalendar[] = [
+//   {
+//     title: "Meeting with Team",
+//     description: "Discuss project progress",
+//     start: "2024-12-10T10:00:00",
+//   },
+//   {
+//     title: "Project Deadline",
+//     description: "Submit final report",
+//     start: "2024-12-15",
+//   },
+//   {
+//     title: "Conference",
+//     description: "Attend tech conference",
+//     start: "2024-12-20",
+//     end: "2024-12-22",
+//   },
+// ];
 
-const Calendar: React.FC = () => {
+interface CalendarComponentProps {
+  events: EventCalendar[];
+}
+
+const CalendarComponent: React.FC<CalendarComponentProps> = ({ events }) => {
   const [open, setOpen] = useState(false);
-  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<EventCalendar | null>(
+    null
+  );
 
   const handleEventClick = (info: { event: any }) => {
-    const clickedEvent: Event = {
+    const clickedEvent: EventCalendar = {
       title: info.event.title,
       description: info.event.extendedProps.description,
       start: info.event.startStr,
@@ -84,6 +92,12 @@ const Calendar: React.FC = () => {
         PaperProps={{
           style: { borderRadius: "12px", padding: "10px" },
         }}
+        fullWidth
+        maxWidth={
+          selectedEvent && selectedEvent.widthDialog
+            ? selectedEvent.widthDialog
+            : "sm"
+        }
       >
         <DialogTitle>
           <Typography variant="h5" component="div" color="primary">
@@ -95,25 +109,59 @@ const Calendar: React.FC = () => {
           <Box display="flex" flexDirection="column" gap={2}>
             <Typography variant="h6">{selectedEvent?.title}</Typography>
             <Typography variant="body1" color="textSecondary">
-              {selectedEvent?.description || "Chưa có mô tả"}
+              <div style={{ whiteSpace: "pre-line" }}>
+                {selectedEvent?.description ?? ""}
+              </div>
             </Typography>
             <Divider />
             <Box>
-              <Typography variant="body2" fontWeight="bold">
-                Bắt đầu:
-              </Typography>
-              <Typography variant="body2" color="textSecondary">
-                {new Date(selectedEvent?.start || "").toLocaleString()}
-              </Typography>
+              <div className="flex gap-x-2">
+                <Typography variant="body2" fontWeight="bold">
+                  Bắt đầu:
+                </Typography>
+                <Typography variant="body2" color="textSecondary">
+                  {formatDate.HH_mm(
+                    new Date(selectedEvent?.start || "").toString()
+                  ) == "00:00" ? (
+                    <>
+                      {formatDate.DD_MM_YYYY(
+                        new Date(selectedEvent?.start || "").toString()
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      {formatDate.DD_MM_YYYY_Time(
+                        new Date(selectedEvent?.start || "").toString()
+                      )}
+                    </>
+                  )}
+                </Typography>
+              </div>
             </Box>
             {selectedEvent?.end && (
               <Box>
-                <Typography variant="body2" fontWeight="bold">
-                  Kết thúc:
-                </Typography>
-                <Typography variant="body2" color="textSecondary">
-                  {new Date(selectedEvent?.end).toLocaleString()}
-                </Typography>
+                <div className="flex gap-x-2">
+                  <Typography variant="body2" fontWeight="bold">
+                    Kết thúc:
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    {formatDate.HH_mm(
+                      new Date(selectedEvent?.end || "").toString()
+                    ) == "00:00" ? (
+                      <>
+                        {formatDate.DD_MM_YYYY(
+                          new Date(selectedEvent?.end || "").toString()
+                        )}
+                      </>
+                    ) : (
+                      <>
+                        {formatDate.DD_MM_YYYY_Time(
+                          new Date(selectedEvent?.end || "").toString()
+                        )}
+                      </>
+                    )}
+                  </Typography>
+                </div>
               </Box>
             )}
           </Box>
@@ -129,4 +177,4 @@ const Calendar: React.FC = () => {
   );
 };
 
-export default Calendar;
+export default CalendarComponent;
