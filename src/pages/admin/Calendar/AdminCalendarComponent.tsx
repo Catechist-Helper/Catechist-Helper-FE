@@ -64,13 +64,14 @@ const AdminCalendarComponent = () => {
         };
 
         await action();
-        console.log("finalList", finalList);
         setCalendarEvents(finalList);
       });
     } catch (error) {
       console.error("Error:", error);
     } finally {
-      fetchAllEvents();
+      setTimeout(() => {
+        fetchAllEvents();
+      }, 500);
     }
   };
 
@@ -114,6 +115,8 @@ const AdminCalendarComponent = () => {
   }, [finishFetchData]);
 
   if (!finishFetchData) return <></>;
+
+  console.log("calendarEvents", calendarEvents);
 
   return <Calendar events={calendarEvents} />;
 };
