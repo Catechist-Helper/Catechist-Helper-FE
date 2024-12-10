@@ -4,6 +4,12 @@ export enum CatechistInSlotTypeEnum {
     Substitute="Substitute"
 }
 
+export enum CatechistInSlotTypeEnumNumber {
+    Main,
+    Assistant,
+    Substitute
+}
+
 export enum CatechistInSlotTypeEnumString {
     Main = "Chính",
     Assistant = "Phụ",

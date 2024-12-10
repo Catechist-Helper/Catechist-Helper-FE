@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
@@ -53,6 +53,11 @@ const CalendarComponent: React.FC<CalendarComponentProps> = ({ events }) => {
   const [selectedEvent, setSelectedEvent] = useState<EventCalendar | null>(
     null
   );
+  const [eventList, setEventList] = useState<EventCalendar[]>([]);
+
+  useEffect(() => {
+    setEventList(events);
+  }, [events]);
 
   const handleEventClick = (info: { event: any }) => {
     const clickedEvent: EventCalendar = {
@@ -76,7 +81,7 @@ const CalendarComponent: React.FC<CalendarComponentProps> = ({ events }) => {
         plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
         initialView="dayGridMonth"
         locale={viLocale}
-        events={events}
+        events={eventList}
         eventClick={handleEventClick}
         headerToolbar={{
           left: "prev,next today",

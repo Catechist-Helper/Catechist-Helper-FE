@@ -56,7 +56,7 @@ export type LevelResponse = {
   id: string;
   name: string;
   description: string;
-  catechismLevel: number;
+   hierarchyLevel: number;
 };
 
 export type GetMajorResponse = {

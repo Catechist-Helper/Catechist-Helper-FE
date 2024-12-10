@@ -3,7 +3,7 @@ import Calendar, { EventCalendar } from "../../common/Calendar/Calendar";
 import { getUserInfo } from "../../../utils/utils";
 import eventApi from "../../../api/Event";
 import classApi from "../../../api/Class";
-import catechistInClassApi from "../../../api/CatchistInClass";
+import catechistInClassApi from "../../../api/CatechistInClass";
 import processApi from "../../../api/EventProcess";
 import useAppContext from "../../../hooks/useAppContext";
 
@@ -124,7 +124,9 @@ const CatechistCalendarComponent = () => {
     } catch (error) {
       console.error("Error:", error);
     } finally {
-      fetchClassesSlotData();
+      setTimeout(() => {
+        fetchClassesSlotData();
+      }, 500);
     }
   };
 

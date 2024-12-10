@@ -23,7 +23,7 @@ import classApi from "../../../api/Class"; // Import API Class
 import majorApi from "../../../api/Major"; // Import API Major
 import gradeApi from "../../../api/Grade"; // Import API Grade
 import timetableApi from "../../../api/Timetable";
-import catechistInClassApi from "../../../api/CatchistInClass";
+import catechistInClassApi from "../../../api/CatechistInClass";
 import pastoralYearsApi from "../../../api/PastoralYear"; // Import API PastoralYears
 import roomApi from "../../../api/Room"; // Import API Room
 import viVNGridTranslation from "../../../locale/MUITable";
@@ -511,6 +511,9 @@ export default function ClassComponent() {
           catechistId: catechist.id,
           isMain: catechist.id === mainCatechistId,
         }));
+        console.log(selectedClass ? selectedClass.id : "", {
+          catechists: updateCates,
+        });
         classApi.updateCatechitsOfClass(selectedClass ? selectedClass.id : "", {
           catechists: updateCates,
         });
@@ -1198,7 +1201,18 @@ export default function ClassComponent() {
                 field: "date",
                 headerName: "Ngày học",
                 width: 130,
-                renderCell: (params) => formatDate.DD_MM_YYYY(params.row.date),
+                renderCell: (params) => {
+                  return (
+                    <div>
+                      <span
+                        className={`rounded-md px-2 py-1
+                      ${new Date().getTime() - new Date(params.row.date).getTime() >= 0 ? "bg-yellow-300" : ""}`}
+                      >
+                        {formatDate.DD_MM_YYYY(params.row.date)}
+                      </span>
+                    </div>
+                  );
+                },
               },
               {
                 field: "time",

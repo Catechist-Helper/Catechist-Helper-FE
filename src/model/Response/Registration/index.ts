@@ -12,6 +12,7 @@ export type InterviewResponse = {
   meetingTime: string;
   note: string | null;
   isPassed: boolean;
+  interviewType: number;
   recruiters: RecruiterResponse[];
 };
 
