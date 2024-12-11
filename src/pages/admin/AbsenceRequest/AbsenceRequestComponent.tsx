@@ -18,6 +18,7 @@ import {
 } from "../../../enums/AbsenceRequest";
 import ApprovalDialog from "./ApprovalDialog";
 import ViewDetailAbsenceDialog from "./ViewDetailAbsenceDialog";
+import catechistApi from "../../../api/Catechist";
 
 const AbsencePage = () => {
   const [absences, setAbsences] = useState<GetAbsenceItemResponse[]>([]);
@@ -49,7 +50,17 @@ const AbsencePage = () => {
 
   // Cấu hình các cột trong DataGrid
   const columns: GridColDef[] = [
-    { field: "catechistName", headerName: "Tên đầy đủ", width: 180 },
+    {
+      field: "catechistName",
+      headerName: "Giáo lý viên xin nghỉ",
+      width: 250,
+      renderCell: (params) => (
+        <>
+          {params.row.catechistAbsence.fullName}{" "}
+          {`(${params.row.catechistAbsence.code})`}
+        </>
+      ),
+    },
     {
       field: "createAt",
       headerName: "Thời gian gửi đơn",
@@ -138,14 +149,93 @@ const AbsencePage = () => {
         );
       },
     },
+    {
+      field: "cateReplace",
+      headerName: "Giáo lý viên thay thế",
+      width: 300,
+      renderCell: (params) => {
+        if (params.row.status == AbsenceRequestStatus.Rejected) {
+          return <></>;
+        }
+        if (params.row.status == AbsenceRequestStatus.Pending) {
+          return <>Chờ duyệt đơn</>;
+        }
+        if (
+          params.row.status == AbsenceRequestStatus.Approved &&
+          !params.row.catechistReplace
+        ) {
+          if (
+            new Date(params.row.slot.date).getTime() - new Date().getTime() <
+            0
+          ) {
+            return <>Không có</>;
+          }
+          return (
+            <div className="flex gap-x-2">
+              <p>Chưa có</p>
+              <div>
+                <Button
+                  variant="outlined"
+                  color="secondary"
+                  onClick={() => {
+                    setSelectedAbsence(params.row);
+                    setOpenDialog(true);
+                  }}
+                >
+                  Chọn
+                </Button>
+              </div>
+            </div>
+          );
+        }
+
+        if (
+          params.row.status == AbsenceRequestStatus.Approved &&
+          params.row.catechistReplace
+        ) {
+          console.log("catechistReplace", params.row.catechistReplace);
+          return (
+            <>
+              {params.row.catechistReplace.fullName}{" "}
+              {`(${params.row.catechistReplace.code})`}
+            </>
+          );
+        }
+      },
+    },
   ];
 
   const fetchAbsences = async () => {
     setLoading(true);
     try {
       const response = await absenceApi.getAbsences(); // Gọi API
-      setAbsences(response.data.data); // Lưu dữ liệu vào state
-      console.log(response.data.data);
+
+      const updatedRows = await Promise.all(
+        response.data.data.map(async (item) => {
+          let cateProfile: any = null;
+          let cateAbsenceProfile: any = null;
+          const res2 = await catechistApi.getCatechistById(item.catechistId);
+          cateAbsenceProfile = res2.data.data;
+          if (item.replacementCatechistId) {
+            const res = await catechistApi.getCatechistById(
+              item.replacementCatechistId
+            );
+            cateProfile = res.data.data;
+          }
+          return {
+            ...item,
+            catechistReplace: cateProfile,
+            catechistAbsence: cateAbsenceProfile,
+          };
+        })
+      );
+
+      setAbsences(
+        updatedRows.sort(
+          (a, b) =>
+            new Date(b.createAt).getTime() - new Date(a.createAt).getTime()
+        )
+      );
     } catch (error) {
       console.error("Error fetching absences:", error);
     } finally {
@@ -178,6 +268,14 @@ const AbsencePage = () => {
       <div className="my-2 flex justify-between mx-3">
         <div className="min-w-[10px]"></div>
         <div className="flex gap-x-2">
+          <Button
+            onClick={() => fetchAbsences()}
+            variant="outlined"
+            color="primary"
+            style={{ marginBottom: "16px" }}
+          >
+            Tạo đơn
+          </Button>
           <Button
             onClick={() => fetchAbsences()}
             variant="contained"

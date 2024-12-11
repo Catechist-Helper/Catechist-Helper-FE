@@ -31,7 +31,10 @@ import sweetAlert from "../../../utils/sweetAlert";
 import { CreateCatechistInClassRequest } from "../../../model/Request/CatechistInClass";
 import { CreateSlotRequest } from "../../../model/Request/Slot";
 import { formatDate } from "../../../utils/formatDate";
-import { ClassResponse } from "../../../model/Response/Class";
+import {
+  CatechistSlotResponse,
+  ClassResponse,
+} from "../../../model/Response/Class";
 import useAppContext from "../../../hooks/useAppContext";
 import FileSaver from "file-saver";
 import { ClassStatusEnum, ClassStatusString } from "../../../enums/Class";
@@ -39,6 +42,8 @@ import {
   CatechistInSlotTypeEnum,
   CatechistInSlotTypeEnumString,
 } from "../../../enums/CatechistInSlot";
+import AdminRequestLeaveDialog from "./AdminRequestLeaveDialog";
+import absenceApi from "../../../api/AbsenceRequest";
 
 export default function ClassComponent() {
   const location = useLocation();
@@ -63,12 +68,18 @@ export default function ClassComponent() {
   const [selectedClass, setSelectedClass] = useState<ClassResponse | null>(
     null
   );
+  const [openLeaveDialog, setOpenLeaveDialog] = useState<boolean>(false);
 
   // State for adding timetable
   const [openTimetableDialog, setOpenTimetableDialog] =
     useState<boolean>(false);
   const [file, setFile] = useState<File | null>(null); // State to store the uploaded file
   const { enableLoading, disableLoading } = useAppContext();
+  const [slotAbsenceId, setSlotAbsenceId] = useState<string>("");
+  const [absenceCatechistOptions, setAbsenceCatechistOptions] = useState<
+    CatechistSlotResponse[]
+  >([]);
+  const [absenceDate, setAbsenceDate] = useState<string>("");
 
   // States for slot dialog
   const [openSlotDialog, setOpenSlotDialog] = useState<boolean>(false);
@@ -830,6 +841,34 @@ export default function ClassComponent() {
     setSelectedRows(newSelectionModel);
   };
 
+  const handleLeaveRequestSubmit = async (
+    catechistId: string,
+    reason: string,
+    slotId: string
+  ) => {
+    try {
+      absenceApi.submitAbsence({
+        catechistId: catechistId,
+        reason: reason,
+        slotId: slotId,
+      });
+      sweetAlert.alertSuccess("Tạo đơn nghỉ phép thành công!", "", 1000, 22);
+      setOpenLeaveDialog(false);
+      // if (classViewSlotId != "") {
+      //   fetchSlotForViewing(classViewSlotId);
+      // }
+    } catch (error) {
+      console.error("Error loading slots:", error);
+      sweetAlert.alertFailed(
+        "Có lỗi xảy ra khi tạo đơn nghỉ phép!",
+        "",
+        1000,
+        22
+      );
+    } finally {
+    }
+  };
+
   return (
     <Paper sx={{ width: "calc(100% - 3.8rem)", position: "absolute" }}>
       <h1 className="text-center text-[2.2rem] bg-primary_color text-text_primary_light py-2 font-bold">
@@ -1297,6 +1336,31 @@ export default function ClassComponent() {
                     : "";
                 },
               },
+              {
+                field: "action",
+                headerName: "Hành động",
+                width: 250,
+                renderCell: (params: any) => {
+                  return new Date(params.row.date).getTime() -
+                    new Date().getTime() >=
+                    0 ? (
+                    <Button
+                      color="secondary"
+                      variant="outlined"
+                      onClick={() => {
+                        setOpenLeaveDialog(true);
+                        setSlotAbsenceId(params.row.id);
+                        setAbsenceCatechistOptions(params.row.catechistInSlots);
+                        setAbsenceDate(params.row.date);
+                      }}
+                    >
+                      Tạo nghỉ phép
+                    </Button>
+                  ) : (
+                    <></>
+                  );
+                },
+              },
               // {
               //   field: "mainCatechist",
               //   headerName: "Giáo lý viên chính",
@@ -1311,6 +1375,14 @@ export default function ClassComponent() {
             localeText={viVNGridTranslation}
           />
         </div>
+        <AdminRequestLeaveDialog
+          open={openLeaveDialog}
+          slotId={slotAbsenceId}
+          date={absenceDate}
+          catechists={absenceCatechistOptions}
+          onClose={() => setOpenLeaveDialog(false)} // Đóng dialog
+          onSubmit={handleLeaveRequestSubmit} // Hàm xử lý khi gửi yêu cầu nghỉ phép
+        />
       </Dialog>
 
       {/* Dialog for uploading timetable */}

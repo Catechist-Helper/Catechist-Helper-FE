@@ -236,10 +236,10 @@ export default function CatechistComponent() {
         disableLoading();
         const confirm = await sweetAlert.confirm(
           `Không thể thay đổi trạng thái giảng dạy`,
-          `Giáo lý viên ${catechist.fullName} hiện vẫn còn tiết học\n\n
-          Các lớp học còn tiết học:\n
-          ${remainingClassHavingSlots.data.data.map((item) => item.name).join(", ")}`,
-          "Xem các lớp học",
+          `Giáo lý viên ${catechist.fullName} hiện vẫn còn tiết học ở
+           lớp học sau:\n
+          ${remainingClassHavingSlots.data.data.map((item) => `${item.name} (Niên khóa ${formatDate.YYYY(item.startDate)}-${formatDate.YYYY(item.endDate)})`).join(", ")}`,
+          "Xem lớp học",
           "Hủy bỏ"
         );
         if (confirm) {

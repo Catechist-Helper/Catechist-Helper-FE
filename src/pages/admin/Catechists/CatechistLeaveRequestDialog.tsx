@@ -47,6 +47,17 @@ const CatechistLeaveRequestDialog: React.FC<
       return;
     }
 
+    const confirm = await sweetAlert.confirm(
+      "Xác nhận phê duyệt đơn nghỉ giảng dạy",
+      "",
+      undefined,
+      undefined,
+      "question"
+    );
+    if (!confirm) {
+      return;
+    }
+
     enableLoading();
     setLoading(true);
 
@@ -57,7 +68,6 @@ const CatechistLeaveRequestDialog: React.FC<
         reason,
         leaveDate: formatDate.getISODateInVietnamTimeZone(),
       };
-      console.log("aaaa", submitData);
 
       const submitResponse =
         await leaveRequestApi.submitLeaveRequest(submitData);
@@ -84,7 +94,7 @@ const CatechistLeaveRequestDialog: React.FC<
             status: 1,
             comment,
           };
-          console.log("bbbbb", processData);
+
           const processResponse =
             await leaveRequestApi.processLeaveRequest(processData);
 

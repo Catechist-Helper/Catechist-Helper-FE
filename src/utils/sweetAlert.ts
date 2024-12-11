@@ -122,13 +122,24 @@ const sweetAlert = {
   ): Promise<boolean> {
     const result = await Swal.fire({
       title: title,
-      text: text,
+      html: text,
+      loaderHtml:text,
       icon: icon,
       showCancelButton: true,
       confirmButtonColor: "#3085d6",
       cancelButtonColor: "#d33",
       confirmButtonText: confirmButtonText,
       cancelButtonText: cancelButtonText,
+      didOpen: (toast) => {
+        const swalElement = document.querySelector(
+        ".swal2-container"
+        ) as HTMLElement;
+        if (swalElement) {
+          swalElement.style.zIndex = "10000";
+        }
+        toast.addEventListener("mouseenter", Swal.stopTimer);
+        toast.addEventListener("mouseleave", Swal.resumeTimer);
+      },
     });
 
     return result.isConfirmed; // Trả về true nếu người dùng nhấn "Xác nhận"
