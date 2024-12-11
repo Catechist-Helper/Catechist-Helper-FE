@@ -200,6 +200,7 @@ export default function ApprovedRegistrationsTable() {
   const [openDialog, setOpenDialog] = useState<boolean>(false);
   const [openDialogRegisDetail, setOpenDialogRegisDetail] =
     useState<boolean>(false);
+  const [deleteMode, setDeleteMode] = useState<boolean>(false);
 
   // Lấy danh sách accounts (recruiters)
   const fetchRecruiters = async () => {
@@ -216,7 +217,9 @@ export default function ApprovedRegistrationsTable() {
   };
 
   // Fetch các đơn đã duyệt dựa trên trạng thái và lọc theo ngày
-  const fetchApprovedRegistrations = async () => {
+  const fetchApprovedRegistrations = async (
+    deleteModeOn?: boolean | string
+  ) => {
     try {
       setLoading(true);
 
@@ -278,6 +281,17 @@ export default function ApprovedRegistrationsTable() {
           }
           return true;
         });
+
+      finalData =
+        (deleteModeOn === true || deleteMode) && deleteModeOn != "false"
+          ? [...finalData].filter(
+              (item) =>
+                Number(formatDate.YYYY(item.createdAt)) <
+                Number(
+                  formatDate.YYYY(formatDate.getISODateInVietnamTimeZone())
+                )
+            )
+          : [...finalData];
 
       setRowCount(finalData.length);
       setRows(finalData);
@@ -596,6 +610,36 @@ export default function ApprovedRegistrationsTable() {
   const disableActions = currentFilter !== "waiting";
   const disableActionsApproved = currentFilter !== "accepted";
 
+  const handleDeleteRegistrations = async () => {
+    const confirm = await sweetAlert.confirm(
+      `Bạn có chắc muốn xóa ${selectedRegistrations.length} đơn`,
+      "",
+      "Xác nhận",
+      "Hủy bỏ",
+      "question"
+    );
+    if (!confirm) {
+      return;
+    }
+    try {
+      enableLoading();
+      const deletePromises = selectedRegistrations.map(async (id) => {
+        await registrationApi.deleteRegistration(id.toString());
+      });
+
+      await Promise.all(deletePromises);
+      sweetAlert.alertSuccess("Xóa đơn ứng tuyển thành công!", "", 1000, 28);
+
+      fetchApprovedRegistrations(true);
+      setSelectedRegistrations([]);
+    } catch (error: any) {
+      console.error("Lỗi khi xóa đơn ứng tuyển:", error);
+      sweetAlert.alertFailed("Lỗi khi xóa đơn ứng tuyển", ``, 10000, 24);
+    } finally {
+      disableLoading();
+    }
+  };
+
   return (
     <Paper
       sx={{
@@ -605,25 +649,39 @@ export default function ApprovedRegistrationsTable() {
     >
       <h1
         className={`text-center text-[2rem] py-2 font-bold 
-        ${currentFilter == "waiting" ? "bg-info text-text_primary_dark" : ""} 
-        ${currentFilter == "accepted" ? "bg-success text-text_primary_light" : ""} 
-        ${currentFilter == "rejected" ? "bg-danger text-text_primary_light" : ""}`}
+        ${!deleteMode && currentFilter == "waiting" ? "bg-info text-text_primary_dark" : ""} 
+        ${!deleteMode && currentFilter == "accepted" ? "bg-success text-text_primary_light" : ""} 
+        ${!deleteMode && currentFilter == "rejected" ? "bg-danger text-text_primary_light" : ""}
+        ${deleteMode ? "bg-black text-text_primary_light" : ""}`}
       >
-        {currentFilter == "waiting" ? "Danh sách phỏng vấn ứng viên" : ""}
-        {currentFilter == "accepted" ? "Danh sách ứng viên đậu phỏng vấn" : ""}
-        {currentFilter == "rejected" ? "Danh sách ứng viên bị từ chối" : ""}
+        {!deleteMode && currentFilter == "waiting"
+          ? "Danh sách ứng viên chờ phỏng vấn"
+          : ""}
+        {!deleteMode && currentFilter == "accepted"
+          ? "Danh sách ứng viên đậu phỏng vấn"
+          : ""}
+        {!deleteMode && currentFilter == "rejected"
+          ? "Danh sách ứng viên bị từ chối"
+          : ""}
+        {deleteMode ? "Lọc các đơn cũ" : ""}
       </h1>
 
       <div className="flex justify-between items-center w-full my-3">
         {/* Chọn ngày filter */}
-        <div className="flex justify-start px-3">
-          <input
-            type="date"
-            className="w-[200px] py-2 px-2 border rounded-md"
-            value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value)}
-          />
-          {renderFilterButtons()}
+        <div className="flex justify-start px-3 min-w-[10px]">
+          {!deleteMode ? (
+            <>
+              <input
+                type="date"
+                className="w-[200px] py-2 px-2 border rounded-md"
+                value={selectedDate}
+                onChange={(e) => setSelectedDate(e.target.value)}
+              />
+              {renderFilterButtons()}
+            </>
+          ) : (
+            <></>
+          )}
         </div>
         <div className="flex">
           {selectedRegistrations.length > 0 && !disableActions && (
@@ -695,6 +753,61 @@ export default function ApprovedRegistrationsTable() {
             <></>
           )}
 
+          {currentFilter == "rejected" &&
+          deleteMode &&
+          selectedRegistrations.length > 0 ? (
+            <>
+              <Button
+                className="btn bg-primary_color text-text_primary_light hover:text-text_primary_dark
+          hover:bg-gray-400"
+                onClick={() => {
+                  handleDeleteRegistrations();
+                }}
+                variant="outlined"
+                color="primary"
+              >
+                Xóa đơn
+              </Button>
+            </>
+          ) : (
+            <></>
+          )}
+          {currentFilter === "rejected" && !deleteMode ? (
+            <>
+              <Button
+                className="btn bg-primary_color text-text_primary_light hover:text-text_primary_dark
+          hover:bg-gray-400"
+                onClick={() => {
+                  setDeleteMode(true);
+                  fetchApprovedRegistrations(true);
+                }}
+                variant="outlined"
+                color="primary"
+              >
+                Lọc đơn
+              </Button>
+            </>
+          ) : (
+            <></>
+          )}
+          {currentFilter === "rejected" && deleteMode ? (
+            <>
+              <Button
+                className="btn bg-primary_color text-text_primary_light hover:text-text_primary_dark
+          hover:bg-gray-400"
+                onClick={() => {
+                  setDeleteMode(false);
+                  fetchApprovedRegistrations("false");
+                }}
+                variant="outlined"
+                color="primary"
+              >
+                Xong
+              </Button>
+            </>
+          ) : (
+            <></>
+          )}
           <button
             className="btn btn-primary ml-1 mr-2"
             onClick={() => {
