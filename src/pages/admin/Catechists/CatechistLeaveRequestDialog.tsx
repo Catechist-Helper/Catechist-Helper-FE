@@ -3,7 +3,6 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
-  DialogTitle,
   TextField,
   Button,
   CircularProgress,
@@ -38,17 +37,17 @@ const CatechistLeaveRequestDialog: React.FC<
   }, []);
 
   const handleSubmit = async () => {
-    enableLoading();
     if (!reason || !comment) {
       sweetAlert.alertFailed(
         "Lý do xin nghỉ và Ghi chú phê duyệt là bắt buộc!",
         "",
-        1000,
+        6000,
         22
       );
       return;
     }
 
+    enableLoading();
     setLoading(true);
 
     try {
@@ -56,14 +55,9 @@ const CatechistLeaveRequestDialog: React.FC<
       const submitData = {
         catechistId,
         reason,
-        leaveDate: formatDate.getISODateInVietnamTimeZone(), // Ngày hôm nay dạng ISOString
+        leaveDate: formatDate.getISODateInVietnamTimeZone(),
       };
-      console.log("aaaa", submitData, {
-        requestId: "hehe",
-        approverId: userLogin ? userLogin.id : "",
-        status: 1,
-        comment,
-      });
+      console.log("aaaa", submitData);
 
       const submitResponse =
         await leaveRequestApi.submitLeaveRequest(submitData);
@@ -90,6 +84,7 @@ const CatechistLeaveRequestDialog: React.FC<
             status: 1,
             comment,
           };
+          console.log("bbbbb", processData);
           const processResponse =
             await leaveRequestApi.processLeaveRequest(processData);
 
@@ -118,16 +113,20 @@ const CatechistLeaveRequestDialog: React.FC<
       sweetAlert.alertFailed("Có lỗi xảy ra!", "", 1000, 22);
     } finally {
       setLoading(false);
-      disableLoading();
+      setTimeout(() => {
+        disableLoading();
+      }, 1000);
     }
   };
 
   if (!userLogin || !userLogin.id) return <></>;
 
   return (
-    <Dialog open={open} onClose={onClose}>
-      <DialogTitle>Thông tin đơn xin nghỉ</DialogTitle>
+    <Dialog open={open}>
       <DialogContent>
+        <h2 className="font-bold text-[1.5rem]">
+          Thông tin đơn xin nghỉ giảng dạy
+        </h2>
         <TextField
           label="Lý do xin nghỉ"
           variant="outlined"
@@ -137,6 +136,7 @@ const CatechistLeaveRequestDialog: React.FC<
           value={reason}
           onChange={(e) => setReason(e.target.value)}
           required
+          className="mt-3"
         />
         <TextField
           label="Ghi chú phê duyệt"
@@ -147,6 +147,7 @@ const CatechistLeaveRequestDialog: React.FC<
           value={comment}
           onChange={(e) => setComment(e.target.value)}
           required
+          className="mt-3"
         />
       </DialogContent>
       <DialogActions>

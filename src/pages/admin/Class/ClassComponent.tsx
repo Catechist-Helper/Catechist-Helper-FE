@@ -104,9 +104,19 @@ export default function ClassComponent() {
       try {
         await fetchPastoralYears();
         if (location.state) {
-          const { majorId, gradeId } = location.state;
-          setSelectedMajor(majorId);
-          await fetchGrades(majorId, gradeId);
+          if (location.state.gradeId) {
+            const { majorId, gradeId } = location.state;
+            setSelectedMajor(majorId);
+            await fetchGrades(majorId, gradeId);
+          } else if (location.state.classIds) {
+            console.log("location.state.classIds", location.state.classIds);
+            enableLoading();
+            setTimeout(() => {
+              fetchClasses(undefined, undefined, location.state.classIds);
+              disableLoading();
+            }, 1200);
+            setSelectedMajor("all");
+          }
         } else {
           setSelectedMajor("all");
         }
@@ -261,7 +271,8 @@ export default function ClassComponent() {
 
   const fetchClasses = async (
     changeInitDate?: boolean,
-    defaultGradeId?: string
+    defaultGradeId?: string,
+    classIds?: string[]
   ) => {
     try {
       setLoading(true);
@@ -280,8 +291,15 @@ export default function ClassComponent() {
         size
       );
 
+      const filterDataByClassIds =
+        classIds && classIds.length > 0
+          ? data.data.items.filter(
+              (item) => classIds.findIndex((id) => id == item.id) >= 0
+            )
+          : data.data.items;
+
       const updatedRows = await Promise.all(
-        data.data.items.map(async (classItem: any) => {
+        filterDataByClassIds.map(async (classItem: any) => {
           const slotCount = await fetchSlotCountOfClass(classItem.id);
           return {
             ...classItem,
@@ -291,7 +309,7 @@ export default function ClassComponent() {
       );
 
       setRows(updatedRows);
-      setRowCount(data.data.total);
+      setRowCount(updatedRows.length);
     } catch (error) {
       console.error("Error loading classes:", error);
       sweetAlert.alertFailed(
@@ -488,7 +506,16 @@ export default function ClassComponent() {
 
       const fetchItems: any[] = [];
       [...data.data.items].forEach((item) => {
-        fetchItems.push({ ...item, id: item.catechist.id });
+        const action = async () => {
+          const remainingClassHavingSlots =
+            await catechistInClassApi.getClassesRemainingSlotsOfCatechist(
+              item.catechist.id
+            );
+          if (remainingClassHavingSlots.data.data.length <= 0) {
+            fetchItems.push({ ...item, id: item.catechist.id });
+          }
+        };
+        action();
       });
 
       setCatechists(fetchItems);
@@ -677,6 +704,12 @@ export default function ClassComponent() {
       renderCell: (params) => params.row.catechist.fullName,
     },
     {
+      field: "code",
+      headerName: "Mã giáo lý viên",
+      width: 200,
+      renderCell: (params) => params.row.catechist.code,
+    },
+    {
       field: "gender",
       headerName: "Giới tính",
       width: 100,
@@ -732,6 +765,12 @@ export default function ClassComponent() {
       headerName: "Tên giáo lý viên",
       width: 200,
       renderCell: (params) => params.row.catechist.fullName,
+    },
+    {
+      field: "code",
+      headerName: "Mã giáo lý viên",
+      width: 200,
+      renderCell: (params) => params.row.catechist.code,
     },
     {
       field: "gender",
