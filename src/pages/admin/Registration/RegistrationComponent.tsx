@@ -112,6 +112,7 @@ export default function RegistrationDataTable() {
   const [selectedIds, setSelectedIds] = useState<GridRowSelectionModel>([]); // Cập nhật kiểu dữ liệu
   const [hasFunction, setHasFunction] = useState<boolean>(false);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [deleteMode, setDeleteMode] = useState<boolean>(false);
   const [isModalOpenRejected, setIsModalOpenRejected] =
     useState<boolean>(false);
   const [accounts, setAccounts] = useState<any[]>([]);
@@ -129,7 +130,7 @@ export default function RegistrationDataTable() {
   const [viewMode, setViewMode] = useState<"pending" | "rejected">("pending"); // Trạng thái xem hiện tại
 
   // Hàm fetch các đơn đăng ký
-  const fetchRegistrations = async () => {
+  const fetchRegistrations = async (deleteModeOn?: boolean | string) => {
     try {
       setLoading(true);
 
@@ -161,14 +162,21 @@ export default function RegistrationDataTable() {
         firstResponse.data.data.total
       );
 
-      console.log(data.data.items);
-
       // Lọc các đơn theo chế độ xem hiện tại
-      const filteredRegistrations = data.data.items;
+      const filteredRegistrations =
+        (deleteModeOn === true || deleteMode) && deleteModeOn != "false"
+          ? data.data.items.filter(
+              (item) =>
+                Number(formatDate.YYYY(item.createdAt)) <
+                Number(
+                  formatDate.YYYY(formatDate.getISODateInVietnamTimeZone())
+                )
+            )
+          : data.data.items;
 
       // Cập nhật state với dữ liệu mới
       setRows(filteredRegistrations);
-      setRowCount(data.data.total); // Cập nhật tổng số hàng từ phản hồi API
+      setRowCount(filteredRegistrations.length); // Cập nhật tổng số hàng từ phản hồi API
     } catch (error) {
       console.error("Lỗi khi tải danh sách registrations:", error);
     } finally {
@@ -417,6 +425,36 @@ export default function RegistrationDataTable() {
     }
   }, [meetingTime]);
 
+  const handleDeleteRegistrations = async () => {
+    const confirm = await sweetAlert.confirm(
+      `Bạn có chắc muốn xóa ${selectedIds.length} đơn`,
+      "",
+      "Xác nhận",
+      "Hủy bỏ",
+      "question"
+    );
+    if (!confirm) {
+      return;
+    }
+    try {
+      enableLoading();
+      const deletePromises = selectedIds.map(async (id) => {
+        await registrationApi.deleteRegistration(id.toString());
+      });
+
+      await Promise.all(deletePromises);
+      sweetAlert.alertSuccess("Xóa đơn ứng tuyển thành công!", "", 1000, 28);
+
+      fetchRegistrations(true);
+      setSelectedIds([]);
+    } catch (error: any) {
+      console.error("Lỗi khi xóa đơn ứng tuyển:", error);
+      sweetAlert.alertFailed("Lỗi khi xóa đơn ứng tuyển", ``, 10000, 24);
+    } finally {
+      disableLoading();
+    }
+  };
+
   return (
     <Paper
       sx={{
@@ -424,60 +462,81 @@ export default function RegistrationDataTable() {
         position: "absolute",
       }}
     >
-      <h1 className="text-center text-[2.2rem] bg-primary_color text-text_primary_light py-2 font-bold">
-        Danh sách ứng tuyển giáo lý viên
+      <h1
+        className={`text-center text-[2.2rem]  text-text_primary_light py-2 font-bold 
+          ${!deleteMode ? `${viewMode === "pending" ? "bg-primary_color" : "bg-danger"}` : "bg-black"}`}
+      >
+        {!deleteMode ? (
+          <>
+            {viewMode === "pending"
+              ? "Danh sách ứng tuyển giáo lý viên chờ phê duyệt"
+              : "Danh sách ứng tuyển giáo lý viên bị từ chối"}
+          </>
+        ) : (
+          <>Lọc các đơn ứng tuyển</>
+        )}
       </h1>
 
       <div className="flex mt-2 px-3 w-full justify-between">
         <div className="flex justify-start">
-          {viewMode === "pending" ? (
-            <button
-              className="mx-1 btn btn-danger"
-              disabled={hasFunction}
-              onClick={() => {
-                setViewMode("rejected");
-              }}
-            >
-              Đơn bị từ chối
-            </button>
+          {!deleteMode ? (
+            <>
+              {viewMode === "pending" ? (
+                <button
+                  className="mx-1 btn btn-danger"
+                  disabled={hasFunction}
+                  onClick={() => {
+                    setViewMode("rejected");
+                  }}
+                >
+                  Đơn bị từ chối
+                </button>
+              ) : (
+                <button
+                  className="mx-1 btn btn-warning"
+                  disabled={hasFunction}
+                  onClick={() => {
+                    setViewMode("pending");
+                  }}
+                >
+                  Đơn chờ duyệt
+                </button>
+              )}
+            </>
           ) : (
-            <button
-              className="mx-1 btn btn-warning"
-              disabled={hasFunction}
-              onClick={() => {
-                setViewMode("pending");
-              }}
-            >
-              Đơn chờ duyệt
-            </button>
+            <></>
           )}
         </div>
-        <div className="flex justify-end">
-          {selectedIds.length > 0 ? (
+        <div className="flex justify-end gap-x-2">
+          {selectedIds.length > 0 && !deleteMode ? (
             <>
               {selectedIds.length <= 1 ? (
                 <>
-                  <button
-                    className="ml-1 btn btn-primary"
+                  <Button
+                    className="btn btn-primary"
                     disabled={hasFunction}
                     onClick={() => {
                       handleOpenModal();
                     }}
+                    variant="outlined"
+                    color="primary"
                   >
                     Xếp lịch phỏng vấn
-                  </button>
+                  </Button>
 
                   {viewMode != "rejected" ? (
                     <>
-                      <button
-                        className="ml-1 btn btn-danger"
+                      <Button
+                        className="btn btn-danger"
                         onClick={() => {
                           handleOpenModalRejected();
                         }}
                         disabled={hasFunction}
+                        variant="outlined"
+                        color="primary"
                       >
                         Từ chối đơn
-                      </button>
+                      </Button>
                     </>
                   ) : (
                     <></>
@@ -486,7 +545,7 @@ export default function RegistrationDataTable() {
               ) : (
                 <></>
               )}
-              {/* <button
+              {/* <Button
                 className="mx-1 btn btn-danger"
                 disabled={hasFunction}
                 onClick={() => {
@@ -494,33 +553,93 @@ export default function RegistrationDataTable() {
                 }}
               >
                 Xóa đơn
-              </button> */}
+              </Button> */}
             </>
           ) : (
             <></>
           )}
+
           {selectedIds.length == 1 ? (
             <>
-              <button
-                className="btn btn-info ml-1"
+              <Button
+                className="btn btn-info"
                 onClick={() => setOpenDialogRegisDetail(true)}
+                variant="outlined"
+                color="primary"
               >
                 Xem chi tiết
-              </button>
+              </Button>
             </>
           ) : (
             <></>
           )}
-          <button
-            className="mx-1 btn bg-primary_color text-text_primary_light hover:text-text_primary_dark
+          {viewMode == "rejected" && deleteMode && selectedIds.length > 0 ? (
+            <>
+              <Button
+                className="btn bg-primary_color text-text_primary_light hover:text-text_primary_dark
+          hover:bg-gray-400"
+                onClick={() => {
+                  handleDeleteRegistrations();
+                }}
+                disabled={hasFunction}
+                variant="outlined"
+                color="primary"
+              >
+                Xóa đơn
+              </Button>
+            </>
+          ) : (
+            <></>
+          )}
+          {viewMode == "rejected" && !deleteMode ? (
+            <>
+              <Button
+                className="btn bg-primary_color text-text_primary_light hover:text-text_primary_dark
+          hover:bg-gray-400"
+                onClick={() => {
+                  setDeleteMode(true);
+                  fetchRegistrations(true);
+                }}
+                disabled={hasFunction}
+                variant="outlined"
+                color="primary"
+              >
+                Lọc đơn
+              </Button>
+            </>
+          ) : (
+            <></>
+          )}
+          {deleteMode ? (
+            <>
+              <Button
+                className="btn btn-primary"
+                disabled={hasFunction}
+                onClick={() => {
+                  setDeleteMode(false);
+                  fetchRegistrations("false");
+                }}
+                variant="outlined"
+                color="primary"
+              >
+                Xong
+              </Button>
+            </>
+          ) : (
+            <></>
+          )}
+          <Button
+            className="btn bg-primary_color text-text_primary_light hover:text-text_primary_dark
           hover:bg-gray-400"
             onClick={() => {
               fetchRegistrations();
             }}
             disabled={hasFunction}
+            variant="outlined"
+            color="primary"
           >
             Tải lại
-          </button>
+          </Button>
         </div>
       </div>
 

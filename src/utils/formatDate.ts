@@ -12,6 +12,8 @@ const DD_MM_YYYY_Time = (dateStr: string) => moment(dateStr).format('DD/MM/YYYY,
 
 const HH_mm = (dateStr: string) => moment(dateStr).format('HH:mm');
 
+const YYYY = (dateStr: string) => moment(dateStr).format('YYYY');
+
 const getISODateInVietnamTimeZone = () => {
     const date = new Date();
     const formatter = new Intl.DateTimeFormat("en-CA", {
@@ -45,5 +47,6 @@ export const formatDate = {
     YYYY_YYYY,
     DD_MM_YYYY_Time,
     HH_mm,
+    YYYY,
     getISODateInVietnamTimeZone
 }

@@ -7,7 +7,7 @@ import {
 } from "@mui/x-data-grid";
 import Paper from "@mui/material/Paper";
 import viVNGridTranslation from "../../../locale/MUITable";
-import RegistrationDetailDialog from "./RegistrationDetailDialog";
+import RegistrationDetailDialog from "../../admin/ApprovedRegistration/RegistrationDetailDialog";
 import dayjs from "dayjs";
 import registrationApi from "../../../api/Registration";
 import { RegistrationItemResponse } from "../../../model/Response/Registration";
