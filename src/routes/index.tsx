@@ -30,6 +30,7 @@ import ListAllCatechistByLevel from "../pages/admin/TrainingList/ListAllCatechis
 import CreateCertificate from "../pages/admin/Certificate/CreateCertificate";
 import RoleBasedGuard from "../guards/RoleBasedGuard";
 import { RoleNameEnum } from "../enums/RoleEnum";
+import Introduction from "../pages/common/Introduction/Introduction";
 // path
 
 // ----------------------------------------------------------------------
@@ -158,6 +159,14 @@ export default function Router() {
           element: (
             // <GuestGuard>
             <Room />
+            // </GuestGuard>
+          ),
+        },
+        {
+          path: PATH_HOME.introduce,
+          element: (
+            // <GuestGuard>
+            <Introduction />
             // </GuestGuard>
           ),
         },

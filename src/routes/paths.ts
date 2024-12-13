@@ -84,4 +84,5 @@ export const PATH_HOME = {
   registration: path(PATH_ROOT_HOME, "register-form"),
   meeting: path(PATH_ROOT_HOME, "meeting"),
   room: path(PATH_ROOT_HOME, "room"),
+  introduce: path(PATH_ROOT_HOME, "introduce"),
 };
