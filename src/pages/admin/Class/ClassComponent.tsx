@@ -515,21 +515,32 @@ export default function ClassComponent() {
         selectedPastoralYear
       );
 
-      const fetchItems: any[] = [];
-      [...data.data.items].forEach((item) => {
-        const action = async () => {
+      let fetchItems: any[] = []; // Đảm bảo mảng là extensible
+
+      const processItems = async () => {
+        const promises = [...data.data.items].map(async (item) => {
           const remainingClassHavingSlots =
             await catechistInClassApi.getClassesRemainingSlotsOfCatechist(
               item.catechist.id
             );
+
           if (remainingClassHavingSlots.data.data.length <= 0) {
-            fetchItems.push({ ...item, id: item.catechist.id });
+            // Dùng concat thay vì push để tránh lỗi
+            fetchItems = fetchItems.concat({ ...item, id: item.catechist.id });
           }
-        };
-        action();
+        });
+
+        // Chờ cho tất cả các promise hoàn thành
+        await Promise.all(promises);
+      };
+
+      // Gọi hàm xử lý
+      processItems().then(() => {
+        // console.log(fetchItems);
+        setCatechists(fetchItems);
       });
 
-      setCatechists(fetchItems);
+      // setCatechists(fetchItems);
     } catch (error) {
       console.error("Error loading catechists:", error);
     }
@@ -549,36 +560,50 @@ export default function ClassComponent() {
           catechistId: catechist.id,
           isMain: catechist.id === mainCatechistId,
         }));
+        const updateRes = await classApi.updateCatechitsOfClass(
+          selectedClass ? selectedClass.id : "",
+          {
+            catechists: updateCates,
+          }
+        );
+
         console.log(selectedClass ? selectedClass.id : "", {
           catechists: updateCates,
         });
-        classApi.updateCatechitsOfClass(selectedClass ? selectedClass.id : "", {
-          catechists: updateCates,
-        });
-        console.log(selectedClass ? selectedClass.id : "", {
-          catechists: updateCates,
-        });
-        setTimeout(() => {
-          setOpenSlotDialog(false);
+
+        // setTimeout(() => {
+        if (updateRes.data.statusCode.toString().startsWith("2")) {
           sweetAlert.alertSuccess(
             "Cập nhật tiết học thành công!",
             "",
             1000,
             22
           );
+          setOpenSlotDialog(false);
           handleViewSlots(selectedClass ? selectedClass.id : "");
-        }, 3000);
-      } catch (error) {
-        sweetAlert.alertFailed(
-          "Có lỗi xảy ra khi cập nhật tiết học!",
-          "",
-          1000,
-          22
-        );
+        }
+        // }, 3000);
+      } catch (error: any) {
+        if (
+          error.message &&
+          error.message.includes("Không thể cập nhật khi bắt đầu niên khóa mới")
+        ) {
+          sweetAlert.alertFailed(
+            "Không thể cập nhật khi bắt đầu niên khóa mới",
+            "",
+            5000,
+            25
+          );
+        } else {
+          sweetAlert.alertFailed(
+            "Có lỗi xảy ra khi cập nhật tiết học!",
+            "",
+            1000,
+            22
+          );
+        }
       } finally {
-        setTimeout(() => {
-          disableLoading();
-        }, 3000);
+        disableLoading();
       }
 
       return;
@@ -852,19 +877,14 @@ export default function ClassComponent() {
         reason: reason,
         slotId: slotId,
       });
-      sweetAlert.alertSuccess("Tạo đơn nghỉ phép thành công!", "", 1000, 22);
+      sweetAlert.alertSuccess("Tạo đơn nghỉ phép thành công", "", 1000, 22);
       setOpenLeaveDialog(false);
       // if (classViewSlotId != "") {
       //   fetchSlotForViewing(classViewSlotId);
       // }
     } catch (error) {
       console.error("Error loading slots:", error);
-      sweetAlert.alertFailed(
-        "Có lỗi xảy ra khi tạo đơn nghỉ phép!",
-        "",
-        1000,
-        22
-      );
+      sweetAlert.alertFailed("Lỗi khi tạo đơn nghỉ phép", "", 1000, 22);
     } finally {
     }
   };

@@ -25,14 +25,17 @@ import { PATH_ADMIN } from "../../../routes/paths";
 
 export default function CatechistComponent() {
   const [rows, setRows] = useState<CatechistItemResponse[]>([]);
+  const [selectedUpdateCatechist, setSelectedUpdateCatechist] =
+    useState<CatechistItemResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({
     page: 0, // zero-based index for MUI DataGrid
     pageSize: 50, // Default page size
   });
   const [rowCount, setRowCount] = useState<number>(0);
-  const [selectedIds] = useState<GridRowSelectionModel>([]);
+  const [selectedIds, setSelectedIds] = useState<GridRowSelectionModel>([]);
   const [openDialog, setOpenDialog] = useState<boolean>(false);
+  const [updateMode, setUpdateMode] = useState<boolean>(false);
   const { enableLoading, disableLoading } = useAppContext();
   const [selectedCatechist, setSelectedCatechist] =
     useState<CatechistItemResponse | null>(null); // Catechist đang chọn
@@ -161,6 +164,23 @@ export default function CatechistComponent() {
         ),
     },
   ];
+
+  const handleUpdateCatechist = () => {
+    const catechist = rows.find((item) => item.id == selectedIds[0].toString());
+    if (catechist) {
+      setSelectedUpdateCatechist(catechist);
+      setUpdateMode(true);
+      setOpenDialog(true);
+    }
+  };
+
+  useEffect(() => {
+    if (!openDialog) {
+      setUpdateMode(false);
+      setSelectedUpdateCatechist(null);
+    }
+  }, [openDialog]);
+
   const handleAddCatechist = () => {
     setOpenDialog(true);
   };
@@ -310,19 +330,25 @@ export default function CatechistComponent() {
           </div>
         </div>
         <div className="flex gap-x-2">
+          {selectedIds.length === 1 ? (
+            <>
+              <div>
+                <Button
+                  onClick={() => {
+                    handleUpdateCatechist();
+                  }} // Open dialog
+                  variant="outlined"
+                  color="primary"
+                  style={{ marginBottom: "16px" }}
+                >
+                  Cập nhật giáo lý viên
+                </Button>
+              </div>
+            </>
+          ) : (
+            <></>
+          )}
           <div>
-            {" "}
-            <Button
-              onClick={handleExportCatechists} // Xuất danh sách
-              variant="contained"
-              color="secondary"
-              style={{ marginBottom: "16px" }}
-            >
-              Xuất danh sách
-            </Button>
-          </div>
-          <div>
-            {" "}
             <Button
               onClick={handleAddCatechist} // Open dialog
               variant="contained"
@@ -333,7 +359,16 @@ export default function CatechistComponent() {
             </Button>
           </div>
           <div>
-            {" "}
+            <Button
+              onClick={handleExportCatechists} // Xuất danh sách
+              variant="contained"
+              color="secondary"
+              style={{ marginBottom: "16px" }}
+            >
+              Xuất danh sách
+            </Button>
+          </div>
+          <div>
             <Button
               onClick={() => fetchCatechists()} // Gọi lại hàm fetchCatechists
               variant="contained"
@@ -353,20 +388,26 @@ export default function CatechistComponent() {
         loading={loading}
         paginationModel={paginationModel}
         onPaginationModelChange={setPaginationModel}
-        pagination
         pageSizeOptions={[50, 100, 250]}
-        checkboxSelection
         rowSelectionModel={selectedIds}
         sx={{
           border: 0,
         }}
         localeText={viVNGridTranslation}
+        onRowSelectionModelChange={(newSelection) => {
+          setSelectedIds(newSelection);
+        }}
+        checkboxSelection
+        disableRowSelectionOnClick
+        disableMultipleRowSelection
       />
       {openDialog && (
         <CatechistDialog
           open={openDialog}
           onClose={() => setOpenDialog(false)}
           refresh={fetchCatechists}
+          updateMode={updateMode}
+          updatedCatechist={selectedUpdateCatechist}
         />
       )}
       {selectedCatechist && (

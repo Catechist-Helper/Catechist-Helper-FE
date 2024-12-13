@@ -23,6 +23,7 @@ import sweetAlert from "../../../utils/sweetAlert";
 import viVNGridTranslation from "../../../locale/MUITable";
 import { PATH_ADMIN } from "../../../routes/paths";
 import { GradeResponse } from "../../../model/Response/Grade";
+import useAppContext from "../../../hooks/useAppContext";
 
 export default function GradeComponent() {
   const navigate = useNavigate();
@@ -42,6 +43,7 @@ export default function GradeComponent() {
   const [selectedMajor, setSelectedMajor] = useState<string>("all");
   const [selectedMajorCreateGrade, setSelectedMajorCreateGrade] =
     useState<string>("");
+  const { enableLoading, disableLoading } = useAppContext();
 
   useEffect(() => {
     fetchMajors();
@@ -144,23 +146,47 @@ export default function GradeComponent() {
   // Xử lý thêm mới Grade
   const handleCreateGrade = async () => {
     try {
+      enableLoading();
       if (
         selectedMajorCreateGrade &&
         selectedMajorCreateGrade != "" &&
         gradeName &&
         gradeName != ""
       ) {
+        console.log({
+          name: gradeName,
+          majorId: selectedMajorCreateGrade,
+        });
         await gradeApi.createGrade({
           name: gradeName,
-          majorId: selectedMajor,
+          majorId: selectedMajorCreateGrade,
         });
         fetchGrades(selectedMajor);
         setOpenDialog(false);
       } else {
         sweetAlert.alertFailed("Vui lòng điền đầy đủ thông tin!", "", 1000, 22);
       }
-    } catch (error) {
-      sweetAlert.alertFailed("Có lỗi xảy ra khi tạo khối!", "", 1000, 22);
+    } catch (error: any) {
+      console.log(error);
+      if (
+        (error.message &&
+          error.message.includes(
+            "Không thể cập nhật khi bắt đầu niên khóa mới"
+          )) ||
+        (error.Error &&
+          error.Error.includes("Không thể cập nhật khi bắt đầu niên khóa mới"))
+      ) {
+        sweetAlert.alertFailed(
+          "Không thể cập nhật khi bắt đầu niên khóa mới",
+          "",
+          5000,
+          25
+        );
+      } else {
+        sweetAlert.alertFailed("Có lỗi xảy ra khi tạo khối!", "", 1000, 22);
+      }
+    } finally {
+      disableLoading();
     }
   };
 

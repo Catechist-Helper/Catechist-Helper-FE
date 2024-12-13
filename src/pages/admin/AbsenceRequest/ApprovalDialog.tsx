@@ -69,8 +69,32 @@ const ApprovalDialog = ({
   // Handle phê duyệt đơn nghỉ phép
   const handleApproval = async () => {
     try {
-      // Gọi API phê duyệt đơn
       if (absence.status == AbsenceRequestStatus.Pending) {
+        if (
+          status != AbsenceRequestStatus.Approved &&
+          status != AbsenceRequestStatus.Rejected
+        ) {
+          sweetAlert.alertFailed(
+            "Vui lòng chọn kết quả phê duyệt nghỉ phép",
+            "",
+            1200,
+            26
+          );
+
+          return;
+        }
+
+        if (comment.trim() == "") {
+          sweetAlert.alertFailed(
+            "Vui lòng nhập ghi chú duyệt nghỉ phép",
+            "",
+            1200,
+            25
+          );
+
+          return;
+        }
+
         await absenceApi.processAbsence({
           requestId: absence.id,
           approverId: approverId,
@@ -103,7 +127,7 @@ const ApprovalDialog = ({
       }
     } catch (error) {
       console.error("Error processing absence:", error);
-      sweetAlert.alertFailed("Có lỗi xảy ra", "", 1200, 22);
+      sweetAlert.alertFailed("Có lỗi xảy ra khi phê duyệt", "", 1200, 25);
     }
   };
 
@@ -142,7 +166,7 @@ const ApprovalDialog = ({
         {absence.status == AbsenceRequestStatus.Pending ? (
           <>
             <label htmlFor="" className="ml-1">
-              Phê duyệt đơn nghỉ phép
+              Quyết định phê duyệt
             </label>
             <Select
               value={status}

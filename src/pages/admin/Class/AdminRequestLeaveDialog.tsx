@@ -10,6 +10,7 @@ import {
 import { CatechistSlotResponse } from "../../../model/Response/Class";
 import Select from "react-select";
 import { formatDate } from "../../../utils/formatDate";
+import sweetAlert from "../../../utils/sweetAlert";
 
 interface AdminRequestLeaveDialogProps {
   open: boolean;
@@ -37,15 +38,26 @@ const AdminRequestLeaveDialog: React.FC<AdminRequestLeaveDialogProps> = ({
   }, [slotId, catechists]);
 
   const handleSubmit = () => {
-    if (reason.trim()) {
-      onSubmit(
-        selectedCateId && selectedCateId.value ? selectedCateId.value : "",
-        reason,
-        slotId
+    if (!(selectedCateId && selectedCateId.value)) {
+      sweetAlert.alertFailed(
+        "Vui lòng chọn giáo lý viên nghỉ phép",
+        "",
+        5000,
+        27
       );
-      setReason("");
-      setSelectedCateId({});
+      return;
     }
+    if (!reason || reason.trim() == "") {
+      sweetAlert.alertFailed("Vui lòng nhập lý do nghỉ phép", "", 5000, 25);
+      return;
+    }
+    onSubmit(
+      selectedCateId && selectedCateId.value ? selectedCateId.value : "",
+      reason,
+      slotId
+    );
+    setReason("");
+    setSelectedCateId({});
   };
 
   return (
