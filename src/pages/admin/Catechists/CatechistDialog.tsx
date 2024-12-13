@@ -83,7 +83,7 @@ const CatechistDialog: React.FC<CatechistDialogProps> = ({
       setFormData({
         ...formData,
         email: updatedCatechist.email,
-        fullName: updatedCatechist.fatherName,
+        fullName: updatedCatechist.fullName,
         gender: updatedCatechist.gender,
         phone: updatedCatechist.phone,
         dateOfBirth: updatedCatechist.dateOfBirth.split("T")[0],
@@ -339,7 +339,7 @@ const CatechistDialog: React.FC<CatechistDialogProps> = ({
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-      <DialogTitle>Thêm giáo lý viên</DialogTitle>
+      <DialogTitle>{updateMode ? "Cập nhật" : "Thêm"} giáo lý viên</DialogTitle>
       <DialogContent>
         <TextField
           label="Email"

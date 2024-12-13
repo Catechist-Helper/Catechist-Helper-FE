@@ -329,6 +329,7 @@ export default function CatechistRegistrationsTable() {
   if (!userLogin) {
     return <></>;
   }
+  console.log(rows);
 
   return (
     <Paper
