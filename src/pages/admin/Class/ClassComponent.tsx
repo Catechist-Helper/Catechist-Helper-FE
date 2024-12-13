@@ -287,9 +287,15 @@ export default function ClassComponent() {
   ) => {
     try {
       setLoading(true);
-      const page = paginationModel.page + 1;
-      const size = paginationModel.pageSize;
-
+      const firstRes = await classApi.getAllClasses(
+        selectedMajor && selectedMajor != "all" ? selectedMajor : "",
+        defaultGradeId
+          ? defaultGradeId
+          : selectedGrade && selectedGrade != "all"
+            ? selectedGrade
+            : "",
+        selectedPastoralYear
+      );
       const { data } = await classApi.getAllClasses(
         selectedMajor && selectedMajor != "all" ? selectedMajor : "",
         defaultGradeId
@@ -298,16 +304,18 @@ export default function ClassComponent() {
             ? selectedGrade
             : "",
         selectedPastoralYear,
-        page,
-        size
+        1,
+        firstRes.data.data.total
       );
 
-      const filterDataByClassIds =
+      let filterDataByClassIds =
         classIds && classIds.length > 0
           ? data.data.items.filter(
               (item) => classIds.findIndex((id) => id == item.id) >= 0
             )
           : data.data.items;
+
+      // filterDataByClassIds = [...filterDataByClassIds].sort((a,b)=>a.ma)
 
       const updatedRows = await Promise.all(
         filterDataByClassIds.map(async (classItem: any) => {
@@ -888,7 +896,7 @@ export default function ClassComponent() {
     } finally {
     }
   };
-
+  console.log(rows);
   return (
     <Paper sx={{ width: "calc(100% - 3.8rem)", position: "absolute" }}>
       <h1 className="text-center text-[2.2rem] bg-primary_color text-text_primary_light py-2 font-bold">
@@ -1076,7 +1084,7 @@ export default function ClassComponent() {
       <DataGrid
         rows={rows}
         columns={columns}
-        paginationMode="server"
+        paginationMode="client"
         rowCount={rowCount}
         loading={loading}
         paginationModel={paginationModel}
@@ -1084,7 +1092,7 @@ export default function ClassComponent() {
         pageSizeOptions={[8, 25, 50]}
         checkboxSelection
         onRowSelectionModelChange={handleSelectionChange}
-        rowSelectionModel={selectedRows} // Use selectedRows as controlled model
+        rowSelectionModel={selectedRows}
         sx={{
           border: 0,
         }}
