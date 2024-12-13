@@ -276,7 +276,8 @@ export default function RegistrationDataTable() {
       const { data } = await accountApi.getAllAccounts(1, 10000);
       setAccounts(
         data.data.items.filter(
-          (item: any) => item.role.roleName == RoleNameEnum.Catechist
+          (item: any) =>
+            !item.isDeleted && item.role.roleName == RoleNameEnum.Catechist
         )
       );
     } catch (error) {
@@ -354,9 +355,28 @@ export default function RegistrationDataTable() {
         return;
       }
 
-      await registrationApi.updateRegistration(registrationId, {
-        status: RegistrationStatus.Approved_Duyet_Don,
-      });
+      if (viewMode === "pending") {
+        await registrationApi.updateRegistration(registrationId, {
+          status: RegistrationStatus.Approved_Duyet_Don,
+        });
+      } else {
+        const regisChoose = rows.find(
+          (item) => item.id == selectedIds[0].toString()
+        );
+        if (regisChoose && regisChoose.note) {
+          await registrationApi.updateRegistration(registrationId, {
+            status: RegistrationStatus.Approved_Duyet_Don,
+            note: regisChoose.note.replace(
+              "Lý do từ chối",
+              "Lý do từ chối vòng duyệt đơn lần 1"
+            ),
+          });
+        } else {
+          await registrationApi.updateRegistration(registrationId, {
+            status: RegistrationStatus.Approved_Duyet_Don,
+          });
+        }
+      }
 
       await interviewApi.createInterview({
         registrationId,
@@ -367,11 +387,17 @@ export default function RegistrationDataTable() {
 
       let process = await interviewProcessApi.createInterviewProcess({
         registrationId: registrationId,
-        name: `${RegistrationProcessTitle.DUYET_DON}`,
+        name:
+          viewMode === "pending"
+            ? `${RegistrationProcessTitle.DUYET_DON}`
+            : `${RegistrationProcessTitle.DUYET_DON_LAI}`,
       });
 
       await interviewProcessApi.updateInterviewProcess(process.data.data.id, {
-        name: `${RegistrationProcessTitle.DUYET_DON}`,
+        name:
+          viewMode === "pending"
+            ? `${RegistrationProcessTitle.DUYET_DON}`
+            : `${RegistrationProcessTitle.DUYET_DON_LAI}`,
         status: RegistrationProcessStatus.Approved,
       });
 
@@ -385,6 +411,7 @@ export default function RegistrationDataTable() {
       fetchRegistrations(); // Refresh registration data after scheduling
       setSelectedIds([]);
       setMeetingTime("");
+      setInterviewTypeOption(-1);
     } catch (error: any) {
       console.error("Lỗi khi xếp lịch phỏng vấn:", error);
       if (error && error.message) {
@@ -521,7 +548,9 @@ export default function RegistrationDataTable() {
                     variant="outlined"
                     color="primary"
                   >
-                    Xếp lịch phỏng vấn
+                    {viewMode === "pending"
+                      ? "Xếp lịch phỏng vấn"
+                      : "Xếp lịch phỏng vấn lại"}
                   </Button>
 
                   {viewMode != "rejected" ? (
@@ -667,7 +696,6 @@ export default function RegistrationDataTable() {
       {/* Dialog để xếp lịch phỏng vấn */}
       <Dialog
         open={isModalOpen}
-        onClose={handleCloseModal}
         className="z-[1000] flex justify-center items-center"
         fullWidth
         maxWidth="md"
@@ -854,7 +882,6 @@ export default function RegistrationDataTable() {
 
       <Modal
         open={isModalOpenRejected}
-        onClose={handleCloseModalRejected}
         className="fixed z-[1000] flex justify-center items-center"
       >
         <div

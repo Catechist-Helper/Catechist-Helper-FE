@@ -162,17 +162,17 @@ const OrganizersDialog: React.FC<OrganizersDialogProps> = ({
         RoleEventName.TRUONG_BTC
     ).length;
 
-    const phoCount = organizers.filter(
-      (org) =>
-        roles.find((r) => r.id === org.roleEventId)?.name ===
-        RoleEventName.PHO_BTC
-    ).length;
+    // const phoCount = organizers.filter(
+    //   (org) =>
+    //     roles.find((r) => r.id === org.roleEventId)?.name ===
+    //     RoleEventName.PHO_BTC
+    // ).length;
 
-    const memberCount = organizers.filter(
-      (org) =>
-        roles.find((r) => r.id === org.roleEventId)?.name ===
-        RoleEventName.MEMBER_BTC
-    ).length;
+    // const memberCount = organizers.filter(
+    //   (org) =>
+    //     roles.find((r) => r.id === org.roleEventId)?.name ===
+    //     RoleEventName.MEMBER_BTC
+    // ).length;
 
     if (truongCount !== 1) {
       sweetAlert.alertWarning(
@@ -184,25 +184,25 @@ const OrganizersDialog: React.FC<OrganizersDialogProps> = ({
       return;
     }
 
-    if (phoCount < 1 || phoCount > 2) {
-      sweetAlert.alertWarning(
-        "Cần ít nhất 1 và tối đa 2 Phó Ban Tổ Chức!",
-        "",
-        1000,
-        22
-      );
-      return;
-    }
+    // if (phoCount < 1 || phoCount > 2) {
+    //   sweetAlert.alertWarning(
+    //     "Cần ít nhất 1 và tối đa 2 Phó Ban Tổ Chức!",
+    //     "",
+    //     1000,
+    //     22
+    //   );
+    //   return;
+    // }
 
-    if (memberCount < 1) {
-      sweetAlert.alertWarning(
-        "Cần ít nhất 1 Thành Viên Ban Tổ Chức!",
-        "",
-        1000,
-        22
-      );
-      return;
-    }
+    // if (memberCount < 1) {
+    //   sweetAlert.alertWarning(
+    //     "Cần ít nhất 1 Thành Viên Ban Tổ Chức!",
+    //     "",
+    //     1000,
+    //     22
+    //   );
+    //   return;
+    // }
 
     try {
       await memberApi.updateEventMember(eventId, organizers);

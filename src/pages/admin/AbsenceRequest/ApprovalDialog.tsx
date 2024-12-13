@@ -22,11 +22,12 @@ import catechistInClassApi from "../../../api/CatechistInClass";
 import { AssignReplacementRequest } from "../../../model/Request/AbsenceRequest";
 import sweetAlert from "../../../utils/sweetAlert";
 import { CatechistInSlotTypeEnumNumber } from "../../../enums/CatechistInSlot";
+import { GetAbsenceItemResponse } from "../../../model/Response/AbsenceRequest";
 
 interface ApprovalDialogProps {
   open: boolean;
   onClose: () => void;
-  absence: any; // The selected absence request
+  absence: GetAbsenceItemResponse; // The selected absence request
   approverId: string; // The ID of the approver (user logged in)
 }
 
@@ -68,13 +69,39 @@ const ApprovalDialog = ({
   // Handle phê duyệt đơn nghỉ phép
   const handleApproval = async () => {
     try {
-      // Gọi API phê duyệt đơn
-      await absenceApi.processAbsence({
-        requestId: absence.id,
-        approverId: approverId,
-        status: status,
-        comment: comment,
-      });
+      if (absence.status == AbsenceRequestStatus.Pending) {
+        if (
+          status != AbsenceRequestStatus.Approved &&
+          status != AbsenceRequestStatus.Rejected
+        ) {
+          sweetAlert.alertFailed(
+            "Vui lòng chọn kết quả phê duyệt nghỉ phép",
+            "",
+            1200,
+            26
+          );
+
+          return;
+        }
+
+        if (comment.trim() == "") {
+          sweetAlert.alertFailed(
+            "Vui lòng nhập ghi chú duyệt nghỉ phép",
+            "",
+            1200,
+            25
+          );
+
+          return;
+        }
+
+        await absenceApi.processAbsence({
+          requestId: absence.id,
+          approverId: approverId,
+          status: status,
+          comment: comment,
+        });
+      }
 
       // Gọi API chỉ định người thay thế
       if (selectedReplacementId) {
@@ -88,10 +115,19 @@ const ApprovalDialog = ({
 
       // Đóng dialog và thực hiện các hành động cần thiết sau khi phê duyệt và chỉ định người thay thế
       onClose();
-      sweetAlert.alertSuccess("Phê duyệt thành công", "", 1200, 22);
+      if (absence.status == AbsenceRequestStatus.Pending) {
+        sweetAlert.alertSuccess("Phê duyệt thành công", "", 1200, 22);
+      } else {
+        sweetAlert.alertSuccess(
+          "Chọn giáo lý viên thay thế thành công",
+          "",
+          1200,
+          26
+        );
+      }
     } catch (error) {
       console.error("Error processing absence:", error);
-      sweetAlert.alertFailed("Có lỗi khi phê duyệt", "", 1200, 22);
+      sweetAlert.alertFailed("Có lỗi xảy ra khi phê duyệt", "", 1200, 25);
     }
   };
 
@@ -121,44 +157,56 @@ const ApprovalDialog = ({
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
-      <DialogTitle>Phê duyệt đơn nghỉ phép</DialogTitle>
+      <DialogTitle>
+        {absence.status == AbsenceRequestStatus.Pending
+          ? "Phê duyệt đơn nghỉ phép"
+          : ""}
+      </DialogTitle>
       <DialogContent>
-        <label htmlFor="" className="ml-1">
-          Quyết định phê duyệt
-        </label>
-        <Select
-          value={status}
-          onChange={(e) => setStatus(Number(e.target.value))}
-          fullWidth
-          variant="outlined"
-          className={`${status == AbsenceRequestStatus.Approved ? "bg-success text-white" : ""}
+        {absence.status == AbsenceRequestStatus.Pending ? (
+          <>
+            <label htmlFor="" className="ml-1">
+              Quyết định phê duyệt
+            </label>
+            <Select
+              value={status}
+              onChange={(e) => setStatus(Number(e.target.value))}
+              fullWidth
+              variant="outlined"
+              className={`${status == AbsenceRequestStatus.Approved ? "bg-success text-white" : ""}
           ${status == AbsenceRequestStatus.Rejected ? "bg-danger text-white" : ""}`}
-        >
-          <MenuItem
-            value={AbsenceRequestStatus.Approved}
-            className="bg-success text-white py-3"
-          >
-            {AbsenceRequestStatusString.Approved}
-          </MenuItem>
-          <MenuItem
-            value={AbsenceRequestStatus.Rejected}
-            className="bg-danger text-white py-3"
-          >
-            {AbsenceRequestStatusString.Rejected}
-          </MenuItem>
-        </Select>
-        <TextField
-          value={comment}
-          onChange={(e) => setComment(e.target.value)}
-          label="Nhập ghi chú"
-          fullWidth
-          variant="outlined"
-          margin="normal"
-          multiline
-          rows={4}
-          style={{ margin: "0", marginTop: "25px" }}
-        />
-        {status == AbsenceRequestStatus.Approved ? (
+            >
+              <MenuItem
+                value={AbsenceRequestStatus.Approved}
+                className="bg-success text-white py-3"
+              >
+                {AbsenceRequestStatusString.Approved}
+              </MenuItem>
+              <MenuItem
+                value={AbsenceRequestStatus.Rejected}
+                className="bg-danger text-white py-3"
+              >
+                {AbsenceRequestStatusString.Rejected}
+              </MenuItem>
+            </Select>
+            <TextField
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              label="Nhập ghi chú"
+              fullWidth
+              variant="outlined"
+              margin="normal"
+              multiline
+              rows={4}
+              style={{ margin: "0", marginTop: "25px" }}
+            />
+          </>
+        ) : (
+          <></>
+        )}
+
+        {status == AbsenceRequestStatus.Approved ||
+        absence.status != AbsenceRequestStatus.Pending ? (
           <>
             <FormControl fullWidth margin="normal">
               <label htmlFor="" className="mt-1 ml-1">
@@ -178,7 +226,7 @@ const ApprovalDialog = ({
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose} color="secondary">
-          Hủy
+          Hủy bỏ
         </Button>
         <Button onClick={handleApproval} color="primary">
           Xác nhận

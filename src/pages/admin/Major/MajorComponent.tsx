@@ -166,10 +166,23 @@ export default function MajorComponent() {
         name: majorName,
         hierarchyLevel: majorLevel ?? 0,
       });
-      fetchMajors(); // Refresh after creation
+      sweetAlert.alertSuccess("Tạo ngành thành công!", "", 5000, 25);
+      fetchMajors();
       setOpenDialog(false);
-    } catch (error) {
-      sweetAlert.alertFailed("Có lỗi xảy ra khi tạo ngành!", "", 1000, 22);
+    } catch (error: any) {
+      if (
+        error.message &&
+        error.message.includes("Không thể cập nhật khi bắt đầu niên khóa mới")
+      ) {
+        sweetAlert.alertFailed(
+          "Không thể cập nhật khi bắt đầu niên khóa mới",
+          "",
+          5000,
+          25
+        );
+      } else {
+        sweetAlert.alertFailed("Có lỗi xảy ra khi tạo ngành", "", 5000, 25);
+      }
     }
   };
 
@@ -208,9 +221,10 @@ export default function MajorComponent() {
         return;
       }
 
-      majorApi.deleteMajor(selectedRows[0].toString());
+      await majorApi.deleteMajor(selectedRows[0].toString());
       sweetAlert.alertSuccess("Xoá thành công", "", 1000, 18);
     } catch (error) {
+      console.log("error", error);
       sweetAlert.alertFailed("Có lỗi xảy ra khi xóa", "", 1000, 20);
     } finally {
       handleRefresh();

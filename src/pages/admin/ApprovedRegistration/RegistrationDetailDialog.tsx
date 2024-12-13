@@ -99,7 +99,7 @@ const RegistrationDetailDialog: React.FC<RegistrationDetailDialogProps> = ({
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+    <Dialog open={open} maxWidth="sm" fullWidth>
       <DialogTitle
         style={{ fontSize: "1.5rem", fontWeight: "bolder", marginBottom: "0" }}
       >
@@ -140,7 +140,9 @@ const RegistrationDetailDialog: React.FC<RegistrationDetailDialogProps> = ({
                 {registration.note && (
                   <li>
                     <strong>Ghi chú:</strong>
-                    <div className="ml-6">{registration.note}</div>
+                    <div className="ml-6" style={{ whiteSpace: "pre-line" }}>
+                      {`${registration.note}`}
+                    </div>
                   </li>
                 )}
                 <li>

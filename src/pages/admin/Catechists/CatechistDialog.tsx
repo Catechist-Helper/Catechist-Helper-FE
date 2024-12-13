@@ -21,17 +21,22 @@ import {
 import Select from "react-select";
 import christianNamesApi from "../../../api/ChristianName";
 import levelApi from "../../../api/Level";
+import { CatechistItemResponse } from "../../../model/Response/Catechist";
 
 interface CatechistDialogProps {
   open: boolean;
   onClose: () => void;
   refresh: () => void;
+  updateMode?: boolean;
+  updatedCatechist?: CatechistItemResponse | null;
 }
 
 const CatechistDialog: React.FC<CatechistDialogProps> = ({
   open,
   onClose,
   refresh,
+  updateMode,
+  updatedCatechist,
 }) => {
   const [formData, setFormData] = useState({
     email: "",
@@ -53,11 +58,47 @@ const CatechistDialog: React.FC<CatechistDialogProps> = ({
   const [fullchristianNames, setFullChristianNames] = useState<any[]>([]);
   const [christianNames, setChristianNames] = useState<any[]>([]);
   const [levels, setLevels] = useState([]);
-  const [selectedChristianNameId, setSelectedChristianNameId] = useState(null);
-  const [selectedLevelId, setSelectedLevelId] = useState(null);
+  const [selectedChristianNameId, setSelectedChristianNameId] = useState<
+    string | null
+  >(null);
+  const [selectedLevelId, setSelectedLevelId] = useState<string | null>(null);
 
   useEffect(() => {
-    // Fetch Christian Names
+    if (updateMode && updatedCatechist) {
+      const fetchAvatar = async () => {
+        if (updatedCatechist.imageUrl && updatedCatechist.imageUrl != "") {
+          const imageResponse = await fetch(updatedCatechist.imageUrl);
+          const blob = await imageResponse.blob();
+          const file = new File([blob], "image.jpg", { type: blob.type });
+          setPreviewAvatar(URL.createObjectURL(file));
+          setFormData({
+            ...formData,
+            avatar: file,
+          });
+        }
+      };
+
+      fetchAvatar();
+
+      setFormData({
+        ...formData,
+        email: updatedCatechist.email,
+        fullName: updatedCatechist.fatherName,
+        gender: updatedCatechist.gender,
+        phone: updatedCatechist.phone,
+        dateOfBirth: updatedCatechist.dateOfBirth.split("T")[0],
+        birthPlace: updatedCatechist.birthPlace,
+        fatherName: updatedCatechist.fatherName,
+        fatherPhone: updatedCatechist.fatherPhone,
+        motherName: updatedCatechist.motherName,
+        motherPhone: updatedCatechist.motherPhone,
+        address: updatedCatechist.address,
+        qualification: updatedCatechist.qualification,
+      });
+
+      setSelectedChristianNameId(updatedCatechist.christianNameId);
+      setSelectedLevelId(updatedCatechist.levelId);
+    }
     const fetchChristianNames = async () => {
       try {
         const { data } = await christianNamesApi.getAllChristianNames();
@@ -153,6 +194,47 @@ const CatechistDialog: React.FC<CatechistDialogProps> = ({
     }
 
     try {
+      if (updateMode && updatedCatechist) {
+        let catechistFormData = new FormData();
+        if (formData.avatar) {
+          catechistFormData.append("ImageUrl", formData.avatar || "");
+        }
+        catechistFormData.append("FullName", formData.fullName);
+        catechistFormData.append("Gender", formData.gender);
+        catechistFormData.append("Phone", formData.phone);
+        catechistFormData.append("DateOfBirth", formData.dateOfBirth);
+        catechistFormData.append("BirthPlace", formData.birthPlace);
+        catechistFormData.append("FatherName", formData.fatherName);
+        catechistFormData.append("FatherPhone", formData.fatherPhone);
+        catechistFormData.append("MotherName", formData.motherName);
+        catechistFormData.append("MotherPhone", formData.motherPhone);
+        catechistFormData.append("Address", formData.address);
+        catechistFormData.append("Qualification", formData.qualification);
+        catechistFormData.append("IsTeaching", "true");
+        catechistFormData.append(
+          "ChristianNameId",
+          selectedChristianNameId ?? ""
+        );
+        catechistFormData.append("LevelId", selectedLevelId);
+        catechistFormData.append("AccountId", updatedCatechist.account.id);
+
+        const cateUpdateResponse = await catechistApi.updateCatechist(
+          updatedCatechist.id,
+          catechistFormData
+        );
+        console.log("Catechist created successfully:", cateUpdateResponse);
+
+        sweetAlert.alertSuccess(
+          "Cập nhật giáo lý viên thành công!",
+          "",
+          1000,
+          27
+        );
+        refresh();
+        onClose();
+        return;
+      }
+
       const generateRandomPassword = (): string => {
         const upperCaseChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         const lowerCaseChars = "abcdefghijklmnopqrstuvwxyz";
@@ -250,7 +332,7 @@ const CatechistDialog: React.FC<CatechistDialogProps> = ({
       refresh();
       onClose();
     } catch (error) {
-      console.error("Lỗi khi thêm giáo lý viên:", error);
+      console.error("Lỗi xảy ra:", error);
       sweetAlert.alertFailed("Không thể thêm giáo lý viên!", "", 1000, 22);
     }
   };
@@ -265,6 +347,7 @@ const CatechistDialog: React.FC<CatechistDialogProps> = ({
           onChange={(e) => handleInputChange("email", e.target.value)}
           fullWidth
           margin="normal"
+          disabled={updateMode}
         />
         <TextField
           label="Tên đầy đủ"
@@ -272,11 +355,13 @@ const CatechistDialog: React.FC<CatechistDialogProps> = ({
           onChange={(e) => handleInputChange("fullName", e.target.value)}
           fullWidth
           margin="normal"
+          disabled={updateMode}
         />
         <FormControl fullWidth margin="normal">
           <InputLabel>Giới tính</InputLabel>
           <MuiSelect
             value={formData.gender}
+            disabled={updateMode}
             onChange={(e) => {
               handleInputChange("gender", e.target.value);
               setChristianNames(
@@ -296,14 +381,8 @@ const CatechistDialog: React.FC<CatechistDialogProps> = ({
           </MuiSelect>
         </FormControl>
         <TextField
-          label="Số điện thoại"
-          value={formData.phone}
-          onChange={(e) => handleInputChange("phone", e.target.value)}
-          fullWidth
-          margin="normal"
-        />
-        <TextField
           label="Ngày sinh"
+          disabled={updateMode}
           type="date"
           value={formData.dateOfBirth}
           onChange={(e) => handleInputChange("dateOfBirth", e.target.value)}
@@ -313,8 +392,16 @@ const CatechistDialog: React.FC<CatechistDialogProps> = ({
         />
         <TextField
           label="Nơi sinh"
+          disabled={updateMode}
           value={formData.birthPlace}
           onChange={(e) => handleInputChange("birthPlace", e.target.value)}
+          fullWidth
+          margin="normal"
+        />
+        <TextField
+          label="Số điện thoại"
+          value={formData.phone}
+          onChange={(e) => handleInputChange("phone", e.target.value)}
           fullWidth
           margin="normal"
         />
@@ -382,20 +469,30 @@ const CatechistDialog: React.FC<CatechistDialogProps> = ({
         </div>
 
         {/* Select for Levels */}
-        <div className="mt-3">
-          <InputLabel>Cấp độ</InputLabel>
-          <Select
-            options={levels}
-            value={
-              levels.find((item: any) => item.value === selectedLevelId) || null
-            }
-            onChange={(selectedOption: any) =>
-              setSelectedLevelId(selectedOption ? selectedOption.value : null)
-            }
-            placeholder="Chọn Cấp độ"
-            isSearchable
-          />
-        </div>
+        {updateMode ? (
+          <></>
+        ) : (
+          <>
+            <div className="mt-3">
+              <InputLabel>Cấp độ</InputLabel>
+              <Select
+                options={levels}
+                value={
+                  levels.find((item: any) => item.value === selectedLevelId) ||
+                  null
+                }
+                onChange={(selectedOption: any) =>
+                  setSelectedLevelId(
+                    selectedOption ? selectedOption.value : null
+                  )
+                }
+                placeholder="Chọn Cấp độ"
+                isSearchable
+              />
+            </div>
+          </>
+        )}
+
         {/* Avatar */}
         <div className="my-3">
           {previewAvatar && (
@@ -417,7 +514,7 @@ const CatechistDialog: React.FC<CatechistDialogProps> = ({
             </div>
           )}
           <Button variant="contained" component="label" className="mt-2">
-            Tải ảnh
+            {updateMode ? <>Cập nhật ảnh</> : <>Tải ảnh</>}
             <input
               type="file"
               hidden
@@ -434,7 +531,7 @@ const CatechistDialog: React.FC<CatechistDialogProps> = ({
           Hủy
         </Button>
         <Button onClick={handleSubmit} color="primary">
-          Thêm
+          {updateMode ? <>Cập nhật </> : <>Thêm</>}
         </Button>
       </DialogActions>
     </Dialog>

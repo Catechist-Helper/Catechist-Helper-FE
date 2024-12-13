@@ -256,7 +256,8 @@ const CreateAccountAndCatechistDialog: React.FC<
       catechistFormData.append("LevelId", selectedLevelId || "");
       catechistFormData.append("AccountId", accountResponse.data.data.id);
 
-      await catechistApi.createCatechist(catechistFormData);
+      const catechistProfileRes =
+        await catechistApi.createCatechist(catechistFormData);
 
       sweetAlert.alertSuccess(
         "Tạo tài khoản và giáo lý viên thành công!",
@@ -267,7 +268,7 @@ const CreateAccountAndCatechistDialog: React.FC<
 
       await registrationApi.updateRegistration(registrationItem.id, {
         status: registrationItem.status,
-        note: "Đã tạo tài khoản",
+        note: "Đã tạo tài khoản: Mã " + catechistProfileRes.data.data.code,
       });
 
       let processRes = await interviewProcessApi.createInterviewProcess({
@@ -303,7 +304,7 @@ const CreateAccountAndCatechistDialog: React.FC<
           onChange={(e) => handleInputChange("email", e.target.value)}
           fullWidth
           margin="normal"
-          disabled
+          // disabled
           sx={{
             "& .MuiInputBase-input.Mui-disabled": {
               color: "green", // Màu chữ đen
@@ -321,7 +322,7 @@ const CreateAccountAndCatechistDialog: React.FC<
           onChange={(e) => handleInputChange("fullName", e.target.value)}
           fullWidth
           margin="normal"
-          disabled
+          // disabled
           sx={{
             "& .MuiInputBase-input.Mui-disabled": {
               color: "green", // Màu chữ đen
@@ -336,7 +337,7 @@ const CreateAccountAndCatechistDialog: React.FC<
         <FormControl
           fullWidth
           margin="normal"
-          disabled
+          // disabled
           sx={{
             "& .MuiInputBase-input.Mui-disabled": {
               color: "green", // Màu chữ đen
@@ -363,7 +364,7 @@ const CreateAccountAndCatechistDialog: React.FC<
           onChange={(e) => handleInputChange("phone", e.target.value)}
           fullWidth
           margin="normal"
-          disabled
+          // disabled
           sx={{
             "& .MuiInputBase-input.Mui-disabled": {
               color: "green", // Màu chữ đen
@@ -382,7 +383,7 @@ const CreateAccountAndCatechistDialog: React.FC<
           onChange={(e) => handleInputChange("dateOfBirth", e.target.value)}
           fullWidth
           margin="normal"
-          disabled
+          // disabled
           sx={{
             "& .MuiInputBase-input.Mui-disabled": {
               color: "green", // Màu chữ đen

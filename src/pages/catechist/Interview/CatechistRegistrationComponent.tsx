@@ -225,11 +225,12 @@ export default function CatechistRegistrationsTable() {
           : "";
       },
     },
-
     {
       field: "note",
       headerName: "Ghi chú",
       width: 200,
+      renderCell: (params) =>
+        params.value ? params.value.replace("\n", ".") : "",
     },
     // {
     //   field: "interviews",
@@ -342,7 +343,7 @@ export default function CatechistRegistrationsTable() {
         ${currentFilter == "accepted" ? "bg-success text-text_primary_light" : ""} 
         ${currentFilter == "rejected" ? "bg-danger text-text_primary_light" : ""}`}
       >
-        {currentFilter == "waiting" ? "Danh sách phỏng vấn ứng viên" : ""}
+        {currentFilter == "waiting" ? "Danh sách ứng viên chờ phỏng vấn" : ""}
         {currentFilter == "accepted" ? "Danh sách ứng viên đậu phỏng vấn" : ""}
         {currentFilter == "rejected" ? "Danh sách ứng viên bị từ chối" : ""}
       </h1>

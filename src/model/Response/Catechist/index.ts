@@ -52,6 +52,8 @@ export type CatechistItemResponse = {
   imageUrl: string;
   fatherName: string;
   motherName: string;
+  fatherPhone: string;
+  motherPhone: string;
   note: string;
   email: string;
   levelName: string;
