@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Container,
   Typography,
@@ -6,7 +5,6 @@ import {
   Card,
   CardContent,
   Stack,
-  Divider,
 } from "@mui/material";
 import EmailIcon from "@mui/icons-material/Email";
 import PhoneIcon from "@mui/icons-material/Phone";
