@@ -23,7 +23,7 @@ import classApi from "../../../api/Class"; // Import API Class
 import majorApi from "../../../api/Major"; // Import API Major
 import gradeApi from "../../../api/Grade"; // Import API Grade
 import timetableApi from "../../../api/Timetable";
-import catechistInClassApi from "../../../api/CatchistInClass";
+import catechistInClassApi from "../../../api/CatechistInClass";
 import pastoralYearsApi from "../../../api/PastoralYear"; // Import API PastoralYears
 import roomApi from "../../../api/Room"; // Import API Room
 import viVNGridTranslation from "../../../locale/MUITable";
@@ -31,10 +31,20 @@ import sweetAlert from "../../../utils/sweetAlert";
 import { CreateCatechistInClassRequest } from "../../../model/Request/CatechistInClass";
 import { CreateSlotRequest } from "../../../model/Request/Slot";
 import { formatDate } from "../../../utils/formatDate";
-import { ClassResponse } from "../../../model/Response/Class";
+import {
+  CatechistSlotResponse,
+  ClassResponse,
+} from "../../../model/Response/Class";
 import useAppContext from "../../../hooks/useAppContext";
 import FileSaver from "file-saver";
 import { ClassStatusEnum, ClassStatusString } from "../../../enums/Class";
+import {
+  CatechistInSlotTypeEnum,
+  CatechistInSlotTypeEnumString,
+} from "../../../enums/CatechistInSlot";
+import AdminRequestLeaveDialog from "./AdminRequestLeaveDialog";
+import absenceApi from "../../../api/AbsenceRequest";
+import CreateUpdateClassDialog from "./CreateUpdateClassDialog";
 
 export default function ClassComponent() {
   const location = useLocation();
@@ -59,12 +69,18 @@ export default function ClassComponent() {
   const [selectedClass, setSelectedClass] = useState<ClassResponse | null>(
     null
   );
+  const [openLeaveDialog, setOpenLeaveDialog] = useState<boolean>(false);
 
   // State for adding timetable
   const [openTimetableDialog, setOpenTimetableDialog] =
     useState<boolean>(false);
   const [file, setFile] = useState<File | null>(null); // State to store the uploaded file
   const { enableLoading, disableLoading } = useAppContext();
+  const [slotAbsenceId, setSlotAbsenceId] = useState<string>("");
+  const [absenceCatechistOptions, setAbsenceCatechistOptions] = useState<
+    CatechistSlotResponse[]
+  >([]);
+  const [absenceDate, setAbsenceDate] = useState<string>("");
 
   // States for slot dialog
   const [openSlotDialog, setOpenSlotDialog] = useState<boolean>(false);
@@ -90,6 +106,24 @@ export default function ClassComponent() {
   const [openSlotsDialog, setOpenSlotsDialog] = useState<boolean>(false);
   const [slots, setSlots] = useState<any[]>([]); // Slots list
   const [selectedClassView, setSelectedClassView] = useState<any>(null); // Loading state for slots
+  const [openDialogCreateUpdateClass, setOpenDialogCreateUpdateClass] =
+    useState<boolean>(false);
+  const [openDialogUpdateClassMode, setOpenDialogUpdateClassMode] =
+    useState<boolean>(false);
+
+  console.log(pastoralYears);
+  useEffect(() => {
+    if (!openDialogCreateUpdateClass) {
+      setOpenDialogUpdateClassMode(false);
+    }
+  }, [openDialogCreateUpdateClass]);
+
+  const handleOpenDialogCreateUpdateClass = (update?: boolean) => {
+    if (update) {
+      setOpenDialogUpdateClassMode(true);
+    }
+    setOpenDialogCreateUpdateClass(true);
+  };
 
   useEffect(() => {
     fetchMajors();
@@ -100,9 +134,19 @@ export default function ClassComponent() {
       try {
         await fetchPastoralYears();
         if (location.state) {
-          const { majorId, gradeId } = location.state;
-          setSelectedMajor(majorId);
-          await fetchGrades(majorId, gradeId);
+          if (location.state.gradeId) {
+            const { majorId, gradeId } = location.state;
+            setSelectedMajor(majorId);
+            await fetchGrades(majorId, gradeId);
+          } else if (location.state.classIds) {
+            console.log("location.state.classIds", location.state.classIds);
+            enableLoading();
+            setTimeout(() => {
+              fetchClasses(undefined, undefined, location.state.classIds);
+              disableLoading();
+            }, 1200);
+            setSelectedMajor("all");
+          }
         } else {
           setSelectedMajor("all");
         }
@@ -257,13 +301,20 @@ export default function ClassComponent() {
 
   const fetchClasses = async (
     changeInitDate?: boolean,
-    defaultGradeId?: string
+    defaultGradeId?: string,
+    classIds?: string[]
   ) => {
     try {
       setLoading(true);
-      const page = paginationModel.page + 1;
-      const size = paginationModel.pageSize;
-
+      const firstRes = await classApi.getAllClasses(
+        selectedMajor && selectedMajor != "all" ? selectedMajor : "",
+        defaultGradeId
+          ? defaultGradeId
+          : selectedGrade && selectedGrade != "all"
+            ? selectedGrade
+            : "",
+        selectedPastoralYear
+      );
       const { data } = await classApi.getAllClasses(
         selectedMajor && selectedMajor != "all" ? selectedMajor : "",
         defaultGradeId
@@ -272,12 +323,21 @@ export default function ClassComponent() {
             ? selectedGrade
             : "",
         selectedPastoralYear,
-        page,
-        size
+        1,
+        firstRes.data.data.total
       );
 
+      let filterDataByClassIds =
+        classIds && classIds.length > 0
+          ? data.data.items.filter(
+              (item) => classIds.findIndex((id) => id == item.id) >= 0
+            )
+          : data.data.items;
+
+      // filterDataByClassIds = [...filterDataByClassIds].sort((a,b)=>a.ma)
+
       const updatedRows = await Promise.all(
-        data.data.items.map(async (classItem: any) => {
+        filterDataByClassIds.map(async (classItem: any) => {
           const slotCount = await fetchSlotCountOfClass(classItem.id);
           return {
             ...classItem,
@@ -287,7 +347,7 @@ export default function ClassComponent() {
       );
 
       setRows(updatedRows);
-      setRowCount(data.data.total);
+      setRowCount(updatedRows.length);
     } catch (error) {
       console.error("Error loading classes:", error);
       sweetAlert.alertFailed(
@@ -482,12 +542,32 @@ export default function ClassComponent() {
         selectedPastoralYear
       );
 
-      const fetchItems: any[] = [];
-      [...data.data.items].forEach((item) => {
-        fetchItems.push({ ...item, id: item.catechist.id });
+      let fetchItems: any[] = []; // Đảm bảo mảng là extensible
+
+      const processItems = async () => {
+        const promises = [...data.data.items].map(async (item) => {
+          const remainingClassHavingSlots =
+            await catechistInClassApi.getClassesRemainingSlotsOfCatechist(
+              item.catechist.id
+            );
+
+          if (remainingClassHavingSlots.data.data.length <= 0) {
+            // Dùng concat thay vì push để tránh lỗi
+            fetchItems = fetchItems.concat({ ...item, id: item.catechist.id });
+          }
+        });
+
+        // Chờ cho tất cả các promise hoàn thành
+        await Promise.all(promises);
+      };
+
+      // Gọi hàm xử lý
+      processItems().then(() => {
+        // console.log(fetchItems);
+        setCatechists(fetchItems);
       });
 
-      setCatechists(fetchItems);
+      // setCatechists(fetchItems);
     } catch (error) {
       console.error("Error loading catechists:", error);
     }
@@ -507,33 +587,50 @@ export default function ClassComponent() {
           catechistId: catechist.id,
           isMain: catechist.id === mainCatechistId,
         }));
-        classApi.updateCatechitsOfClass(selectedClass ? selectedClass.id : "", {
-          catechists: updateCates,
-        });
+        const updateRes = await classApi.updateCatechitsOfClass(
+          selectedClass ? selectedClass.id : "",
+          {
+            catechists: updateCates,
+          }
+        );
+
         console.log(selectedClass ? selectedClass.id : "", {
           catechists: updateCates,
         });
-        setTimeout(() => {
-          setOpenSlotDialog(false);
+
+        // setTimeout(() => {
+        if (updateRes.data.statusCode.toString().startsWith("2")) {
           sweetAlert.alertSuccess(
             "Cập nhật tiết học thành công!",
             "",
             1000,
             22
           );
+          setOpenSlotDialog(false);
           handleViewSlots(selectedClass ? selectedClass.id : "");
-        }, 3000);
-      } catch (error) {
-        sweetAlert.alertFailed(
-          "Có lỗi xảy ra khi cập nhật tiết học!",
-          "",
-          1000,
-          22
-        );
+        }
+        // }, 3000);
+      } catch (error: any) {
+        if (
+          error.message &&
+          error.message.includes("Không thể cập nhật khi bắt đầu niên khóa mới")
+        ) {
+          sweetAlert.alertFailed(
+            "Không thể cập nhật khi bắt đầu niên khóa mới",
+            "",
+            5000,
+            25
+          );
+        } else {
+          sweetAlert.alertFailed(
+            "Có lỗi xảy ra khi cập nhật tiết học!",
+            "",
+            1000,
+            22
+          );
+        }
       } finally {
-        setTimeout(() => {
-          disableLoading();
-        }, 3000);
+        disableLoading();
       }
 
       return;
@@ -670,6 +767,12 @@ export default function ClassComponent() {
       renderCell: (params) => params.row.catechist.fullName,
     },
     {
+      field: "code",
+      headerName: "Mã giáo lý viên",
+      width: 200,
+      renderCell: (params) => params.row.catechist.code,
+    },
+    {
       field: "gender",
       headerName: "Giới tính",
       width: 100,
@@ -725,6 +828,12 @@ export default function ClassComponent() {
       headerName: "Tên giáo lý viên",
       width: 200,
       renderCell: (params) => params.row.catechist.fullName,
+    },
+    {
+      field: "code",
+      headerName: "Mã giáo lý viên",
+      width: 200,
+      renderCell: (params) => params.row.catechist.code,
     },
     {
       field: "gender",
@@ -784,6 +893,68 @@ export default function ClassComponent() {
     setSelectedRows(newSelectionModel);
   };
 
+  const handleLeaveRequestSubmit = async (
+    catechistId: string,
+    reason: string,
+    slotId: string
+  ) => {
+    try {
+      absenceApi.submitAbsence({
+        catechistId: catechistId,
+        reason: reason,
+        slotId: slotId,
+      });
+      sweetAlert.alertSuccess("Tạo đơn nghỉ phép thành công", "", 1000, 22);
+      setOpenLeaveDialog(false);
+      // if (classViewSlotId != "") {
+      //   fetchSlotForViewing(classViewSlotId);
+      // }
+    } catch (error) {
+      console.error("Error loading slots:", error);
+      sweetAlert.alertFailed("Lỗi khi tạo đơn nghỉ phép", "", 1000, 22);
+    } finally {
+    }
+  };
+
+  const handleDeleteClass = async () => {
+    try {
+      enableLoading();
+      const deletedClass = rows.find(
+        (item) => item.id == selectedRows[0].toString()
+      );
+
+      const confirm = await sweetAlert.confirm(
+        `Xác nhận sẽ xóa lớp ${deletedClass.name}`,
+        "",
+        undefined,
+        undefined,
+        "question"
+      );
+      if (!confirm) {
+        return;
+      }
+      await classApi.deleteClass(deletedClass.id);
+      sweetAlert.alertSuccess("Xoá thành công", "", 5000, 22);
+      fetchClasses();
+    } catch (error: any) {
+      console.error("Error loading slots:", error);
+      if (error && error.message) {
+        if (error.message.includes("Không thể xóa vì đã có slot")) {
+          sweetAlert.alertFailed(
+            "Có lỗi khi xóa lớp",
+            "Không thể xóa lớp này vì có dữ liệu bên trong lớp",
+            5000,
+            25
+          );
+        }
+      } else {
+        sweetAlert.alertFailed("Có lỗi khi xóa lớp", "", 5000, 22);
+      }
+    } finally {
+      disableLoading();
+    }
+  };
+
   return (
     <Paper sx={{ width: "calc(100% - 3.8rem)", position: "absolute" }}>
       <h1 className="text-center text-[2.2rem] bg-primary_color text-text_primary_light py-2 font-bold">
@@ -791,10 +962,25 @@ export default function ClassComponent() {
       </h1>
 
       <div className="my-2 flex justify-between mx-3">
-        <div className="flex items-center justify-between w-full">
+        <div className="flex items-center justify-between w-full mt-1">
           <div className="flex gap-x-[5px]">
             {/* Select for Pastoral Year */}
-            <FormControl fullWidth sx={{ minWidth: 180 }}>
+            <FormControl
+              fullWidth
+              sx={{
+                minWidth: 180,
+                marginTop: 1.5,
+                "& .MuiInputLabel-root": {
+                  transform: "translateY(-20px)",
+                  fontSize: "14px",
+                  marginLeft: "8px",
+                },
+                "& .MuiSelect-select": {
+                  paddingTop: "10px",
+                  paddingBottom: "10px",
+                },
+              }}
+            >
               <InputLabel>Chọn Niên Khóa</InputLabel>
               <Select
                 value={selectedPastoralYear}
@@ -815,7 +1001,22 @@ export default function ClassComponent() {
             </FormControl>
 
             {/* Select for Major */}
-            <FormControl fullWidth sx={{ minWidth: 180 }}>
+            <FormControl
+              fullWidth
+              sx={{
+                minWidth: 180,
+                marginTop: 1.5,
+                "& .MuiInputLabel-root": {
+                  transform: "translateY(-20px)",
+                  fontSize: "14px",
+                  marginLeft: "8px",
+                },
+                "& .MuiSelect-select": {
+                  paddingTop: "10px",
+                  paddingBottom: "10px",
+                },
+              }}
+            >
               <InputLabel>Chọn Ngành</InputLabel>
               <Select
                 value={selectedMajor}
@@ -837,7 +1038,22 @@ export default function ClassComponent() {
             </FormControl>
 
             {selectedMajor && selectedMajor != "all" && (
-              <FormControl fullWidth sx={{ minWidth: 180 }}>
+              <FormControl
+                fullWidth
+                sx={{
+                  minWidth: 180,
+                  marginTop: 1.5,
+                  "& .MuiInputLabel-root": {
+                    transform: "translateY(-20px)",
+                    fontSize: "14px",
+                    marginLeft: "8px",
+                  },
+                  "& .MuiSelect-select": {
+                    paddingTop: "10px",
+                    paddingBottom: "10px",
+                  },
+                }}
+              >
                 <InputLabel>Chọn Khối</InputLabel>
                 <Select
                   value={selectedGrade}
@@ -857,6 +1073,48 @@ export default function ClassComponent() {
             )}
           </div>
           <div className="flex gap-x-[5px]">
+            {selectedRows.length === 1 ? (
+              <>
+                <div>
+                  <Button
+                    onClick={() => {
+                      handleDeleteClass();
+                    }}
+                    variant="contained"
+                    color="error"
+                    style={{ marginBottom: "16px" }}
+                  >
+                    Xóa
+                  </Button>
+                </div>
+                <div>
+                  <Button
+                    onClick={() => {
+                      handleOpenDialogCreateUpdateClass(true);
+                    }} // Mở dialog thêm dữ liệu năm học mới
+                    variant="contained"
+                    color="warning"
+                    style={{ marginBottom: "16px" }}
+                  >
+                    Cập nhật
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <></>
+            )}
+            <div>
+              <Button
+                onClick={() => {
+                  handleOpenDialogCreateUpdateClass();
+                }} // Mở dialog thêm dữ liệu năm học mới
+                variant="contained"
+                color="primary"
+                style={{ marginBottom: "16px" }}
+              >
+                Tạo mới
+              </Button>
+            </div>
             <div>
               <Button
                 onClick={handleOpenTimetableDialog} // Mở dialog thêm dữ liệu năm học mới
@@ -926,21 +1184,49 @@ export default function ClassComponent() {
       <DataGrid
         rows={rows}
         columns={columns}
-        paginationMode="server"
+        paginationMode="client"
         rowCount={rowCount}
         loading={loading}
         paginationModel={paginationModel}
         onPaginationModelChange={(newModel) => setPaginationModel(newModel)}
         pageSizeOptions={[8, 25, 50]}
-        checkboxSelection
+        onRowClick={() => {}}
         onRowSelectionModelChange={handleSelectionChange}
-        rowSelectionModel={selectedRows} // Use selectedRows as controlled model
+        rowSelectionModel={selectedRows}
         sx={{
           border: 0,
         }}
         localeText={viVNGridTranslation}
+        checkboxSelection
         disableRowSelectionOnClick
+        disableMultipleRowSelection
       />
+
+      {openDialogCreateUpdateClass ? (
+        <>
+          <CreateUpdateClassDialog
+            open={openDialogCreateUpdateClass}
+            onClose={() => {
+              setOpenDialogCreateUpdateClass(false);
+            }}
+            pastoralYearId={selectedPastoralYear}
+            pastoralYearName={
+              pastoralYears.find((item) => item.id == selectedPastoralYear).name
+            }
+            classData={
+              selectedRows.length === 1
+                ? rows.find((item) => item.id == selectedRows[0].toString())
+                : undefined
+            }
+            updateMode={openDialogUpdateClassMode}
+            refresh={() => {
+              fetchClasses();
+            }}
+          />
+        </>
+      ) : (
+        <></>
+      )}
 
       {/* Dialog for creating Slot */}
       <Dialog
@@ -1149,7 +1435,18 @@ export default function ClassComponent() {
                 field: "date",
                 headerName: "Ngày học",
                 width: 130,
-                renderCell: (params) => formatDate.DD_MM_YYYY(params.row.date),
+                renderCell: (params) => {
+                  return (
+                    <div>
+                      <span
+                        className={`rounded-md px-2 py-1
+                      ${new Date().getTime() - new Date(params.row.date).getTime() >= 0 ? "bg-yellow-300" : ""}`}
+                      >
+                        {formatDate.DD_MM_YYYY(params.row.date)}
+                      </span>
+                    </div>
+                  );
+                },
               },
               {
                 field: "time",
@@ -1163,18 +1460,61 @@ export default function ClassComponent() {
               {
                 field: "catechists",
                 headerName: "Giáo lý viên",
-                width: 300,
+                width: 500,
                 renderCell: (params) => {
+                  const priority: Record<CatechistInSlotTypeEnum, number> = {
+                    [CatechistInSlotTypeEnum.Main]: 1,
+                    [CatechistInSlotTypeEnum.Assistant]: 2,
+                    [CatechistInSlotTypeEnum.Substitute]: 3,
+                  };
+
                   return params.row.catechistInSlots
                     ? params.row.catechistInSlots
+                        .sort(
+                          (
+                            a: { type: CatechistInSlotTypeEnum },
+                            b: { type: CatechistInSlotTypeEnum }
+                          ) => priority[a.type] - priority[b.type]
+                        )
                         .map((item: any) =>
                           item.catechist
-                            ? item.catechist.fullName +
-                              (item.type == "Main" ? " (Chính)" : "")
+                            ? item.catechist.code +
+                              ` (${
+                                CatechistInSlotTypeEnumString[
+                                  CatechistInSlotTypeEnum[
+                                    item.type as keyof typeof CatechistInSlotTypeEnum
+                                  ]
+                                ]
+                              })`
                             : ""
                         )
                         .join(", ")
                     : "";
+                },
+              },
+              {
+                field: "action",
+                headerName: "Hành động",
+                width: 250,
+                renderCell: (params: any) => {
+                  return new Date(params.row.date).getTime() -
+                    new Date().getTime() >=
+                    0 ? (
+                    <Button
+                      color="secondary"
+                      variant="outlined"
+                      onClick={() => {
+                        setOpenLeaveDialog(true);
+                        setSlotAbsenceId(params.row.id);
+                        setAbsenceCatechistOptions(params.row.catechistInSlots);
+                        setAbsenceDate(params.row.date);
+                      }}
+                    >
+                      Tạo nghỉ phép
+                    </Button>
+                  ) : (
+                    <></>
+                  );
                 },
               },
               // {
@@ -1191,6 +1531,14 @@ export default function ClassComponent() {
             localeText={viVNGridTranslation}
           />
         </div>
+        <AdminRequestLeaveDialog
+          open={openLeaveDialog}
+          slotId={slotAbsenceId}
+          date={absenceDate}
+          catechists={absenceCatechistOptions}
+          onClose={() => setOpenLeaveDialog(false)} // Đóng dialog
+          onSubmit={handleLeaveRequestSubmit} // Hàm xử lý khi gửi yêu cầu nghỉ phép
+        />
       </Dialog>
 
       {/* Dialog for uploading timetable */}

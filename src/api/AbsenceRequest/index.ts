@@ -25,9 +25,10 @@ const assignReplacement = (data: AssignReplacementRequest) => {
 };
 
 // 4. GET: Lấy danh sách yêu cầu vắng mặt
-const getAbsences = (status?: number) => {
+const getAbsences = (status?: number, cId?: string) => {
   const params = {
     ...(status !== undefined && { status }),
+    ...(cId !== undefined && { cId }),
   };
   return request.get<AbsenceResponse<GetAbsenceItemResponse[]>>(`${ROOT_API}`, { params });
 };

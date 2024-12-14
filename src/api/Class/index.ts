@@ -51,10 +51,39 @@ const updateCatechitsOfClass = (classId: string, data: CreateSlotRequest) => {
   return request.patch<BasicResponse<boolean>>(`${ROOT_CLASS}/${classId}/catechists`, data);
 };
 
+const createClass = (data: {
+  name: string,
+  numberOfCatechist: number,
+  note: string,
+  pastoralYearId: string,
+  gradeId: string
+}) => {
+  return request.post<BasicResponse<boolean>>(`${ROOT_CLASS}`, data);
+};
+
+const updateClass = (classId:string, data: {
+  name: string,
+  numberOfCatechist: number,
+  note: string,
+  pastoralYearId: string,
+  gradeId: string
+}) => {
+  return request.put<BasicResponse<boolean>>(`${ROOT_CLASS}/${classId}`, data);
+};
+
+const deleteClass = (classId:string) => {
+  return request.delete<BasicResponse<boolean>>(`${ROOT_CLASS}/${classId}`);
+};
+
 const classApi = {
   getAllClasses,
   getCatechistsOfClass,
-  getSlotsOfClass,updateRoomOfClass,updateCatechitsOfClass
+  getSlotsOfClass,
+  updateRoomOfClass,
+  updateCatechitsOfClass,
+  createClass,
+  updateClass,
+  deleteClass
 };
 
 export default classApi;

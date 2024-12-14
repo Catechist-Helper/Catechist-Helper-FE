@@ -8,12 +8,15 @@ import {
 import Paper from "@mui/material/Paper";
 import {
   Modal,
+  Dialog,
   Button,
   Select as MuiSelect,
   MenuItem,
   TextField,
   FormControl,
-  InputLabel,
+  RadioGroup,
+  FormControlLabel,
+  Radio,
 } from "@mui/material";
 import viVNGridTranslation from "../../../locale/MUITable";
 import RegistrationDetailDialog from "./RegistrationDetailDialog";
@@ -36,6 +39,7 @@ import {
 } from "../../../enums/RegistrationProcess";
 import { RoleNameEnum } from "../../../enums/RoleEnum";
 import CkEditor from "../../../components/ckeditor5/CkEditor";
+import { RecruitersByMeetingTimeItemResponse } from "../../../model/Response/Account";
 
 // import { RegistrationProcessTitle } from "../../../enums/RegistrationProcess";
 
@@ -76,6 +80,26 @@ const columns: GridColDef[] = [
     },
   },
   {
+    field: "interviewType",
+    headerName: "Hình thức",
+    width: 100,
+    renderCell: (params) => {
+      return params.row.interview && params.row.interview.interviewType == 1 ? (
+        <span className="text-white bg-success rounded-xl py-1 px-2">
+          Online
+        </span>
+      ) : (
+        <span className="text-white bg-black rounded-xl py-1 px-2">
+          Trực tiếp
+        </span>
+      );
+    },
+    sortComparator: (a, b) => {
+      if (!a || !b) return 0;
+      return dayjs(a).isBefore(dayjs(b)) ? -1 : 1; // Sắp xếp theo ngày giờ từ sớm tới muộn
+    },
+  },
+  {
     field: "interview.recruiters",
     headerName: "Người phỏng vấn",
     width: 200,
@@ -87,11 +111,12 @@ const columns: GridColDef[] = [
         : "";
     },
   },
-
   {
     field: "note",
     headerName: "Ghi chú",
     width: 200,
+    renderCell: (params) =>
+      params.value ? params.value.replace("\n", ".") : "",
   },
   // {
   //   field: "interviews",
@@ -171,6 +196,8 @@ export default function ApprovedRegistrationsTable() {
   const [recruiters, setRecruiters] = useState<any[]>([]); // Lưu danh sách recruiter
   const [updatedInterviewReason, setUpdatedInterviewReason] =
     useState<string>("");
+  const [interviewTypeOption, setInterviewTypeOption] = useState<number>(-1);
+
   // const [deletedInterviewReason, setDeletedInterviewReason] =
   //   useState<string>("");
 
@@ -181,6 +208,13 @@ export default function ApprovedRegistrationsTable() {
   const [openDialog, setOpenDialog] = useState<boolean>(false);
   const [openDialogRegisDetail, setOpenDialogRegisDetail] =
     useState<boolean>(false);
+  const [deleteMode, setDeleteMode] = useState<boolean>(false);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [accounts, setAccounts] = useState<any[]>([]);
+  const [selectedAccounts, setSelectedAccounts] = useState<any[]>([]);
+  const [previewAccounts, setPreviewAccounts] = useState<
+    RecruitersByMeetingTimeItemResponse[]
+  >([]);
 
   // Lấy danh sách accounts (recruiters)
   const fetchRecruiters = async () => {
@@ -188,7 +222,8 @@ export default function ApprovedRegistrationsTable() {
       const { data } = await accountApi.getAllAccounts(1, 10000);
       setRecruiters(
         data.data.items.filter(
-          (item: any) => item.role.roleName == RoleNameEnum.Catechist
+          (item: any) =>
+            !item.isDeleted && item.role.roleName == RoleNameEnum.Catechist
         )
       );
     } catch (error) {
@@ -197,7 +232,9 @@ export default function ApprovedRegistrationsTable() {
   };
 
   // Fetch các đơn đã duyệt dựa trên trạng thái và lọc theo ngày
-  const fetchApprovedRegistrations = async () => {
+  const fetchApprovedRegistrations = async (
+    deleteModeOn?: boolean | string
+  ) => {
     try {
       setLoading(true);
 
@@ -215,51 +252,64 @@ export default function ApprovedRegistrationsTable() {
           break;
       }
 
-      // Xác định ngày bắt đầu và kết thúc (lọc theo ngày nếu có selectedDate)
-      const startDate = selectedDate ? selectedDate : undefined;
-      const endDate = selectedDate ? selectedDate : undefined;
-
       // Gọi API getAllRegistrations với các tham số
       const firstResponse = await registrationApi.getAllRegistrations(
         undefined,
         undefined,
-        status,
-        1, // Sử dụng paginationModel.page + 1 vì API có thể sử dụng số trang bắt đầu từ 1
-        2, // Sử dụng kích thước trang từ paginationModel
-        startDate,
-        endDate
+        status
       );
 
       const { data } = await registrationApi.getAllRegistrations(
         undefined,
         undefined,
         status,
-        1, // Sử dụng paginationModel.page + 1 vì API có thể sử dụng số trang bắt đầu từ 1
-        firstResponse.data.data.total, // Sử dụng kích thước trang từ paginationModel
-        startDate,
-        endDate
+        1,
+        firstResponse.data.data.total
       );
 
-      // Cập nhật tổng số hàng
-      setRowCount(data.data.total); // Cập nhật tổng số hàng từ API
-      setRows(
-        data.data.items.sort(
-          (a: RegistrationItemResponse, b: RegistrationItemResponse) => {
-            if (
-              a.interview &&
-              a.interview.meetingTime &&
-              b.interview &&
-              b.interview.meetingTime
-            ) {
-              return (
-                new Date(a.interview.meetingTime).getTime() -
-                new Date(b.interview.meetingTime).getTime()
-              );
-            }
-            return -1;
+      let finalData = data.data.items
+        .sort((a: RegistrationItemResponse, b: RegistrationItemResponse) => {
+          if (
+            a.interview &&
+            a.interview.meetingTime &&
+            b.interview &&
+            b.interview.meetingTime
+          ) {
+            return (
+              new Date(a.interview.meetingTime).getTime() -
+              new Date(b.interview.meetingTime).getTime()
+            );
           }
-        )
-      ); // Cập nhật hàng được trả về từ API
+          return -1;
+        })
+        .filter((item: RegistrationItemResponse) => {
+          if (
+            selectedDate &&
+            selectedDate != "" &&
+            item.interview &&
+            item.interview.meetingTime
+          ) {
+            return (
+              formatDate.DD_MM_YYYY(item.interview.meetingTime) ==
+              formatDate.DD_MM_YYYY(selectedDate)
+            );
+          }
+          return true;
+        });
+
+      finalData =
+        (deleteModeOn === true || deleteMode) && deleteModeOn != "false"
+          ? [...finalData].filter(
+              (item) =>
+                Number(formatDate.YYYY(item.createdAt)) <
+                Number(
+                  formatDate.YYYY(formatDate.getISODateInVietnamTimeZone())
+                )
+            )
+          : [...finalData];
+
+      setRowCount(finalData.length);
+      setRows(finalData);
     } catch (error) {
       console.error("Lỗi khi tải danh sách registrations:", error);
     } finally {
@@ -274,13 +324,6 @@ export default function ApprovedRegistrationsTable() {
   useEffect(() => {
     handleRefresh();
   }, [openDialog]);
-
-  const element = document.querySelector<HTMLElement>(
-    ".MuiTablePagination-selectLabel"
-  );
-  if (element) {
-    element.innerHTML = "Số hàng mỗi trang";
-  }
 
   // Gọi API khi component được render
   useEffect(() => {
@@ -461,12 +504,6 @@ export default function ApprovedRegistrationsTable() {
       if (selectedRegistration) {
         const interviewId = selectedRegistration.interview?.id;
         if (interviewId) {
-          console.log({
-            meetingTime,
-            note: selectedRegistration.interview.note,
-            isPassed: selectedRegistration.interview.isPassed,
-            reason: updatedInterviewReason,
-          });
           await interviewApi.updateInterview(interviewId, {
             meetingTime,
             note: selectedRegistration.interview.note,
@@ -584,9 +621,183 @@ export default function ApprovedRegistrationsTable() {
     );
   };
 
+  const fetchAccounts = async () => {
+    try {
+      const { data } = await accountApi.getAllAccounts(1, 10000);
+      setAccounts(
+        data.data.items.filter(
+          (item: any) =>
+            !item.isDeleted && item.role.roleName == RoleNameEnum.Catechist
+        )
+      );
+    } catch (error) {
+      console.error("Lỗi khi tải danh sách accounts:", error);
+    }
+  };
+
+  const handleOpenModal = () => {
+    fetchAccounts(); // Load accounts before opening modal
+    fetchSelectedRegistrationOfModal();
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setMeetingTime("");
+  };
+
+  const handleScheduleInterview = async () => {
+    try {
+      enableLoading();
+      const registrationId: string = selectedRegistrations[0].toString();
+      const selectedAccountIds = selectedAccounts.map((acc: any) => acc.value);
+
+      if (meetingTime == "") {
+        sweetAlert.alertFailed(
+          "Vui lòng chọn thời gian phỏng vấn",
+          "",
+          6000,
+          27
+        );
+        return;
+      }
+
+      if (interviewTypeOption < 0) {
+        sweetAlert.alertFailed(
+          "Vui lòng chọn hình thức phỏng vấn",
+          "",
+          6000,
+          27
+        );
+        return;
+      }
+
+      if (selectedAccountIds.length <= 0) {
+        sweetAlert.alertFailed("Vui lòng chọn người phỏng vấn", "", 6000, 26);
+        return;
+      }
+
+      // await registrationApi.updateRegistration(registrationId, {
+      //   status: RegistrationStatus.Approved_Duyet_Don,
+      // });
+
+      console.log("res", {
+        registrationId,
+        meetingTime: meetingTime,
+        interviewType: interviewTypeOption,
+        accounts: selectedAccountIds,
+      });
+      const res = await interviewApi.createInterview({
+        registrationId,
+        meetingTime: meetingTime,
+        interviewType: interviewTypeOption,
+        accounts: selectedAccountIds,
+      });
+      console.log(
+        "res",
+        {
+          registrationId,
+          meetingTime: meetingTime,
+          interviewType: interviewTypeOption,
+          accounts: selectedAccountIds,
+        },
+        res
+      );
+
+      let process = await interviewProcessApi.createInterviewProcess({
+        registrationId: registrationId,
+        name: `${RegistrationProcessTitle.PHONG_VAN_LAI}`,
+      });
+
+      await interviewProcessApi.updateInterviewProcess(process.data.data.id, {
+        name: `${RegistrationProcessTitle.PHONG_VAN_LAI}`,
+        status: RegistrationProcessStatus.Approved,
+      });
+
+      sweetAlert.alertSuccess(
+        "Đã xếp lịch phỏng vấn thành công!",
+        "",
+        1000,
+        28
+      );
+      handleCloseModal();
+      fetchApprovedRegistrations(); // Refresh registration data after scheduling
+      setSelectedRegistrations([]);
+      setMeetingTime("");
+      setInterviewTypeOption(-1);
+    } catch (error: any) {
+      console.error("Lỗi khi xếp lịch phỏng vấn:", error);
+      if (error && error.message) {
+        if (
+          error.message.toString().toLowerCase().includes("scheduled at least")
+        ) {
+          sweetAlert.alertFailed(
+            "Lỗi khi xếp lịch phỏng vấn",
+            `Lịch phỏng vấn phải cách ngày hiện tại ít nhất ${error.message.split("scheduled at least ")[1].split(" ")[0].trim()} ngày`,
+            10000,
+            24
+          );
+        }
+      }
+    } finally {
+      disableLoading();
+    }
+  };
+
+  useEffect(() => {
+    if (meetingTime == "") {
+      setSelectedAccounts([]);
+      setPreviewAccounts([]);
+      setInterviewTypeOption(-1);
+    } else if (meetingTime && meetingTime != "") {
+      const action = async () => {
+        const res = await accountApi.getRecruitersByMeetingTime(meetingTime);
+        setPreviewAccounts(
+          res.data.data.items.sort((a: any, b: any) => {
+            if (a.interviews && b.interviews) {
+              return a.interviews.length - b.interviews.length;
+            }
+            return -1;
+          })
+        );
+      };
+      action();
+    }
+  }, [meetingTime]);
+
   // Vô hiệu hóa các hành động khi không ở trạng thái "waiting"
   const disableActions = currentFilter !== "waiting";
   const disableActionsApproved = currentFilter !== "accepted";
+
+  const handleDeleteRegistrations = async () => {
+    const confirm = await sweetAlert.confirm(
+      `Bạn có chắc muốn xóa ${selectedRegistrations.length} đơn`,
+      "",
+      "Xác nhận",
+      "Hủy bỏ",
+      "question"
+    );
+    if (!confirm) {
+      return;
+    }
+    try {
+      enableLoading();
+      const deletePromises = selectedRegistrations.map(async (id) => {
+        await registrationApi.deleteRegistration(id.toString());
+      });
+
+      await Promise.all(deletePromises);
+      sweetAlert.alertSuccess("Xóa đơn ứng tuyển thành công!", "", 1000, 28);
+
+      fetchApprovedRegistrations(true);
+      setSelectedRegistrations([]);
+    } catch (error: any) {
+      console.error("Lỗi khi xóa đơn ứng tuyển:", error);
+      sweetAlert.alertFailed("Lỗi khi xóa đơn ứng tuyển", ``, 10000, 24);
+    } finally {
+      disableLoading();
+    }
+  };
 
   return (
     <Paper
@@ -597,25 +808,39 @@ export default function ApprovedRegistrationsTable() {
     >
       <h1
         className={`text-center text-[2rem] py-2 font-bold 
-        ${currentFilter == "waiting" ? "bg-info text-text_primary_dark" : ""} 
-        ${currentFilter == "accepted" ? "bg-success text-text_primary_light" : ""} 
-        ${currentFilter == "rejected" ? "bg-danger text-text_primary_light" : ""}`}
+        ${!deleteMode && currentFilter == "waiting" ? "bg-info text-text_primary_dark" : ""} 
+        ${!deleteMode && currentFilter == "accepted" ? "bg-success text-text_primary_light" : ""} 
+        ${!deleteMode && currentFilter == "rejected" ? "bg-danger text-text_primary_light" : ""}
+        ${deleteMode ? "bg-black text-text_primary_light" : ""}`}
       >
-        {currentFilter == "waiting" ? "Danh sách phỏng vấn ứng viên" : ""}
-        {currentFilter == "accepted" ? "Danh sách ứng viên đậu phỏng vấn" : ""}
-        {currentFilter == "rejected" ? "Danh sách ứng viên bị từ chối" : ""}
+        {!deleteMode && currentFilter == "waiting"
+          ? "Danh sách ứng viên chờ phỏng vấn"
+          : ""}
+        {!deleteMode && currentFilter == "accepted"
+          ? "Danh sách ứng viên đậu phỏng vấn"
+          : ""}
+        {!deleteMode && currentFilter == "rejected"
+          ? "Danh sách ứng viên bị từ chối"
+          : ""}
+        {deleteMode ? "Lọc các đơn cũ" : ""}
       </h1>
 
       <div className="flex justify-between items-center w-full my-3">
         {/* Chọn ngày filter */}
-        <div className="flex justify-start px-3">
-          <input
-            type="date"
-            className="w-[200px] py-2 px-2 border rounded-md"
-            value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value)}
-          />
-          {renderFilterButtons()}
+        <div className="flex justify-start px-3 min-w-[10px]">
+          {!deleteMode ? (
+            <>
+              <input
+                type="date"
+                className="w-[200px] py-2 px-2 border rounded-md"
+                value={selectedDate}
+                onChange={(e) => setSelectedDate(e.target.value)}
+              />
+              {renderFilterButtons()}
+            </>
+          ) : (
+            <></>
+          )}
         </div>
         <div className="flex">
           {selectedRegistrations.length > 0 && !disableActions && (
@@ -654,7 +879,18 @@ export default function ApprovedRegistrationsTable() {
           )}
           {selectedRegistrations.length > 0 && !disableActionsApproved && (
             <div className="flex justify-end">
-              {selectedRegistrations.length === 1 ? (
+              {selectedRegistrations.length === 1 &&
+              rows.findIndex(
+                (item) => item.id == selectedRegistrations[0].toString()
+              ) >= 0 &&
+              !rows
+                .find(
+                  (item: RegistrationItemResponse) =>
+                    item.id == selectedRegistrations[0].toString()
+                )
+                ?.registrationProcesses.find(
+                  (item) => item.name == RegistrationProcessTitle.TAO_TAI_KHOAN
+                ) ? (
                 <>
                   <button
                     className="btn btn-success ml-1"
@@ -687,6 +923,82 @@ export default function ApprovedRegistrationsTable() {
             <></>
           )}
 
+          {currentFilter == "rejected" &&
+          deleteMode &&
+          selectedRegistrations.length > 0 ? (
+            <>
+              <Button
+                className="btn bg-primary_color text-text_primary_light hover:text-text_primary_dark
+          hover:bg-gray-400"
+                onClick={() => {
+                  handleDeleteRegistrations();
+                }}
+                variant="outlined"
+                color="primary"
+              >
+                Xóa đơn
+              </Button>
+            </>
+          ) : (
+            <></>
+          )}
+          {currentFilter === "rejected" && !deleteMode ? (
+            <>
+              <Button
+                className="btn bg-primary_color text-text_primary_light hover:text-text_primary_dark
+          hover:bg-gray-400"
+                onClick={() => {
+                  setDeleteMode(true);
+                  fetchApprovedRegistrations(true);
+                  setSelectedRegistrations([]);
+                }}
+                variant="outlined"
+                color="primary"
+              >
+                Lọc đơn
+              </Button>
+            </>
+          ) : (
+            <></>
+          )}
+          {currentFilter === "rejected" && deleteMode ? (
+            <>
+              <Button
+                className="btn bg-primary_color text-text_primary_light hover:text-text_primary_dark
+          hover:bg-gray-400"
+                onClick={() => {
+                  setDeleteMode(false);
+                  fetchApprovedRegistrations("false");
+                }}
+                variant="outlined"
+                color="primary"
+              >
+                Xong
+              </Button>
+            </>
+          ) : (
+            <></>
+          )}
+
+          {currentFilter === "rejected" &&
+          selectedRegistrations.length === 1 &&
+          !deleteMode &&
+          false ? (
+            <>
+              <Button
+                className="btn btn-primary"
+                onClick={() => {
+                  handleOpenModal();
+                }}
+                variant="outlined"
+                color="primary"
+              >
+                Xếp lịch phỏng vấn lại
+              </Button>
+            </>
+          ) : (
+            <></>
+          )}
           <button
             className="btn btn-primary ml-1 mr-2"
             onClick={() => {
@@ -826,25 +1138,24 @@ export default function ApprovedRegistrationsTable() {
             className="my-0 mt-1"
           /> */}
 
-          <FormControl fullWidth margin="normal" className="my-0 mt-4">
-            <InputLabel id="result-label">
-              <strong>Kết quả</strong>
-            </InputLabel>
+          <FormControl fullWidth margin="normal" className="my-0 mt-3">
+            <label id="result-label">
+              <strong>Kết quả phỏng vấn</strong>
+            </label>
             <MuiSelect
               labelId="result-label"
               value={interviewResult}
               onChange={(e) => setInterviewResult(e.target.value)}
+              className={`${interviewResult == "Chấp nhận" ? "bg-success text-white" : ""}
+              ${interviewResult == "Từ chối" ? "bg-danger text-white" : ""}`}
             >
               <MenuItem
                 value="Chấp nhận"
-                style={{ backgroundColor: "green", color: "white" }}
+                className="bg-success text-white py-3"
               >
                 Chấp nhận
               </MenuItem>
-              <MenuItem
-                value="Từ chối"
-                style={{ backgroundColor: "red", color: "white" }}
-              >
+              <MenuItem value="Từ chối" className="bg-danger text-white py-3">
                 Từ chối
               </MenuItem>
             </MuiSelect>
@@ -858,15 +1169,15 @@ export default function ApprovedRegistrationsTable() {
               marginTop: "20px",
             }}
           >
+            <Button onClick={handleCloseApprovalModal} variant="outlined">
+              Hủy bỏ
+            </Button>
             <Button
               onClick={handleConfirmInterview}
               variant="contained"
               color="primary"
             >
               Xác nhận
-            </Button>
-            <Button onClick={handleCloseApprovalModal} variant="outlined">
-              Hủy bỏ
             </Button>
           </div>
         </div>
@@ -1018,71 +1329,50 @@ export default function ApprovedRegistrationsTable() {
       </Modal>
 
       {/* Modal xóa phỏng vấn */}
-      {/* <Modal open={openDeleteModal} onClose={handleCloseUpdateModal}>
+      <Dialog
+        open={isModalOpen}
+        className="z-[1000] flex justify-center items-center"
+        fullWidth
+        maxWidth="xl"
+      >
         <div
-          style={{
-            width: "50%",
-            margin: "auto",
-            backgroundColor: "white",
-            borderRadius: "8px",
-          }}
-          className="py-5 px-5 mt-4"
+          className="modal-container bg-white py-5 px-5 rounded-lg
+        w-full"
+          style={{ scrollBehavior: "smooth", overflowY: "scroll" }}
         >
-          <h1 className="text-center text-[2.2rem] text-danger py-2 pt-0 font-bold uppercase">
-            Xóa lịch phỏng vấn
+          <h1 className="text-center text-[2.2rem] text-primary py-2 pt-0 font-bold uppercase">
+            Xếp lịch phỏng vấn lại
           </h1>
 
-          {selectedRegistrationOfModal ? (
+          {selectedRegistration ? (
             <>
               <div className="flex flex-wrap mt-3">
-                <h5 className="mt-2 w-[50%]">
-                  <strong>Tên ứng viên:</strong>{" "}
-                  {selectedRegistrationOfModal.fullName}
+                <h5 className="mt-3 w-[100%]">
+                  <strong>Tên ứng viên:</strong> {selectedRegistration.fullName}
                 </h5>
-                <h5 className="mt-2 w-[50%]">
-                  <strong>Thời gian phỏng vấn:</strong>{" "}
-                  {formatDate.DD_MM_YYYY_Time(
-                    selectedRegistrationOfModal.interview.meetingTime
-                  )}
+                <h5 className="mt-3 w-[50%]">
+                  <strong>Giới tính:</strong> {selectedRegistration.gender}
                 </h5>
-                <h5 className="mt-2 w-[50%]">
-                  <strong>Giới tính:</strong>{" "}
-                  {selectedRegistrationOfModal.gender}
-                </h5>
-                <h5 className="mt-2 w-[50%]">
+                <h5 className="mt-3 w-[50%]">
                   <strong>Ngày sinh:</strong>{" "}
-                  {formatDate.DD_MM_YYYY(
-                    selectedRegistrationOfModal.dateOfBirth
-                  )}
+                  {formatDate.DD_MM_YYYY(selectedRegistration.dateOfBirth)}
                 </h5>
-                <h5 className="mt-2 w-[50%]">
-                  <strong>Số điện thoại:</strong>{" "}
-                  {selectedRegistrationOfModal.phone}
+                <h5 className="mt-3 w-[50%]">
+                  <strong>Số điện thoại:</strong> {selectedRegistration.phone}
                 </h5>
-                <h5 className="mt-2 w-[50%]">
-                  <strong>Email:</strong> {selectedRegistrationOfModal.email}
+                <h5 className="mt-3 w-[50%]">
+                  <strong>Email:</strong> {selectedRegistration.email}
                 </h5>
-                <h5 className="mt-2 w-[50%]">
+                <h5 className="mt-3 w-[50%]">
                   <strong>Kinh nghiệm:</strong>{" "}
-                  {selectedRegistrationOfModal.isTeachingBefore
-                    ? "Có"
-                    : "Không"}
+                  {selectedRegistration.isTeachingBefore ? "Có" : "Không"}
                 </h5>
-                <h5 className="mt-2 w-[50%]">
+                <h5 className="mt-3 w-[50%]">
                   <strong>Số năm giảng dạy:</strong>{" "}
-                  {selectedRegistrationOfModal.yearOfTeaching}
+                  {selectedRegistration.yearOfTeaching}
                 </h5>
-                <h5 className="mt-2 w-[100%]">
-                  <strong>Địa chỉ:</strong>{" "}
-                  {selectedRegistrationOfModal.address}
-                </h5>
-                <h5 className="mt-2 w-[100%]">
-                  <strong>Người phỏng vấn:</strong>{" "}
-                  {selectedRegistrationOfModal.interview.recruiters
-                    ? selectedRegistrationOfModal.interview.recruiters
-                        .map((recruiter: any) => recruiter.fullName)
-                        .join(", ")
-                    : ""}
+                <h5 className="mt-3 w-[100%]">
+                  <strong>Địa chỉ:</strong> {selectedRegistration.address}
                 </h5>
               </div>
             </>
@@ -1090,44 +1380,140 @@ export default function ApprovedRegistrationsTable() {
             <></>
           )}
 
-          <div className="mt-3">
-            <h5 className="w-[100%] mb-1">
-              <strong>Lý do xóa lịch phỏng vấn</strong>
-            </h5>
-            <textarea
-              name="deletedInterviewReason"
-              onChange={() => {
-                // setDeletedInterviewReason(e.target.value);
-              }}
-              className="block w-full p-2 border border-gray-700 rounded-lg"
-            />
-          </div>
+          <label className="font-bold mt-4">Ngày phỏng vấn</label>
+          <br />
+          <input
+            type="datetime-local"
+            className="w-full rounded mt-1 py-2 px-2"
+            style={{ border: "1px solid #d9d9d9" }}
+            value={meetingTime}
+            onChange={(e) => setMeetingTime(e.target.value)}
+          />
 
-          <div
-            className="modal-buttons"
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              marginTop: "20px",
-            }}
-          >
+          {meetingTime != "" ? (
+            <>
+              <label className="font-bold mt-4">Chọn hình thức phỏng vấn</label>
+              <RadioGroup
+                aria-labelledby="demo-radio-buttons-group-label"
+                name="radio-buttons-group"
+                value={interviewTypeOption}
+                onChange={(event) => {
+                  setInterviewTypeOption(Number(event.target.value));
+                }}
+              >
+                <FormControlLabel
+                  value={0}
+                  control={<Radio />}
+                  label="Offline"
+                />
+                <FormControlLabel
+                  value={1}
+                  control={<Radio />}
+                  label="Online"
+                />
+              </RadioGroup>
+              <label className="font-bold mt-4">Chọn người phỏng vấn</label>
+              <Select
+                options={accounts.map((acc: any) => ({
+                  value: acc.id,
+                  label: `${acc.fullName} ${acc.role && acc.role.roleName.toUpperCase() == AccountRoleString.ADMIN ? " - Admin" : ""} ${acc.role && acc.role.roleName.toUpperCase() == AccountRoleString.MANAGER ? " - Quản lý" : ""} ${acc.role && acc.role.roleName.toUpperCase() == AccountRoleString.CATECHIST ? " - Giáo lý viên" : ""}`,
+                }))}
+                isMulti
+                onChange={(newValue) =>
+                  setSelectedAccounts(
+                    newValue as { value: string; label: string }[]
+                  )
+                }
+                placeholder="Tìm kiếm và chọn người phỏng vấn..."
+                className="mt-1"
+              />
+              <label className="font-bold mt-4">
+                Danh sách lịch phân công phỏng vấn ngày{" "}
+                {formatDate.DD_MM_YYYY(meetingTime)}
+              </label>
+              <DataGrid
+                rows={previewAccounts}
+                columns={[
+                  {
+                    field: "avatar",
+                    headerName: "Ảnh",
+                    width: 100,
+                    renderCell: (params) => (
+                      <img
+                        src={
+                          params.row.avatar || "https://via.placeholder.com/50"
+                        }
+                        alt="Avatar"
+                        width={50}
+                        height={50}
+                        style={{ borderRadius: "3px" }}
+                      />
+                    ),
+                  },
+                  { field: "fullName", headerName: "Họ và Tên", width: 200 },
+                  { field: "gender", headerName: "Giới tính", width: 150 },
+                  {
+                    field: "interviewCount",
+                    headerName: "Số lượng phỏng vấn",
+                    width: 150,
+                    renderCell: (params) => (
+                      <>
+                        {params.row.interviews ? (
+                          <>
+                            {params.row.interviews.length}
+                            {params.row.interviews.length > 0 ? (
+                              <>{` (${params.row.interviews
+                                .map((item: any) =>
+                                  formatDate.HH_mm(item.meetingTime)
+                                )
+                                .join(", ")})`}</>
+                            ) : (
+                              <></>
+                            )}
+                          </>
+                        ) : (
+                          <>0</>
+                        )}
+                      </>
+                    ),
+                  },
+                ]}
+                paginationMode="client"
+                rowCount={previewAccounts.length}
+                loading={loading}
+                initialState={{ pagination: { paginationModel } }}
+                pageSizeOptions={[8, 25, 50]}
+                disableRowSelectionOnClick
+                sx={{
+                  border: 0,
+                }}
+                localeText={viVNGridTranslation}
+              />
+            </>
+          ) : (
+            <></>
+          )}
+
+          <div className="modal-buttons flex justify-center gap-x-3 mt-4">
             <Button
-              onClick={handleDeleteInterview}
+              onClick={() => {
+                handleScheduleInterview();
+              }}
               variant="contained"
-              color="error"
             >
               Xác nhận
             </Button>
             <Button
-              onClick={handleCloseDeleteModal}
+              onClick={() => {
+                handleCloseModal();
+              }}
               variant="outlined"
-              color="error"
             >
               Hủy bỏ
             </Button>
           </div>
         </div>
-      </Modal> */}
+      </Dialog>
 
       {openDialog ? (
         <>

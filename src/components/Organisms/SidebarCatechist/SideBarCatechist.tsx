@@ -1,6 +1,5 @@
 import "./SideBarCatechist.scss";
 import { useState } from "react";
-//import { LOCALSTORAGE_CONSTANTS } from "../../../constants/WebsiteConstant";
 import { Link } from "react-router-dom";
 import { PATH_CATECHIST } from "../../../routes/paths";
 import useAuth from "../../../hooks/useAuth";
@@ -8,25 +7,6 @@ import useAuth from "../../../hooks/useAuth";
 const SideBarCatechist = () => {
   const [isHovered, setIsHovered] = useState(false);
   const { logout } = useAuth();
-
-  /*
-  const navigateTo = (route: string) => {
-    if (typeof window !== "undefined") {
-      localStorage.setItem(LOCALSTORAGE_CONSTANTS.CURRENT_PAGE, route);
-    }
-    // router.push(route);
-  };
-
-  const isActive = (route: string) => {
-    if (typeof window === "undefined") {
-      return false;
-    }
-    return (
-      localStorage.getItem(LOCALSTORAGE_CONSTANTS.CURRENT_PAGE) &&
-      localStorage.getItem(LOCALSTORAGE_CONSTANTS.CURRENT_PAGE) == route
-    );
-  };
-  */
 
   return (
     <div
@@ -64,17 +44,39 @@ const SideBarCatechist = () => {
             </div>
             <ul className="mt-6 space-y-2 tracking-wide">
               <li className="min-w-max">
-                <div
-                  onClick={() => {
-                    // navigateTo(PATH_MAIN.supplier);
-                  }}
-                  //   className={`links_hover ${
-                  //     typeof window !== "undefined" &&
-                  //     isActive(PATH_MAIN.supplier)
-                  //       ? "active_current_link"
-                  //       : ""
-                  //   }`}
-                >
+                <div>
+                  <Link
+                    style={{
+                      opacity: `${isHovered ? "1" : "0"}`,
+                      transition: "all ease 0.2s",
+                    }}
+                    to={PATH_CATECHIST.catechist_calendar}
+                    className="relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-primary_color hover:to-amber-600 px-4 py-3 hover:text-white"
+                  >
+                    <svg
+                      style={{ display: "none" }}
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        className="fill-current text-gray-600 group-hover:text-cyan-600"
+                        d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z"
+                      />
+                      <path
+                        className="fill-current text-gray-300 group-hover:text-cyan-300"
+                        d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z"
+                      />
+                    </svg>
+                    <span className="group-hover:text-gray-700">
+                      Thời gian biểu
+                    </span>
+                  </Link>
+                </div>
+              </li>
+              <li className="min-w-max">
+                <div>
                   <Link
                     style={{
                       opacity: `${isHovered ? "1" : "0"}`,
@@ -106,17 +108,7 @@ const SideBarCatechist = () => {
                 </div>
               </li>
               <li className="min-w-max">
-                <div
-                  onClick={() => {
-                    // navigateTo(PATH_MAIN.supplier);
-                  }}
-                  //   className={`links_hover ${
-                  //     typeof window !== "undefined" &&
-                  //     isActive(PATH_MAIN.supplier)
-                  //       ? "active_current_link"
-                  //       : ""
-                  //   }`}
-                >
+                <div>
                   <Link
                     style={{
                       opacity: `${isHovered ? "1" : "0"}`,
@@ -146,17 +138,37 @@ const SideBarCatechist = () => {
                 </div>
               </li>
               <li className="min-w-max">
-                <div
-                  onClick={() => {
-                    // navigateTo(PATH_MAIN.supplier);
-                  }}
-                  //   className={`links_hover ${
-                  //     typeof window !== "undefined" &&
-                  //     isActive(PATH_MAIN.supplier)
-                  //       ? "active_current_link"
-                  //       : ""
-                  //   }`}
-                >
+                <div>
+                  <Link
+                    style={{
+                      opacity: `${isHovered ? "1" : "0"}`,
+                      transition: "all ease 0.2s",
+                    }}
+                    to={PATH_CATECHIST.catechist_training}
+                    className="relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-primary_color hover:to-amber-600 px-4 py-3 hover:text-white"
+                  >
+                    <svg
+                      style={{ display: "none" }}
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        className="fill-current text-gray-600 group-hover:text-cyan-600"
+                        d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z"
+                      />
+                      <path
+                        className="fill-current text-gray-300 group-hover:text-cyan-300"
+                        d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z"
+                      />
+                    </svg>
+                    <span className="group-hover:text-gray-700">Đào tạo</span>
+                  </Link>
+                </div>
+              </li>
+              <li className="min-w-max">
+                <div>
                   <Link
                     style={{
                       opacity: `${isHovered ? "1" : "0"}`,
@@ -220,13 +232,7 @@ const SideBarCatechist = () => {
                 <div
                   onClick={() => {
                     logout();
-                    // navigateTo(PATH_MAIN.users);
                   }}
-                  //   className={`links_hover ${
-                  //     typeof window !== "undefined" && isActive(PATH_MAIN.users)
-                  //       ? "active_current_link"
-                  //       : ""
-                  //   }`}
                 >
                   <Link
                     style={{
@@ -260,26 +266,6 @@ const SideBarCatechist = () => {
               </li>
             </ul>
           </div>
-          {/* <div className="w-max -mb-3">
-            <a
-              href="#"
-              className="relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-primary_color hover:to-amber-600 px-4 py-3 hover:text-white"
-            >
-              <svg style={{display:"none"}}
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5 group-hover:fill-cyan-600"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              <p className="group-hover:text-gray-700">Settings</p>
-            </a>
-          </div> */}
         </div>
       </div>
     </div>

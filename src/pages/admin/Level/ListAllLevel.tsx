@@ -2,10 +2,10 @@ import React, { useState, useEffect } from "react";
 import levelApi from "../../../api/Level";
 import { AxiosResponse } from "axios";
 import { BasicResponse } from "../../../model/Response/BasicResponse";
-// import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 const ListAllLevel: React.FC = () => {
   const [levels, setLevels] = useState([]);
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
   useEffect(() => {
     levelApi
       .getAllLevel()
@@ -33,27 +33,27 @@ const ListAllLevel: React.FC = () => {
       });
   }, []);
 
-  // const handleCreate = () => {
-  //   navigate("/admin/create-levels");
-  // };
+  const handleCreate = () => {
+    navigate("/admin/create-levels");
+  };
 
   // const handleEditCategoryClick = (id: string): void => {
   //   navigate(`/admin/update-levels/${id}`);
   // };
 
-  // const handleDeleteLevelClick = (id: string): void => {
-  //   if (window.confirm("Bạn có chắc là muốn xóa cấp bậc này không?")) {
-  //     levelApi
-  //       .deleteLevel(id)
-  //       .then(() => {
-  //         alert(`Level đã xóa thành công.`);
-  //         window.location.reload();
-  //       })
-  //       .catch((err: Error) => {
-  //         console.error(`Failed to delete level with ID: ${id}`, err);
-  //       });
-  //   }
-  // };
+  const handleDeleteLevelClick = (id: string): void => {
+    if (window.confirm("Bạn có chắc là muốn xóa cấp bậc này không?")) {
+      levelApi
+        .deleteLevel(id)
+        .then(() => {
+          alert(`Level đã xóa thành công.`);
+          window.location.reload();
+        })
+        .catch((err: Error) => {
+          console.error(`Failed to delete level with ID: ${id}`, err);
+        });
+    }
+  };
 
   console.log(ListAllLevel);
   return (
@@ -62,13 +62,16 @@ const ListAllLevel: React.FC = () => {
         <div className="mb-10 text-center fw-bold">
           <h1>CẤP BẬC</h1>
         </div>
-        {/* <div className="d-flex align-items-center mb-3 ">
+        <div className="d-flex align-items-center mb-3 ">
           <div className="ml-6">
-            <button className="px-4 py-2 border border-black text-black bg-white hover:bg-gray-200" onClick={handleCreate}>
+            <button
+              className="px-4 py-2 border border-black text-black bg-white hover:bg-gray-200"
+              onClick={handleCreate}
+            >
               Tạo cấp bậc
             </button>
           </div>
-        </div> */}
+        </div>
 
         <div className="flex relative overflow-x-auto justify-center p-6">
           <table className="w-full text-sm text-left rtl:text-right text-gray-500">
@@ -111,20 +114,20 @@ const ListAllLevel: React.FC = () => {
                         {level.hierarchyLevel}
                       </div>
                     </td>
-                    {/* <td className="px-4 py-4 space-x-2">
-                      <button
+                    <td className="px-4 py-4 space-x-2">
+                      {/* <button
                         onClick={() => handleEditCategoryClick(level.id)}
                         className="btn btn-info"
                       >
                         Chỉnh sửa
-                      </button>
+                      </button> */}
                       <button
                         onClick={() => handleDeleteLevelClick(level.id)}
                         className="btn btn-warning"
                       >
                         Xóa
                       </button>
-                    </td> */}
+                    </td>
                   </tr>
                 ))
               ) : (

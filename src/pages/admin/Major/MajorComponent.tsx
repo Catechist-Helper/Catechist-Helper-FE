@@ -21,7 +21,7 @@ export default function MajorComponent() {
   const [loading, setLoading] = useState<boolean>(true);
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({
     page: 0, // zero-based index for MUI DataGrid
-    pageSize: 8, // Default page size
+    pageSize: 10, // Default page size
   });
   const [rowCount, setRowCount] = useState<number>(0);
   const [selectedRows, setSelectedRows] = useState<GridRowSelectionModel>([]);
@@ -55,7 +55,7 @@ export default function MajorComponent() {
     {
       field: "levels",
       headerName: "Cấp độ giáo lý viên phù hợp",
-      width: 800,
+      width: 830,
       renderCell: (params) => (
         <div>
           <p>{params.row.levels}</p>
@@ -107,10 +107,9 @@ export default function MajorComponent() {
   const fetchMajors = async () => {
     try {
       setLoading(true);
-      const page = paginationModel.page + 1;
-      const size = paginationModel.pageSize;
 
-      const { data } = await majorApi.getAllMajors(page, size);
+      const firstRes = await majorApi.getAllMajors();
+      const { data } = await majorApi.getAllMajors(1, firstRes.data.data.total);
 
       const sortedArray = data.data.items.sort(
         (a: any, b: any) => a.hierarchyLevel - b.hierarchyLevel
@@ -166,10 +165,23 @@ export default function MajorComponent() {
         name: majorName,
         hierarchyLevel: majorLevel ?? 0,
       });
-      fetchMajors(); // Refresh after creation
+      sweetAlert.alertSuccess("Tạo ngành thành công!", "", 5000, 25);
+      fetchMajors();
       setOpenDialog(false);
-    } catch (error) {
-      sweetAlert.alertFailed("Có lỗi xảy ra khi tạo ngành!", "", 1000, 22);
+    } catch (error: any) {
+      if (
+        error.message &&
+        error.message.includes("Không thể cập nhật khi bắt đầu niên khóa mới")
+      ) {
+        sweetAlert.alertFailed(
+          "Không thể cập nhật khi bắt đầu niên khóa mới",
+          "",
+          5000,
+          25
+        );
+      } else {
+        sweetAlert.alertFailed("Có lỗi xảy ra khi tạo ngành", "", 5000, 25);
+      }
     }
   };
 
@@ -201,17 +213,41 @@ export default function MajorComponent() {
       if (selectedRow.gradeCount >= 1) {
         sweetAlert.alertFailed(
           "Có lỗi khi xóa ngành",
-          "Không thể xóa ngành này vì có dữ liệu khối bên trong ngành",
+          "Không thể xóa ngành này vì có dữ liệu bên trong ngành",
           10000,
           25
         );
         return;
       }
 
-      majorApi.deleteMajor(selectedRows[0].toString());
+      await majorApi.deleteMajor(selectedRows[0].toString());
       sweetAlert.alertSuccess("Xoá thành công", "", 1000, 18);
-    } catch (error) {
-      sweetAlert.alertFailed("Có lỗi xảy ra khi xóa", "", 1000, 20);
+    } catch (error: any) {
+      console.log("error", error);
+
+      if (
+        error.message &&
+        error.message.includes("Không thể cập nhật khi bắt đầu niên khóa mới")
+      ) {
+        sweetAlert.alertFailed(
+          "Có lỗi khi xóa ngành",
+          "Không thể cập nhật khi bắt đầu niên khóa mới",
+          5000,
+          25
+        );
+      } else if (
+        error.message &&
+        error.message.includes("Không thể xóa dữ liệu đang được sử dụng")
+      ) {
+        sweetAlert.alertFailed(
+          "Có lỗi khi xóa ngành",
+          "Không thể xóa ngành này vì có dữ liệu bên trong ngành",
+          5000,
+          25
+        );
+      } else {
+        sweetAlert.alertFailed("Có lỗi xảy ra khi xóa", "", 1000, 20);
+      }
     } finally {
       handleRefresh();
     }
@@ -271,12 +307,12 @@ export default function MajorComponent() {
       <DataGrid
         rows={rows}
         columns={columns}
-        paginationMode="server"
+        paginationMode="client"
         rowCount={rowCount}
         loading={loading}
         paginationModel={paginationModel}
         onPaginationModelChange={(newModel) => setPaginationModel(newModel)}
-        pageSizeOptions={[8, 25, 50]}
+        pageSizeOptions={[10, 25, 50, 100, 250]}
         checkboxSelection
         onRowSelectionModelChange={handleSelectionChange}
         rowSelectionModel={selectedRows} // Use selectedRows as controlled model
@@ -284,6 +320,7 @@ export default function MajorComponent() {
           border: 0,
         }}
         localeText={viVNGridTranslation}
+        disableMultipleRowSelection
       />
 
       {/* Dialog for creating new Major */}

@@ -18,4 +18,5 @@ export interface ProcessAbsenceRequest {
 export interface AssignReplacementRequest {
   requestId: string; // ID của yêu cầu
   replacementCatechistId: string; // ID người thay thế
+  type: number;
 }

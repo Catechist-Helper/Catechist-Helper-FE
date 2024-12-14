@@ -23,6 +23,7 @@ import sweetAlert from "../../../utils/sweetAlert";
 import viVNGridTranslation from "../../../locale/MUITable";
 import { PATH_ADMIN } from "../../../routes/paths";
 import { GradeResponse } from "../../../model/Response/Grade";
+import useAppContext from "../../../hooks/useAppContext";
 
 export default function GradeComponent() {
   const navigate = useNavigate();
@@ -31,7 +32,7 @@ export default function GradeComponent() {
   const [loading, setLoading] = useState<boolean>(true);
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({
     page: 0,
-    pageSize: 8,
+    pageSize: 10,
   });
   const [rowCount, setRowCount] = useState<number>(0);
   const [selectedRows, setSelectedRows] = useState<GridRowSelectionModel>([]);
@@ -42,6 +43,7 @@ export default function GradeComponent() {
   const [selectedMajor, setSelectedMajor] = useState<string>("all");
   const [selectedMajorCreateGrade, setSelectedMajorCreateGrade] =
     useState<string>("");
+  const { enableLoading, disableLoading } = useAppContext();
 
   useEffect(() => {
     fetchMajors();
@@ -93,10 +95,17 @@ export default function GradeComponent() {
 
       const updatedRows = await Promise.all(
         sortedArray.map(async (grade: GradeResponse) => {
-          const catechistsCount = await fetchCatechistCountByGrade(grade.id);
+          const fetchCatechistRes = await fetchCatechistCountByGrade(grade.id);
           return {
             ...grade,
-            catechistsCount,
+            catechistsCount:
+              fetchCatechistRes && fetchCatechistRes.total
+                ? fetchCatechistRes.total
+                : 0,
+            catechistItems:
+              fetchCatechistRes && fetchCatechistRes.items
+                ? fetchCatechistRes.items
+                : null,
           };
         })
       );
@@ -118,10 +127,13 @@ export default function GradeComponent() {
         1,
         1000
       );
-      return data.data.total; // Trả về số lượng khối
+      return {
+        total: data.data.total,
+        items: data.data.items,
+      }; // Trả về số lượng khối
     } catch (error) {
       console.error("Error loading grades:", error);
-      return "N/A";
+      return {};
     }
   };
 
@@ -134,23 +146,47 @@ export default function GradeComponent() {
   // Xử lý thêm mới Grade
   const handleCreateGrade = async () => {
     try {
+      enableLoading();
       if (
         selectedMajorCreateGrade &&
         selectedMajorCreateGrade != "" &&
         gradeName &&
         gradeName != ""
       ) {
+        console.log({
+          name: gradeName,
+          majorId: selectedMajorCreateGrade,
+        });
         await gradeApi.createGrade({
           name: gradeName,
-          majorId: selectedMajor,
+          majorId: selectedMajorCreateGrade,
         });
         fetchGrades(selectedMajor);
         setOpenDialog(false);
       } else {
         sweetAlert.alertFailed("Vui lòng điền đầy đủ thông tin!", "", 1000, 22);
       }
-    } catch (error) {
-      sweetAlert.alertFailed("Có lỗi xảy ra khi tạo khối!", "", 1000, 22);
+    } catch (error: any) {
+      console.log(error);
+      if (
+        (error.message &&
+          error.message.includes(
+            "Không thể cập nhật khi bắt đầu niên khóa mới"
+          )) ||
+        (error.Error &&
+          error.Error.includes("Không thể cập nhật khi bắt đầu niên khóa mới"))
+      ) {
+        sweetAlert.alertFailed(
+          "Không thể cập nhật khi bắt đầu niên khóa mới",
+          "",
+          5000,
+          25
+        );
+      } else {
+        sweetAlert.alertFailed("Có lỗi xảy ra khi tạo khối!", "", 1000, 22);
+      }
+    } finally {
+      disableLoading();
     }
   };
 
@@ -166,10 +202,18 @@ export default function GradeComponent() {
       },
     },
     {
+      field: "hierarchyLevel",
+      headerName: "Phân cấp ngành",
+      width: 180,
+      renderCell: (params) => {
+        return params.row.major.hierarchyLevel;
+      },
+    },
+    {
       field: "catechistsCount",
       headerName: "Số lượng giáo lý viên",
       align: "left",
-      width: 220,
+      width: 200,
       renderCell: (params) => {
         return (
           <div className="flex">
@@ -184,13 +228,15 @@ export default function GradeComponent() {
                   Thêm
                 </Button>
               ) : (
-                <Button
-                  variant="contained"
-                  color="warning"
-                  onClick={() => handleUpdateCatechist(params.row.id)}
-                >
-                  Cập nhật
-                </Button>
+                <>
+                  <Button
+                    variant="contained"
+                    color="warning"
+                    onClick={() => handleUpdateCatechist(params.row.id)}
+                  >
+                    Xem
+                  </Button>
+                </>
               )}
             </div>
           </div>
@@ -240,6 +286,7 @@ export default function GradeComponent() {
           gradeName: selectedGrade.name,
           majorName: selectedGrade.major.name,
           totalCatechist: selectedGrade.totalCatechist,
+          viewMode: true,
         },
       });
     }
@@ -272,6 +319,54 @@ export default function GradeComponent() {
     setSelectedRows(newSelectionModel);
   };
 
+  const handleDeleteGrade = async () => {
+    try {
+      const selectedRow: any = rows.find(
+        (row) => row.id === selectedRows[0].toString()
+      );
+      if (!selectedRow) {
+        sweetAlert.alertFailed(
+          "Có lỗi khi xóa khối",
+          "Không tìm thấy khối này để xóa",
+          10000,
+          22
+        );
+        return;
+      }
+
+      await gradeApi.deleteGrade(selectedRows[0].toString());
+      sweetAlert.alertSuccess("Xoá thành công", "", 1000, 18);
+      fetchGrades();
+    } catch (error: any) {
+      console.log("error", error);
+
+      if (
+        error.message &&
+        error.message.includes("Không thể cập nhật khi bắt đầu niên khóa mới")
+      ) {
+        sweetAlert.alertFailed(
+          "Có lỗi khi xóa khối",
+          "Không thể cập nhật khi bắt đầu niên khóa mới",
+          5000,
+          25
+        );
+      } else if (
+        error.message &&
+        error.message.includes("Không thể xóa dữ liệu đang được sử dụng")
+      ) {
+        sweetAlert.alertFailed(
+          "Có lỗi khi xóa khối",
+          "Không thể xóa khối này vì có dữ liệu bên trong khối",
+          5000,
+          25
+        );
+      } else {
+        sweetAlert.alertFailed("Có lỗi xảy ra khi xóa", "", 1000, 20);
+      }
+    } finally {
+    }
+  };
+
   return (
     <Paper sx={{ width: "calc(100% - 3.8rem)", position: "absolute" }}>
       <h1 className="text-center text-[2.2rem] bg-primary_color text-text_primary_light py-2 font-bold">
@@ -280,7 +375,7 @@ export default function GradeComponent() {
 
       <div className="my-2 flex justify-between mx-3">
         {/* Select cho Major */}
-        <div className="flex">
+        <div className="flex mt-1">
           {/* Select cho Pastoral Year */}
           {/* <FormControl fullWidth sx={{ minWidth: 200, marginRight: 2 }}>
             <InputLabel>Chọn Niên Khóa</InputLabel>
@@ -295,7 +390,22 @@ export default function GradeComponent() {
               ))}
             </Select>
           </FormControl> */}
-          <FormControl fullWidth sx={{ minWidth: 200 }}>
+          <FormControl
+            fullWidth
+            sx={{
+              minWidth: 180,
+              marginTop: 1.5,
+              "& .MuiInputLabel-root": {
+                transform: "translateY(-20px)",
+                fontSize: "14px",
+                marginLeft: "8px",
+              },
+              "& .MuiSelect-select": {
+                paddingTop: "10px",
+                paddingBottom: "10px",
+              },
+            }}
+          >
             <InputLabel>Chọn Ngành</InputLabel>
             <Select value={selectedMajor} onChange={handleMajorChange}>
               <MenuItem key="all" value="all">
@@ -310,11 +420,23 @@ export default function GradeComponent() {
           </FormControl>
         </div>
         <div className="flex">
-          <div>
-            <Button variant="contained" color="primary" onClick={() => {}}>
-              Xếp giáo lý viên
-            </Button>
-          </div>
+          {selectedRows.length === 1 ? (
+            <>
+              <div>
+                <Button
+                  variant="contained"
+                  color="error"
+                  onClick={() => {
+                    handleDeleteGrade();
+                  }}
+                >
+                  Xóa khối
+                </Button>
+              </div>
+            </>
+          ) : (
+            <></>
+          )}
           {/* Nút Thêm Khối */}
           <div className="ml-1">
             <Button
@@ -331,30 +453,41 @@ export default function GradeComponent() {
       <DataGrid
         rows={rows}
         columns={columns}
-        paginationMode="server"
+        paginationMode="client"
         rowCount={rowCount}
         loading={loading}
         paginationModel={paginationModel}
         onPaginationModelChange={(newModel) => setPaginationModel(newModel)}
-        pageSizeOptions={[8, 25, 50]}
+        pageSizeOptions={[10, 25, 50, 100, 250]}
         checkboxSelection
         onRowSelectionModelChange={handleSelectionChange}
         rowSelectionModel={selectedRows}
         sx={{ border: 0 }}
         localeText={viVNGridTranslation}
+        disableMultipleRowSelection
       />
 
       {/* Dialog for creating new Grade */}
-      <Dialog
-        open={openDialog}
-        onClose={() => setOpenDialog(false)}
-        maxWidth="lg"
-        fullWidth={true}
-      >
+      <Dialog open={openDialog} maxWidth="lg" fullWidth={true}>
         <div className="w-full" style={{ padding: "20px" }}>
           <h2>Tạo khối học mới</h2>
-          <div className="my-2">
-            <FormControl fullWidth sx={{ minWidth: 200 }}>
+          <div className="my-2 mt-3">
+            <FormControl
+              fullWidth
+              sx={{
+                minWidth: 180,
+                marginTop: 1.5,
+                "& .MuiInputLabel-root": {
+                  transform: "translateY(-20px)",
+                  fontSize: "14px",
+                  marginLeft: "8px",
+                },
+                "& .MuiSelect-select": {
+                  paddingTop: "10px",
+                  paddingBottom: "10px",
+                },
+              }}
+            >
               <InputLabel>Chọn Ngành</InputLabel>
               <Select
                 value={selectedMajorCreateGrade}
@@ -370,7 +503,7 @@ export default function GradeComponent() {
               </Select>
             </FormControl>
           </div>
-          <div className="my-2">
+          <div className="my-2 mt-3">
             <TextField
               label="Tên khối"
               value={gradeName}
@@ -378,13 +511,22 @@ export default function GradeComponent() {
               fullWidth
             />
           </div>
-          <Button
-            onClick={handleCreateGrade}
-            variant="contained"
-            color="primary"
-          >
-            Lưu
-          </Button>
+          <div className="w-full flex mt-3 gap-x-2">
+            <Button
+              onClick={handleCreateGrade}
+              variant="contained"
+              color="primary"
+            >
+              Xác nhận
+            </Button>
+            <Button
+              onClick={() => setOpenDialog(false)}
+              variant="outlined"
+              color="primary"
+            >
+              Hủy bỏ
+            </Button>
+          </div>
         </div>
       </Dialog>
     </Paper>

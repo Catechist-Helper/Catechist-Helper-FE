@@ -2,7 +2,6 @@ import { AxiosResponse } from "axios";
 import axiosInstances from "../../config/axios"
 
 const request = axiosInstances.base
-// https://localhost:7012/api/v1/
 
 const ROOT_LEVEL = "/levels"
 

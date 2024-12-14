@@ -13,6 +13,10 @@ import RequestLeaveDialog from "./RequestLeaveDialog";
 import absenceApi from "../../../api/AbsenceRequest";
 import { GetAbsenceItemResponse } from "../../../model/Response/AbsenceRequest";
 import { ClassStatusEnum, ClassStatusString } from "../../../enums/Class";
+import {
+  CatechistInSlotTypeEnum,
+  CatechistInSlotTypeEnumString,
+} from "../../../enums/CatechistInSlot";
 
 const CatechistClassComponent = () => {
   const [userLogin, setUserLogin] = useState<any>(null);
@@ -25,6 +29,7 @@ const CatechistClassComponent = () => {
   const [slots, setSlots] = useState<any[]>([]);
   const [openLeaveDialog, setOpenLeaveDialog] = useState<boolean>(false);
   const [slotAbsenceId, setSlotAbsenceId] = useState<string>("");
+  const [classViewSlotId, setClassViewSlotId] = useState<string>("");
   const [absenceList, setAbsenceList] = useState<GetAbsenceItemResponse[]>([]);
 
   // Fetch thông tin người dùng đã đăng nhập
@@ -220,20 +225,30 @@ const CatechistClassComponent = () => {
     // { field: "majorName", headerName: "Ngành học", width: 180 },
     // { field: "gradeName", headerName: "Khối học", width: 180 },
   ];
+
+  const fetchSlotForViewing = async (classId: string) => {
+    const { data } = await classApi.getSlotsOfClass(classId);
+
+    const sortedArray = data.data.items.sort(
+      (a: any, b: any) =>
+        new Date(a.date).getTime() - new Date(b.date).getTime()
+    );
+
+    const absenceRes = await absenceApi.getAbsences(
+      undefined,
+      userLogin.catechistId
+    );
+    setAbsenceList(absenceRes.data.data ?? []);
+    console.log("aaaaaaaa", absenceRes.data.data);
+
+    setSlots(sortedArray);
+  };
+
   const handleViewSlots = async (classId: string) => {
     try {
-      const { data } = await classApi.getSlotsOfClass(classId);
-
-      const sortedArray = data.data.items.sort(
-        (a: any, b: any) =>
-          new Date(a.date).getTime() - new Date(b.date).getTime()
-      );
-
-      const absenceRes = await absenceApi.getAbsences();
-      setAbsenceList(absenceRes.data.data ?? []);
-
-      setSlots(sortedArray);
+      await fetchSlotForViewing(classId);
       setOpenSlotsDialog(true);
+      setClassViewSlotId(classId);
     } catch (error) {
       console.error("Error loading slots:", error);
       sweetAlert.alertFailed(
@@ -245,7 +260,13 @@ const CatechistClassComponent = () => {
     }
   };
 
-  const handleLeaveRequestSubmit = (reason: string, slotId: string) => {
+  useEffect(() => {
+    if (!openSlotsDialog) {
+      setClassViewSlotId("");
+    }
+  }, [openSlotsDialog]);
+
+  const handleLeaveRequestSubmit = async (reason: string, slotId: string) => {
     try {
       console.log({
         catechistId: userLogin.catechistId,
@@ -269,6 +290,10 @@ const CatechistClassComponent = () => {
         1000,
         22
       );
+      setOpenLeaveDialog(false);
+      if (classViewSlotId != "") {
+        fetchSlotForViewing(classViewSlotId);
+      }
     } catch (error) {
       console.error("Error loading slots:", error);
       sweetAlert.alertFailed("Có lỗi xảy ra khi gửi yêu cầu!", "", 1000, 22);
@@ -367,14 +392,33 @@ const CatechistClassComponent = () => {
               {
                 field: "catechists",
                 headerName: "Giáo lý viên",
-                width: 300,
+                width: 500,
+
                 renderCell: (params) => {
+                  const priority: Record<CatechistInSlotTypeEnum, number> = {
+                    [CatechistInSlotTypeEnum.Main]: 1,
+                    [CatechistInSlotTypeEnum.Assistant]: 2,
+                    [CatechistInSlotTypeEnum.Substitute]: 3,
+                  };
+
                   return params.row.catechistInSlots
                     ? params.row.catechistInSlots
+                        .sort(
+                          (
+                            a: { type: CatechistInSlotTypeEnum },
+                            b: { type: CatechistInSlotTypeEnum }
+                          ) => priority[a.type] - priority[b.type]
+                        )
                         .map((item: any) =>
                           item.catechist
-                            ? item.catechist.fullName +
-                              (item.type == "Main" ? " (Chính)" : "")
+                            ? item.catechist.code +
+                              ` (${
+                                CatechistInSlotTypeEnumString[
+                                  CatechistInSlotTypeEnum[
+                                    item.type as keyof typeof CatechistInSlotTypeEnum
+                                  ]
+                                ]
+                              })`
                             : ""
                         )
                         .join(", ")
@@ -404,7 +448,6 @@ const CatechistClassComponent = () => {
                                 color="secondary"
                                 variant="contained"
                                 onClick={() => {
-                                  setOpenLeaveDialog(true);
                                   setSlotAbsenceId(params.row.id);
                                 }} // Mở dialog khi nhấn
                               >

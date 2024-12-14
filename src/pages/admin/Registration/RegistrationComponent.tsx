@@ -5,7 +5,14 @@ import {
   GridRowSelectionModel,
 } from "@mui/x-data-grid";
 import Select from "react-select";
-import { Modal, Button, Dialog } from "@mui/material";
+import {
+  Modal,
+  Button,
+  Dialog,
+  RadioGroup,
+  FormControlLabel,
+  Radio,
+} from "@mui/material";
 import Paper from "@mui/material/Paper";
 import { useState, useEffect } from "react";
 import registrationApi from "../../../api/Registration";
@@ -105,6 +112,7 @@ export default function RegistrationDataTable() {
   const [selectedIds, setSelectedIds] = useState<GridRowSelectionModel>([]); // Cập nhật kiểu dữ liệu
   const [hasFunction, setHasFunction] = useState<boolean>(false);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [deleteMode, setDeleteMode] = useState<boolean>(false);
   const [isModalOpenRejected, setIsModalOpenRejected] =
     useState<boolean>(false);
   const [accounts, setAccounts] = useState<any[]>([]);
@@ -122,7 +130,7 @@ export default function RegistrationDataTable() {
   const [viewMode, setViewMode] = useState<"pending" | "rejected">("pending"); // Trạng thái xem hiện tại
 
   // Hàm fetch các đơn đăng ký
-  const fetchRegistrations = async () => {
+  const fetchRegistrations = async (deleteModeOn?: boolean | string) => {
     try {
       setLoading(true);
 
@@ -154,14 +162,21 @@ export default function RegistrationDataTable() {
         firstResponse.data.data.total
       );
 
-      console.log(data.data.items);
-
       // Lọc các đơn theo chế độ xem hiện tại
-      const filteredRegistrations = data.data.items;
+      const filteredRegistrations =
+        (deleteModeOn === true || deleteMode) && deleteModeOn != "false"
+          ? data.data.items.filter(
+              (item) =>
+                Number(formatDate.YYYY(item.createdAt)) <
+                Number(
+                  formatDate.YYYY(formatDate.getISODateInVietnamTimeZone())
+                )
+            )
+          : data.data.items;
 
       // Cập nhật state với dữ liệu mới
       setRows(filteredRegistrations);
-      setRowCount(data.data.total); // Cập nhật tổng số hàng từ phản hồi API
+      setRowCount(filteredRegistrations.length); // Cập nhật tổng số hàng từ phản hồi API
     } catch (error) {
       console.error("Lỗi khi tải danh sách registrations:", error);
     } finally {
@@ -169,36 +184,13 @@ export default function RegistrationDataTable() {
     }
   };
 
-  const element = document.querySelector<HTMLElement>(
-    ".MuiTablePagination-selectLabel"
-  );
-  if (element) {
-    element.innerHTML = "Số hàng mỗi trang";
-  }
-  const element2 = document.querySelector<HTMLElement>(
-    ".MuiTablePagination-displayedRows"
-  );
-  if (element2) {
-    let text = element2.innerHTML;
-    text = text.replace(/\bof\b/g, "trong");
-    element2.innerHTML = text;
-  }
-
   useEffect(() => {
     fetchRegistrations();
   }, [paginationModel, viewMode]); // Cập nhật lại khi paginationModel hoặc viewMode thay đổi
 
   // Xử lý sự kiện khi thay đổi trang hoặc kích thước trang
   const handlePaginationChange = (newPaginationModel: GridPaginationModel) => {
-    setPaginationModel(newPaginationModel); // Cập nhật model phân trang
-    const element2 = document.querySelector<HTMLElement>(
-      ".MuiTablePagination-displayedRows"
-    );
-    if (element2) {
-      let text = element2.innerHTML;
-      text = text.replace(/\bof\b/g, "trong");
-      element2.innerHTML = text;
-    }
+    setPaginationModel(newPaginationModel);
   };
 
   // Xử lý khi thay đổi các lựa chọn trong bảng
@@ -284,7 +276,8 @@ export default function RegistrationDataTable() {
       const { data } = await accountApi.getAllAccounts(1, 10000);
       setAccounts(
         data.data.items.filter(
-          (item: any) => item.role.roleName == RoleNameEnum.Catechist
+          (item: any) =>
+            !item.isDeleted && item.role.roleName == RoleNameEnum.Catechist
         )
       );
     } catch (error) {
@@ -330,30 +323,81 @@ export default function RegistrationDataTable() {
     setIsModalOpenRejected(false);
   };
 
+  const [interviewTypeOption, setInterviewTypeOption] = useState<number>(-1);
   const handleScheduleInterview = async () => {
     try {
       enableLoading();
-      const registrationId: string = selectedIds[0].toString(); // Only one registration at a time
+      const registrationId: string = selectedIds[0].toString();
       const selectedAccountIds = selectedAccounts.map((acc: any) => acc.value);
 
-      await registrationApi.updateRegistration(registrationId, {
-        status: RegistrationStatus.Approved_Duyet_Don, // optional accounts
-      });
+      if (meetingTime == "") {
+        sweetAlert.alertFailed(
+          "Vui lòng chọn thời gian phỏng vấn",
+          "",
+          6000,
+          27
+        );
+        return;
+      }
+
+      if (interviewTypeOption < 0) {
+        sweetAlert.alertFailed(
+          "Vui lòng chọn hình thức phỏng vấn",
+          "",
+          6000,
+          27
+        );
+        return;
+      }
+
+      if (selectedAccountIds.length <= 0) {
+        sweetAlert.alertFailed("Vui lòng chọn người phỏng vấn", "", 6000, 26);
+        return;
+      }
+
+      if (viewMode === "pending") {
+        await registrationApi.updateRegistration(registrationId, {
+          status: RegistrationStatus.Approved_Duyet_Don,
+        });
+      } else {
+        const regisChoose = rows.find(
+          (item) => item.id == selectedIds[0].toString()
+        );
+        if (regisChoose && regisChoose.note) {
+          await registrationApi.updateRegistration(registrationId, {
+            status: RegistrationStatus.Approved_Duyet_Don,
+            note: regisChoose.note.replace(
+              "Lý do từ chối",
+              "Lý do từ chối vòng duyệt đơn lần 1"
+            ),
+          });
+        } else {
+          await registrationApi.updateRegistration(registrationId, {
+            status: RegistrationStatus.Approved_Duyet_Don,
+          });
+        }
+      }
 
       await interviewApi.createInterview({
         registrationId,
         meetingTime: meetingTime,
-        interviewType: 0,
+        interviewType: interviewTypeOption,
         accounts: selectedAccountIds,
       });
 
       let process = await interviewProcessApi.createInterviewProcess({
         registrationId: registrationId,
-        name: `${RegistrationProcessTitle.DUYET_DON}`,
+        name:
+          viewMode === "pending"
+            ? `${RegistrationProcessTitle.DUYET_DON}`
+            : `${RegistrationProcessTitle.DUYET_DON_LAI}`,
       });
 
       await interviewProcessApi.updateInterviewProcess(process.data.data.id, {
-        name: `${RegistrationProcessTitle.DUYET_DON}`,
+        name:
+          viewMode === "pending"
+            ? `${RegistrationProcessTitle.DUYET_DON}`
+            : `${RegistrationProcessTitle.DUYET_DON_LAI}`,
         status: RegistrationProcessStatus.Approved,
       });
 
@@ -361,12 +405,13 @@ export default function RegistrationDataTable() {
         "Đã xếp lịch phỏng vấn thành công!",
         "",
         1000,
-        24
+        28
       );
       handleCloseModal();
       fetchRegistrations(); // Refresh registration data after scheduling
       setSelectedIds([]);
       setMeetingTime("");
+      setInterviewTypeOption(-1);
     } catch (error: any) {
       console.error("Lỗi khi xếp lịch phỏng vấn:", error);
       if (error && error.message) {
@@ -390,6 +435,7 @@ export default function RegistrationDataTable() {
     if (meetingTime == "") {
       setSelectedAccounts([]);
       setPreviewAccounts([]);
+      setInterviewTypeOption(-1);
     } else if (meetingTime && meetingTime != "") {
       const action = async () => {
         const res = await accountApi.getRecruitersByMeetingTime(meetingTime);
@@ -406,6 +452,36 @@ export default function RegistrationDataTable() {
     }
   }, [meetingTime]);
 
+  const handleDeleteRegistrations = async () => {
+    const confirm = await sweetAlert.confirm(
+      `Bạn có chắc muốn xóa ${selectedIds.length} đơn`,
+      "",
+      "Xác nhận",
+      "Hủy bỏ",
+      "question"
+    );
+    if (!confirm) {
+      return;
+    }
+    try {
+      enableLoading();
+      const deletePromises = selectedIds.map(async (id) => {
+        await registrationApi.deleteRegistration(id.toString());
+      });
+
+      await Promise.all(deletePromises);
+      sweetAlert.alertSuccess("Xóa đơn ứng tuyển thành công!", "", 1000, 28);
+
+      fetchRegistrations(true);
+      setSelectedIds([]);
+    } catch (error: any) {
+      console.error("Lỗi khi xóa đơn ứng tuyển:", error);
+      sweetAlert.alertFailed("Lỗi khi xóa đơn ứng tuyển", ``, 10000, 24);
+    } finally {
+      disableLoading();
+    }
+  };
+
   return (
     <Paper
       sx={{
@@ -413,60 +489,83 @@ export default function RegistrationDataTable() {
         position: "absolute",
       }}
     >
-      <h1 className="text-center text-[2.2rem] bg-primary_color text-text_primary_light py-2 font-bold">
-        Danh sách ứng tuyển giáo lý viên
+      <h1
+        className={`text-center text-[2.2rem]  text-text_primary_light py-2 font-bold 
+          ${!deleteMode ? `${viewMode === "pending" ? "bg-primary_color" : "bg-danger"}` : "bg-black"}`}
+      >
+        {!deleteMode ? (
+          <>
+            {viewMode === "pending"
+              ? "Danh sách ứng tuyển giáo lý viên chờ phê duyệt"
+              : "Danh sách ứng tuyển giáo lý viên bị từ chối"}
+          </>
+        ) : (
+          <>Lọc các đơn ứng tuyển</>
+        )}
       </h1>
 
       <div className="flex mt-2 px-3 w-full justify-between">
         <div className="flex justify-start">
-          {viewMode === "pending" ? (
-            <button
-              className="mx-1 btn btn-danger"
-              disabled={hasFunction}
-              onClick={() => {
-                setViewMode("rejected");
-              }}
-            >
-              Đơn bị từ chối
-            </button>
+          {!deleteMode ? (
+            <>
+              {viewMode === "pending" ? (
+                <button
+                  className="mx-1 btn btn-danger"
+                  disabled={hasFunction}
+                  onClick={() => {
+                    setViewMode("rejected");
+                  }}
+                >
+                  Đơn bị từ chối
+                </button>
+              ) : (
+                <button
+                  className="mx-1 btn btn-warning"
+                  disabled={hasFunction}
+                  onClick={() => {
+                    setViewMode("pending");
+                  }}
+                >
+                  Đơn chờ duyệt
+                </button>
+              )}
+            </>
           ) : (
-            <button
-              className="mx-1 btn btn-warning"
-              disabled={hasFunction}
-              onClick={() => {
-                setViewMode("pending");
-              }}
-            >
-              Đơn chờ duyệt
-            </button>
+            <></>
           )}
         </div>
-        <div className="flex justify-end">
-          {selectedIds.length > 0 ? (
+        <div className="flex justify-end gap-x-2">
+          {selectedIds.length > 0 && !deleteMode ? (
             <>
               {selectedIds.length <= 1 ? (
                 <>
-                  <button
-                    className="ml-1 btn btn-primary"
+                  <Button
+                    className="btn btn-primary"
                     disabled={hasFunction}
                     onClick={() => {
                       handleOpenModal();
                     }}
+                    variant="outlined"
+                    color="primary"
                   >
-                    Xếp lịch phỏng vấn
-                  </button>
+                    {viewMode === "pending"
+                      ? "Xếp lịch phỏng vấn"
+                      : "Xếp lịch phỏng vấn lại"}
+                  </Button>
 
                   {viewMode != "rejected" ? (
                     <>
-                      <button
-                        className="ml-1 btn btn-danger"
+                      <Button
+                        className="btn btn-danger"
                         onClick={() => {
                           handleOpenModalRejected();
                         }}
                         disabled={hasFunction}
+                        variant="outlined"
+                        color="primary"
                       >
                         Từ chối đơn
-                      </button>
+                      </Button>
                     </>
                   ) : (
                     <></>
@@ -475,7 +574,7 @@ export default function RegistrationDataTable() {
               ) : (
                 <></>
               )}
-              {/* <button
+              {/* <Button
                 className="mx-1 btn btn-danger"
                 disabled={hasFunction}
                 onClick={() => {
@@ -483,33 +582,93 @@ export default function RegistrationDataTable() {
                 }}
               >
                 Xóa đơn
-              </button> */}
+              </Button> */}
             </>
           ) : (
             <></>
           )}
+
           {selectedIds.length == 1 ? (
             <>
-              <button
-                className="btn btn-info ml-1"
+              <Button
+                className="btn btn-info"
                 onClick={() => setOpenDialogRegisDetail(true)}
+                variant="outlined"
+                color="primary"
               >
                 Xem chi tiết
-              </button>
+              </Button>
             </>
           ) : (
             <></>
           )}
-          <button
-            className="mx-1 btn bg-primary_color text-text_primary_light hover:text-text_primary_dark
+          {viewMode == "rejected" && deleteMode && selectedIds.length > 0 ? (
+            <>
+              <Button
+                className="btn bg-primary_color text-text_primary_light hover:text-text_primary_dark
+          hover:bg-gray-400"
+                onClick={() => {
+                  handleDeleteRegistrations();
+                }}
+                disabled={hasFunction}
+                variant="outlined"
+                color="primary"
+              >
+                Xóa đơn
+              </Button>
+            </>
+          ) : (
+            <></>
+          )}
+          {viewMode == "rejected" && !deleteMode ? (
+            <>
+              <Button
+                className="btn bg-primary_color text-text_primary_light hover:text-text_primary_dark
+          hover:bg-gray-400"
+                onClick={() => {
+                  setDeleteMode(true);
+                  fetchRegistrations(true);
+                }}
+                disabled={hasFunction}
+                variant="outlined"
+                color="primary"
+              >
+                Lọc đơn
+              </Button>
+            </>
+          ) : (
+            <></>
+          )}
+          {deleteMode ? (
+            <>
+              <Button
+                className="btn btn-primary"
+                disabled={hasFunction}
+                onClick={() => {
+                  setDeleteMode(false);
+                  fetchRegistrations("false");
+                }}
+                variant="outlined"
+                color="primary"
+              >
+                Xong
+              </Button>
+            </>
+          ) : (
+            <></>
+          )}
+          <Button
+            className="btn bg-primary_color text-text_primary_light hover:text-text_primary_dark
           hover:bg-gray-400"
             onClick={() => {
               fetchRegistrations();
             }}
             disabled={hasFunction}
+            variant="outlined"
+            color="primary"
           >
             Tải lại
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -523,7 +682,7 @@ export default function RegistrationDataTable() {
           initialState={{ pagination: { paginationModel } }}
           paginationModel={paginationModel}
           onPaginationModelChange={handlePaginationChange}
-          pageSizeOptions={[8, 25, 50]} // Đặt pageSizeOptions đúng
+          pageSizeOptions={[3, 25, 50]} // Đặt pageSizeOptions đúng
           checkboxSelection
           rowSelectionModel={selectedIds}
           onRowSelectionModelChange={handleSelectionChange} // Gọi hàm khi thay đổi lựa chọn
@@ -537,7 +696,6 @@ export default function RegistrationDataTable() {
       {/* Dialog để xếp lịch phỏng vấn */}
       <Dialog
         open={isModalOpen}
-        onClose={handleCloseModal}
         className="z-[1000] flex justify-center items-center"
         fullWidth
         maxWidth="md"
@@ -599,6 +757,26 @@ export default function RegistrationDataTable() {
 
           {meetingTime != "" ? (
             <>
+              <label className="font-bold mt-4">Chọn hình thức phỏng vấn</label>
+              <RadioGroup
+                aria-labelledby="demo-radio-buttons-group-label"
+                name="radio-buttons-group"
+                value={interviewTypeOption}
+                onChange={(event) => {
+                  setInterviewTypeOption(Number(event.target.value));
+                }}
+              >
+                <FormControlLabel
+                  value={0}
+                  control={<Radio />}
+                  label="Offline"
+                />
+                <FormControlLabel
+                  value={1}
+                  control={<Radio />}
+                  label="Online"
+                />
+              </RadioGroup>
               <label className="font-bold mt-4">Chọn người phỏng vấn</label>
               <Select
                 options={accounts.map((acc: any) => ({
@@ -614,7 +792,6 @@ export default function RegistrationDataTable() {
                 placeholder="Tìm kiếm và chọn người phỏng vấn..."
                 className="mt-1"
               />
-
               <label className="font-bold mt-4">
                 Danh sách lịch phân công phỏng vấn ngày{" "}
                 {formatDate.DD_MM_YYYY(meetingTime)}
@@ -705,7 +882,6 @@ export default function RegistrationDataTable() {
 
       <Modal
         open={isModalOpenRejected}
-        onClose={handleCloseModalRejected}
         className="fixed z-[1000] flex justify-center items-center"
       >
         <div

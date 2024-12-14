@@ -1,5 +1,5 @@
 import React from "react";
-//import { Link } from "react-router-dom";
+import { CORE_INFORMATION } from "../../../constants/CoreInformation";
 
 const FooterHome: React.FC = () => {
   return (
@@ -13,7 +13,9 @@ const FooterHome: React.FC = () => {
             Catechist Helper
           </h2>
           <p className="text-[0.8rem]">Ho Chi Minh City, Vietnam</p>
-          <p className="text-[0.8rem]">+(84) 565 565</p>
+          <p className="text-[0.8rem]">
+            {CORE_INFORMATION.PHONE_CONSTANT_DISPLAY}
+          </p>
         </div>
         <div>
           <p

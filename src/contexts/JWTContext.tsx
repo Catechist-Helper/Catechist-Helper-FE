@@ -12,7 +12,7 @@ import {
   JWTContextType,
 } from "../types/authentication";
 import useAppContext from "../hooks/useAppContext";
-import { PATH_ADMIN, PATH_AUTH } from "../routes/paths";
+import { PATH_ADMIN, PATH_AUTH, PATH_CATECHIST } from "../routes/paths";
 import { LOCALSTORAGE_CONSTANTS } from "../constants/WebsiteConstant";
 // import Swal from "sweetalert2";
 import { BasicResponse } from "../model/Response/BasicResponse";
@@ -93,6 +93,7 @@ function AuthProvider({ children }: { children: ReactNode }) {
   // const router = useRouter();
   const [state, dispatch] = useReducer(JWTReducer, initialState);
   const { enableLoading, disableLoading } = useAppContext();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const initialize = async () => {
@@ -146,7 +147,6 @@ function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const navigateToPage = (route: string) => {
-    const navigate = useNavigate();
     localStorage.setItem(LOCALSTORAGE_CONSTANTS.CURRENT_PAGE, route);
     navigate(route);
   };
@@ -202,9 +202,13 @@ function AuthProvider({ children }: { children: ReactNode }) {
               role.trim().toLowerCase() ===
                 AccountRoleString.ADMIN.trim().toLowerCase()
             ) {
-              setTimeout(() => {
-                navigateToPage(PATH_ADMIN.root);
-              }, 5000);
+              navigateToPage(PATH_ADMIN.root);
+            } else if (
+              role &&
+              role.trim().toLowerCase() ===
+                AccountRoleString.CATECHIST.trim().toLowerCase()
+            ) {
+              navigateToPage(PATH_CATECHIST.root);
             } else {
               navigateToPage("/");
             }

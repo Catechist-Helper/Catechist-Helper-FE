@@ -5,3 +5,8 @@ export type CreateCatechistInGradeRequest = {
   catechistIds: string[];
   mainCatechistId: string;
 };
+
+export type ReplaceCatechistInGradeRequest = {
+  gradeId: string;
+  catechistIds: string[];
+};

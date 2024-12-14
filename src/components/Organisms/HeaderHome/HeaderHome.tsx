@@ -40,7 +40,7 @@ const HeaderHome: React.FC = () => {
           <Link to={"/"} className="links_dark_hover">
             TRANG CHỦ
           </Link>
-          <Link to={"/"} className="links_dark_hover">
+          <Link to={"/introduce"} className="links_dark_hover">
             GIỚI THIỆU
           </Link>
           <Link to={PATH_HOME.news} className="links_dark_hover">

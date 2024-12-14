@@ -22,7 +22,7 @@ export default function RoleBasedGuard({
   children,
 }: RoleBasedGuardProp) {
   const currentRole = useCurrentRole();
-  const { logout } = useAuth();
+  // const { logout } = useAuth();
   const navigate = useNavigate();
 
   if (
@@ -30,16 +30,42 @@ export default function RoleBasedGuard({
     !accessibleRoles.some((r) => currentRole.some((ur) => ur === r))
   ) {
     return (
-      <Container sx={{ height: "100vh" }}>
+      <Container
+        sx={{
+          height: "100vh",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+          zIndex: "99999",
+        }}
+      >
         <Alert severity="error">
-          <AlertTitle>Từ chối truy cập</AlertTitle>
-          Bạn không có quyền truy cập trang này
+          <AlertTitle>
+            <h1 className="text-center">Từ chối truy cập</h1>
+          </AlertTitle>
+          <h1>Bạn không có quyền truy cập trang này</h1>
         </Alert>
         <Stack direction="row" justifyContent="center">
-          <Button onClick={() => navigate("/")}>Quay lại trang chính</Button>
-          <Button onClick={logout} variant="outlined" color="inherit">
-            Đăng xuất
+          <Button
+            className="mx-1 mt-2"
+            onClick={() => navigate("/")}
+            variant="contained"
+            color="error"
+            sx={{ fontSize: "1.2rem" }}
+          >
+            Quay lại trang chính
           </Button>
+          {/* <Button
+            className="mx-1"
+            onClick={() => {
+              logout();
+            }}
+            variant="contained"
+            color="error"
+          >
+            Đăng xuất tài khoản
+          </Button> */}
         </Stack>
       </Container>
     );

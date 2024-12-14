@@ -11,3 +11,9 @@ export const catechistInTrainingStatusLabel: { [key in catechistInTrainingStatus
     [catechistInTrainingStatus.Completed]: "Hoàn thành",
     [catechistInTrainingStatus.Failed]: "Không đạt",
 };
+
+export enum catechistInTrainingStatusString {
+    Training = "Đang đào tạo",
+    Completed = "Hoàn thành",
+    Failed = "Không đạt"
+}

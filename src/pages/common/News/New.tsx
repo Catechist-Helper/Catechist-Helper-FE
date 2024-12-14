@@ -68,9 +68,13 @@ const New: React.FC = () => {
                 </Link>
                 <p className="text-gray-700 mt-2">
                   {post.content.length > 100
-                    ? post.content.replace(/<[^>]*>/g, "").substring(0, 100) +
-                      "..."
-                    : post.content.replace(/<[^>]*>/g, "")}
+                    ? post.content
+                        .replace(/<[^>]*>/g, "")
+                        .replace("&nbsp;", ". ")
+                        .substring(0, 100) + "..."
+                    : post.content
+                        .replace(/<[^>]*>/g, "")
+                        .replace("&nbsp;", ". ")}
                 </p>
               </li>
             ))}

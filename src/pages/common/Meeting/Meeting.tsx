@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   CallClient,
   CallAgent,
@@ -9,7 +10,15 @@ import {
 } from "@azure/communication-calling";
 import { AzureCommunicationTokenCredential } from "@azure/communication-common";
 
+import { AppBar, IconButton, Toolbar, Box, Button } from "@mui/material";
+import CallEndIcon from "@mui/icons-material/CallEnd";
+import VideoCallIcon from "@mui/icons-material/VideoCall";
+import VideocamOffIcon from "@mui/icons-material/VideocamOff";
+import "./Meeting.css";
+import LoadingScreen from "../../../components/Organisms/LoadingScreen/LoadingScreen";
+
 const Meeting = () => {
+  const navigate = useNavigate();
   const [callAgent, setCallAgent] = useState<CallAgent | null>(null);
   const [deviceManager, setDeviceManager] = useState<DeviceManager | null>(
     null
@@ -20,7 +29,6 @@ const Meeting = () => {
   const [localVideoRenderer, setLocalVideoRenderer] =
     useState<VideoStreamRenderer | null>(null);
 
-  const [isCallConnected, setIsCallConnected] = useState(false);
   const [isStartCallEnabled, setIsStartCallEnabled] = useState(false);
   const [isHangUpEnabled, setIsHangUpEnabled] = useState(false);
   const [isVideoEnabled, setIsVideoEnabled] = useState(false);
@@ -29,8 +37,7 @@ const Meeting = () => {
   const remoteVideosGalleryRef = useRef<HTMLDivElement>(null);
 
   const [roomId, setRoomId] = useState<string>("");
-  const [token, setToken] = useState<string>("");
-
+  const [loading, setLoading] = useState(true);
   useEffect(() => {
     // Extract query parameters from the URL
     const searchParams = new URLSearchParams(window.location.search);
@@ -39,11 +46,11 @@ const Meeting = () => {
 
     if (roomIdParam && tokenParam) {
       setRoomId(roomIdParam);
-      setToken(tokenParam);
+      initializeCallAgent(tokenParam).finally(() => setLoading(false));
     }
   }, []);
 
-  const initializeCallAgent = async () => {
+  const initializeCallAgent = async (token: string) => {
     try {
       const callClient = new CallClient();
       const tokenCredential = new AzureCommunicationTokenCredential(token);
@@ -56,7 +63,6 @@ const Meeting = () => {
       await manager.askDevicePermission({ video: true, audio: true });
 
       setIsStartCallEnabled(true);
-      console.log("Call agent initialized.");
     } catch (error) {
       console.error("Failed to initialize call agent:", error);
     }
@@ -85,12 +91,9 @@ const Meeting = () => {
 
   const subscribeToCall = (call: Call) => {
     call.on("stateChanged", () => {
-      console.log(`Call state changed: ${call.state}`);
       if (call.state === "Connected") {
-        setIsCallConnected(true);
         setIsVideoEnabled(true);
       } else if (call.state === "Disconnected") {
-        setIsCallConnected(false);
         setIsStartCallEnabled(true);
         setIsHangUpEnabled(false);
         setIsVideoEnabled(false);
@@ -180,7 +183,6 @@ const Meeting = () => {
 
   const removeLocalVideoStream = () => {
     if (localVideoRenderer && localVideoContainerRef.current) {
-      localVideoRenderer.dispose();
       localVideoContainerRef.current.hidden = true;
       setLocalVideoRenderer(null);
     }
@@ -190,12 +192,11 @@ const Meeting = () => {
     if (call) {
       await call.hangUp();
       setCall(null);
-      setIsCallConnected(false);
+      navigate("/");
     }
   };
 
   useEffect(() => {
-    // Cleanup on unmount
     return () => {
       if (localVideoRenderer) {
         localVideoRenderer.dispose();
@@ -203,31 +204,181 @@ const Meeting = () => {
     };
   }, [localVideoRenderer]);
 
-  return (
-    <div>
-      <h1>Azure Communication Meeting</h1>
-      <button onClick={() => initializeCallAgent()}>
-        Initialize Call Agent
-      </button>
-      <button onClick={() => joinRoomCall()} disabled={!isStartCallEnabled}>
-        Join Room Call
-      </button>
-      <button onClick={hangUpCall} disabled={!isHangUpEnabled}>
-        Hang Up Call
-      </button>
-      <button onClick={displayLocalVideoStream} disabled={!isVideoEnabled}>
-        Start Video
-      </button>
-      <button onClick={removeLocalVideoStream} disabled={!isVideoEnabled}>
-        Stop Video
-      </button>
-      <div id="connectedLabel" hidden={!isCallConnected}>
-        Room Call is connected!
-      </div>
-      <div id="remoteVideosGallery" ref={remoteVideosGalleryRef}></div>
-      <div id="localVideoContainer" ref={localVideoContainerRef} hidden></div>
-    </div>
-  );
+  if (loading) {
+    return (
+      <>
+        <div className="h-[100vh] absolute z-999 w-full">
+          <LoadingScreen transparent={true} />
+        </div>
+        <Box
+          sx={{
+            height: "100vh",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundRepeat: "no-repeat",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}
+          className="bg-[url(../src/assets/images/HomeTemplate/background.png)]"
+        ></Box>
+      </>
+    );
+  }
+
+  const renderContent = () => {
+    if (isStartCallEnabled) {
+      return (
+        <Box
+          sx={{
+            height: "100vh",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundRepeat: "no-repeat",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}
+          className="bg-[url(../src/assets/images/HomeTemplate/background.png)]"
+        >
+          <div
+            className="w-full h-full absolute bg-black"
+            style={{ opacity: "0.5" }}
+          ></div>
+          <div className="z-999">
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => joinRoomCall()}
+              disabled={!isStartCallEnabled}
+              sx={{
+                fontSize: "1.25rem",
+                padding: "12px 24px",
+                borderRadius: "8px",
+                textTransform: "none",
+              }}
+            >
+              Tham gia phỏng vấn
+            </Button>
+          </div>
+        </Box>
+      );
+    }
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          height: "100vh",
+          backgroundRepeat: "no-repeat",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+        className="bg-[url(../src/assets/images/HomeTemplate/background.png)]"
+      >
+        <Box
+          className="video-container"
+          sx={{
+            flex: 1,
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", // Side-by-side layout
+            gap: 10,
+            padding: 20,
+            alignItems: "center", // Center-align items vertically
+          }}
+        >
+          <div
+            id="localVideoContainer"
+            ref={localVideoContainerRef}
+            style={{
+              backgroundColor: "#000",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              borderRadius: 8,
+              overflow: "hidden",
+              height: "100%", // Match height with the row's layout
+              width: "100%", // Stretches within its grid cell
+            }}
+          ></div>
+          <div
+            id="remoteVideosGallery"
+            ref={remoteVideosGalleryRef}
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", // Handles responsive layout for multiple videos
+              gap: 10,
+              backgroundColor: "transparent",
+              borderRadius: 8,
+              overflow: "hidden",
+              height: "100%", // Match height
+            }}
+          ></div>
+        </Box>
+        <AppBar
+          position="fixed"
+          color="default"
+          sx={{
+            top: "auto",
+            bottom: 0,
+            backgroundColor: "#1c1c1c",
+            color: "white",
+            padding: "10px 0",
+          }}
+        >
+          <Toolbar
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              gap: 2,
+            }}
+          >
+            <IconButton
+              onClick={hangUpCall}
+              disabled={!isHangUpEnabled}
+              sx={{
+                color: "#ff4d4d",
+                fontSize: "1.5rem",
+                backgroundColor: "rgba(255, 77, 77, 0.1)",
+                borderRadius: "50%",
+                padding: "10px",
+              }}
+            >
+              <CallEndIcon fontSize="large" />
+            </IconButton>
+            <IconButton
+              onClick={displayLocalVideoStream}
+              disabled={!isVideoEnabled}
+              sx={{
+                color: "white",
+                fontSize: "1.5rem",
+                backgroundColor: "rgba(255, 255, 255, 0.1)",
+                borderRadius: "50%",
+                padding: "10px",
+              }}
+            >
+              <VideoCallIcon fontSize="large" />
+            </IconButton>
+            <IconButton
+              onClick={removeLocalVideoStream}
+              disabled={!isVideoEnabled}
+              sx={{
+                color: "white",
+                fontSize: "1.5rem",
+                backgroundColor: "rgba(255, 255, 255, 0.1)",
+                borderRadius: "50%",
+                padding: "10px",
+              }}
+            >
+              <VideocamOffIcon fontSize="large" />
+            </IconButton>
+          </Toolbar>
+        </AppBar>
+      </Box>
+    );
+  };
+
+  return <>{renderContent()}</>;
 };
 
 export default Meeting;

@@ -1,0 +1,48 @@
+.calendar-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+/* Calendar Header */
+.calendar-title {
+  font-family: "Arial", sans-serif;
+  font-size: 2rem;
+  text-align: center;
+  color: #0078d4;
+  margin: 10px 0;
+}
+
+/* FullCalendar Styling Overrides */
+.fc {
+  font-family: "Arial", sans-serif;
+  background-color: white;
+  border-radius: 8px;
+  padding: 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.fc-toolbar {
+  margin-bottom: 10px;
+}
+
+.fc-button {
+  background-color: #0078d4 !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 4px !important;
+  margin: 5px !important;
+}
+
+.fc-button:hover {
+  background-color: #005fa3 !important;
+}
+
+.fc-daygrid-event {
+  background-color: #0078d4 !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 4px !important;
+  padding: 2px 5px !important;
+}

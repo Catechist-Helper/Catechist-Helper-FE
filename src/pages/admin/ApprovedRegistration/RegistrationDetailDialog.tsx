@@ -99,7 +99,7 @@ const RegistrationDetailDialog: React.FC<RegistrationDetailDialogProps> = ({
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+    <Dialog open={open} maxWidth="sm" fullWidth>
       <DialogTitle
         style={{ fontSize: "1.5rem", fontWeight: "bolder", marginBottom: "0" }}
       >
@@ -139,8 +139,10 @@ const RegistrationDetailDialog: React.FC<RegistrationDetailDialogProps> = ({
                 </li>
                 {registration.note && (
                   <li>
-                    <strong>Ghi chú:</strong> <br />
-                    <span className="ml-6">{registration.note}</span>
+                    <strong>Ghi chú:</strong>
+                    <div className="ml-6" style={{ whiteSpace: "pre-line" }}>
+                      {`${registration.note}`}
+                    </div>
                   </li>
                 )}
                 <li>
@@ -218,6 +220,44 @@ const RegistrationDetailDialog: React.FC<RegistrationDetailDialogProps> = ({
                       registration.interview?.meetingTime
                     )}
                   </li>
+                  {registration.interview.recruiterInInterviews.findIndex(
+                    (item) => item.evaluation && item.evaluation != ""
+                  ) >= 0 ? (
+                    <li>
+                      <strong>Nhận xét của người phỏng vấn</strong>:
+                      {registration.interview &&
+                      registration.interview.recruiterInInterviews ? (
+                        <>
+                          {registration.interview.recruiterInInterviews.map(
+                            (item) => {
+                              return (
+                                <div key={item.accountId}>
+                                  <p>
+                                    Nhận xét của{" "}
+                                    {
+                                      registration.interview.recruiters.find(
+                                        (item2) => item2.id == item.accountId
+                                      )?.fullName
+                                    }
+                                  </p>
+                                  <div
+                                    className="mt-2"
+                                    dangerouslySetInnerHTML={{
+                                      __html: item.evaluation,
+                                    }}
+                                  />
+                                </div>
+                              );
+                            }
+                          )}
+                        </>
+                      ) : (
+                        <></>
+                      )}
+                    </li>
+                  ) : (
+                    <></>
+                  )}
                   <li>
                     <strong>Người phỏng vấn</strong>:{" "}
                     {registration.interview && registration.interview.recruiters

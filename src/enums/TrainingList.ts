@@ -9,4 +9,10 @@ export enum trainingListStatus {
     [trainingListStatus.Training]: "Đào tạo",
     [trainingListStatus.Finished]: "Kết thúc",
   };
+
+  export enum trainingListStatusString {
+    NotStarted = "Chưa bắt đầu",
+    Training = "Đào tạo", 
+    Finished = "Kết thúc", 
+  }
   

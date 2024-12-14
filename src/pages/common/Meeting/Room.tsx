@@ -16,8 +16,7 @@ const Room: React.FC = () => {
   const [deviceManager, setDeviceManager] = useState<any>(null);
   const [localVideoStream, setLocalVideoStream] =
     useState<LocalVideoStream | null>(null);
-  const [localVideoStreamRenderer, setLocalVideoStreamRenderer] =
-    useState<VideoStreamRenderer | null>(null);
+  const [localVideoStreamRenderer] = useState<VideoStreamRenderer | null>(null);
 
   const roomId = searchParams.get("roomid");
   const token = searchParams.get("token");
@@ -71,6 +70,7 @@ const Room: React.FC = () => {
     try {
       const stream = await createLocalVideoStream();
       setLocalVideoStream(stream);
+      console.log(localVideoStream);
 
       const videoOptions = stream ? { localVideoStreams: [stream] } : undefined;
 
@@ -112,10 +112,10 @@ const Room: React.FC = () => {
   return (
     <Box sx={{ padding: 4 }}>
       <Typography variant="h4" gutterBottom>
-        Meeting Room
+        Phòng phỏng vấn
       </Typography>
       <Box sx={{ marginBottom: 2 }}>
-        <Typography variant="body1">Room ID: {roomId}</Typography>
+        <Typography variant="body1">ID của phòng: {roomId}</Typography>
       </Box>
       <Box sx={{ marginBottom: 4 }}>
         <Button
@@ -124,7 +124,7 @@ const Room: React.FC = () => {
           onClick={handleJoinRoom}
           sx={{ marginRight: 2 }}
         >
-          Join Room
+          Tham gia phòng
         </Button>
         <Button
           variant="contained"
