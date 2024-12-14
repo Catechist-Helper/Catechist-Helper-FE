@@ -276,106 +276,104 @@ const Meeting = () => {
         }}
         className="bg-[url(../src/assets/images/HomeTemplate/background.png)]"
       >
-        <div
-          className="w-full h-full absolute bg-black"
-          style={{ opacity: "0.5" }}
-        ></div>
-        <div className="z-999">
-          <Box
-            className="video-container"
-            sx={{
-              flex: 1,
+        <Box
+          className="video-container"
+          sx={{
+            flex: 1,
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", // Side-by-side layout
+            gap: 10,
+            padding: 20,
+            alignItems: "center", // Center-align items vertically
+          }}
+        >
+          <div
+            id="localVideoContainer"
+            ref={localVideoContainerRef}
+            style={{
+              backgroundColor: "#000",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              borderRadius: 8,
+              overflow: "hidden",
+              height: "100%", // Match height with the row's layout
+              width: "100%", // Stretches within its grid cell
+            }}
+          ></div>
+          <div
+            id="remoteVideosGallery"
+            ref={remoteVideosGalleryRef}
+            style={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+              gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", // Handles responsive layout for multiple videos
               gap: 10,
-              padding: 20,
+              backgroundColor: "transparent",
+              borderRadius: 8,
+              overflow: "hidden",
+              height: "100%", // Match height
             }}
-          >
-            <div
-              id="localVideoContainer z-999"
-              ref={localVideoContainerRef}
-              style={{
-                backgroundColor: "#000",
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                borderRadius: 8,
-                overflow: "hidden",
-              }}
-            ></div>
-            <div
-              id="remoteVideosGallery z-999"
-              ref={remoteVideosGalleryRef}
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-                gap: 10,
-                backgroundColor: "transparent",
-                borderRadius: 8,
-                overflow: "hidden",
-              }}
-            ></div>
-          </Box>
-          <AppBar
-            position="fixed"
-            color="default"
+          ></div>
+        </Box>
+        <AppBar
+          position="fixed"
+          color="default"
+          sx={{
+            top: "auto",
+            bottom: 0,
+            backgroundColor: "#1c1c1c",
+            color: "white",
+            padding: "10px 0",
+          }}
+        >
+          <Toolbar
             sx={{
-              top: "auto",
-              bottom: 0,
-              backgroundColor: "#1c1c1c",
-              color: "white",
-              padding: "10px 0",
+              display: "flex",
+              justifyContent: "center",
+              gap: 2,
             }}
           >
-            <Toolbar
+            <IconButton
+              onClick={hangUpCall}
+              disabled={!isHangUpEnabled}
               sx={{
-                display: "flex",
-                justifyContent: "center",
-                gap: 2,
+                color: "#ff4d4d",
+                fontSize: "1.5rem",
+                backgroundColor: "rgba(255, 77, 77, 0.1)",
+                borderRadius: "50%",
+                padding: "10px",
               }}
             >
-              <IconButton
-                onClick={hangUpCall}
-                disabled={!isHangUpEnabled}
-                sx={{
-                  color: "#ff4d4d",
-                  fontSize: "1.5rem",
-                  backgroundColor: "rgba(255, 77, 77, 0.1)",
-                  borderRadius: "50%",
-                  padding: "10px",
-                }}
-              >
-                <CallEndIcon fontSize="large" />
-              </IconButton>
-              <IconButton
-                onClick={displayLocalVideoStream}
-                disabled={!isVideoEnabled}
-                sx={{
-                  color: "white",
-                  fontSize: "1.5rem",
-                  backgroundColor: "rgba(255, 255, 255, 0.1)",
-                  borderRadius: "50%",
-                  padding: "10px",
-                }}
-              >
-                <VideoCallIcon fontSize="large" />
-              </IconButton>
-              <IconButton
-                onClick={removeLocalVideoStream}
-                disabled={!isVideoEnabled}
-                sx={{
-                  color: "white",
-                  fontSize: "1.5rem",
-                  backgroundColor: "rgba(255, 255, 255, 0.1)",
-                  borderRadius: "50%",
-                  padding: "10px",
-                }}
-              >
-                <VideocamOffIcon fontSize="large" />
-              </IconButton>
-            </Toolbar>
-          </AppBar>
-        </div>
+              <CallEndIcon fontSize="large" />
+            </IconButton>
+            <IconButton
+              onClick={displayLocalVideoStream}
+              disabled={!isVideoEnabled}
+              sx={{
+                color: "white",
+                fontSize: "1.5rem",
+                backgroundColor: "rgba(255, 255, 255, 0.1)",
+                borderRadius: "50%",
+                padding: "10px",
+              }}
+            >
+              <VideoCallIcon fontSize="large" />
+            </IconButton>
+            <IconButton
+              onClick={removeLocalVideoStream}
+              disabled={!isVideoEnabled}
+              sx={{
+                color: "white",
+                fontSize: "1.5rem",
+                backgroundColor: "rgba(255, 255, 255, 0.1)",
+                borderRadius: "50%",
+                padding: "10px",
+              }}
+            >
+              <VideocamOffIcon fontSize="large" />
+            </IconButton>
+          </Toolbar>
+        </AppBar>
       </Box>
     );
   };
