@@ -237,6 +237,43 @@ const ListAllTrain: React.FC = () => {
                 });
         }
     };
+    // const handleDeleteTrainClick = (id: string): void => {
+    //     // Kiểm tra số lượng Catechist trong training
+    //     const trainingCatechists = catechists[id] || [];
+        
+    //     if (trainingCatechists.length > 0) {
+    //         sweetAlert.alertWarning(
+    //             "Không thể xóa!",
+    //             "Không thể xóa khóa đào tạo đã có Giáo lý viên tham gia.",
+    //             2000,
+    //             false
+    //         );
+    //         return;
+    //     }
+    
+    //     if (window.confirm("Bạn có chắc là muốn xóa đào tạo này không?")) {
+    //         trainApi
+    //             .deleteTrain(id)
+    //             .then(() => {
+    //                 sweetAlert.alertSuccess(
+    //                     "Xóa thành công!",
+    //                     `Khóa đào tạo đã được xóa thành công.`,
+    //                     2000,
+    //                     false
+    //                 );
+    //                 setTrains(trains.filter((train) => train.id !== id));
+    //             })
+    //             .catch((err: Error) => {
+    //                 console.error(`Không thể xóa khóa đào tạo với ID: ${id}`, err);
+    //                 sweetAlert.alertFailed(
+    //                     "Xóa thất bại!",
+    //                     "Đã xảy ra lỗi khi xóa khóa đào tạo.",
+    //                     2000,
+    //                     false
+    //                 );
+    //             });
+    //     }
+    // };
 
     // const handleAddOrUpdateCatechist = (trainId: string, catechistCount: number) => {
     //     if (catechistCount === 0) {
@@ -338,7 +375,7 @@ const ListAllTrain: React.FC = () => {
                             <th className="px-6 py-3">Ngày kết thúc</th>
                             <th className="px-6 py-3">Số lượng Giáo lí viên</th>
                             {/* <th className="px-6 py-3">Chứng chỉ</th> */}
-                            <th className="px-6 py-3">Hoàn thành</th>
+                            <th className="px-6 py-3">Trạng thái</th>
                             <th className="px-6 py-3">Action</th>
                         </tr>
                     </thead>

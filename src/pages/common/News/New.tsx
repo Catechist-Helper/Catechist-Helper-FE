@@ -16,6 +16,18 @@ interface Post {
 const New: React.FC = () => {
   const [publicPosts, setPublicPosts] = useState<Post[]>([]);
 
+  const mapApiModuleToEnum = (module: string): string => {
+    switch (module) {
+      case 'PUBLIC':
+        return PostStatus.PUBLIC;
+      case 'PRIVATE':
+        return PostStatus.PRIVATE;
+      default:
+        return 'Không xác định';
+    }
+  };
+  
+
   useEffect(() => {
     const fetchPublicPosts = async () => {
       try {
@@ -23,10 +35,9 @@ const New: React.FC = () => {
         console.log(response.data.data.items);
         const allPosts: Post[] = response.data.data.items;
 
-        const publicPosts = allPosts.filter((post) => {
-          console.log(post.module);
-          return post.module === PostStatus.PUBLIC;
-        });
+        const publicPosts = allPosts.filter(
+          (post) => mapApiModuleToEnum(post.module) === PostStatus.PUBLIC
+        );
 
         setPublicPosts(publicPosts);
       } catch (error) {

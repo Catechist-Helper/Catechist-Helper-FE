@@ -18,6 +18,17 @@ interface Post {
 const OutstandingNews: React.FC = () => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  
+  const mapApiModuleToEnum = (module: string): string => {
+    switch (module) {
+      case "PUBLIC":
+        return PostStatus.PUBLIC;
+      case "PRIVATE":
+        return PostStatus.PRIVATE;
+      default:
+        return "Không xác định";
+    }
+  };
 
   useEffect(() => {
     // Gọi API để lấy danh sách bài viết
@@ -25,9 +36,9 @@ const OutstandingNews: React.FC = () => {
       try {
         const response = await postsApi.getAll(1, 6); // Lấy 6 bài tin tức mới nhất
         // Lọc bài viết có module là PUBLIC
-        const publicPosts = response.data.data.items
-          .filter((post: Post) => post.module === PostStatus.PUBLIC)
-          .sort((a: Post, b: Post) => {
+         const publicPosts = response.data.data.items.filter(
+          (post: Post) => mapApiModuleToEnum(post.module) === PostStatus.PUBLIC
+        ).sort((a: Post, b: Post) => {
             return (
               new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
             );

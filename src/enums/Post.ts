@@ -1,4 +1,4 @@
 export enum PostStatus {
-    PUBLIC = 'PUBLIC',
-    PRIVATE = 'PRIVATE',
+    PUBLIC = 'Công khai',
+    PRIVATE = 'Nội bộ',
 }

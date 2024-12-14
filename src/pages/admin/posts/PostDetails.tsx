@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { AxiosResponse } from "axios";
 import { BasicResponse } from "../../../model/Response/BasicResponse";
 import postsApi from "../../../api/Post";
+import accountApi from "../../../api/Account";
 import postCategoryApi from "../../../api/PostCategory";
 import { useParams, Link } from "react-router-dom";
 import AdminTemplate from "../../../components/Templates/AdminTemplate/AdminTemplate";
@@ -21,7 +22,7 @@ const PostDetails: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [categoryName, setCategoryName] = useState<string | null>(null);
-
+  const [accountName, setAccountName] = useState<string | null>(null); 
   useEffect(() => {
     const fetchPostAndCategory = async () => {
       try {
@@ -39,6 +40,19 @@ const PostDetails: React.FC = () => {
             setCategoryName(categoryRes.data.name); // Set the category name
           } else {
             setCategoryName("Không tìm thấy danh mục");
+          }
+          try {
+            const accountResponse: AxiosResponse<BasicResponse> = await accountApi.getAccountById(res.data.accountId);
+            const accountRes = accountResponse.data;
+
+            if (accountRes.statusCode.toString().startsWith("2") && accountRes.data) {
+              setAccountName(accountRes.data.fullName);
+            } else {
+              setAccountName("Không tìm thấy người dùng");
+            }
+          } catch (accountErr) {
+            console.error("Error fetching account:", accountErr);
+            setAccountName("Không tìm thấy người dùng");
           }
         } else {
           setError("Không tìm thấy bài viết.");
@@ -73,7 +87,7 @@ const PostDetails: React.FC = () => {
             <div dangerouslySetInnerHTML={{ __html: post.content }} />
             <div className="text-sm text-gray-500">
               <p>Module: {post.module}</p>
-              <p>Người đăng: {post.accountId}</p>
+              <p>Người đăng: {accountName || "Đang tải..."}</p>
               <p>Danh mục: {categoryName}</p>
             </div>
             <Link

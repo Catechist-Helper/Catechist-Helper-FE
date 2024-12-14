@@ -24,9 +24,14 @@ const UpdatePostCategory: React.FC = () => {
           values.description
         );
         console.log("Update successful: ", response);
-        navigate("/admin/post-category");
+        console.log("Update successful: ", response);
+        navigate(PATH_ADMIN.post_category);  
+        setTimeout(() => {                  
+          alert("Cập nhật danh mục thành công!");
+        }, 100);
       } catch (error) {
         console.error("Update failed: ", error);
+        alert("Cập nhật danh mục thất bại!");
       } finally {
         setIsSubmitting(false);
       }
@@ -64,38 +69,35 @@ const UpdatePostCategory: React.FC = () => {
           CẬP NHẬT DANH MỤC BÀI VIẾT
         </h3>
         <form onSubmit={formik.handleSubmit} className="max-w-sm mx-auto mt-5">
-          <div className="mb-5">
+        <div className="mb-5">
             <label
               htmlFor="name"
               className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
             >
               Tên
             </label>
-            <input id="name" name="name" value={formik.values.name} />
+            <input
+              id="name"
+              name="name"
+              type="text"
+              className={`bg-gray-50 border ${formik.touched.name && formik.errors.name
+                  ? 'border-red-500'
+                  : 'border-gray-300'
+                } text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5`}
+              onBlur={formik.handleBlur}
+              onChange={formik.handleChange}
+              value={formik.values.name}
+            />
+            {formik.touched.name && formik.errors.name && (
+            <p className="mt-2 text-sm text-red-600">{formik.errors.name}</p>
+          )}
           </div>
-
           <div className="mb-5">
             <label
               htmlFor="description"
               className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
             >
               Mô tả
-            </label>
-            <input
-              id="description"
-              name="description"
-              type="text"
-              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              onChange={formik.handleChange}
-              value={formik.values.name}
-            />
-          </div>
-          <div className="mb-5">
-            <label
-              htmlFor="description"
-              className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-            >
-              Description
             </label>
             <input
               id="description"
