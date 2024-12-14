@@ -11,7 +11,7 @@ const ListAllChristianNames: React.FC = () => {
 
   useEffect(() => {
     christianNamesApi
-      .getAllChristianNames(1, 10)
+      .getAllChristianNames(1, 1000)
       .then((axiosRes: AxiosResponse) => {
         const res: BasicResponse = axiosRes.data;
         console.log("Response data: ", res);

@@ -81,6 +81,10 @@ const getCatechistGrades = (id: string, pastoralYear?: string, page?: number, si
   return request.get<BasicResponse<any>>(`${ROOT_CATECHIST}/${id}/grades`, { params });
 };
 
+const getTrainingsOfCatechist = (id: string) => {
+  return request.get<BasicResponse<any>>(`${ROOT_CATECHIST}/${id}/training`);
+};
+
 const catechistApi = {
   getAllCatechists,
   getCatechistById,
@@ -90,7 +94,8 @@ const catechistApi = {
   updateCatechistImage,
   getCatechistCertificates,
   getCatechistClasses,
-  getCatechistGrades
+  getCatechistGrades,
+  getTrainingsOfCatechist
 };
 
 export default catechistApi;

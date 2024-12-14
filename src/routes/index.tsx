@@ -662,6 +662,16 @@ export default function Router() {
             </AuthGuard>
           ),
         },
+        {
+          path: PATH_CATECHIST.catechist_training,
+          element: (
+            <AuthGuard>
+              <RoleBasedGuard accessibleRoles={[RoleNameEnum.Catechist]}>
+                <CatechistTrainingComponent />
+              </RoleBasedGuard>
+            </AuthGuard>
+          ),
+        },
       ],
     },
 
@@ -742,6 +752,9 @@ const CatechistEventProcessPage = Loadable(
 );
 const CatechistCalendar = Loadable(
   lazy(() => import("../pages/catechist/Calendar/index"))
+);
+const CatechistTrainingComponent = Loadable(
+  lazy(() => import("../pages/catechist/Training/index"))
 );
 //----------------------------
 

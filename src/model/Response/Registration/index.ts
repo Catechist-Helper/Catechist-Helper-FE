@@ -61,6 +61,7 @@ export type RegistrationItemResponse = {
 export type recruiterInInterviewItemResponse= {
   accountId:string,
   onlineRoomUrl:string|null
+  evaluation:string
 }
 
 // Mô hình cho phản hồi của danh sách Registration (hỗ trợ phân trang)

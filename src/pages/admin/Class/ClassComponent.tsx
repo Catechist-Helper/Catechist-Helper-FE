@@ -44,6 +44,7 @@ import {
 } from "../../../enums/CatechistInSlot";
 import AdminRequestLeaveDialog from "./AdminRequestLeaveDialog";
 import absenceApi from "../../../api/AbsenceRequest";
+import CreateUpdateClassDialog from "./CreateUpdateClassDialog";
 
 export default function ClassComponent() {
   const location = useLocation();
@@ -105,6 +106,24 @@ export default function ClassComponent() {
   const [openSlotsDialog, setOpenSlotsDialog] = useState<boolean>(false);
   const [slots, setSlots] = useState<any[]>([]); // Slots list
   const [selectedClassView, setSelectedClassView] = useState<any>(null); // Loading state for slots
+  const [openDialogCreateUpdateClass, setOpenDialogCreateUpdateClass] =
+    useState<boolean>(false);
+  const [openDialogUpdateClassMode, setOpenDialogUpdateClassMode] =
+    useState<boolean>(false);
+
+  console.log(pastoralYears);
+  useEffect(() => {
+    if (!openDialogCreateUpdateClass) {
+      setOpenDialogUpdateClassMode(false);
+    }
+  }, [openDialogCreateUpdateClass]);
+
+  const handleOpenDialogCreateUpdateClass = (update?: boolean) => {
+    if (update) {
+      setOpenDialogUpdateClassMode(true);
+    }
+    setOpenDialogCreateUpdateClass(true);
+  };
 
   useEffect(() => {
     fetchMajors();
@@ -896,7 +915,46 @@ export default function ClassComponent() {
     } finally {
     }
   };
-  console.log(rows);
+
+  const handleDeleteClass = async () => {
+    try {
+      enableLoading();
+      const deletedClass = rows.find(
+        (item) => item.id == selectedRows[0].toString()
+      );
+
+      const confirm = await sweetAlert.confirm(
+        `Xác nhận sẽ xóa lớp ${deletedClass.name}`,
+        "",
+        undefined,
+        undefined,
+        "question"
+      );
+      if (!confirm) {
+        return;
+      }
+      await classApi.deleteClass(deletedClass.id);
+      sweetAlert.alertSuccess("Xoá thành công", "", 5000, 22);
+      fetchClasses();
+    } catch (error: any) {
+      console.error("Error loading slots:", error);
+      if (error && error.message) {
+        if (error.message.includes("Không thể xóa vì đã có slot")) {
+          sweetAlert.alertFailed(
+            "Có lỗi khi xóa lớp",
+            "Không thể xóa lớp này vì có dữ liệu bên trong lớp",
+            5000,
+            25
+          );
+        }
+      } else {
+        sweetAlert.alertFailed("Có lỗi khi xóa lớp", "", 5000, 22);
+      }
+    } finally {
+      disableLoading();
+    }
+  };
+
   return (
     <Paper sx={{ width: "calc(100% - 3.8rem)", position: "absolute" }}>
       <h1 className="text-center text-[2.2rem] bg-primary_color text-text_primary_light py-2 font-bold">
@@ -1015,6 +1073,48 @@ export default function ClassComponent() {
             )}
           </div>
           <div className="flex gap-x-[5px]">
+            {selectedRows.length === 1 ? (
+              <>
+                <div>
+                  <Button
+                    onClick={() => {
+                      handleDeleteClass();
+                    }}
+                    variant="contained"
+                    color="error"
+                    style={{ marginBottom: "16px" }}
+                  >
+                    Xóa
+                  </Button>
+                </div>
+                <div>
+                  <Button
+                    onClick={() => {
+                      handleOpenDialogCreateUpdateClass(true);
+                    }} // Mở dialog thêm dữ liệu năm học mới
+                    variant="contained"
+                    color="warning"
+                    style={{ marginBottom: "16px" }}
+                  >
+                    Cập nhật
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <></>
+            )}
+            <div>
+              <Button
+                onClick={() => {
+                  handleOpenDialogCreateUpdateClass();
+                }} // Mở dialog thêm dữ liệu năm học mới
+                variant="contained"
+                color="primary"
+                style={{ marginBottom: "16px" }}
+              >
+                Tạo mới
+              </Button>
+            </div>
             <div>
               <Button
                 onClick={handleOpenTimetableDialog} // Mở dialog thêm dữ liệu năm học mới
@@ -1090,15 +1190,43 @@ export default function ClassComponent() {
         paginationModel={paginationModel}
         onPaginationModelChange={(newModel) => setPaginationModel(newModel)}
         pageSizeOptions={[8, 25, 50]}
-        checkboxSelection
+        onRowClick={() => {}}
         onRowSelectionModelChange={handleSelectionChange}
         rowSelectionModel={selectedRows}
         sx={{
           border: 0,
         }}
         localeText={viVNGridTranslation}
+        checkboxSelection
         disableRowSelectionOnClick
+        disableMultipleRowSelection
       />
+
+      {openDialogCreateUpdateClass ? (
+        <>
+          <CreateUpdateClassDialog
+            open={openDialogCreateUpdateClass}
+            onClose={() => {
+              setOpenDialogCreateUpdateClass(false);
+            }}
+            pastoralYearId={selectedPastoralYear}
+            pastoralYearName={
+              pastoralYears.find((item) => item.id == selectedPastoralYear).name
+            }
+            classData={
+              selectedRows.length === 1
+                ? rows.find((item) => item.id == selectedRows[0].toString())
+                : undefined
+            }
+            updateMode={openDialogUpdateClassMode}
+            refresh={() => {
+              fetchClasses();
+            }}
+          />
+        </>
+      ) : (
+        <></>
+      )}
 
       {/* Dialog for creating Slot */}
       <Dialog
