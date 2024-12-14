@@ -159,7 +159,7 @@ const CatechistTrainingComponent = () => {
       <h1 className="text-center text-[2.2rem] bg-primary_color text-text_primary_light py-2 font-bold">
         Thông tin các khóa đào tạo tham gia
       </h1>
-      <div className="w-full mx-3">
+      <div className="w-full px-3">
         {trainings.length <= 0 ? (
           <>
             <h1 className="text-[1.2rem] my-3">

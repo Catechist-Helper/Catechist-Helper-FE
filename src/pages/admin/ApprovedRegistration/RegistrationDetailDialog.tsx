@@ -220,6 +220,44 @@ const RegistrationDetailDialog: React.FC<RegistrationDetailDialogProps> = ({
                       registration.interview?.meetingTime
                     )}
                   </li>
+                  {registration.interview.recruiterInInterviews.findIndex(
+                    (item) => item.evaluation && item.evaluation != ""
+                  ) >= 0 ? (
+                    <li>
+                      <strong>Nhận xét của người phỏng vấn</strong>:
+                      {registration.interview &&
+                      registration.interview.recruiterInInterviews ? (
+                        <>
+                          {registration.interview.recruiterInInterviews.map(
+                            (item) => {
+                              return (
+                                <div key={item.accountId}>
+                                  <p>
+                                    Nhận xét của{" "}
+                                    {
+                                      registration.interview.recruiters.find(
+                                        (item2) => item2.id == item.accountId
+                                      )?.fullName
+                                    }
+                                  </p>
+                                  <div
+                                    className="mt-2"
+                                    dangerouslySetInnerHTML={{
+                                      __html: item.evaluation,
+                                    }}
+                                  />
+                                </div>
+                              );
+                            }
+                          )}
+                        </>
+                      ) : (
+                        <></>
+                      )}
+                    </li>
+                  ) : (
+                    <></>
+                  )}
                   <li>
                     <strong>Người phỏng vấn</strong>:{" "}
                     {registration.interview && registration.interview.recruiters
