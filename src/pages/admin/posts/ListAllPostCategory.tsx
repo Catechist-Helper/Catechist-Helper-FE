@@ -3,6 +3,7 @@ import postCategoryApi from "../../../api/PostCategory";
 import { AxiosResponse } from "axios";
 import { BasicResponse } from "../../../model/Response/BasicResponse";
 import { useNavigate } from "react-router-dom";
+import postsApi from "../../../api/Post";
 const ListAllPostCategory: React.FC = () => {
   const [postCategories, setPostCategories] = useState([]);
   const navigate = useNavigate();
@@ -32,21 +33,49 @@ const ListAllPostCategory: React.FC = () => {
     navigate("/admin/create-post-category");
   };
 
-  const handleEditCategoryClick = (id: string): void => {
-    navigate(`/admin/update-post-category/${id}`);
+  const handleEditCategoryClick = async (id: string): Promise<void> => {
+    try {
+      // Kiểm tra xem danh mục có đang được sử dụng không
+      const postsResponse = await postsApi.getAll(1, 999);
+      const posts = postsResponse.data.data.items;
+      const isCategoryInUse = posts.some((post: any) => post.postCategoryId === id);
+  
+      if (isCategoryInUse) {
+        alert("Danh mục này đang được sử dụng trong bài viết. Không thể chỉnh sửa!");
+        return;
+      }
+  
+      // Nếu không được sử dụng thì mới cho phép chuyển đến trang edit
+      navigate(`/admin/update-post-category/${id}`);
+    } catch (err) {
+      console.error(`Lỗi khi kiểm tra danh mục có ID: ${id}`, err);
+      alert("Có lỗi xảy ra khi kiểm tra danh mục!");
+    }
   };
 
-  const handleDeleteCategoryClick = (id: string): void => {
-    if (window.confirm("Bạn có chắc là muốn xóa danh mục này không?")) {
-      postCategoryApi
-        .deleteCategory(id)
-        .then(() => {
-          alert(`Category đã xóa thành công.`);
-          window.location.reload();
-        })
-        .catch((err: Error) => {
-          console.error(`Failed to delete category with ID: ${id}`, err);
-        });
+  const handleDeleteCategoryClick = async (id: string): Promise<void> => {
+    try {
+      // Trước tiên lấy tất cả bài post để kiểm tra
+      const postsResponse = await postsApi.getAll(1, 100); 
+      const posts = postsResponse.data.data.items;
+      
+      // Kiểm tra xem có bài post nào đang sử dụng category này không
+      const isPostUsingCategory = posts.some((post: any) => post.postCategoryId === id);
+  
+      if (isPostUsingCategory) {
+        alert("Không thể xóa danh mục này vì đang được sử dụng trong bài viết!");
+        return;
+      }
+  
+      // Nếu không có bài post nào sử dụng, tiến hành xóa
+      if (window.confirm("Bạn có chắc là muốn xóa danh mục này không?")) {
+        await postCategoryApi.deleteCategory(id);
+        alert(`Xóa danh mục thành công.`);
+        window.location.reload();
+      }
+    } catch (err) {
+      console.error(`Lỗi khi xóa danh mục có ID: ${id}`, err);
+      alert("Xóa danh mục thất bại!");
     }
   };
 

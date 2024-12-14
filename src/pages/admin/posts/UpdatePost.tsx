@@ -38,6 +38,16 @@ const UpdatePost: React.FC = () => {
     name: string;
   };
 
+  const mapApiModuleToEnum = (module: string): string => {
+    switch (module) {
+      case "PUBLIC":
+        return PostStatus.PUBLIC;
+      case "PRIVATE":
+        return PostStatus.PRIVATE;
+      default:
+        return "";
+    }
+  };
   useEffect(() => {
     postsApi
       .getById(id!)
@@ -46,7 +56,7 @@ const UpdatePost: React.FC = () => {
         formik.setValues({
           title: post.title,
           content: post.content,
-          module: post.module,
+          module: mapApiModuleToEnum(post.module),
           postCategoryId: post.postCategoryId,
         });
       })
@@ -63,6 +73,17 @@ const UpdatePost: React.FC = () => {
         console.error("Failed to fetch post categories", err);
       });
   }, [id]);
+
+  const mapEnumToApiModule = (status: string): string => {
+    switch (status) {
+      case PostStatus.PUBLIC:
+        return "PUBLIC";
+      case PostStatus.PRIVATE:
+        return "PRIVATE";
+      default:
+        return "";
+    }
+  };
 
   const formik = useFormik({
     initialValues: {
@@ -83,7 +104,7 @@ const UpdatePost: React.FC = () => {
         const updatedPost = {
           title: values.title,
           content: values.content,
-          module: values.module,
+          module: mapEnumToApiModule(values.module),
           accountId,
           postCategoryId: values.postCategoryId,
         };
@@ -142,14 +163,14 @@ const UpdatePost: React.FC = () => {
           </div>
 
           <div className="mb-5">
-            <label>Module</label>
+            <label>Trạng thái</label>
             <select
               name="module"
               value={formik.values.module}
               onChange={formik.handleChange}
               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
             >
-              <option value="">Chọn trạng thái</option>
+              <option value="" disabled>Chọn trạng thái</option>
               {Object.values(PostStatus).map((status) => (
                 <option key={status} value={status}>
                   {status}
@@ -171,7 +192,7 @@ const UpdatePost: React.FC = () => {
               onChange={formik.handleChange}
               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
             >
-              <option value="">Lựa chọn danh mục</option>
+              <option value=""disabled>Lựa chọn danh mục</option>
               {postCategories.map((category) => (
                 <option key={category.id} value={category.id}>
                   {category.name}

@@ -88,21 +88,21 @@ const UpdateTrain: React.FC = () => {
                 }
 
                 const response = await trainApi.getById(id);
-                const train = response.data;
+                const train = response.data.data;
 
                 formik.setValues({
-                    name: train.data.name,
-                    description: train.data.description,
-                    certificateId: train.data.certificateId,
-                    previousLevelId: train.previousLevel?.hierarchyLevel 
-                    ? `Cấp ${train.previousLevel.hierarchyLevel}` 
-                    : levelMap[train.data.previousLevelId] || "Không xác định",
-                    nextLevelId: train.data.nextLevelId,
-                    startTime: train.data.startTime,
-                    endTime: train.data.endTime,
-                    trainingListStatus: train.data.trainingListStatus,
+                    name: train.name,
+                    description: train.description,
+                    certificateId: train.certificate?.id || "", // Lấy certificate ID
+                    previousLevelId: train.previousLevel?.id || "", // Lấy previous level ID
+                    nextLevelId: train.nextLevel?.id || "", // Lấy next level ID
+                    startTime: train.startTime,
+                    endTime: train.endTime,
+                    trainingListStatus: train.trainingListStatus,
                 });
-
+                if (train.nextLevel?.id) {
+                    fetchCertificatesByNextLevel(train.nextLevel.id);
+                }
                 console.log("Updated Formik values:", formik.values);
             } catch (error) {
                 console.error("Failed to fetch pastoralYear data:", error);
@@ -162,7 +162,7 @@ const UpdateTrain: React.FC = () => {
     return (
         <AdminTemplate>
             <div>
-                <h3 className="text-center pt-10 fw-bold">TẠO DANH SÁCH ĐÀO TẠO</h3>
+                <h3 className="text-center pt-10 fw-bold">CHỈNH SỬA DANH SÁCH ĐÀO TẠO</h3>
                 <form onSubmit={formik.handleSubmit} className="max-w-sm mx-auto mt-5">
                 <div className="mb-5">
                         <label
@@ -300,7 +300,7 @@ const UpdateTrain: React.FC = () => {
                             </div>
                         </div>
                     </div>
-                    <div className="mb-5">
+                    {/* <div className="mb-5">
                         <label className="block mb-1 text-sm font-medium">Trạng thái</label>
                         <div className="flex items-center space-x-4">
                             <div className="flex items-center">
@@ -326,7 +326,7 @@ const UpdateTrain: React.FC = () => {
                                 <label className="ml-2">Kết thúc</label>
                             </div>
                         </div>
-                    </div>
+                    </div> */}
 
                     <div className="flex items-start mb-5">
                         <button

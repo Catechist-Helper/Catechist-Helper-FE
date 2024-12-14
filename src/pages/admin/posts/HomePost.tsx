@@ -5,6 +5,7 @@ import { AxiosResponse } from "axios";
 import { BasicResponse } from "../../../model/Response/BasicResponse";
 import postsApi from "../../../api/Post";
 import { useNavigate, Link } from "react-router-dom";
+import { PostStatus } from "../../../enums/Post";
 import AdminTemplate from "../../../components/Templates/AdminTemplate/AdminTemplate";
 
 
@@ -41,7 +42,7 @@ const HomePost: React.FC = () => {
         }
       })
       .catch((err) => {
-        console.error("Không thấy danh mục : ", err);
+        console.error("Không thấy bài viết : ", err);
       });
   }, []);
 
@@ -76,7 +77,7 @@ const HomePost: React.FC = () => {
       postsApi
         .deletePosts(id)
         .then(() => {
-          alert(`Post đã xóa thành công!`);
+          alert(`Bài viết đã xóa thành công!`);
           window.location.reload();
         })
         .catch((err: Error) => {
@@ -150,7 +151,7 @@ const HomePost: React.FC = () => {
               <tr>
                 <th scope="col" className="px-6 py-3">Tiêu đề</th>
                 <th scope="col" className="px-6 py-3">Nội dung</th>
-                <th scope="col" className="px-6 py-3">Module</th>
+                <th scope="col" className="px-6 py-3">Trạng thái</th>
                 <th scope="col" className="px-6 py-3">Ngày đăng</th>
                 <th scope="col" className="px-6 py-3">Danh mục</th>
                 <th scope="col" className="px-6 py-3">Action</th>
@@ -174,7 +175,7 @@ const HomePost: React.FC = () => {
                         {isPost.content.replace(/<[^>]*>/g, '').split(" ").slice(0, 10).join(" ")}...
                       </td>
 
-                      <td className="px-6 py-4">{isPost.module}</td>
+                      <td className="px-6 py-4">  {isPost.module === 'PUBLIC' ? PostStatus.PUBLIC : PostStatus.PRIVATE}</td>
                       <td className="px-6 py-4">{new Date(isPost.createdAt).toLocaleDateString()}</td> 
                       <td className="px-6 py-4">{category ? category.name : 'Không có danh mục'}</td>
                       <td>
@@ -191,7 +192,7 @@ const HomePost: React.FC = () => {
                 })
               ) : (
                 <tr>
-                  <td colSpan={6}>Không thấy danh sách bài viết</td>
+                  <td colSpan={6}>Không thấy bài viết</td>
                 </tr>
               )}
             </tbody>
