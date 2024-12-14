@@ -74,6 +74,7 @@ export const PATH_CATECHIST = {
   event: path(PATH_ROOT_CATECHIST, "/events"),
   event_process: path(PATH_ROOT_CATECHIST, "/event-processes"),
   catechist_calendar: path(PATH_ROOT_CATECHIST, "/calendar"),
+  catechist_training: path(PATH_ROOT_CATECHIST, "/training"),
 };
 
 export const PATH_HOME = {

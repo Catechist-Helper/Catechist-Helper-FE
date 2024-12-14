@@ -20,10 +20,18 @@ const deleteInterview = (id: string) => {
   return request.delete<BasicResponse<boolean>>(`${ROOT_INTERVIEW}/${id}`);
 };
 
+const evaluateInterview = (id: string, data: {
+  evaluation: string,
+  recruiterAccountId: string
+}) => {
+  return request.put<BasicResponse<any>>(`${ROOT_INTERVIEW}/${id}/evaluate`, data);
+};
+
 const interviewApi = {
   createInterview,
   updateInterview,
   deleteInterview,
+  evaluateInterview
 };
 
 export default interviewApi;

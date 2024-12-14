@@ -14,6 +14,11 @@ import { RegistrationItemResponse } from "../../../model/Response/Registration";
 import { RegistrationStatus } from "../../../enums/Registration";
 import { formatDate } from "../../../utils/formatDate";
 import { getUserInfo } from "../../../utils/utils";
+import sweetAlert from "../../../utils/sweetAlert";
+import { Button, Modal } from "@mui/material";
+import CkEditorComponent from "../../../components/ckeditor5/CkEditor";
+import useAppContext from "../../../hooks/useAppContext";
+import interviewApi from "../../../api/Interview";
 
 // Hàm chính để hiển thị danh sách đơn
 export default function CatechistRegistrationsTable() {
@@ -35,6 +40,13 @@ export default function CatechistRegistrationsTable() {
   >("waiting");
   const [openDialogRegisDetail, setOpenDialogRegisDetail] =
     useState<boolean>(false);
+  const [selectedRegistration, setSelectedRegistration] =
+    useState<RegistrationItemResponse | null>(null);
+  const [selectedRegistrationOfModal, setSelectedRegistrationOfModal] =
+    useState<RegistrationItemResponse | null>(null);
+  const [openApprovalModal, setOpenApprovalModal] = useState<boolean>(false);
+  const [interviewNote, setInterviewNote] = useState<string>("");
+  const { enableLoading, disableLoading } = useAppContext();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -226,20 +238,32 @@ export default function CatechistRegistrationsTable() {
       },
     },
     {
-      field: "note",
-      headerName: "Ghi chú",
+      field: "evaluation",
+      headerName: "Nhận xét ứng viên",
       width: 200,
-      renderCell: (params) =>
-        params.value ? params.value.replace("\n", ".") : "",
+      renderCell: (params) => {
+        const regis: RegistrationItemResponse = params.row;
+        if (!(regis.interview && regis.interview.recruiterInInterviews)) {
+          return "";
+        }
+        const regisRecruiter = regis.interview.recruiterInInterviews.find(
+          (item) => item.accountId == userLogin.id
+        );
+        if (regisRecruiter) {
+          return (
+            <div
+              dangerouslySetInnerHTML={{
+                __html:
+                  regis.interview.recruiterInInterviews.find(
+                    (item) => item.accountId == userLogin.id
+                  )?.evaluation ?? "",
+              }}
+            />
+          );
+        }
+        return "";
+      },
     },
-    // {
-    //   field: "interviews",
-    //   headerName: "Kết quả phỏng vấn",
-    //   width: 200,
-    //   renderCell: (params) => {
-    //     return params.row.interviews[0]?.note || ""; // Hiển thị ghi chú nếu có
-    //   },
-    // },
     {
       field: "status",
       headerName: "Trạng thái",
@@ -326,10 +350,124 @@ export default function CatechistRegistrationsTable() {
     );
   };
 
+  const fetchSelectedRegistrationOfModal = async () => {
+    await registrationApi
+      .getRegistrationById(selectedRegistrations[0].toString())
+      .then((res) => {
+        setSelectedRegistrationOfModal(res.data.data);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+  useEffect(() => {
+    if (openApprovalModal == true && selectedRegistration != null) {
+      const note = selectedRegistration.interview.recruiterInInterviews.find(
+        (item) => item.accountId == userLogin.id
+      )?.evaluation;
+      if (note && note != "") {
+        console.log("hehe", note);
+        setInterviewNote(note);
+      }
+    }
+  }, [openApprovalModal, selectedRegistrationOfModal]);
+
+  const handleOpenApprovalModal = (registrationId: string) => {
+    const selectedRow = rows.find((row) => row.id === registrationId);
+
+    if (!selectedRow || !selectedRow.interview) {
+      sweetAlert.alertFailed(
+        "Không tìm thấy thông tin phỏng vấn!",
+        "",
+        1000,
+        22
+      );
+      return;
+    }
+
+    const meetingTime = new Date(selectedRow.interview.meetingTime);
+    const currentTime = new Date();
+
+    if (currentTime < meetingTime) {
+      sweetAlert.alertFailed(
+        `Chưa đến thời điểm phỏng vấn. Vui lòng quay lại sau ${formatDate.DD_MM_YYYY_Time(
+          selectedRow.interview.meetingTime
+        )}`,
+        "",
+        10000,
+        30
+      );
+      return;
+    }
+
+    if (selectedRow) {
+      setSelectedRegistration(selectedRow);
+      fetchSelectedRegistrationOfModal();
+      setOpenApprovalModal(true);
+    }
+  };
+
+  const handleCloseApprovalModal = () => {
+    setSelectedRegistrationOfModal(null);
+    setOpenApprovalModal(false);
+    setInterviewNote("");
+  };
+
+  const handleConfirmInterview = async () => {
+    if (!interviewNote) {
+      sweetAlert.alertFailed(
+        "Vui lòng nhập nhẫn xét cho ứng viên",
+        "",
+        1000,
+        26
+      );
+      disableLoading();
+      return;
+    }
+
+    try {
+      enableLoading();
+      if (selectedRegistrationOfModal) {
+        console.log(selectedRegistrationOfModal.interview.id, {
+          recruiterAccountId: userLogin.id,
+          evaluation: interviewNote,
+        });
+        const res = await interviewApi.evaluateInterview(
+          selectedRegistrationOfModal.interview.id,
+          {
+            recruiterAccountId: userLogin.id,
+            evaluation: interviewNote,
+          }
+        );
+        console.log("resssssss", res);
+
+        handleCloseApprovalModal();
+        setSelectedRegistrations([]);
+        setSelectedRegistrationOfModal(null);
+        setInterviewNote("");
+        sweetAlert.alertSuccess("Nhận xét thành công", "", 1000, 20);
+        fetchApprovedRegistrations();
+      }
+    } catch (error) {
+      console.error("Lỗi khi nhận xét ứng viên:", error);
+      sweetAlert.alertFailed("Có lỗi khi nhận xét ứng viên", "", 1000, 26);
+    } finally {
+      disableLoading();
+    }
+    disableLoading();
+  };
+  console.log(rows);
+
+  useEffect(() => {
+    if (!openApprovalModal) {
+      setSelectedRegistrationOfModal(null);
+      setInterviewNote("");
+    }
+  }, [openApprovalModal]);
+
   if (!userLogin) {
     return <></>;
   }
-  console.log(rows);
 
   return (
     <Paper
@@ -361,6 +499,20 @@ export default function CatechistRegistrationsTable() {
           {renderFilterButtons()}
         </div>
         <div className="flex">
+          {selectedRegistrations.length == 1 && currentFilter == "waiting" ? (
+            <>
+              <button
+                className="btn btn-info ml-1"
+                onClick={() =>
+                  handleOpenApprovalModal(selectedRegistrations[0].toString())
+                }
+              >
+                Nhận xét ứng viên
+              </button>
+            </>
+          ) : (
+            <></>
+          )}
           {selectedRegistrations.length == 1 ? (
             <>
               <button
@@ -411,6 +563,7 @@ export default function CatechistRegistrationsTable() {
                 border: 0,
               }}
               localeText={viVNGridTranslation}
+              disableMultipleRowSelection
             />
           </>
         )}
@@ -427,6 +580,124 @@ export default function CatechistRegistrationsTable() {
       ) : (
         <></>
       )}
+
+      <Modal open={openApprovalModal} onClose={handleCloseApprovalModal}>
+        <div
+          style={{
+            width: "50%",
+            margin: "auto",
+            backgroundColor: "white",
+            borderRadius: "8px",
+          }}
+          className="py-5 px-5 mt-4"
+        >
+          <h1 className="text-center text-[2.2rem] text-primary py-2 pt-0 font-bold uppercase">
+            Nhận xét ứng viên
+          </h1>
+
+          {selectedRegistrationOfModal ? (
+            <>
+              <div className="flex flex-wrap mt-3">
+                <h5 className="mt-2 w-[50%]">
+                  <strong>Tên ứng viên:</strong>{" "}
+                  {selectedRegistrationOfModal.fullName}
+                </h5>
+                <h5 className="mt-2 w-[50%]">
+                  <strong>Thời gian phỏng vấn:</strong>{" "}
+                  {formatDate.DD_MM_YYYY_Time(
+                    selectedRegistrationOfModal.interview.meetingTime
+                  )}
+                </h5>
+                <h5 className="mt-2 w-[50%]">
+                  <strong>Giới tính:</strong>{" "}
+                  {selectedRegistrationOfModal.gender}
+                </h5>
+                <h5 className="mt-2 w-[50%]">
+                  <strong>Ngày sinh:</strong>{" "}
+                  {formatDate.DD_MM_YYYY(
+                    selectedRegistrationOfModal.dateOfBirth
+                  )}
+                </h5>
+                <h5 className="mt-2 w-[50%]">
+                  <strong>Số điện thoại:</strong>{" "}
+                  {selectedRegistrationOfModal.phone}
+                </h5>
+                <h5 className="mt-2 w-[50%]">
+                  <strong>Email:</strong> {selectedRegistrationOfModal.email}
+                </h5>
+                <h5 className="mt-2 w-[50%]">
+                  <strong>Kinh nghiệm:</strong>{" "}
+                  {selectedRegistrationOfModal.isTeachingBefore
+                    ? "Có"
+                    : "Không"}
+                </h5>
+                <h5 className="mt-2 w-[50%]">
+                  <strong>Số năm giảng dạy:</strong>{" "}
+                  {selectedRegistrationOfModal.yearOfTeaching}
+                </h5>
+                <h5 className="mt-2 w-[100%]">
+                  <strong>Địa chỉ:</strong>{" "}
+                  {selectedRegistrationOfModal.address}
+                </h5>
+                <h5 className="mt-2 w-[100%]">
+                  <strong>Người phỏng vấn:</strong>{" "}
+                  {selectedRegistrationOfModal.interview.recruiters
+                    ? selectedRegistrationOfModal.interview.recruiters
+                        .map((recruiter: any) => recruiter.fullName)
+                        .join(", ")
+                    : ""}
+                </h5>
+              </div>
+            </>
+          ) : (
+            <></>
+          )}
+
+          <h2 className="my-0 py-0 mt-3">
+            <strong>Nhận xét ứng viên</strong>
+          </h2>
+
+          <div className="w-full">
+            <CkEditorComponent
+              data={interviewNote}
+              onChange={(data) => setInterviewNote(data)}
+              placeholder="Nhập nhận xét ứng viên tại đây..."
+            />
+          </div>
+
+          {/* <TextField
+            label="Ghi chú"
+            fullWidth
+            multiline
+            rows={3}
+            value={interviewNote}
+            onChange={(e) => setInterviewNote(e.target.value)}
+            placeholder="Nhập ghi chú phỏng vấn (không bắt buộc)"
+            margin="normal"
+            className="my-0 mt-1"
+          /> */}
+
+          <div
+            className="modal-buttons"
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              marginTop: "20px",
+            }}
+          >
+            <Button onClick={handleCloseApprovalModal} variant="outlined">
+              Hủy bỏ
+            </Button>
+            <Button
+              onClick={handleConfirmInterview}
+              variant="contained"
+              color="primary"
+            >
+              Xác nhận
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </Paper>
   );
 }

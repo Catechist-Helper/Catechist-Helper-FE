@@ -32,7 +32,7 @@ export default function GradeComponent() {
   const [loading, setLoading] = useState<boolean>(true);
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({
     page: 0,
-    pageSize: 8,
+    pageSize: 10,
   });
   const [rowCount, setRowCount] = useState<number>(0);
   const [selectedRows, setSelectedRows] = useState<GridRowSelectionModel>([]);
@@ -202,10 +202,18 @@ export default function GradeComponent() {
       },
     },
     {
+      field: "hierarchyLevel",
+      headerName: "Phân cấp ngành",
+      width: 180,
+      renderCell: (params) => {
+        return params.row.major.hierarchyLevel;
+      },
+    },
+    {
       field: "catechistsCount",
       headerName: "Số lượng giáo lý viên",
       align: "left",
-      width: 180,
+      width: 200,
       renderCell: (params) => {
         return (
           <div className="flex">
@@ -311,6 +319,54 @@ export default function GradeComponent() {
     setSelectedRows(newSelectionModel);
   };
 
+  const handleDeleteGrade = async () => {
+    try {
+      const selectedRow: any = rows.find(
+        (row) => row.id === selectedRows[0].toString()
+      );
+      if (!selectedRow) {
+        sweetAlert.alertFailed(
+          "Có lỗi khi xóa khối",
+          "Không tìm thấy khối này để xóa",
+          10000,
+          22
+        );
+        return;
+      }
+
+      await gradeApi.deleteGrade(selectedRows[0].toString());
+      sweetAlert.alertSuccess("Xoá thành công", "", 1000, 18);
+      fetchGrades();
+    } catch (error: any) {
+      console.log("error", error);
+
+      if (
+        error.message &&
+        error.message.includes("Không thể cập nhật khi bắt đầu niên khóa mới")
+      ) {
+        sweetAlert.alertFailed(
+          "Có lỗi khi xóa khối",
+          "Không thể cập nhật khi bắt đầu niên khóa mới",
+          5000,
+          25
+        );
+      } else if (
+        error.message &&
+        error.message.includes("Không thể xóa dữ liệu đang được sử dụng")
+      ) {
+        sweetAlert.alertFailed(
+          "Có lỗi khi xóa khối",
+          "Không thể xóa khối này vì có dữ liệu bên trong khối",
+          5000,
+          25
+        );
+      } else {
+        sweetAlert.alertFailed("Có lỗi xảy ra khi xóa", "", 1000, 20);
+      }
+    } finally {
+    }
+  };
+
   return (
     <Paper sx={{ width: "calc(100% - 3.8rem)", position: "absolute" }}>
       <h1 className="text-center text-[2.2rem] bg-primary_color text-text_primary_light py-2 font-bold">
@@ -364,11 +420,23 @@ export default function GradeComponent() {
           </FormControl>
         </div>
         <div className="flex">
-          <div>
-            <Button variant="contained" color="primary" onClick={() => {}}>
-              Xếp giáo lý viên
-            </Button>
-          </div>
+          {selectedRows.length === 1 ? (
+            <>
+              <div>
+                <Button
+                  variant="contained"
+                  color="error"
+                  onClick={() => {
+                    handleDeleteGrade();
+                  }}
+                >
+                  Xóa khối
+                </Button>
+              </div>
+            </>
+          ) : (
+            <></>
+          )}
           {/* Nút Thêm Khối */}
           <div className="ml-1">
             <Button
@@ -385,17 +453,18 @@ export default function GradeComponent() {
       <DataGrid
         rows={rows}
         columns={columns}
-        paginationMode="server"
+        paginationMode="client"
         rowCount={rowCount}
         loading={loading}
         paginationModel={paginationModel}
         onPaginationModelChange={(newModel) => setPaginationModel(newModel)}
-        pageSizeOptions={[8, 25, 50]}
+        pageSizeOptions={[10, 25, 50, 100, 250]}
         checkboxSelection
         onRowSelectionModelChange={handleSelectionChange}
         rowSelectionModel={selectedRows}
         sx={{ border: 0 }}
         localeText={viVNGridTranslation}
+        disableMultipleRowSelection
       />
 
       {/* Dialog for creating new Grade */}
