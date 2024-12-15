@@ -14,6 +14,8 @@ import { AppBar, IconButton, Toolbar, Box, Button } from "@mui/material";
 import CallEndIcon from "@mui/icons-material/CallEnd";
 import VideoCallIcon from "@mui/icons-material/VideoCall";
 import VideocamOffIcon from "@mui/icons-material/VideocamOff";
+import MicIcon from "@mui/icons-material/Mic";
+import MicOffIcon from "@mui/icons-material/MicOff";
 import "./Meeting.css";
 import LoadingScreen from "../../../components/Organisms/LoadingScreen/LoadingScreen";
 
@@ -35,6 +37,7 @@ const Meeting = () => {
 
   const localVideoContainerRef = useRef<HTMLDivElement>(null);
   const remoteVideosGalleryRef = useRef<HTMLDivElement>(null);
+  const [isMuted, setIsMuted] = useState(false);
 
   const [roomId, setRoomId] = useState<string>("");
   const [loading, setLoading] = useState(true);
@@ -196,6 +199,34 @@ const Meeting = () => {
     }
   };
 
+  const toggleCamera = async () => {
+    if (isVideoEnabled) {
+      // Turn off the camera
+      removeLocalVideoStream();
+      setIsVideoEnabled(false);
+    } else {
+      // Turn on the camera
+      await displayLocalVideoStream();
+      setIsVideoEnabled(true);
+    }
+  };
+
+  const toggleMute = async () => {
+    if (call) {
+      if (isMuted) {
+        // Unmute
+        await call.unmute();
+        setIsMuted(false);
+      } else {
+        // Mute
+        await call.mute();
+        setIsMuted(true);
+      }
+    } else {
+      console.error("No active call to mute/unmute.");
+    }
+  };
+
   useEffect(() => {
     return () => {
       if (localVideoRenderer) {
@@ -347,30 +378,40 @@ const Meeting = () => {
               <CallEndIcon fontSize="large" />
             </IconButton>
             <IconButton
-              onClick={displayLocalVideoStream}
-              disabled={!isVideoEnabled}
+              onClick={toggleCamera}
               sx={{
-                color: "white",
+                color: isVideoEnabled ? "#00ff00" : "white", // Lighten when on, darken when off
                 fontSize: "1.5rem",
-                backgroundColor: "rgba(255, 255, 255, 0.1)",
+                backgroundColor: isVideoEnabled
+                  ? "rgba(0, 255, 0, 0.1)" // Green tint when on
+                  : "rgba(255, 255, 255, 0.1)", // White tint when off
                 borderRadius: "50%",
                 padding: "10px",
               }}
             >
-              <VideoCallIcon fontSize="large" />
+              {isVideoEnabled ? (
+                <VideoCallIcon fontSize="large" />
+              ) : (
+                <VideocamOffIcon fontSize="large" />
+              )}
             </IconButton>
             <IconButton
-              onClick={removeLocalVideoStream}
-              disabled={!isVideoEnabled}
+              onClick={toggleMute}
               sx={{
-                color: "white",
+                color: isMuted ? "red" : "white",
                 fontSize: "1.5rem",
-                backgroundColor: "rgba(255, 255, 255, 0.1)",
+                backgroundColor: isMuted
+                  ? "rgba(255, 0, 0, 0.1)"
+                  : "rgba(255, 255, 255, 0.1)",
                 borderRadius: "50%",
                 padding: "10px",
               }}
             >
-              <VideocamOffIcon fontSize="large" />
+              {isMuted ? (
+                <MicOffIcon fontSize="large" />
+              ) : (
+                <MicIcon fontSize="large" />
+              )}
             </IconButton>
           </Toolbar>
         </AppBar>
