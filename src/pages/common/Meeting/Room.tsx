@@ -8,6 +8,7 @@ import {
   VideoStreamRenderer,
 } from "@azure/communication-calling";
 import { AzureCommunicationTokenCredential } from "@azure/communication-common";
+import sweetAlert from "../../../utils/sweetAlert";
 
 const Room: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -63,7 +64,12 @@ const Room: React.FC = () => {
 
   const handleJoinRoom = async () => {
     if (!callAgent || !roomId) {
-      alert("Call agent or Room ID is not ready.");
+      sweetAlert.alertWarning(
+        "Gọi cho nhân viên hỗ trợ hoặc ID phòng hiện chưa sẵn sàng.",
+        "",
+        4000,
+        32
+      );
       return;
     }
 

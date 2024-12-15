@@ -12,7 +12,6 @@ const CreatePostCategory: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
-
   const formik = useFormik({
     initialValues: {
       name: "",
@@ -38,8 +37,8 @@ const CreatePostCategory: React.FC = () => {
           values.description
         );
 
-        console.log("Response: ", response);   
-        navigate(PATH_ADMIN.post_category);  
+        console.log("Response: ", response);
+        navigate(PATH_ADMIN.post_category);
         setTimeout(() => {
           sweetAlert.alertSuccess(
             "Tạo thành công!",
@@ -47,14 +46,14 @@ const CreatePostCategory: React.FC = () => {
             3000,
             false
           );
-        }); 
+        });
       } catch (error) {
         sweetAlert.alertFailed(
           "Thất bại!",
           "Không thể tạo danh mục. Vui lòng thử lại.",
           3000,
           true
-      );
+        );
         console.error("Error: ", error);
       } finally {
         setIsSubmitting(false);
@@ -66,7 +65,7 @@ const CreatePostCategory: React.FC = () => {
     <AdminTemplate>
       <div>
         <h3 className="text-center pt-10 fw-bold">TẠO DANH MỤC BÀI VIẾT</h3>
-        <form onSubmit={formik.handleSubmit} className="max-w-sm mx-auto mt-5">
+        <form onSubmit={formik.handleSubmit} className="max-w-lg mx-auto mt-5">
           <div className="mb-5">
             <label
               htmlFor="name"
@@ -78,17 +77,18 @@ const CreatePostCategory: React.FC = () => {
               id="name"
               name="name"
               type="text"
-              className={`bg-gray-50 border ${formik.touched.name && formik.errors.name
-                  ? 'border-red-500'
-                  : 'border-gray-300'
-                } text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5`}
+              className={`bg-gray-50 border ${
+                formik.touched.name && formik.errors.name
+                  ? "border-red-500"
+                  : "border-gray-300"
+              } text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5`}
               onBlur={formik.handleBlur}
               onChange={formik.handleChange}
               value={formik.values.name}
             />
             {formik.touched.name && formik.errors.name && (
-            <p className="mt-2 text-sm text-red-600">{formik.errors.name}</p>
-          )}
+              <p className="mt-2 text-sm text-red-600">{formik.errors.name}</p>
+            )}
           </div>
           <div className="mb-5">
             <label
@@ -110,7 +110,7 @@ const CreatePostCategory: React.FC = () => {
             <button
               type="submit"
               className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center "
-              disabled={isSubmitting || !formik.values.name.trim()} 
+              disabled={isSubmitting || !formik.values.name.trim()}
             >
               {isSubmitting ? "Đang tạo" : "Tạo danh mục bài viết"}
             </button>

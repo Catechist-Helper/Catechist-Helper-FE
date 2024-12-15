@@ -1,206 +1,210 @@
 import React, { useState, useEffect } from "react";
-import { AiOutlineSearch, AiOutlineCalendar } from "react-icons/ai";
 import postCategoryApi from "../../../api/PostCategory";
+import postsApi from "../../../api/Post";
 import { AxiosResponse } from "axios";
 import { BasicResponse } from "../../../model/Response/BasicResponse";
-import postsApi from "../../../api/Post";
+import sweetAlert from "../../../utils/sweetAlert";
+import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import { Button, Paper } from "@mui/material";
 import { useNavigate, Link } from "react-router-dom";
+import viVNGridTranslation from "../../../locale/MUITable";
 import { PostStatus } from "../../../enums/Post";
 import AdminTemplate from "../../../components/Templates/AdminTemplate/AdminTemplate";
 
-
-
 const HomePost: React.FC = () => {
-  const [selectedDate, setSelectedDate] = useState("");
-  const [postCategories, setPostCategories] = useState<PostCategory[]>([]);
-  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) =>
-    setSelectedDate(e.target.value);
-  const [post, setPost] = useState([]);
+  const [postCategories, setPostCategories] = useState<any[]>([]);
+  const [posts, setPosts] = useState<any[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const navigate = useNavigate();
 
-  type PostCategory = {
-    id: string;
-    name: string;
+  const fetchPosts = async () => {
+    try {
+      const { data }: AxiosResponse<BasicResponse> = await postsApi.getAll(
+        1,
+        100
+      );
+      if (
+        data.statusCode.toString().trim().startsWith("2") &&
+        data.data.items != null
+      ) {
+        setPosts(data.data.items);
+      } else {
+        console.log("No posts found");
+      }
+    } catch (err) {
+      console.error("Không thể tải bài viết: ", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
+  const fetchPostCategories = async () => {
+    try {
+      const { data }: AxiosResponse<BasicResponse> =
+        await postCategoryApi.getAll(1, 100);
+      if (
+        data.statusCode.toString().trim().startsWith("2") &&
+        data.data.items != null
+      ) {
+        setPostCategories(data.data.items);
+      } else {
+        console.log("No categories found");
+      }
+    } catch (err) {
+      console.error("Không thể tải danh mục bài viết: ", err);
+    }
+  };
 
   useEffect(() => {
-    postsApi
-      .getAll(1, 5)
-      .then((axiosRes: AxiosResponse) => {
-        const res: BasicResponse = axiosRes.data;
-        console.log("Response data: ", res);
-
-        if (
-          res.statusCode.toString().trim().startsWith("2") &&
-          res.data.items != null
-        ) {
-          console.log("Items: ", res.data.items);
-          setPost(res.data.items);
-        } else {
-          console.log("No items found");
-        }
-      })
-      .catch((err) => {
-        console.error("Không thấy bài viết : ", err);
-      });
-  }, []);
-
-  useEffect(() => {
-    postCategoryApi
-      .getAll(1, 5)
-      .then((axiosRes: AxiosResponse) => {
-        const res: BasicResponse = axiosRes.data;
-        console.log("Response data: ", res);
-
-        if (
-          res.statusCode.toString().trim().startsWith("2") &&
-          res.data.items != null
-        ) {
-          console.log("Items: ", res.data.items);
-          setPostCategories(res.data.items);
-        } else {
-          console.log("No items found");
-        }
-      })
-      .catch((err) => {
-        console.error("Không thấy danh mục : ", err);
-      });
+    fetchPosts();
+    fetchPostCategories();
   }, []);
 
   const handleCreatePost = () => {
     navigate("/admin/create-post");
   };
 
-  const handleDeletePostClick = (id: string): void => {
-    if (window.confirm("Bạn có chắc là muốn xóa bài này không?")) {
-      postsApi
-        .deletePosts(id)
-        .then(() => {
-          alert(`Bài viết đã xóa thành công!`);
-          window.location.reload();
-        })
-        .catch((err: Error) => {
-          console.error(`Failed to delete post with ID: ${id}`, err);
-        });
-    }
-  };
-
   const handleEditPostClick = (id: string): void => {
     navigate(`/admin/update-post/${id}`);
   };
 
-  return (
-    <>
-      <AdminTemplate>
-        <div className="mb-10 text-center fw-bold mb-50">
-          <h1>BẢNG TIN</h1>
-        </div>
-        <div className="flex items-center justify-end space-x-4 p-5">
+  const handleDeletePostClick = async (id: string) => {
+    const confirm = await sweetAlert.confirm(
+      "Bạn có chắc là muốn xóa bài viết này không?",
+      "",
+      undefined,
+      undefined,
+      "question"
+    );
 
-          <div className="d-flex">
-            {postCategories.map((category: any) => (
-              <button
-                key={category.id}
-                className="btn btn-outline-primary mx-2 px-4 py-2 border border-black text-black bg-white hover:bg-gray-200"
-              >
-                {category.name}
-              </button>
-            ))}
-          </div>
+    if (confirm) {
+      try {
+        await postsApi.deletePosts(id);
+        sweetAlert.alertSuccess("Bài viết đã xóa thành công!", "", 3000, 26);
+        setPosts((prev) => prev.filter((post) => post.id !== id));
+      } catch (err) {
+        console.error("Không thể xóa bài viết: ", err);
+        sweetAlert.alertFailed("Không thể xóa bài viết!", "", 3000, 26);
+      }
+    }
+  };
 
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Search"
-              className="pl-4 pr-10 py-2 rounded-lg bg-gray-100 border focus:outline-none focus:ring-2 focus:ring-gray-400"
-            />
-            <AiOutlineSearch
-              className="absolute right-3 top-2.5 text-gray-500"
-              size={20}
-            />
-          </div>
-          <div className="relative">
-            <input
-              type="date"
-              value={selectedDate}
-              onChange={handleDateChange}
-              className="pl-4 pr-10 py-2 rounded-lg bg-gray-100 border focus:outline-none focus:ring-2 focus:ring-gray-400"
-            />
-            <AiOutlineCalendar
-              className="absolute right-3 top-2.5 text-gray-500"
-              size={20}
-            />
-          </div>
-
-          <button
-            className="bg-white text-black px-4 py-2 border border-black hover:bg-gray-200 hover:text-blue-600 transition-colors duration-200 !important"
-            onClick={handleCreatePost}
+  const columns: GridColDef[] = [
+    {
+      field: "title",
+      headerName: "Tiêu đề",
+      width: 200,
+      renderCell: (params) => (
+        <Link className="text-dark" to={`/admin/post-detail/${params.row.id}`}>
+          {params.value}
+        </Link>
+      ),
+    },
+    {
+      field: "content",
+      headerName: "Nội dung",
+      width: 300,
+      renderCell: (params) =>
+        params.value
+          .replace(/<[^>]*>/g, "")
+          .split(" ")
+          .slice(0, 10)
+          .join(" ") + "...",
+    },
+    {
+      field: "module",
+      headerName: "Trạng thái",
+      width: 150,
+      renderCell: (params) =>
+        params.value === "PUBLIC" ? PostStatus.PUBLIC : PostStatus.PRIVATE,
+    },
+    {
+      field: "createdAt",
+      headerName: "Ngày đăng",
+      width: 150,
+      renderCell: (params) => new Date(params.value).toLocaleDateString(),
+    },
+    {
+      field: "postCategoryId",
+      headerName: "Danh mục",
+      width: 200,
+      renderCell: (params) => {
+        const category = postCategories.find(
+          (category) => category.id === params.value
+        );
+        return category ? category.name : "Không có danh mục";
+      },
+    },
+    {
+      field: "actions",
+      headerName: "Hành động",
+      width: 200,
+      renderCell: (params) => (
+        <div className="space-x-2">
+          <Button
+            className="btn btn-primary"
+            color="primary"
+            variant="outlined"
+            onClick={() => handleEditPostClick(params.row.id)}
           >
-            Tạo bài mới
-          </button>
-
-
-
-
+            Chỉnh sửa
+          </Button>
+          <Button
+            className="btn btn-danger"
+            color="error"
+            variant="outlined"
+            onClick={() => handleDeletePostClick(params.row.id)}
+          >
+            Xóa
+          </Button>
         </div>
-        
-        <div className="flex relative overflow-x-auto justify-center p-6">
-          <table className="w-full text-sm text-left rtl:text-right text-gray-500 ">
-            <thead className="text-xs text-white uppercase bg-[#422A14] h-20">
-              <tr>
-                <th scope="col" className="px-6 py-3">Tiêu đề</th>
-                <th scope="col" className="px-6 py-3">Nội dung</th>
-                <th scope="col" className="px-6 py-3">Trạng thái</th>
-                <th scope="col" className="px-6 py-3">Ngày đăng</th>
-                <th scope="col" className="px-6 py-3">Danh mục</th>
-                <th scope="col" className="px-6 py-3">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {post && post.length > 0 ? (
-                post.map((isPost: any) => {
-                  const category = postCategories.find(
-                    (category: any) => category.id === isPost.postCategoryId
-                  );
+      ),
+      sortable: false,
+      filterable: false,
+    },
+  ];
 
-                  return (
-                    <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700" key={isPost.id}>
-                      <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                        <Link className="text-dark" to={`/admin/post-detail/${isPost.id}`}>
-                          {isPost.title}
-                        </Link>
-                      </th>
-                      <td className="px-4 py-4 space-x-2">
-                        {isPost.content.replace(/<[^>]*>/g, '').split(" ").slice(0, 10).join(" ")}...
-                      </td>
-
-                      <td className="px-6 py-4">  {isPost.module === 'PUBLIC' ? PostStatus.PUBLIC : PostStatus.PRIVATE}</td>
-                      <td className="px-6 py-4">{new Date(isPost.createdAt).toLocaleDateString()}</td> 
-                      <td className="px-6 py-4">{category ? category.name : 'Không có danh mục'}</td>
-                      <td>
-                        <button onClick={() => handleEditPostClick(isPost.id)} className="btn btn-info">
-                          Chỉnh sửa
-
-                        </button>
-                        <button onClick={() => handleDeletePostClick(isPost.id)} className="btn btn-warning">
-                          Xóa
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })
-              ) : (
-                <tr>
-                  <td colSpan={6}>Không thấy bài viết</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+  return (
+    <AdminTemplate>
+      <Paper
+        sx={{
+          width: "calc(100% - 3.8rem)",
+          position: "absolute",
+          left: "3.8rem",
+        }}
+      >
+        <h1 className="text-center text-[2.2rem] bg_title text-text_primary_light py-2 font-bold">
+          BẢNG TIN
+        </h1>
+        <div className="flex justify-between mb-3 mt-3 px-3">
+          <div className="min-w-[2px]" />
+          <div className="flex gap-x-2">
+            <Button
+              className="btn btn-success"
+              color="success"
+              variant="outlined"
+              onClick={handleCreatePost}
+            >
+              Tạo bài mới
+            </Button>
+            <Button color="primary" variant="contained" onClick={fetchPosts}>
+              Tải lại
+            </Button>
+          </div>
         </div>
-
-      </AdminTemplate>
-    </>
+        <div className="px-2">
+          <DataGrid
+            rows={posts}
+            columns={columns}
+            loading={loading}
+            paginationMode="client"
+            localeText={viVNGridTranslation}
+            getRowId={(row) => row.id}
+            disableRowSelectionOnClick
+          />
+        </div>
+      </Paper>
+    </AdminTemplate>
   );
 };
 

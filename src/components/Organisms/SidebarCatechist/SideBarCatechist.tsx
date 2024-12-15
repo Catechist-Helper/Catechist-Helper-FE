@@ -14,7 +14,7 @@ const SideBarCatechist = () => {
       style={{
         height: "100%",
         overflowY: "auto",
-        position: "sticky",
+        position: "fixed",
         left: 0,
         top: 0,
         bottom: 0,

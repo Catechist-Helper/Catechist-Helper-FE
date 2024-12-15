@@ -186,7 +186,12 @@ const CatechistDialog: React.FC<CatechistDialogProps> = ({
       }
 
       if (updateMode && updatedCatechist) {
-        formData.append("IsTeaching", updatedCatechist.isTeaching.toString());
+        formData.append(
+          "IsTeaching",
+          updatedCatechist.isTeaching
+            ? updatedCatechist.isTeaching.toString()
+            : updatedCatechist.isTeaching.toString()
+        );
         formData.append("AccountId", updatedCatechist.account.id);
         await catechistApi.updateCatechist(updatedCatechist.id, formData);
         sweetAlert.alertSuccess(
@@ -328,6 +333,9 @@ const CatechistDialog: React.FC<CatechistDialogProps> = ({
                           variant="contained"
                           component="label"
                           className="mt-2"
+                          style={{
+                            display: `${updatedCatechist && !updatedCatechist.isTeaching ? "none" : "block"}`,
+                          }}
                         >
                           {updateMode ? "Cập nhật ảnh" : "Tải ảnh"}
                           <input
@@ -463,6 +471,11 @@ const CatechistDialog: React.FC<CatechistDialogProps> = ({
                     margin="normal"
                     error={touched.phone && !!errors.phone}
                     helperText={touched.phone && errors.phone}
+                    disabled={
+                      updatedCatechist && !updatedCatechist.isTeaching
+                        ? true
+                        : false
+                    }
                   />
                 </Grid>
 
@@ -480,6 +493,11 @@ const CatechistDialog: React.FC<CatechistDialogProps> = ({
                     margin="normal"
                     error={touched.address && !!errors.address}
                     helperText={touched.address && errors.address}
+                    disabled={
+                      updatedCatechist && !updatedCatechist.isTeaching
+                        ? true
+                        : false
+                    }
                   />
                 </Grid>
                 <Grid item xs={6}>
@@ -496,6 +514,11 @@ const CatechistDialog: React.FC<CatechistDialogProps> = ({
                     margin="normal"
                     error={touched.qualification && !!errors.qualification}
                     helperText={touched.qualification && errors.qualification}
+                    disabled={
+                      updatedCatechist && !updatedCatechist.isTeaching
+                        ? true
+                        : false
+                    }
                   />
                 </Grid>
 
@@ -509,6 +532,11 @@ const CatechistDialog: React.FC<CatechistDialogProps> = ({
                     margin="normal"
                     error={touched.fatherName && !!errors.fatherName}
                     helperText={touched.fatherName && errors.fatherName}
+                    disabled={
+                      updatedCatechist && !updatedCatechist.isTeaching
+                        ? true
+                        : false
+                    }
                   />
                 </Grid>
 
@@ -522,6 +550,11 @@ const CatechistDialog: React.FC<CatechistDialogProps> = ({
                     margin="normal"
                     error={touched.fatherPhone && !!errors.fatherPhone}
                     helperText={touched.fatherPhone && errors.fatherPhone}
+                    disabled={
+                      updatedCatechist && !updatedCatechist.isTeaching
+                        ? true
+                        : false
+                    }
                   />
                 </Grid>
 
@@ -535,6 +568,11 @@ const CatechistDialog: React.FC<CatechistDialogProps> = ({
                     margin="normal"
                     error={touched.motherName && !!errors.motherName}
                     helperText={touched.motherName && errors.motherName}
+                    disabled={
+                      updatedCatechist && !updatedCatechist.isTeaching
+                        ? true
+                        : false
+                    }
                   />
                 </Grid>
 
@@ -548,6 +586,11 @@ const CatechistDialog: React.FC<CatechistDialogProps> = ({
                     margin="normal"
                     error={touched.motherPhone && !!errors.motherPhone}
                     helperText={touched.motherPhone && errors.motherPhone}
+                    disabled={
+                      updatedCatechist && !updatedCatechist.isTeaching
+                        ? true
+                        : false
+                    }
                   />
                 </Grid>
 
@@ -571,6 +614,11 @@ const CatechistDialog: React.FC<CatechistDialogProps> = ({
                       }
                       placeholder="Chọn Tên Thánh"
                       isSearchable
+                      isDisabled={
+                        updatedCatechist && !updatedCatechist.isTeaching
+                          ? true
+                          : false
+                      }
                     />
                     {touched.christianNameId && errors.christianNameId && (
                       <p
@@ -619,30 +667,50 @@ const CatechistDialog: React.FC<CatechistDialogProps> = ({
               </Grid>
 
               <DialogActions className="mt-4">
-                <Button variant="outlined" onClick={onClose} color="secondary">
-                  Hủy
-                </Button>
-                <Button
-                  variant="outlined"
-                  type="submit"
-                  color="primary"
-                  // disabled={
-                  //   Object.keys(errors).length > 0 ||
-                  //   !Object.keys(touched).length
-                  // }
-                  onClick={() => {
-                    if (Object.keys(errors).length > 0) {
-                      sweetAlert.alertFailed(
-                        "Có lỗi xảy ra khi nhập liệu",
-                        "",
-                        5000,
-                        23
-                      );
-                    }
-                  }}
-                >
-                  {updateMode ? "Cập nhật" : "Thêm"}
-                </Button>
+                <div className="flex justify-between items-center w-full">
+                  <div className="min-w-[2px] text-danger font-bold text-[1.2rem]">
+                    Giáo lý viên này hiện đã nghỉ giảng dạy
+                  </div>
+                  <div className="flex gap-x-2">
+                    <Button
+                      variant="outlined"
+                      onClick={onClose}
+                      color="secondary"
+                    >
+                      {updatedCatechist && !updatedCatechist.isTeaching
+                        ? "Đóng"
+                        : "Hủy"}
+                    </Button>
+                    {updatedCatechist && !updatedCatechist.isTeaching ? (
+                      <></>
+                    ) : (
+                      <>
+                        {" "}
+                        <Button
+                          variant="outlined"
+                          type="submit"
+                          color="primary"
+                          // disabled={
+                          //   Object.keys(errors).length > 0 ||
+                          //   !Object.keys(touched).length
+                          // }
+                          onClick={() => {
+                            if (Object.keys(errors).length > 0) {
+                              sweetAlert.alertFailed(
+                                "Có lỗi xảy ra khi nhập liệu",
+                                "",
+                                5000,
+                                23
+                              );
+                            }
+                          }}
+                        >
+                          {updateMode ? "Cập nhật" : "Thêm"}
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                </div>
               </DialogActions>
             </Form>
           )}

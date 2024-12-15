@@ -482,6 +482,7 @@ export default function EventsComponent() {
         sx={{
           width: "calc(100% - 3.8rem)",
           position: "absolute",
+          left: "3.8rem",
         }}
       >
         <h1 className="text-center text-[2.2rem] bg_title text-text_primary_light py-2 font-bold">

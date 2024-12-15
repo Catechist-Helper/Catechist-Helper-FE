@@ -5,9 +5,7 @@ import AdminTemplate from "../../../components/Templates/AdminTemplate/AdminTemp
 const PostCategory: React.FC = () => {
   return (
     <AdminTemplate>
-      <div className="flex items-center justify-start space-x-4 p-5">
-        <ListAllPostCategory />
-      </div>
+      <ListAllPostCategory />
     </AdminTemplate>
   );
 };

@@ -24,6 +24,8 @@ import { useNavigate } from "react-router-dom";
 import { PATH_ADMIN } from "../../../routes/paths";
 import LeaveRequestDialog from "./LeaveRequestDialog";
 import { GetLeaveRequestItemResponse } from "../../../model/Response/LeaveRequest";
+import leaveRequestApi from "../../../api/LeaveRequest";
+import { LeaveRequestStatus } from "../../../enums/LeaveRequest";
 
 export default function CatechistComponent() {
   const [rows, setRows] = useState<CatechistItemResponse[]>([]);
@@ -63,22 +65,11 @@ export default function CatechistComponent() {
   const [openViewLeaveRequest, setOpenViewLeaveRequest] =
     useState<boolean>(false);
 
-  const handleOpenViewLeaveRequest = () => setOpenViewLeaveRequest(true);
   const handleCloseViewLeaveRequest = () => setOpenViewLeaveRequest(false);
-  const mockLeaveRequest: GetLeaveRequestItemResponse = {
-    id: "123",
-    reason: "Nghỉ phép cá nhân",
-    comment: "Tôi có công việc gia đình",
-    approvalDate: "2024-06-20T12:00:00Z",
-    catechistId: "456",
-    catechistName: "Nguyễn Văn A",
-    approver: null,
-    status: 1, // Approved
-    approverId: null,
-    createAt: "2024-06-19T08:30:00Z",
-    updateAt: null,
-    leaveDate: null,
-  };
+  const [selectedLeaveRequest, setSelectedLeaveRequest] = useState<
+    GetLeaveRequestItemResponse | undefined
+  >(undefined);
+
   const columns: GridColDef[] = [
     {
       field: "no",
@@ -195,7 +186,36 @@ export default function CatechistComponent() {
                 <Button
                   color="secondary"
                   onClick={() => {
-                    handleOpenViewLeaveRequest();
+                    const action = async () => {
+                      try {
+                        const firstRes = await leaveRequestApi.getLeaveRequests(
+                          LeaveRequestStatus.Approved,
+                          params.row.id
+                        );
+                        const leave = firstRes.data.data.sort((a, b) => {
+                          if (a.leaveDate && b.leaveDate) {
+                            return (
+                              new Date(b.leaveDate).getTime() -
+                              new Date(a.leaveDate).getTime()
+                            );
+                          }
+                          return -1;
+                        })[0];
+                        if (leave) {
+                          setSelectedLeaveRequest(leave);
+                          setOpenViewLeaveRequest(true);
+                        }
+                      } catch (err) {
+                        console.error(err);
+                        sweetAlert.alertFailed(
+                          "Có lỗi khi tải đơn nghỉ dạy",
+                          "",
+                          3000,
+                          28
+                        );
+                      }
+                    };
+                    action();
                   }}
                 >
                   Xem phê duyệt
@@ -333,6 +353,7 @@ export default function CatechistComponent() {
       sx={{
         width: "calc(100% - 3.8rem)",
         position: "absolute",
+        left: "3.8rem",
       }}
     >
       <h1 className="text-center text-[2.2rem] bg_title text-text_primary_light py-2 font-bold">
@@ -357,7 +378,7 @@ export default function CatechistComponent() {
                 )
               }
               placeholder="Chọn trạng thái giảng dạy"
-              className={`mt-1 z-[999] w-[200px]`}
+              className={`mt-1 w-[200px]`}
             />
           </div>
           <div>
@@ -464,7 +485,7 @@ export default function CatechistComponent() {
           <LeaveRequestDialog
             open={openViewLeaveRequest}
             onClose={handleCloseViewLeaveRequest}
-            leaveRequest={mockLeaveRequest}
+            leaveRequest={selectedLeaveRequest}
           />
         </>
       ) : (

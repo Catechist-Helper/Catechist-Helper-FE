@@ -36,73 +36,98 @@ const ParishIntroduction = () => {
           backgroundSize: "cover",
         }}
       >
-        <Container maxWidth="md" sx={{ marginTop: 4 }}>
-          <Box textAlign="center" mb={4} color="white">
-            <Typography variant="h3" component="h1" gutterBottom>
-              Chào mừng đến với {CORE_INFORMATION.PARISH_NAME}
-            </Typography>
-            <Typography variant="body1" color="white" mb={2}>
-              Giáo xứ của chúng tôi là một cộng đồng sống động và thân thiện,
-              nơi đức tin và tình bạn được gắn kết. Chúng tôi cam kết phục vụ
-              cộng đồng và chia sẻ tình yêu của Chúa Kitô với mọi người.
-            </Typography>
-            <Typography variant="body2" color="white" fontStyle="italic">
-              "Nơi đức tin lớn lên và cộng đồng thăng hoa."
-            </Typography>
-          </Box>
+        <div
+          className="w-full h-full absolute z-1"
+          style={{
+            background: `linear-gradient(
+                        to right, 
+                        rgba(0, 0, 0, 0.8) 0%, 
+                        rgba(0, 0, 0, 0.75) 4%, 
+                        rgba(0, 0, 0, 0.7) 18%, 
+                        rgba(0, 0, 0, 0.75) 100%
+                      )`,
+          }}
+        ></div>{" "}
+        <div className="z-[100] relative h-full">
+          <Container maxWidth="lg" sx={{ marginTop: 4 }}>
+            <Box textAlign="center" mb={4} color="white">
+              <Typography variant="h3" component="h1" gutterBottom>
+                <h1
+                  className="text-[3rem] text-text_primary_light text-center mt-4"
+                  style={{
+                    lineHeight: "60px",
+                    fontWeight: "600",
+                    letterSpacing: "3px",
+                  }}
+                >
+                  {" "}
+                  Chào mừng đến với <br /> {CORE_INFORMATION.PARISH_NAME}
+                </h1>
+              </Typography>
+              <Typography variant="body1" color="white" mb={2}>
+                Giáo xứ của chúng tôi là một cộng đồng sống động và thân thiện,
+                nơi đức tin và tình bạn được gắn kết. <br /> Chúng tôi cam kết
+                phục vụ cộng đồng và chia sẻ tình yêu của Chúa Kitô với mọi
+                người.
+              </Typography>
+              <Typography variant="body2" color="white" fontStyle="italic">
+                "Nơi đức tin lớn lên và cộng đồng thăng hoa."
+              </Typography>
+            </Box>
 
-          <Stack spacing={3} direction={{ xs: "column", sm: "row" }}>
-            <Card sx={{ flex: 1 }}>
-              <CardContent>
-                <Box display="flex" alignItems="center" mb={2}>
-                  <LocationOnIcon color="primary" sx={{ marginRight: 1 }} />
-                  <Typography variant="h6">Địa chỉ</Typography>
-                </Box>
-                <Typography variant="body1" color="text.secondary">
-                  {CORE_INFORMATION.ADDRESS}
-                </Typography>
-              </CardContent>
-            </Card>
+            <Stack spacing={3} direction={{ xs: "column", sm: "row" }}>
+              <Card sx={{ flex: 1 }}>
+                <CardContent>
+                  <Box display="flex" alignItems="center" mb={2}>
+                    <LocationOnIcon color="primary" sx={{ marginRight: 1 }} />
+                    <Typography variant="h6">Địa chỉ</Typography>
+                  </Box>
+                  <Typography variant="body1" color="text.secondary">
+                    {CORE_INFORMATION.ADDRESS}
+                  </Typography>
+                </CardContent>
+              </Card>
 
-            <Card sx={{ flex: 1 }}>
-              <CardContent>
-                <Box display="flex" alignItems="center" mb={2}>
-                  <ChurchIcon color="primary" sx={{ marginRight: 1 }} />
-                  <Typography variant="h6">Giờ lễ</Typography>
-                </Box>
-                <Typography variant="body1" color="text.secondary">
-                  {CORE_INFORMATION.SERVICE_HOURS}
-                </Typography>
-              </CardContent>
-            </Card>
-          </Stack>
+              <Card sx={{ flex: 1 }}>
+                <CardContent>
+                  <Box display="flex" alignItems="center" mb={2}>
+                    <ChurchIcon color="primary" sx={{ marginRight: 1 }} />
+                    <Typography variant="h6">Giờ lễ</Typography>
+                  </Box>
+                  <Typography variant="body1" color="text.secondary">
+                    {CORE_INFORMATION.SERVICE_HOURS}
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Stack>
 
-          <Stack spacing={3} direction={{ xs: "column", sm: "row" }} mt={3}>
-            <Card sx={{ flex: 1 }}>
-              <CardContent>
-                <Box display="flex" alignItems="center" mb={2}>
-                  <EmailIcon color="primary" sx={{ marginRight: 1 }} />
-                  <Typography variant="h6">Email</Typography>
-                </Box>
-                <Typography variant="body1" color="text.secondary">
-                  {CORE_INFORMATION.MAIL_CONSTANT}
-                </Typography>
-              </CardContent>
-            </Card>
+            <Stack spacing={3} direction={{ xs: "column", sm: "row" }} mt={3}>
+              <Card sx={{ flex: 1 }}>
+                <CardContent>
+                  <Box display="flex" alignItems="center" mb={2}>
+                    <EmailIcon color="primary" sx={{ marginRight: 1 }} />
+                    <Typography variant="h6">Email</Typography>
+                  </Box>
+                  <Typography variant="body1" color="text.secondary">
+                    {CORE_INFORMATION.MAIL_CONSTANT}
+                  </Typography>
+                </CardContent>
+              </Card>
 
-            <Card sx={{ flex: 1 }}>
-              <CardContent>
-                <Box display="flex" alignItems="center" mb={2}>
-                  <PhoneIcon color="primary" sx={{ marginRight: 1 }} />
-                  <Typography variant="h6">Số điện thoại</Typography>
-                </Box>
-                <Typography variant="body1" color="text.secondary">
-                  {CORE_INFORMATION.PHONE_CONSTANT_DISPLAY}
-                </Typography>
-              </CardContent>
-            </Card>
-          </Stack>
-        </Container>
+              <Card sx={{ flex: 1 }}>
+                <CardContent>
+                  <Box display="flex" alignItems="center" mb={2}>
+                    <PhoneIcon color="primary" sx={{ marginRight: 1 }} />
+                    <Typography variant="h6">Số điện thoại</Typography>
+                  </Box>
+                  <Typography variant="body1" color="text.secondary">
+                    {CORE_INFORMATION.PHONE_CONSTANT_DISPLAY}
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Stack>
+          </Container>
+        </div>
       </main>
 
       <FooterHome />

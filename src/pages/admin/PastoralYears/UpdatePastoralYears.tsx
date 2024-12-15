@@ -7,10 +7,10 @@ import { useNavigate, useParams, Link } from "react-router-dom";
 import AdminTemplate from "../../../components/Templates/AdminTemplate/AdminTemplate";
 import { PATH_ADMIN } from "../../../routes/paths";
 import { pastoralYearStatus } from "../../../enums/PastoralYear";
-import { formatDate } from '../../../utils/formatDate'; 
+import { formatDate } from "../../../utils/formatDate";
 
 const UpdatePastoralYear: React.FC = () => {
-  const { id } = useParams<{ id: string }>(); 
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -24,18 +24,18 @@ const UpdatePastoralYear: React.FC = () => {
     onSubmit: async (values) => {
       setIsSubmitting(true);
       try {
-        const [startYear, endYear] = values.name.split('-');
+        const [startYear, endYear] = values.name.split("-");
         const formattedName = formatDate.YYYY_YYYY(startYear, endYear);
         const response = await pastoralYearsApi.updatePastoralYears(
           id!,
-          formattedName, 
+          formattedName,
           values.note,
           values.pastoralYearStatus
         );
 
         console.log("Update successful: ", response);
         message.success("Cập nhật niên khóa thành công!");
-        navigate(PATH_ADMIN.pastoral_years); 
+        navigate(PATH_ADMIN.pastoral_years);
       } catch (error) {
         console.error("Update failed: ", error);
         message.error("Cập nhật niên khóa không thành công");
@@ -48,7 +48,6 @@ const UpdatePastoralYear: React.FC = () => {
   useEffect(() => {
     const loadPastoralYear = async () => {
       try {
-    
         const response = await pastoralYearsApi.getById(id!);
         const pastoralYear = response.data;
 
@@ -72,7 +71,7 @@ const UpdatePastoralYear: React.FC = () => {
     <AdminTemplate>
       <div>
         <h3 className="text-center pt-10 fw-bold">CẬP NHẬT NIÊN KHÓA</h3>
-        <form onSubmit={formik.handleSubmit} className="max-w-sm mx-auto mt-5">
+        <form onSubmit={formik.handleSubmit} className="max-w-lg mx-auto mt-5">
           <div className="mb-5">
             <label
               htmlFor="name"
@@ -115,9 +114,15 @@ const UpdatePastoralYear: React.FC = () => {
                   type="radio"
                   name="pastoralYearStatus"
                   value={pastoralYearStatus.START}
-                  checked={formik.values.pastoralYearStatus === pastoralYearStatus.START}
+                  checked={
+                    formik.values.pastoralYearStatus ===
+                    pastoralYearStatus.START
+                  }
                   onChange={() =>
-                    formik.setFieldValue('pastoralYearStatus', pastoralYearStatus.START)
+                    formik.setFieldValue(
+                      "pastoralYearStatus",
+                      pastoralYearStatus.START
+                    )
                   }
                   className="w-4 h-4 text-blue-600"
                 />
@@ -128,9 +133,15 @@ const UpdatePastoralYear: React.FC = () => {
                   type="radio"
                   name="pastoralYearStatus"
                   value={pastoralYearStatus.FINISH}
-                  checked={formik.values.pastoralYearStatus === pastoralYearStatus.FINISH}
+                  checked={
+                    formik.values.pastoralYearStatus ===
+                    pastoralYearStatus.FINISH
+                  }
                   onChange={() =>
-                    formik.setFieldValue('pastoralYearStatus', pastoralYearStatus.FINISH)
+                    formik.setFieldValue(
+                      "pastoralYearStatus",
+                      pastoralYearStatus.FINISH
+                    )
                   }
                   className="w-4 h-4 text-blue-600"
                 />

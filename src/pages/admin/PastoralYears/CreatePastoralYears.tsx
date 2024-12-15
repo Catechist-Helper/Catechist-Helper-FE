@@ -1,26 +1,25 @@
 import React, { useState } from "react";
 import { useFormik } from "formik";
 import { message } from "antd";
-import pastoralYearsApi from "../../../api/PastoralYear"; 
+import pastoralYearsApi from "../../../api/PastoralYear";
 import "bootstrap/dist/css/bootstrap.min.css";
-import {  useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import AdminTemplate from "../../../components/Templates/AdminTemplate/AdminTemplate";
 import { PATH_ADMIN } from "../../../routes/paths";
-import { pastoralYearStatus} from "../../../enums/PastoralYear"; 
-import { formatDate } from '../../../utils/formatDate';  
-
+import { pastoralYearStatus } from "../../../enums/PastoralYear";
+import { formatDate } from "../../../utils/formatDate";
 
 const CreatePastoralYears: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
   const handleGoBack = () => {
-    navigate(-1); 
+    navigate(-1);
   };
 
   const formik = useFormik({
     initialValues: {
-      name: "",  
+      name: "",
       note: "",
       pastoralYearStatus: pastoralYearStatus.START,
     },
@@ -28,15 +27,15 @@ const CreatePastoralYears: React.FC = () => {
     onSubmit: async (values) => {
       setIsSubmitting(true);
       try {
-        const [startYear, endYear] = values.name.split('-');
+        const [startYear, endYear] = values.name.split("-");
         const formattedName = formatDate.YYYY_YYYY(startYear, endYear);
-  
+
         const response = await pastoralYearsApi.createPastoralYears(
-          formattedName, 
+          formattedName,
           values.note,
           values.pastoralYearStatus
         );
-  
+
         message.success("Tạo niên khóa thành công!");
         console.log("Response: ", response);
         navigate(PATH_ADMIN.pastoral_years);
@@ -48,13 +47,12 @@ const CreatePastoralYears: React.FC = () => {
       }
     },
   });
-  
 
   return (
     <AdminTemplate>
       <div>
         <h3 className="text-center pt-10 fw-bold">TẠO NIÊN KHÓA</h3>
-        <form onSubmit={formik.handleSubmit} className="max-w-sm mx-auto mt-5">
+        <form onSubmit={formik.handleSubmit} className="max-w-lg mx-auto mt-5">
           <div className="mb-5">
             <label
               htmlFor="name"
@@ -71,7 +69,7 @@ const CreatePastoralYears: React.FC = () => {
               value={formik.values.name}
             />
           </div>
-          
+
           <div className="mb-5">
             <label
               htmlFor="note"
@@ -97,8 +95,16 @@ const CreatePastoralYears: React.FC = () => {
                   type="radio"
                   name="pastoralYearStatus"
                   value={pastoralYearStatus.START}
-                  checked={formik.values.pastoralYearStatus === pastoralYearStatus.START}
-                  onChange={() => formik.setFieldValue('pastoralYearStatus', pastoralYearStatus.START)} // Cập nhật giá trị trạng thái
+                  checked={
+                    formik.values.pastoralYearStatus ===
+                    pastoralYearStatus.START
+                  }
+                  onChange={() =>
+                    formik.setFieldValue(
+                      "pastoralYearStatus",
+                      pastoralYearStatus.START
+                    )
+                  } // Cập nhật giá trị trạng thái
                   className="w-4 h-4 text-blue-600"
                 />
                 <label className="ml-2">Bắt đầu</label>

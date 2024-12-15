@@ -1,6 +1,9 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
+import { PATH_HOME } from "../../../../routes/paths";
 
 const IntroductionComponent: React.FC = () => {
+  const navigate = useNavigate();
   return (
     <div className="px-20 w-full flex flex-col items-end">
       <h1
@@ -19,8 +22,11 @@ const IntroductionComponent: React.FC = () => {
         nơi gìn giữ truyền thống <br /> đức tin và tinh thần phục vụ yêu thương
       </p>
       <button
-        className="text-primary_color bg-white py-2 px-3 border-0 mt-2"
+        className="text-primary_color bg-white py-2 px-3 border-0 mt-2 hover:bg-black"
         style={{ fontWeight: "bolder", letterSpacing: "0.5px" }}
+        onClick={() => {
+          navigate(PATH_HOME.introduce);
+        }}
       >
         THÔNG TIN VỀ GIÁO XỨ
       </button>

@@ -74,7 +74,6 @@ const CreateAccountAndCatechistDialog: React.FC<
   const [gender, setGender] = useState<string>(updatedCatechist?.gender ?? "");
 
   useEffect(() => {
-    console.log("hehe");
     const fetchChristianNames = async () => {
       try {
         const { data } = await christianNamesApi.getAllChristianNames();

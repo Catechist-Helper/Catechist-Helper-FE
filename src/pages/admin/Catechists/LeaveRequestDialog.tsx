@@ -17,7 +17,7 @@ import { formatDate } from "../../../utils/formatDate";
 interface LeaveRequestDialogProps {
   open: boolean;
   onClose: () => void;
-  leaveRequest: GetLeaveRequestItemResponse;
+  leaveRequest?: GetLeaveRequestItemResponse;
 }
 
 // Dialog Component
@@ -39,6 +39,10 @@ const LeaveRequestDialog: React.FC<LeaveRequestDialogProps> = ({
         return "Không xác định";
     }
   };
+
+  if (!leaveRequest) {
+    return <></>;
+  }
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">

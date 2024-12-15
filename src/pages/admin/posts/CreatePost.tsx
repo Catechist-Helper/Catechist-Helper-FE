@@ -105,7 +105,7 @@ const CreatePost: React.FC = () => {
   return (
     <AdminTemplate>
       <div>
-        <h2 className="text-center">Tạo bài viết mới</h2>
+        <h2 className="text-center text-[2rem] font-bold">Tạo bài viết mới</h2>
         <form
           onSubmit={formik.handleSubmit}
           className="w-full mx-auto px-20 mt-5"
@@ -151,7 +151,9 @@ const CreatePost: React.FC = () => {
               onChange={formik.handleChange}
               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
             >
-              <option value="" disabled>Chọn trạng thái</option>
+              <option value="" disabled>
+                Chọn trạng thái
+              </option>
               {Object.values(PostStatus).map((status) => (
                 <option key={status} value={status}>
                   {status}
@@ -173,7 +175,9 @@ const CreatePost: React.FC = () => {
               onChange={formik.handleChange}
               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
             >
-              <option value="" disabled>Chọn danh mục</option>
+              <option value="" disabled>
+                Chọn danh mục
+              </option>
               {postCategories.map((category: any) => (
                 <option key={category.id} value={category.id}>
                   {category.name}
@@ -191,7 +195,7 @@ const CreatePost: React.FC = () => {
           </button>
           <Link
             to={PATH_ADMIN.post}
-            className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center ml-5"
+            className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-[14px] text-center ml-5"
           >
             Quay lại
           </Link>

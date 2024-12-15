@@ -111,7 +111,7 @@ const CreateRoom: React.FC = () => {
     <AdminTemplate>
       <div>
         <h3 className="text-center pt-10 fw-bold">TẠO PHÒNG HỌC</h3>
-        <form onSubmit={formik.handleSubmit} className="max-w-sm mx-auto mt-5">
+        <form onSubmit={formik.handleSubmit} className="max-w-lg mx-auto mt-5">
           <div className="mb-5">
             <label
               htmlFor="name"

@@ -29,7 +29,7 @@ export default function EventCategoriesComponent() {
       setRows(data.data.items); // Cập nhật dữ liệu vào state
     } catch (error) {
       console.error("Lỗi khi tải danh sách danh mục:", error);
-      sweetAlert.alertFailed("Không thể tải danh sách danh mục!", "", 1000, 22);
+      sweetAlert.alertFailed("Không thể tải danh sách danh mục!", "", 3000, 26);
     } finally {
       setLoading(false);
     }
@@ -51,8 +51,8 @@ export default function EventCategoriesComponent() {
       sweetAlert.alertWarning(
         "Vui lòng chọn 1 danh mục để chỉnh sửa!",
         "",
-        1000,
-        22
+        3000,
+        30
       );
       return;
     }
@@ -66,7 +66,7 @@ export default function EventCategoriesComponent() {
   // Xử lý xóa danh mục
   const handleDeleteCategory = async () => {
     if (selectedIds.length === 0) {
-      sweetAlert.alertWarning("Vui lòng chọn danh mục để xóa!", "", 1000, 22);
+      sweetAlert.alertWarning("Vui lòng chọn danh mục để xóa!", "", 3000, 26);
       return;
     }
     const confirm = await sweetAlert.confirm(
@@ -82,11 +82,11 @@ export default function EventCategoriesComponent() {
           eventCategoryApi.deleteEventCategory(id.toString())
         )
       );
-      sweetAlert.alertSuccess("Xóa danh mục thành công!", "", 1000, 22);
+      sweetAlert.alertSuccess("Xóa danh mục thành công!", "", 3000, 25);
       fetchEventCategories(); // Làm mới danh sách sau khi xóa
     } catch (error) {
       console.error("Lỗi khi xóa danh mục:", error);
-      sweetAlert.alertFailed("Không thể xóa danh mục!", "", 1000, 22);
+      sweetAlert.alertFailed("Không thể xóa danh mục!", "", 3000, 25);
     }
   };
 
@@ -95,9 +95,10 @@ export default function EventCategoriesComponent() {
       sx={{
         width: "calc(100% - 3.8rem)",
         position: "absolute",
+        left: "3.8rem",
       }}
     >
-      <h1 className="text-center text-[2.2rem] bg-primary_color text-text_primary_light py-2 font-bold">
+      <h1 className="text-center text-[2.2rem] bg_title text-text_primary_light py-2 font-bold">
         Quản lý danh mục sự kiện
       </h1>
       <div className="my-2 flex justify-between mx-3">
@@ -148,6 +149,7 @@ export default function EventCategoriesComponent() {
         sx={{
           border: 0,
         }}
+        disableMultipleRowSelection
       />
       {/* Dialog thêm/chỉnh sửa */}
       {openDialog && (

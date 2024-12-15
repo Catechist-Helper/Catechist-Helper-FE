@@ -3,137 +3,165 @@ import systemConfigApi from "../../../api/SystemConfiguration";
 import { AxiosResponse } from "axios";
 import { BasicResponse } from "../../../model/Response/BasicResponse";
 import { useNavigate } from "react-router-dom";
-import { getSystemConfigEnumDescription } from "../../../enums/SystemConfig";
+import {
+  getSystemConfigEnumDescription,
+  SystemConfigKey,
+} from "../../../enums/SystemConfig";
+import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import {
+  Button,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Paper,
+  Select,
+} from "@mui/material";
+import viVNGridTranslation from "../../../locale/MUITable";
 
 const ListAllConfig: React.FC = () => {
-  const [systemConfig, setSystemConfig] = useState([]);
+  const [systemConfig, setSystemConfig] = useState<any[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const navigate = useNavigate();
-  useEffect(() => {
-    systemConfigApi
-      .getAllConfig(1, 10)
-      .then((axiosRes: AxiosResponse) => {
-        const res: BasicResponse = axiosRes.data;
-        console.log("Response data: ", res);
+  const [categoryFilter, setCategoryFilter] = useState<string>("Tất cả");
+  const [filteredConfig, setFilteredConfig] = useState<any[]>([]);
 
-        if (
-          res.statusCode.toString().trim().startsWith("2") &&
-          res.data.items != null
-        ) {
-          console.log("Items: ", res.data.items);
-          setSystemConfig(res.data.items);
-        } else {
-          console.log("No items found");
-        }
-      })
-      .catch((err) => {
-        console.error("Không thấy cấu hình hệ thống : ", err);
-      });
+  const fetchSystemConfigs = async () => {
+    try {
+      const { data }: AxiosResponse<BasicResponse> =
+        await systemConfigApi.getAllConfig(1, 10);
+      if (
+        data.statusCode.toString().trim().startsWith("2") &&
+        data.data.items != null
+      ) {
+        const sortedData = data.data.items.sort(
+          (a: any, b: any) =>
+            Object.values(SystemConfigKey).indexOf(a.key) -
+            Object.values(SystemConfigKey).indexOf(b.key)
+        );
+        setSystemConfig(sortedData);
+        setFilteredConfig(sortedData);
+      } else {
+        console.log("No items found");
+      }
+    } catch (err) {
+      console.error("Không thấy cấu hình hệ thống : ", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchSystemConfigs();
   }, []);
 
-  //   const handleCreate = () => {
-  //     navigate("/admin/create-system-configurations");
-  //   };
+  useEffect(() => {
+    if (categoryFilter === "Tất cả") {
+      setFilteredConfig(systemConfig);
+    } else if (categoryFilter === "Xếp lớp giáo lý") {
+      setFilteredConfig(
+        systemConfig.filter((item) =>
+          [
+            SystemConfigKey.START_DATE,
+            SystemConfigKey.END_DATE,
+            SystemConfigKey.START_TIME,
+            SystemConfigKey.END_TIME,
+            SystemConfigKey.WEEKDAY,
+            SystemConfigKey.RestrictedDateManagingCatechism,
+          ].includes(item.key)
+        )
+      );
+    } else if (categoryFilter === "Phỏng vấn") {
+      setFilteredConfig(
+        systemConfig.filter(
+          (item) =>
+            item.key === SystemConfigKey.RestrictedUpdateDaysBeforeInterview
+        )
+      );
+    }
+  }, [categoryFilter, systemConfig]);
 
   const handleEditCategoryClick = (id: string): void => {
     navigate(`/admin/update-system-configurations/${id}`);
   };
 
-  //   const handleDeleteCategoryClick = (id: string): void => {
-  //     if (window.confirm("Bạn có chắc là muốn xóa cấu hình này không?")) {
-  //       systemConfigApi
-  //         .deleteConfig(id)
-  //         .then(() => {
-  //           alert(`SystemConfig with ID: ${id} đã xóa thành công.`);
-  //           window.location.reload();
-  //         })
-  //         .catch((err: Error) => {
-  //           console.error(`Failed to delete systemConfig with ID: ${id}`, err);
-  //         });
-  //     }
-  //   };
+  const columns: GridColDef[] = [
+    {
+      field: "key",
+      headerName: "Thông số",
+      width: 350,
+      renderCell: (params) => getSystemConfigEnumDescription(params.value),
+    },
+    { field: "value", headerName: "Giá trị", width: 300 },
+    {
+      field: "actions",
+      headerName: "Hành động",
+      width: 200,
+      renderCell: (params) => (
+        <div className="space-x-2">
+          <Button
+            className="btn btn-primary"
+            color="primary"
+            variant="outlined"
+            onClick={() => handleEditCategoryClick(params.row.id)}
+          >
+            Chỉnh sửa
+          </Button>
+        </div>
+      ),
+      sortable: false,
+      filterable: false,
+    },
+  ];
 
   return (
-    <>
-      <div className="container mt-0">
-        <div className="mb-3 text-center fw-bold">
-          <h1 className="text-[2rem]">CẤU HÌNH HỆ THỐNG</h1>
+    <Paper
+      sx={{
+        width: "calc(100% - 3.8rem)",
+        position: "absolute",
+        left: "3.8rem",
+      }}
+    >
+      <h1 className="text-center text-[2.2rem] bg_title text-text_primary_light py-2 font-bold">
+        CẤU HÌNH HỆ THỐNG
+      </h1>
+      <div className="flex justify-between mb-3 mt-3 px-3">
+        <div>
+          <FormControl sx={{ minWidth: 200 }}>
+            <InputLabel id="category-filter-label">Danh mục</InputLabel>
+            <Select
+              label="Danh mục"
+              labelId="category-filter-label"
+              value={categoryFilter}
+              onChange={(e) => setCategoryFilter(e.target.value)}
+            >
+              <MenuItem value="Tất cả">Tất cả</MenuItem>
+              <MenuItem value="Xếp lớp giáo lý">Xếp lớp giáo lý</MenuItem>
+              <MenuItem value="Phỏng vấn">Phỏng vấn</MenuItem>
+            </Select>
+          </FormControl>
         </div>
-        {/* <div className="d-flex align-items-center mb-3 justify-center">
-                    <button
-                        className="mt-2 px-4 py-2 border border-black text-black bg-white hover:bg-gray-200"
-                        onClick={handleCreate}
-                    >
-                        Tạo cấu hình
-                    </button>
-                </div> */}
-
-        <div className="flex relative overflow-x-auto justify-center p-6">
-          <table className="min-w-[900px] text-sm text-center text-gray-500 table-auto border-collapse">
-            <thead className="text-xs text-white uppercase bg-[#422A14] h-20">
-              <tr>
-                <th
-                  style={{ textAlign: "left" }}
-                  scope="col"
-                  className="px-4 py-3"
-                >
-                  Thông số
-                </th>
-                <th
-                  style={{ textAlign: "left" }}
-                  scope="col"
-                  className="px-4 py-3"
-                >
-                  Giá trị
-                </th>
-                <th scope="col" className="px-4 py-3">
-                  Hành động
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {systemConfig.length > 0 ? (
-                systemConfig.map((system: any) => (
-                  <tr
-                    className="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
-                    key={system.id}
-                  >
-                    <td
-                      className="px-4 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
-                      align="left"
-                    >
-                      {getSystemConfigEnumDescription(system.key)}
-                    </td>
-                    <td className="px-4 py-4" align="left">
-                      {system.value}
-                    </td>
-                    <td className="px-4 py-4 space-x-2">
-                      <button
-                        onClick={() => handleEditCategoryClick(system.id)}
-                        className="btn btn-info"
-                      >
-                        Chỉnh sửa
-                      </button>
-                      {/* <button
-                        onClick={() => handleDeleteCategoryClick(system.id)}
-                        className="btn btn-warning"
-                      >
-                        Xóa
-                      </button> */}
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={3} className="px-4 py-4 text-center">
-                    Không thấy danh sách cấu hình
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+        <div>
+          <Button
+            color="primary"
+            variant="contained"
+            onClick={fetchSystemConfigs}
+          >
+            Tải lại
+          </Button>
         </div>
       </div>
-    </>
+      <div className="px-2">
+        <DataGrid
+          rows={filteredConfig}
+          columns={columns}
+          loading={loading}
+          paginationMode="client"
+          localeText={viVNGridTranslation}
+          getRowId={(row) => row.id}
+          disableRowSelectionOnClick
+        />
+      </div>
+    </Paper>
   );
 };
 

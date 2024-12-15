@@ -964,7 +964,13 @@ export default function ClassComponent() {
   };
 
   return (
-    <Paper sx={{ width: "calc(100% - 3.8rem)", position: "absolute" }}>
+    <Paper
+      sx={{
+        width: "calc(100% - 3.8rem)",
+        left: "3.8rem",
+        position: "absolute",
+      }}
+    >
       <h1 className="text-center text-[2.2rem] bg_title text-text_primary_light py-2 font-bold">
         Danh sách lớp học
       </h1>

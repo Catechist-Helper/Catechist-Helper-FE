@@ -181,7 +181,7 @@ export default function Router() {
           element: (
             <AuthGuard>
               <RoleBasedGuard accessibleRoles={[RoleNameEnum.Admin]}>
-                <CatechistManagement />
+                <AdminCalendar />
               </RoleBasedGuard>
             </AuthGuard>
           ),
@@ -607,7 +607,7 @@ export default function Router() {
           element: (
             <AuthGuard>
               <RoleBasedGuard accessibleRoles={[RoleNameEnum.Catechist]}>
-                <CatechistClassPage />
+                <CatechistCalendar />
               </RoleBasedGuard>
             </AuthGuard>
           ),

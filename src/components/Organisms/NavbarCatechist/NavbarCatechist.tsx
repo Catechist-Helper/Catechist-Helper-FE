@@ -75,7 +75,13 @@ const NavbarCatechist = () => {
     }
   };
   return (
-    <nav className="flex-grow-0 justify-between px-10 py-2 items-center bg-white">
+    <nav
+      className="flex-grow-0 justify-between px-10 py-2 items-center bg-white"
+      style={{
+        width: "calc(100% - 3.8rem)",
+        transform: "translateX(3.7rem)",
+      }}
+    >
       <div className="text-black flex items-center">
         <div className="flex items-center">
           <h1

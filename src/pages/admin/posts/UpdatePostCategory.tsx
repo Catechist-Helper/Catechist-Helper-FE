@@ -4,6 +4,7 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import postCategoryApi from "../../../api/PostCategory";
 import AdminTemplate from "../../../components/Templates/AdminTemplate/AdminTemplate";
 import { PATH_ADMIN } from "../../../routes/paths";
+import sweetAlert from "../../../utils/sweetAlert";
 const UpdatePostCategory: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -25,13 +26,13 @@ const UpdatePostCategory: React.FC = () => {
         );
         console.log("Update successful: ", response);
         console.log("Update successful: ", response);
-        navigate(PATH_ADMIN.post_category);  
-        setTimeout(() => {                  
-          alert("Cập nhật danh mục thành công!");
+        navigate(PATH_ADMIN.post_category);
+        setTimeout(() => {
+          sweetAlert.alertSuccess("Cập nhật danh mục thành công!");
         }, 100);
       } catch (error) {
         console.error("Update failed: ", error);
-        alert("Cập nhật danh mục thất bại!");
+        sweetAlert.alertFailed("Cập nhật danh mục thất bại!");
       } finally {
         setIsSubmitting(false);
       }
@@ -68,8 +69,8 @@ const UpdatePostCategory: React.FC = () => {
         <h3 className="text-center pt-10 fw-bold">
           CẬP NHẬT DANH MỤC BÀI VIẾT
         </h3>
-        <form onSubmit={formik.handleSubmit} className="max-w-sm mx-auto mt-5">
-        <div className="mb-5">
+        <form onSubmit={formik.handleSubmit} className="max-w-lg mx-auto mt-5">
+          <div className="mb-5">
             <label
               htmlFor="name"
               className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
@@ -80,17 +81,18 @@ const UpdatePostCategory: React.FC = () => {
               id="name"
               name="name"
               type="text"
-              className={`bg-gray-50 border ${formik.touched.name && formik.errors.name
-                  ? 'border-red-500'
-                  : 'border-gray-300'
-                } text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5`}
+              className={`bg-gray-50 border ${
+                formik.touched.name && formik.errors.name
+                  ? "border-red-500"
+                  : "border-gray-300"
+              } text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5`}
               onBlur={formik.handleBlur}
               onChange={formik.handleChange}
               value={formik.values.name}
             />
             {formik.touched.name && formik.errors.name && (
-            <p className="mt-2 text-sm text-red-600">{formik.errors.name}</p>
-          )}
+              <p className="mt-2 text-sm text-red-600">{formik.errors.name}</p>
+            )}
           </div>
           <div className="mb-5">
             <label

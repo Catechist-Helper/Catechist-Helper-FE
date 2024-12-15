@@ -39,7 +39,7 @@ const UpdateLevel: React.FC = () => {
         navigate("/admin/levels");
       } catch (error) {
         console.error("Update failed: ", error);
-        
+
         sweetAlert.alertFailed(
           "Cập nhật thất bại!",
           "Đã xảy ra lỗi khi cập nhật cấp bậc.",
@@ -81,7 +81,7 @@ const UpdateLevel: React.FC = () => {
     <AdminTemplate>
       <div>
         <h3 className="text-center pt-10 fw-bold">CẬP NHẬT CẤP BẬC</h3>
-        <form onSubmit={formik.handleSubmit} className="max-w-sm mx-auto mt-5">
+        <form onSubmit={formik.handleSubmit} className="max-w-lg mx-auto mt-5">
           <div className="mb-5">
             <label
               htmlFor="name"

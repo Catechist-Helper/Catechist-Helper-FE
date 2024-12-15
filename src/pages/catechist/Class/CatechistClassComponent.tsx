@@ -76,52 +76,50 @@ const CatechistClassComponent = () => {
     fetchPastoralYears();
   }, []);
 
+  const fetchClasses = async () => {
+    if (userLogin && userLogin.catechistId && selectedPastoralYear) {
+      setLoading(true);
+      try {
+        const response = await catechistApi.getCatechistClasses(
+          userLogin.catechistId,
+          selectedPastoralYear
+        );
+
+        let arr: any[] = [];
+
+        // Sử dụng Promise.all để đợi tất cả các lời gọi API bất đồng bộ hoàn thành
+        const fetchData = async () => {
+          try {
+            const promises = response.data.data.items.map(async (item: any) => {
+              const slotCount = await fetchSlotCountOfClass(item.class.id);
+              return {
+                ...item.class,
+                isMain: item.isMain,
+                slotCount: slotCount,
+              };
+            });
+
+            // Đợi tất cả promises hoàn thành và trả về mảng kết quả
+            arr = await Promise.all(promises);
+
+            // Cập nhật state sau khi tất cả dữ liệu đã được lấy
+            setClasses(arr);
+          } catch (error) {
+            console.error("Error fetching slot count:", error);
+          }
+        };
+
+        // Gọi hàm fetchData để lấy dữ liệu
+        fetchData();
+        // Lưu danh sách lớp học vào state
+      } catch (error) {
+        console.error("Error fetching classes:", error);
+      }
+      setLoading(false);
+    }
+  };
   // Fetch danh sách các lớp học của catechist
   useEffect(() => {
-    const fetchClasses = async () => {
-      if (userLogin && userLogin.catechistId && selectedPastoralYear) {
-        setLoading(true);
-        try {
-          const response = await catechistApi.getCatechistClasses(
-            userLogin.catechistId,
-            selectedPastoralYear
-          );
-
-          let arr: any[] = [];
-
-          // Sử dụng Promise.all để đợi tất cả các lời gọi API bất đồng bộ hoàn thành
-          const fetchData = async () => {
-            try {
-              const promises = response.data.data.items.map(
-                async (item: any) => {
-                  const slotCount = await fetchSlotCountOfClass(item.class.id);
-                  return {
-                    ...item.class,
-                    isMain: item.isMain,
-                    slotCount: slotCount,
-                  };
-                }
-              );
-
-              // Đợi tất cả promises hoàn thành và trả về mảng kết quả
-              arr = await Promise.all(promises);
-
-              // Cập nhật state sau khi tất cả dữ liệu đã được lấy
-              setClasses(arr);
-            } catch (error) {
-              console.error("Error fetching slot count:", error);
-            }
-          };
-
-          // Gọi hàm fetchData để lấy dữ liệu
-          fetchData();
-          // Lưu danh sách lớp học vào state
-        } catch (error) {
-          console.error("Error fetching classes:", error);
-        }
-        setLoading(false);
-      }
-    };
     fetchClasses();
   }, [userLogin, selectedPastoralYear]); // Khi userLogin hoặc selectedPastoralYear thay đổi, gọi lại API
 
@@ -304,6 +302,7 @@ const CatechistClassComponent = () => {
       sx={{
         width: "calc(100% - 3.8rem)",
         position: "absolute",
+        left: "3.8rem",
       }}
     >
       <h1 className="text-center text-[2.2rem] bg_title text-text_primary_light py-2 font-bold">
@@ -311,17 +310,32 @@ const CatechistClassComponent = () => {
       </h1>
       <div className="w-full px-3">
         {/* Dropdown để chọn niên khóa */}
-        <select
-          value={selectedPastoralYear}
-          className="py-1 px-2 border-gray-400 border-1 rounded mb-3 mt-3"
-          onChange={handlePastoralYearChange}
-        >
-          {pastoralYears.map((year: any) => (
-            <option key={year.name} value={year.name}>
-              {year.name}
-            </option>
-          ))}
-        </select>
+        <div className="w-full flex items-center mt-2 justify-between">
+          <div>
+            <select
+              value={selectedPastoralYear}
+              className="py-1 px-2 border-gray-400 border-1 rounded mb-3 mt-3"
+              onChange={handlePastoralYearChange}
+            >
+              {pastoralYears.map((year: any) => (
+                <option key={year.name} value={year.name}>
+                  {year.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <Button
+              onClick={() => fetchClasses()}
+              variant="contained"
+              color="secondary"
+              style={{ marginBottom: "16px" }}
+            >
+              Tải lại
+            </Button>
+          </div>
+        </div>
         {/* DataGrid hiển thị danh sách lớp học */}
         <div style={{ height: 400, width: "100%" }}>
           <DataGrid

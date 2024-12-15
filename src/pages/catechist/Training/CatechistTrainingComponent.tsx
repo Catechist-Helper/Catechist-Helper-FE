@@ -18,6 +18,7 @@ import {
   trainingListStatus,
   trainingListStatusString,
 } from "../../../enums/TrainingList";
+import { Button } from "@mui/material";
 
 const CatechistTrainingComponent = () => {
   const [userLogin, setUserLogin] = useState<any>(null);
@@ -42,23 +43,23 @@ const CatechistTrainingComponent = () => {
     fetchUser();
   }, []);
 
-  useEffect(() => {
-    const fetchTraining = async () => {
-      if (userLogin && userLogin.catechistId) {
-        setLoading(true);
-        try {
-          const response = await catechistApi.getTrainingsOfCatechist(
-            userLogin.catechistId
-          );
-          if (response.data.data.trainingInformation) {
-            setTrainings(response.data.data.trainingInformation);
-          }
-        } catch (error) {
-          console.error("Error fetching classes:", error);
+  const fetchTraining = async () => {
+    if (userLogin && userLogin.catechistId) {
+      setLoading(true);
+      try {
+        const response = await catechistApi.getTrainingsOfCatechist(
+          userLogin.catechistId
+        );
+        if (response.data.data.trainingInformation) {
+          setTrainings(response.data.data.trainingInformation);
         }
-        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching classes:", error);
       }
-    };
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
     fetchTraining();
   }, [userLogin]);
 
@@ -154,11 +155,26 @@ const CatechistTrainingComponent = () => {
       sx={{
         width: "calc(100% - 3.8rem)",
         position: "absolute",
+        left: "3.8rem",
       }}
     >
-      <h1 className="text-center text-[2.2rem] bg-primary_color text-text_primary_light py-2 font-bold">
+      <h1 className="text-center text-[2.2rem] bg_title text-text_primary_light py-2 font-bold">
         Thông tin các khóa đào tạo tham gia
       </h1>
+      <div className="w-full flex items-center mt-2 justify-between px-3">
+        <div className="min-w-[2px]"></div>
+
+        <div>
+          <Button
+            onClick={() => fetchTraining()}
+            variant="contained"
+            color="secondary"
+            style={{ marginBottom: "16px" }}
+          >
+            Tải lại
+          </Button>
+        </div>
+      </div>
       <div className="w-full px-3">
         {trainings.length <= 0 ? (
           <>

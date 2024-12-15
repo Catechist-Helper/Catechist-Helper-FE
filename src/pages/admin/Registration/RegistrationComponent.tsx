@@ -521,6 +521,7 @@ export default function RegistrationDataTable() {
       sx={{
         width: "calc(100% - 3.8rem)",
         position: "absolute",
+        left: "3.8rem",
       }}
     >
       <h1

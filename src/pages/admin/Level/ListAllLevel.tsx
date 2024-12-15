@@ -1,147 +1,138 @@
 import React, { useState, useEffect } from "react";
 import levelApi from "../../../api/Level";
-import { AxiosResponse } from "axios";
 import { BasicResponse } from "../../../model/Response/BasicResponse";
 import { useNavigate } from "react-router-dom";
+import sweetAlert from "../../../utils/sweetAlert";
+import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import { Button, Paper } from "@mui/material";
+import viVNGridTranslation from "../../../locale/MUITable";
+
 const ListAllLevel: React.FC = () => {
   const [levels, setLevels] = useState([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const navigate = useNavigate();
-  useEffect(() => {
-    levelApi
-      .getAllLevel()
-      .then((axiosRes: AxiosResponse) => {
-        const res: BasicResponse = axiosRes.data;
-        console.log("Response data: ", res);
 
-        if (
-          res.statusCode.toString().trim().startsWith("2") &&
-          res.data.items != null
-        ) {
-          console.log(
-            "Items: ",
-            res.data.items.sort(
-              (a: any, b: any) => a.hierarchyLevel - b.hierarchyLevel
-            )
-          );
-          setLevels(res.data.items);
-        } else {
-          console.log("No items found");
-        }
-      })
-      .catch((err) => {
-        console.error("Không thấy cấp bậc: ", err);
-      });
+  const fetchLevels = async () => {
+    setLoading(true);
+    try {
+      const { data } = await levelApi.getAllLevel();
+      const res: BasicResponse = data;
+      if (
+        res.statusCode.toString().trim().startsWith("2") &&
+        res.data.items != null
+      ) {
+        setLevels(
+          res.data.items.sort(
+            (a: any, b: any) => a.hierarchyLevel - b.hierarchyLevel
+          )
+        );
+      } else {
+        console.error("No levels found.");
+      }
+    } catch (error) {
+      console.error("Error fetching levels: ", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchLevels();
   }, []);
 
   const handleCreate = () => {
     navigate("/admin/create-levels");
   };
 
-  // const handleEditCategoryClick = (id: string): void => {
-  //   navigate(`/admin/update-levels/${id}`);
-  // };
+  const handleDeleteLevelClick = async (id: string) => {
+    const confirm = await sweetAlert.confirm(
+      "Bạn có chắc là muốn xóa cấp bậc này không?",
+      "",
+      undefined,
+      undefined,
+      "question"
+    );
 
-  const handleDeleteLevelClick = (id: string): void => {
-    if (window.confirm("Bạn có chắc là muốn xóa cấp bậc này không?")) {
-      levelApi
-        .deleteLevel(id)
-        .then(() => {
-          alert(`Level đã xóa thành công.`);
-          window.location.reload();
-        })
-        .catch((err: Error) => {
-          console.error(`Failed to delete level with ID: ${id}`, err);
-        });
+    if (confirm) {
+      try {
+        await levelApi.deleteLevel(id);
+        sweetAlert.alertSuccess("Cấp bậc đã xóa thành công.", "", 3000, 28);
+        setLevels((prev) => prev.filter((level: any) => level.id !== id));
+      } catch (error) {
+        console.error(`Failed to delete level with ID: ${id}`, error);
+        sweetAlert.alertFailed(
+          "Không thể xóa cấp bậc. Vui lòng thử lại sau.",
+          "",
+          3000,
+          32
+        );
+      }
     }
   };
 
-  console.log(ListAllLevel);
-  return (
-    <>
-      <div className="container mt-5 ">
-        <div className="mb-10 text-center fw-bold">
-          <h1>CẤP BẬC</h1>
+  const columns: GridColDef[] = [
+    { field: "name", headerName: "Tên", width: 200 },
+    { field: "description", headerName: "Mô tả", width: 300 },
+    { field: "hierarchyLevel", headerName: "Cấp độ giáo lý", width: 150 },
+    {
+      field: "actions",
+      headerName: "Hành động",
+      width: 200,
+      renderCell: (params) => (
+        <div className="space-x-2">
+          <Button
+            color="error"
+            variant="outlined"
+            className="btn btn-danger"
+            onClick={() => handleDeleteLevelClick(params.row.id)}
+          >
+            Xóa
+          </Button>
         </div>
-        <div className="d-flex align-items-center mb-3 ">
-          <div className="ml-6">
-            <button
-              className="px-4 py-2 border border-black text-black bg-white hover:bg-gray-200"
-              onClick={handleCreate}
-            >
-              Tạo cấp bậc
-            </button>
-          </div>
-        </div>
+      ),
+      sortable: false,
+      filterable: false,
+    },
+  ];
 
-        <div className="flex relative overflow-x-auto justify-center p-6">
-          <table className="w-full text-sm text-left rtl:text-right text-gray-500">
-            <thead className="text-xs text-white uppercase bg-[#422A14] h-20">
-              <tr>
-                <th scope="col" className="px-6 py-3">
-                  Tên
-                </th>
-                <th scope="col" className="px-6 py-3">
-                  Mô tả
-                </th>
-                <th scope="col" className="px-6 py-3">
-                  Cấp độ giáo lý
-                </th>
-                {/* <th scope="col" className="px-6 py-3">
-                  Action
-                </th> */}
-              </tr>
-            </thead>
-            <tbody>
-              {levels.length > 0 ? (
-                levels.map((level: any) => (
-                  <tr
-                    className="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
-                    key={level.id}
-                  >
-                    <th
-                      scope="row"
-                      className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
-                    >
-                      <div className="text-dark">{level.name}</div>
-                    </th>
-                    <td className="px-6 py-4">
-                      <div className="text-dark text-decoration-none">
-                        {level.description}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-dark text-decoration-none">
-                        {level.hierarchyLevel}
-                      </div>
-                    </td>
-                    <td className="px-4 py-4 space-x-2">
-                      {/* <button
-                        onClick={() => handleEditCategoryClick(level.id)}
-                        className="btn btn-info"
-                      >
-                        Chỉnh sửa
-                      </button> */}
-                      <button
-                        onClick={() => handleDeleteLevelClick(level.id)}
-                        className="btn btn-warning"
-                      >
-                        Xóa
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={3} className="px-6 py-4 text-center">
-                    Không thấy danh sách danh mục
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+  return (
+    <Paper
+      sx={{
+        width: "calc(100% - 3.8rem)",
+        position: "absolute",
+        left: "3.8rem",
+      }}
+    >
+      <h1 className="text-center text-[2.2rem] bg_title text-text_primary_light py-2 font-bold">
+        Danh sách cấp bậc
+      </h1>
+      <div className="flex justify-between mb-3 mt-3 px-3">
+        <div className="min-w-[2px]"></div>
+        <div className="flex gap-x-2">
+          <Button
+            color="success"
+            variant="outlined"
+            className="btn btn-success"
+            onClick={handleCreate}
+          >
+            Tạo cấp bậc
+          </Button>
+          <Button color="primary" variant="contained" onClick={fetchLevels}>
+            Tải lại
+          </Button>
         </div>
       </div>
-    </>
+      <div className="px-2">
+        <DataGrid
+          rows={levels}
+          columns={columns}
+          loading={loading}
+          paginationMode="client"
+          localeText={viVNGridTranslation}
+          disableRowSelectionOnClick
+        />
+      </div>
+    </Paper>
   );
 };
 

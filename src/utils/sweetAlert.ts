@@ -1,14 +1,14 @@
 import Swal from "sweetalert2";
 
 const sweetAlert = {
-  alertSuccess: function (title: any, html: any, time: any, width: any) {
+  alertSuccess: function (title: any, html?: any, time?: any, width?: any) {
     const Toast = Swal.mixin({
       toast: true,
       position: "top-end",
-      width: `${width.toString()}rem`,
+      width: width ? `${width.toString()}rem` : "26rem",
       background: "#eef6ec",
       showConfirmButton: false,
-      timer: time,
+      timer: time ? time :  4000,
       timerProgressBar: true,
       showCloseButton: true,
       didOpen: (toast) => {
@@ -26,17 +26,17 @@ const sweetAlert = {
     Toast.fire({
       icon: "success",
       title: `${title}`,
-      html: `${html}`,
+      html: html?`${html}`:"",
     })
   },
-  alertFailed: function (title: any, html: any, time: any, width: any) {
+  alertFailed: function (title: any, html?: any, time?: any, width?: any) {
     const Toast = Swal.mixin({
       toast: true,
       position: "top-end",
-      width: `${width.toString()}rem`,
+      width: width ? `${width.toString()}rem` : "26rem",
       background: "#fee3e2",
       showConfirmButton: false,
-      timer: time,
+      timer: time ? time :  4000,
       timerProgressBar: true,
       showCloseButton: true,
       didOpen: (toast) => {
@@ -54,17 +54,17 @@ const sweetAlert = {
     Toast.fire({
       icon: "error",
       title: `${title}`,
-      html: `${html}`,
+      html: html?`${html}`:"",
     })
   },
-  alertInfo: function (title: any, html: any, time: any, width: any) {
+  alertInfo: function (title: any, html?: any, time?: any, width?: any) {
     const Toast = Swal.mixin({
       toast: true,
       position: "top-end",
-      width: `${width.toString()}rem`,
+            width: width ? `${width.toString()}rem` : "26rem",
       background: "#d0efff",
       showConfirmButton: false,
-      timer: time,
+      timer: time ? time :  4000,
       timerProgressBar: true,
       showCloseButton: true,
       didOpen: (toast) => {
@@ -82,17 +82,17 @@ const sweetAlert = {
     Toast.fire({
       icon: "info",
       title: `${title}`,
-      html: `${html}`,
+      html: html?`${html}`:"",
     })
   },
-  alertWarning: function (title: any, html: any, time: any, width: any) {
+  alertWarning: function (title: any, html?: any, time?: any, width?: any) {
     const Toast = Swal.mixin({
       toast: true,
       position: "top-end",
-      width: `${width.toString()}rem`,
+      width: width ? `${width.toString()}rem` : "26rem",
       background: "#ffffcc",
       showConfirmButton: false,
-      timer: time,
+      timer: time ? time :  4000,
       timerProgressBar: true,
       showCloseButton: true,
       didOpen: (toast) => {
@@ -110,7 +110,7 @@ const sweetAlert = {
     Toast.fire({
       icon: "warning",
       title: `${title}`,
-      html: `${html}`,
+      html: html?`${html}`:"",
     })
   },
   confirm: async function (

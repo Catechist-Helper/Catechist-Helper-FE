@@ -19,11 +19,10 @@ const UpdateChristianName: React.FC = () => {
 
     onSubmit: async (values) => {
       setIsSubmitting(true);
-      try {   
-
+      try {
         const formattedHolyDay = values.holyDay
-          ? new Date(values.holyDay).toISOString() 
-          : values.holyDay; 
+          ? new Date(values.holyDay).toISOString()
+          : values.holyDay;
 
         const response = await christianNamesApi.updateChristianNames(
           id!,
@@ -51,11 +50,8 @@ const UpdateChristianName: React.FC = () => {
         const response = await christianNamesApi.getById(id);
         const christianName = response.data;
 
-        
         const formattedHolyDay = christianName.data.holyDay
-          ? new Date(christianName.data.holyDay)
-              .toISOString()
-              .slice(0, 16) 
+          ? new Date(christianName.data.holyDay).toISOString().slice(0, 16)
           : "";
 
         formik.setValues({
@@ -77,7 +73,7 @@ const UpdateChristianName: React.FC = () => {
     <AdminTemplate>
       <div>
         <h3 className="text-center pt-10 fw-bold">CẬP NHẬT TÊN THÁNH</h3>
-        <form onSubmit={formik.handleSubmit} className="max-w-sm mx-auto mt-5">
+        <form onSubmit={formik.handleSubmit} className="max-w-lg mx-auto mt-5">
           <div className="mb-5">
             <label
               htmlFor="name"

@@ -27,7 +27,7 @@ const AddParticipantsDialog: React.FC<{
 
   const handleUpload = async () => {
     if (!file) {
-      alert("Vui lòng chọn một tệp!");
+      sweetAlert.alertWarning(`Vui lòng chọn một tệp!`, "", 3000, 26);
       return;
     }
 

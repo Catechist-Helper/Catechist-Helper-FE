@@ -1,453 +1,288 @@
 import React, { useState, useEffect } from "react";
+import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import { Button, Paper } from "@mui/material";
 import trainApi from "../../../api/TrainingList";
 import levelApi from "../../../api/Level";
 import { AxiosResponse } from "axios";
 import { BasicResponse } from "../../../model/Response/BasicResponse";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import sweetAlert from "../../../utils/sweetAlert";
-import { trainingListStatus, trainingListStatusLabel } from "../../../enums/TrainingList";
+import viVNGridTranslation from "../../../locale/MUITable";
+import {
+  trainingListStatus,
+  trainingListStatusLabel,
+} from "../../../enums/TrainingList";
 
-interface TrainingLists {
-    startDate: string | number | Date;
-    id: string;
-    name: string;
-    description: string;
-    certificateId: string;
-    certificate: Certificate;
-    previousLevelId: string;
-    nextLevelId: string;
-    previousLevel?: Level; // Optional if API provides it
-    nextLevel?: Level; // Optional if API provides it
-    startTime: string;
-    endTime: string;
-    trainingListStatus: number;
-}
-interface Level {
-    id: string;
-    hierarchyLevel: number; // Hoặc kiểu dữ liệu phù hợp
-}
-interface Certificate {
-    id: string;
-    name: string;
-    image: File | null;
-    description: string;
-    levelId: string;
-}
 const ListAllTrain: React.FC = () => {
-    const [trains, setTrains] = useState<TrainingLists[]>([]);
-    const [catechists, setCatechists] = useState<{ [key: string]: any[] }>({});
-    const navigate = useNavigate();
-    const [levelMap, setLevelMap] = useState<{ [key: string]: string }>({});
-    // const [certificates, setCertificates] = useState<any[]>([]);
-    // const [certificateMap, setCertificateMap] = useState<{ [key: string]: string }>({});
+  const [trains, setTrains] = useState<any[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [init, setInit] = useState<boolean>(false);
 
-    useEffect(() => {
-        levelApi
-            .getAllLevel()
+  const [catechists, setCatechists] = useState<{ [key: string]: any[] }>({});
+  const [levelMap, setLevelMap] = useState<{ [key: string]: string }>({});
+  const navigate = useNavigate();
+
+  const fetchLevels = async () => {
+    try {
+      const res: AxiosResponse = await levelApi.getAllLevel();
+      const levels = res.data.data.items || [];
+      const map: { [key: string]: string } = {};
+      levels.forEach((level: any) => {
+        map[level.id] = level.name;
+      });
+      setLevelMap(map);
+    } catch (err) {
+      console.error("Lỗi khi lấy danh sách cấp độ:", err);
+    } finally {
+      setInit(true);
+    }
+  };
+
+  const fetchTrains = async () => {
+    try {
+      const res: AxiosResponse = await trainApi.getAllTrain();
+      const data: BasicResponse = res.data;
+      if (
+        data.statusCode.toString().trim().startsWith("2") &&
+        data.data.items
+      ) {
+        setTrains(data.data.items);
+        data.data.items.forEach((train: any) => {
+          trainApi
+            .getCatechistsByTrainingListId(train.id)
             .then((res: AxiosResponse) => {
-                const levels = res.data.data.items || [];
-                // Tạo map từ levelId -> levelName
-                const map: { [key: string]: string } = {};
-                levels.forEach((level: any) => {
-                    map[level.id] = level.name;
-                });
-                setLevelMap(map);
-            })
-            .catch((err) => console.error("Lỗi khi lấy danh sách cấp độ:", err));
-    }, []);
-
-    useEffect(() => {
-        trainApi
-            .getAllTrain()
-            .then((axiosRes: AxiosResponse) => {
-                const res: BasicResponse = axiosRes.data;
-                if (res.statusCode.toString().trim().startsWith("2") && res.data.items != null) {
-                    setTrains(res.data.items);
-
-                    // Fetch Catechists for each training list
-                    res.data.items.forEach((train: any) => {
-                        trainApi
-                            .getCatechistsByTrainingListId(train.id)
-                            .then((catechistRes: AxiosResponse) => {
-                                const catechistData = catechistRes.data;
-                                setCatechists((prevMap) => ({
-                                    ...prevMap,
-                                    [train.id]: catechistData.data.items || [],
-                                }));
-                            })
-                            .catch((err) => {
-                                console.error(`Failed to fetch catechists for train ID ${train.id}:`, err);
-                            });
-                    });
-                } else {
-                    console.log("No items found");
-                }
+              setCatechists((prev) => ({
+                ...prev,
+                [train.id]: res.data.data.items || [],
+              }));
             })
             .catch((err) => {
-                console.error("Không thấy danh sách đào tạo:", err);
+              console.error(
+                `Failed to fetch catechists for train ID ${train.id}:`,
+                err
+              );
             });
-    }, []);
-
-    const formatDate = (dateString: string): string => {
-        const date = new Date(dateString);
-        const day = date.getDate().toString().padStart(2, '0'); // Add leading zero to day
-        const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Add leading zero to month
-        const year = date.getFullYear();
-        return `${day}/${month}/${year}`;
-    };
-
-    const determineStatusLabel = (train: TrainingLists): string => {
-        console.log("hhhhh", train);
-        if (train.trainingListStatus == 0) {
-            return trainingListStatusLabel[trainingListStatus.NotStarted]; // "Chưa bắt đầu"
-        }
-        if (train.trainingListStatus == 1) {
-            return trainingListStatusLabel[trainingListStatus.Training]; // "Chưa bắt đầu"
-        }
-        if (train.trainingListStatus == 2) {
-            return trainingListStatusLabel[trainingListStatus.Finished]; // "Chưa bắt đầu"
-        }
-
-        return ""; // Default empty if no status applies
-    };
-
-    const renderActionCell = (train: TrainingLists): JSX.Element => {
-        return <span>{determineStatusLabel(train)}</span>;
-    };
-
-    const handleCreate = () => {
-        navigate("/admin/create-training-lists");
-    };
-
-    const handleEditTrainClick = (id: string): void => {
-        const train = trains.find(t => t.id === id);
-        if (!train) return;
-
-        if (train.trainingListStatus === 0) {
-            // Chưa bắt đầu - cho phép chỉnh sửa tất cả
-            navigate(`/admin/update-training-lists/${id}`);
-        } else if (train.trainingListStatus === 1) {
-            // Đang đào tạo - chỉ cho phép chỉnh sửa status
-            navigate(`/admin/update-training-lists/${id}`, {
-                state: { editStatusOnly: true }
-            });
-        } else {
-            // Đã kết thúc - không cho chỉnh sửa gì cả
-            sweetAlert.alertWarning(
-                "Không thể chỉnh sửa!",
-                "Danh sách đào tạo đã kết thúc, không thể chỉnh sửa.",
-                2000,
-                false
-            );
-        }
-    };
-    // const handleEditTrainClick = (id: string): void => {
-    //     navigate(`/admin/update-training-lists/${id}`);
-    // }
-
-    const handleTrainingCatechistClick = () => {
-        navigate(`/admin/training-catechist`);
-    }
-
-    // const handleDeleteTrainClick = (id: string): void => {
-    //     if (window.confirm("Bạn có chắc là muốn xóa đào tạo này không?")) {
-    //         trainApi
-    //             .deleteTrain(id)
-    //             .then(() => {
-    //                 sweetAlert.alertSuccess(
-    //                     "Xóa thành công!",
-    //                     `Train đã được xóa thành công.`,
-    //                     2000,
-    //                     false
-    //                 );
-    //                 setTrains(trains.filter((train) => train.id !== id));
-    //             })
-    //             .catch((err: Error) => {
-    //                 console.error(`Không thể cập nhật train với ID: ${name}`, err);
-    //             });
-    //     }
-    // };
-    const handleDeleteTrainClick = (id: string): void => {
-        // Lấy thông tin khóa đào tạo cần xóa
-        const trainingToDelete = trains.find(train => train.id === id);
-
-        if (!trainingToDelete) {
-            sweetAlert.alertWarning(
-                "Lỗi!",
-                "Không tìm thấy thông tin khóa đào tạo.",
-                2000,
-                false
-            );
-            return;
-        }
-
-        // Kiểm tra ngày đào tạo
-        const trainingDate = new Date(trainingToDelete.startDate); // Giả sử có trường startDate
-        const currentDate = new Date();
-
-        if (trainingDate <= currentDate) {
-            sweetAlert.alertWarning(
-                "Không thể xóa!",
-                "Không thể xóa khóa đào tạo đã bắt đầu hoặc đã kết thúc.",
-                2000,
-                false
-            );
-            return;
-        }
-
-        // Kiểm tra số lượng Catechist trong training
-        const trainingCatechists = catechists[id] || [];
-
-        if (trainingCatechists.length > 0) {
-            sweetAlert.alertWarning(
-                "Không thể xóa!",
-                "Không thể xóa khóa đào tạo đã có Giáo lý viên tham gia.",
-                2000,
-                false
-            );
-            return;
-        }
-
-        if (window.confirm("Bạn có chắc là muốn xóa đào tạo này không?")) {
-            trainApi
-                .deleteTrain(id)
-                .then(() => {
-                    sweetAlert.alertSuccess(
-                        "Xóa thành công!",
-                        `Khóa đào tạo đã được xóa thành công.`,
-                        2000,
-                        false
-                    );
-                    setTrains(trains.filter((train) => train.id !== id));
-                })
-                .catch((err: Error) => {
-                    console.error(`Không thể xóa khóa đào tạo với ID: ${id}`, err);
-                    sweetAlert.alertFailed(
-                        "Xóa thất bại!",
-                        "Đã xảy ra lỗi khi xóa khóa đào tạo.",
-                        2000,
-                        false
-                    );
-                });
-        }
-
-
-
-    };
-
-    // const handleAddOrUpdateCatechist = (trainId: string, catechistCount: number) => {
-    //     if (catechistCount === 0) {
-    //         navigate(`/admin/training-catechist`);
-    //     } else {
-    //         navigate(`/admin/training-catechist`);
-    //     }
-    // };
-    // Trong ListAllTrain.tsx, thêm useEffect mới để lắng nghe sự thay đổi:
-
-    useEffect(() => {
-        const fetchCatechistsForTrain = async (trainId: string) => {
-            try {
-                const train = trains.find(t => t.id === trainId);
-                if (!train) return;
-
-                const response = await trainApi.getCatechistsByTrainingListId(trainId);
-                const items = response.data.data.items;
-
-                // Nếu training chưa bắt đầu (status = 0), loại bỏ catechist có status = 3 (Không đạt)
-                if (train.trainingListStatus === 0) {
-                    const activeItems = items.filter(
-                        (item: any) => item.catechistInTrainingStatus !== 3
-                    );
-                    setCatechists(prev => ({
-                        ...prev,
-                        [trainId]: activeItems
-                    }));
-                } else {
-                    // Nếu training đang đào tạo (1) hoặc kết thúc (2), hiển thị tất cả
-                    setCatechists(prev => ({
-                        ...prev,
-                        [trainId]: items
-                    }));
-                }
-            } catch (err) {
-                console.error(`Failed to fetch catechists for train ID ${trainId}:`, err);
-            }
-        };
-
-        trains.forEach(train => {
-            fetchCatechistsForTrain(train.id);
         });
-    }, [trains]);
+      } else {
+        console.log("No items found");
+      }
+    } catch (err) {
+      console.error("Không thể lấy danh sách đào tạo:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    const handleAddOrUpdateCatechist = (trainId: string, catechistCount: number) => {
-        const selectedTrain = trains.find(train => train.id === trainId);
-        if (selectedTrain) {
-            navigate('/admin/training-catechist', {
-                state: {
-                    trainingInfo: {
-                        id: selectedTrain.id,
-                        name: selectedTrain.name,
-                        previousLevel: selectedTrain.previousLevel?.hierarchyLevel || levelMap[selectedTrain.previousLevelId],
-                        nextLevel: selectedTrain.nextLevel?.hierarchyLevel || levelMap[selectedTrain.nextLevelId],
-                        startTime: selectedTrain.startTime,
-                        endTime: selectedTrain.endTime,
-                        description: selectedTrain.description,
-                        currentCatechistCount: catechistCount
-                    }
-                }
-            });
-        }
-    };
+  useEffect(() => {
+    fetchLevels();
+    fetchTrains();
+  }, []);
 
+  const handleCreate = () => navigate("/admin/create-training-lists");
 
-    return (
-        <div className="container mt-5">
-            <div className="mb-10 text-center fw-bold">
-                <h1>DANH SÁCH ĐÀO TẠO</h1>
-            </div>
-            <div className="d-flex align-items-center mb-3">
-                <button
-                    className="px-4 py-2 border border-black text-black bg-white hover:bg-gray-200 me-3"
-                    onClick={handleCreate}
-                >
-                    Tạo danh sách
-                </button>
-                <button
-                    className="px-4 py-2 border border-black text-black bg-white hover:bg-gray-200"
-                    onClick={handleTrainingCatechistClick}
-                >
-                    Danh sách đào tạo
-                </button>
-            </div>
+  const handleEditTrainClick = (id: string): void => {
+    const train = trains.find((t) => t.id === id);
+    if (!train) return;
 
-            <div className="flex relative overflow-x-auto justify-center p-6">
-                <table className="w-full text-sm text-left rtl:text-right text-gray-500">
-                    <thead className="text-xs text-white uppercase bg-[#422A14] h-20">
-                        <tr className="text-center">
-                            <th className="px-6 py-3">Tên</th>
-                            <th className="px-6 py-3">Mô tả</th>
-                            <th className="px-6 py-3">Cấp bậc trước</th>
-                            <th className="px-6 py-3">Bậc cấp tiếp theo</th>
-                            <th className="px-6 py-3">Ngày bắt đầu</th>
-                            <th className="px-6 py-3">Ngày kết thúc</th>
-                            <th className="px-6 py-3">Số lượng Giáo lí viên</th>
-                            {/* <th className="px-6 py-3">Chứng chỉ</th> */}
-                            <th className="px-6 py-3">Trạng thái</th>
-                            <th className="px-6 py-3">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {trains.length > 0 ? (
-                            trains
-                                .filter((train: any) => !train.isDeleted)
-                                .map((train: any) => (
-                                    <tr
-                                        key={train.id}
-                                        className="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
-                                    >
-                                        <th
-                                            scope="row"
-                                            className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white text-center"
-                                        >
-                                            <div className="text-dark">
-                                                <Link
-                                                    to={`/admin/training-list/${train.id}/catechists`}
-                                                    className="text-dark"
-                                                    state={{
-                                                        trainingInfo: {
-                                                            id: train.id,
-                                                            name: train.name,
-                                                            previousLevel: train.previousLevel?.hierarchyLevel || levelMap[train.previousLevelId],
-                                                            nextLevel: train.nextLevel?.hierarchyLevel || levelMap[train.nextLevelId],
-                                                            startTime: train.startTime,
-                                                            endTime: train.endTime,
-                                                            description: train.description,
-                                                            currentCatechistCount: catechists[train.id]?.length || 0
-                                                        }
-                                                    }}
-                                                >
-                                                    {train.name}
-                                                </Link>
-                                            </div>
-                                        </th>
-                                        <td className="px-6 py-4 text-center">{train.description}</td>
-                                        <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white text-center">
-                                            {/* Kiểm tra nếu có hierarchyLevel từ previousLevel thì hiển thị, nếu không dùng fallback từ levelMap */}
-                                            {train.previousLevel?.hierarchyLevel || levelMap[train.previousLevelId] || "Không xác định"}
-                                        </td>
-                                        <td className="px-6 py-4 text-center">
-                                            {/* Hiển thị hierarchyLevel hoặc tên của cấp tiếp theo */}
-                                            {train.nextLevel?.hierarchyLevel || levelMap[train.nextLevelId] || "Không xác định"}
-                                        </td>
-                                        <td className="px-6 py-4 text-center">{formatDate(train.startTime)}</td>
-                                        <td className="px-6 py-4 text-center">{formatDate(train.endTime)}</td>
-                                        <td className="px-6 py-4 text-center">
-                                            {catechists[train.id]?.length || 0}
-                                            {determineStatusLabel(train) === trainingListStatusLabel[trainingListStatus.NotStarted] && (
-                                                <button
-                                                    className="btn btn-primary ml-3"
-                                                    onClick={() => handleAddOrUpdateCatechist(train.id, catechists[train.id]?.length || 0)}
-                                                >
-                                                    {catechists[train.id]?.length === 0 ? "Thêm" : "Cập nhật"}
-                                                </button>
-                                            )}
-                                        </td>
-                                        {/* <td className="px-6 py-4 text-center">
-                                            {train.certificate ? (
-                                                <div>
-                                                    <div><b>Tên:</b> {train.certificate.name || "Không xác định"}</div>
-                                                    <div><b>Mô tả:</b> {train.certificate.description || "Không có mô tả"}</div>
-                                                    <div>
-                                                        <b>Level ID:</b> {train.certificate.levelId || "Không có Level ID"}
-                                                    </div>
-                                                </div>
-                                            ) : (
-                                                "Chưa có chứng chỉ"
-                                            )}
-                                        </td> */}
-                                        {/* <td className="px-6 py-4 text-center">
-                                            {isCompleteButtonVisible(train.endTime) && train.trainingListStatus !== trainingListStatus.Finished ? (
-                                                <button
-                                                    className="btn btn-success"
-                                                    onClick={() => handleComplete(train)}
-                                                >
-                                                    Complete
-                                                </button>
-                                            ) : (
-                                                train.trainingListStatus === trainingListStatus.Finished ? "Đã hoàn thành" : "Chưa kết thúc"
-                                            )}
-                                        </td> */}
-                                        <td className="px-6 py-4 text-center">{renderActionCell(train)}</td>
+    if (train.trainingListStatus === trainingListStatus.NotStarted) {
+      navigate(`/admin/update-training-lists/${id}`);
+    } else if (train.trainingListStatus === trainingListStatus.Training) {
+      navigate(`/admin/update-training-lists/${id}`, {
+        state: { editStatusOnly: true },
+      });
+    } else {
+      sweetAlert.alertWarning(
+        "Không thể chỉnh sửa!",
+        "Danh sách đào tạo đã kết thúc, không thể chỉnh sửa.",
+        2000,
+        false
+      );
+    }
+  };
 
-                                        <td className="px-6 py-4 space-x-2">
-                                            <button
-                                                onClick={() => handleEditTrainClick(train.id)}
-                                                className="btn btn-info"
-                                            >
-                                                Chỉnh sửa
-                                            </button>
-                                            <button
-                                                onClick={() => handleDeleteTrainClick(train.id)}
-                                                className="btn btn-warning"
-                                            >
-                                                Xóa
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))
-                        ) : (
-                            <tr>
-                                <td colSpan={9} className="px-6 py-4 text-center">
-                                    Không thấy danh sách đào tạo
-                                </td>
-                            </tr>
-                        )}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
+  const handleDeleteTrainClick = async (id: string) => {
+    const confirm = await sweetAlert.confirm(
+      "Bạn có chắc là muốn xóa đào tạo này không?",
+      "",
+      undefined,
+      undefined,
+      "question"
     );
+    if (confirm) {
+      try {
+        await trainApi.deleteTrain(id);
+        sweetAlert.alertSuccess(
+          "Xóa thành công!",
+          "Khóa đào tạo đã được xóa.",
+          2000,
+          false
+        );
+        setTrains((prev) => prev.filter((train) => train.id !== id));
+      } catch (err) {
+        console.error("Xóa đào tạo thất bại:", err);
+        sweetAlert.alertFailed("Xóa thất bại!", "Đã xảy ra lỗi.", 2000, false);
+      }
+    }
+  };
+
+  const columns: GridColDef[] = [
+    { field: "name", headerName: "Tên", width: 200 },
+    { field: "description", headerName: "Mô tả", width: 200 },
+    {
+      field: "previousLevel",
+      headerName: "Cấp bậc trước",
+      width: 150,
+      renderCell: (params: any) =>
+        params.row.previousLevel?.hierarchyLevel ||
+        levelMap[params.row.previousLevelId] ||
+        "Không xác định",
+    },
+    {
+      field: "nextLevel",
+      headerName: "Cấp bậc tiếp theo",
+      width: 150,
+      renderCell: (params: any) =>
+        params.row.nextLevel?.hierarchyLevel ||
+        levelMap[params.row.nextLevelId] ||
+        "Không xác định",
+    },
+    {
+      field: "startTime",
+      headerName: "Ngày bắt đầu",
+      width: 140,
+      renderCell: (params: any) =>
+        new Date(params.row.startTime).toLocaleDateString("vi-VN"),
+    },
+    {
+      field: "endTime",
+      headerName: "Ngày kết thúc",
+      width: 140,
+      renderCell: (params: any) =>
+        new Date(params.row.endTime).toLocaleDateString("vi-VN"),
+    },
+    {
+      field: "catechists",
+      headerName: "Số lượng Giáo lý viên",
+      width: 200,
+      renderCell: (params) =>
+        catechists[params.row.id]?.length ? (
+          <>
+            {catechists[params.row.id]?.length}
+            <Button
+              className="btn btn-primary"
+              color="primary"
+              variant="outlined"
+              onClick={() =>
+                navigate("/admin/training-catechist", {
+                  state: { trainingId: params.row.id },
+                })
+              }
+              sx={{ marginLeft: "10px" }}
+            >
+              Cập nhật
+            </Button>
+          </>
+        ) : (
+          <Button
+            color="secondary"
+            variant="contained"
+            onClick={() =>
+              navigate("/admin/training-catechist", {
+                state: { trainingId: params.row.id },
+              })
+            }
+          >
+            Thêm
+          </Button>
+        ),
+    },
+    {
+      field: "trainingListStatus",
+      headerName: "Trạng thái",
+      width: 180,
+      renderCell: (params) => {
+        const status = params.row.trainingListStatus as trainingListStatus;
+        return trainingListStatusLabel[status] || "Không xác định";
+      },
+    },
+    {
+      field: "actions",
+      headerName: "Hành động",
+      width: 250,
+      renderCell: (params) => (
+        <div className="space-x-2">
+          <Button
+            className="btn btn-primary"
+            color="primary"
+            variant="outlined"
+            onClick={() => handleEditTrainClick(params.row.id)}
+          >
+            Chỉnh sửa
+          </Button>
+          <Button
+            className="btn btn-danger"
+            color="error"
+            variant="outlined"
+            onClick={() => handleDeleteTrainClick(params.row.id)}
+          >
+            Xóa
+          </Button>
+        </div>
+      ),
+    },
+  ];
+  console.log("tranins", trains);
+  if (!init) return <></>;
+
+  return (
+    <Paper
+      sx={{
+        width: "calc(100% - 3.8rem)",
+        position: "absolute",
+        left: "3.8rem",
+      }}
+    >
+      <h1 className="text-center text-[2.2rem] bg_title text-text_primary_light py-2 font-bold">
+        DANH SÁCH ĐÀO TẠO
+      </h1>
+      <div className="flex justify-end mb-3 mt-3 px-3 gap-x-2">
+        <Button
+          className="btn btn-success"
+          color="success"
+          variant="outlined"
+          onClick={handleCreate}
+        >
+          Tạo danh sách
+        </Button>
+        <Button
+          color="primary"
+          variant="contained"
+          onClick={() => {
+            fetchTrains();
+          }}
+        >
+          Tải lại
+        </Button>
+      </div>
+      <div className="px-2">
+        {trains.length > 0 && init ? (
+          <>
+            <DataGrid
+              rows={trains}
+              columns={columns}
+              loading={loading}
+              paginationMode="client"
+              localeText={viVNGridTranslation}
+              getRowId={(row) => row.id}
+              disableRowSelectionOnClick
+            />
+          </>
+        ) : (
+          <></>
+        )}
+      </div>
+    </Paper>
+  );
 };
 
 export default ListAllTrain;

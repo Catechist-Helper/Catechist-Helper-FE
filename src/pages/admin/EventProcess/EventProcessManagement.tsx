@@ -171,6 +171,7 @@ const EventProcessManagement: React.FC = () => {
         width: "calc(100% - 3.8rem)",
         position: "absolute",
         padding: "0 10px",
+        left: "3.8rem",
       }}
     >
       {selectedEvent ? (

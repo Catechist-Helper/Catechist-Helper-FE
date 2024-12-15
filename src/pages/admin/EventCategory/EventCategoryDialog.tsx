@@ -91,7 +91,7 @@ const EventCategoryDialog: React.FC<EventCategoryDialogProps> = ({
           onChange={(e) => setName(e.target.value)}
           fullWidth
           margin="normal"
-          disabled={loading}
+          disabled={loading || category ? true : false}
         />
         <TextField
           label="Mô tả"
