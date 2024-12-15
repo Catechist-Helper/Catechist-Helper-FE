@@ -19,6 +19,7 @@ interface TrainingInfo {
   endTime: string;
   description: string;
   currentCatechistCount: number;
+  trainingListStatus: number; 
 }
 
 interface Level {
@@ -35,15 +36,7 @@ interface Catechist {
   status?: number;
 }
 
-// interface AssignedCatechist {
-//   id: string;
-//   status: number;
-//   level: {
-//     hierarchyLevel: string | number;
-//   };
-//   levelId?: string;
-//   fullName: string;
-// }
+
 
 const ListCatechistByLevel: React.FC = () => {
   const [catechists, setCatechists] = useState<any[]>([]); // Danh sách catechists chưa gán
@@ -55,9 +48,13 @@ const ListCatechistByLevel: React.FC = () => {
   const trainingInfo = location.state?.trainingInfo as TrainingInfo;
   const [trainingCatechists, setTrainingCatechists] = useState<any[]>([]);
   const [currentTraining, setCurrentTraining] = useState<TrainingInfo | null>(null);
+
   useEffect(() => {
     if (trainingInfo) {
-      setCurrentTraining(trainingInfo);
+      setCurrentTraining({
+        ...trainingInfo,
+      trainingListStatus: trainingInfo.trainingListStatus // Đảm bảo lấy được giá trị này từ API
+      });
     }
   }, [trainingInfo]);
 
@@ -100,52 +97,38 @@ const ListCatechistByLevel: React.FC = () => {
     const loadInitialData = async () => {
       if (currentTraining?.id) {
         try {
-
           // 1. Get all training lists first
           const allTrainingsResponse = await trainApi.getAllTrain();
           const allTrainings = allTrainingsResponse.data.data.items || [];
-
+  
           // 2. Create a Set to store Catechist IDs that should not appear
           const excludedCatechistIds = new Set();
-
+  
           for (const training of allTrainings) {
             if (training.id !== currentTraining.id) {
               const assignedResponse = await trainApi.getCatechistsByTrainingListId(training.id);
               const assignedCatechists = assignedResponse.data.data.items || [];
-
-              // Check training status (Not Started, In Progress, or Finished)
-              const trainingStartDate = new Date(training.startTime);
-              const trainingEndDate = new Date(training.endTime);
-              const now = new Date();
-
+  
               assignedCatechists.forEach((item: any) => {
-                const shouldExclude =
-                  // For training that hasn't started - exclude all except status 2 (Failed)
-                  (now < trainingStartDate && item.catechistInTrainingStatus !== 2) ||
-                  // For ongoing training - exclude all
-                  (now >= trainingStartDate && now <= trainingEndDate) ||
-                  // For finished training - exclude only status 0 (In Progress)
-                  (now > trainingEndDate && item.catechistInTrainingStatus === 0);
-
-                if (shouldExclude) {
+                // Chỉ loại trừ catechist khi status là 0 (Chưa đào tạo) hoặc 1 (Đang đào tạo)
+                if (item.catechistInTrainingStatus === 0 || item.catechistInTrainingStatus === 1) {
                   excludedCatechistIds.add(item.catechist.id);
                 }
+                // Status 2 (Hoàn thành) và 3 (Không đạt) sẽ được hiển thị lại trong danh sách
               });
             }
           }
-
+  
           // 1. Lấy danh sách levels
           const levelResponse = await levelApi.getAllLevel();
           const levelMap: { [key: string]: number } = {};
           levelResponse.data.data.items.forEach((level: Level) => {
             levelMap[level.id] = level.hierarchyLevel;
           });
-
-          // 4. Get catechists assigned to current training
-          // 1. Đầu tiên lấy dữ liệu từ API
+  
+          // 2. Lấy danh sách catechist trong training hiện tại
           const currentTrainingResponse = await trainApi.getCatechistsByTrainingListId(currentTraining.id);
-
-          // 2. Map dữ liệu vào biến currentAssignedCatechists
+  
           const currentAssignedCatechists = currentTrainingResponse.data.data.items.map((item: any) => ({
             id: item.catechist.id,
             fullName: item.catechist.fullName,
@@ -153,58 +136,45 @@ const ListCatechistByLevel: React.FC = () => {
             levelId: item.catechist.levelId,
             status: item.catechistInTrainingStatus
           }));
-
-          // 3. Map lại level
+  
           const mappedAssignedCatechists = currentAssignedCatechists.map((catechist: Catechist) => ({
             ...catechist,
             level: {
               hierarchyLevel: levelMap[catechist.levelId || ''] || currentTraining.previousLevel
             }
           }));
-
-          // 6. Get all catechists and filter
+  
+          // 3. Lấy tất cả catechist và lọc
           const allCatechistsResponse = await catechistApi.getAllCatechists();
           const allCatechists = allCatechistsResponse.data.data.items || [];
-
+  
           const unassignedCatechists = allCatechists.filter((catechist) => {
-            // Check if catechist is in current training
+            // Kiểm tra xem catechist có trong training hiện tại không
             const currentAssignment = mappedAssignedCatechists.find(
-              function(assigned: { id: string; status: number }) {
-                return assigned.id === catechist.id;
-              }
+              (assigned: { id: string; status: number }) => assigned.id === catechist.id
             );
+  
+            // Nếu catechist đang trong một training khác với status 0 hoặc 1
             if (excludedCatechistIds.has(catechist.id)) {
               return false;
             }
-
-            // Show if catechist is not in current training
+  
+            // Nếu không có trong training hiện tại -> hiển thị
             if (!currentAssignment) {
               return true;
             }
-
-            const now = new Date();
-            const trainingStartDate = new Date(currentTraining.startTime);
-            const trainingEndDate = new Date(currentTraining.endTime);
-
-            // For training that hasn't started - show only if status is 2 (Failed)
-            if (now < trainingStartDate) {
-              return currentAssignment.status === 3;
-            }
-
-            // For finished training - show if status is 1 (Completed) or 2 (Failed)
-            if (now > trainingEndDate) {
-              return currentAssignment.status === 2 || currentAssignment.status === 3;
-            }
-
-            // For ongoing training - don't show
-            return false;
+  
+            // Nếu có trong training hiện tại:
+            // - Hiển thị nếu status = 2 (Hoàn thành) hoặc 3 (Không đạt)
+            // - Không hiển thị nếu status = 0 (Chưa đào tạo) hoặc 1 (Đang đào tạo)
+            return currentAssignment.status === 2 || currentAssignment.status === 3;
           });
-
-          // 5. Set state
+  
+          // 4. Set state
           setAssignedCatechists(mappedAssignedCatechists);
           setTrainingCatechists(mappedAssignedCatechists);
           setCatechists(unassignedCatechists);
-          console.log(trainingCatechists);
+  
         } catch (error) {
           console.error("Lỗi khi load dữ liệu ban đầu:", error);
         }
@@ -252,7 +222,7 @@ const ListCatechistByLevel: React.FC = () => {
           return;
         }
   
-        // 1. Chuẩn bị dữ liệu để cập nhật API
+        // Loại bỏ catechist khỏi danh sách gửi lên API
         const updatedCatechists = assignedCatechists
           .filter(cat => cat.id !== catechistId)
           .map(c => ({
@@ -260,13 +230,17 @@ const ListCatechistByLevel: React.FC = () => {
             status: c.status || 0
           }));
   
-        // 2. Gọi API để cập nhật
+        // Gọi API để cập nhật
         const response = await catInTrainApi.updateCatInTrain(currentTraining.id, updatedCatechists);
   
         if (response.status === 200 || response.status === 201) {
-          // 3. Nếu API thành công, cập nhật state
+          // Cập nhật state
           setAssignedCatechists(prev => prev.filter(cat => cat.id !== catechistId));
-          setCatechists(prev => [removedCatechist, ...prev]);
+          
+          // Kiểm tra status của training hiện tại
+          if (currentTraining.trainingListStatus !== 0) {
+            setCatechists(prev => [removedCatechist, ...prev]);
+          }
           setCatechistsToAssign(prev => prev.filter(cat => cat.id !== catechistId));
         } else {
           alert("Có lỗi xảy ra khi cập nhật danh sách!");
