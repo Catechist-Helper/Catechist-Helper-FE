@@ -43,6 +43,7 @@ body {
   min-width: 320px;
   min-height: 100vh;
   font-family: "Open Sans", sans-serif !important;
+  background-color: #ffffff;
 }
 
 h1 {
@@ -66,6 +67,11 @@ button {
   cursor: pointer;
   transition: border-color 0.25s;
 }
+
+input {
+  background-color: #ffffff;
+}
+
 button:hover {
   border-color: #646cff;
 }

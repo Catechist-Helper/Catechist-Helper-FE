@@ -91,6 +91,10 @@ const SideBarComponent = () => {
                     </li>
                     <li className="min-w-max">
                       <Link
+                        style={{
+                          opacity: `${isHovered ? "1" : "0"}`,
+                          transition: "all ease 0.2s",
+                        }}
                         to={PATH_ADMIN.approved_registration}
                         className="sidebar-link relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-primary_color hover:to-amber-600 px-4 py-3 hover:text-white"
                       >
@@ -153,6 +157,10 @@ const SideBarComponent = () => {
                     </li>
                     <li className="min-w-max">
                       <Link
+                        style={{
+                          opacity: `${isHovered ? "1" : "0"}`,
+                          transition: "all ease 0.2s",
+                        }}
                         to={PATH_ADMIN.admin_management_absence}
                         className="sidebar-link relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-primary_color hover:to-amber-600 px-4 py-3 hover:text-white"
                       >
@@ -239,6 +247,10 @@ const SideBarComponent = () => {
                     </li>
                     <li className="min-w-max">
                       <Link
+                        style={{
+                          opacity: `${isHovered ? "1" : "0"}`,
+                          transition: "all ease 0.2s",
+                        }}
                         to={PATH_ADMIN.system_configurations}
                         className="sidebar-link relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-primary_color hover:to-amber-600 px-4 py-3 hover:text-white"
                       >
@@ -280,6 +292,10 @@ const SideBarComponent = () => {
                   <ul className="pl-4 space-y-2">
                     <li className="min-w-max">
                       <Link
+                        style={{
+                          opacity: `${isHovered ? "1" : "0"}`,
+                          transition: "all ease 0.2s",
+                        }}
                         to={PATH_ADMIN.admin_event_category_management}
                         className="sidebar-link relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-primary_color hover:to-amber-600 px-4 py-3 hover:text-white"
                       >
@@ -288,6 +304,10 @@ const SideBarComponent = () => {
                     </li>
                     <li className="min-w-max">
                       <Link
+                        style={{
+                          opacity: `${isHovered ? "1" : "0"}`,
+                          transition: "all ease 0.2s",
+                        }}
                         to={PATH_ADMIN.admin_event_management}
                         className="sidebar-link relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-primary_color hover:to-amber-600 px-4 py-3 hover:text-white"
                       >

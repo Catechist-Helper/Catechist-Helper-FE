@@ -219,15 +219,22 @@ export default function EventsComponent() {
               Xem
             </Button>
 
-            <Button
-              color="secondary"
-              style={{ marginLeft: "10px" }}
-              onClick={() =>
-                openAddParticipantsDialog(params.row.id, params.row.name)
-              }
-            >
-              Thêm danh sách
-            </Button>
+            {params.row.eventStatus == EventStatus.Not_Started ||
+            params.row.eventStatus == EventStatus.In_Progress ? (
+              <>
+                <Button
+                  color="secondary"
+                  style={{ marginLeft: "10px" }}
+                  onClick={() =>
+                    openAddParticipantsDialog(params.row.id, params.row.name)
+                  }
+                >
+                  Thêm danh sách
+                </Button>
+              </>
+            ) : (
+              <></>
+            )}
           </div>
         );
       },

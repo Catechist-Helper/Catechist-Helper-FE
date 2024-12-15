@@ -486,7 +486,7 @@ export default function CatechistRegistrationsTable() {
           {renderFilterButtons()}
           <input
             type="date"
-            className="w-[200px] py-2 px-2 border rounded-md"
+            className="w-[200px] py-2 px-2 border rounded-md bg-white"
             value={selectedDate}
             onChange={(e) => setSelectedDate(e.target.value)}
           />

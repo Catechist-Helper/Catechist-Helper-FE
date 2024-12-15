@@ -882,7 +882,7 @@ export default function ApprovedRegistrationsTable() {
               {renderFilterButtons()}
               <input
                 type="date"
-                className="w-[200px] py-2 px-2 ml-2 border-1 border-black border rounded-md"
+                className="w-[200px] py-2 px-2 ml-2 border-1 border-black border rounded-md bg-white"
                 value={selectedDate}
                 onChange={(e) => setSelectedDate(e.target.value)}
               />

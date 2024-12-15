@@ -668,8 +668,13 @@ const CatechistDialog: React.FC<CatechistDialogProps> = ({
 
               <DialogActions className="mt-4">
                 <div className="flex justify-between items-center w-full">
+                  {" "}
                   <div className="min-w-[2px] text-danger font-bold text-[1.2rem]">
-                    Giáo lý viên này hiện đã nghỉ giảng dạy
+                    {updatedCatechist && !updatedCatechist.isTeaching ? (
+                      "Giáo lý viên này hiện đã nghỉ giảng dạy"
+                    ) : (
+                      <></>
+                    )}
                   </div>
                   <div className="flex gap-x-2">
                     <Button
