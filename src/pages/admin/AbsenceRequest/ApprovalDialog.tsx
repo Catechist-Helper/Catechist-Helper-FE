@@ -74,22 +74,22 @@ const ApprovalDialog = ({
           status != AbsenceRequestStatus.Approved &&
           status != AbsenceRequestStatus.Rejected
         ) {
-          sweetAlert.alertFailed(
+          sweetAlert.alertWarning(
             "Vui lòng chọn kết quả phê duyệt nghỉ phép",
             "",
-            1200,
-            26
+            2500,
+            32
           );
 
           return;
         }
 
         if (comment.trim() == "") {
-          sweetAlert.alertFailed(
+          sweetAlert.alertWarning(
             "Vui lòng nhập ghi chú duyệt nghỉ phép",
             "",
-            1200,
-            25
+            2500,
+            30
           );
 
           return;
@@ -166,7 +166,7 @@ const ApprovalDialog = ({
         {absence.status == AbsenceRequestStatus.Pending ? (
           <>
             <label htmlFor="" className="ml-1">
-              Quyết định phê duyệt
+              Quyết định phê duyệt <span style={{ color: "red" }}>*</span>
             </label>
             <Select
               value={status}
@@ -192,7 +192,11 @@ const ApprovalDialog = ({
             <TextField
               value={comment}
               onChange={(e) => setComment(e.target.value)}
-              label="Nhập ghi chú"
+              label={
+                <span>
+                  Nhập ghi chú <span style={{ color: "red" }}>*</span>
+                </span>
+              }
               fullWidth
               variant="outlined"
               margin="normal"

@@ -50,6 +50,11 @@ h1 {
   line-height: 1.1;
 }
 
+.bg_title {
+  background: #422a14;
+  background-image: linear-gradient(315deg, #d97706, #2c1c0e, #d97706);
+}
+
 button {
   border-radius: 8px;
   border: 1px solid transparent;

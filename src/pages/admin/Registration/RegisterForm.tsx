@@ -9,11 +9,10 @@ import {
 } from "../../../enums/RegistrationProcess";
 import useAppContext from "../../../hooks/useAppContext";
 import LoadingScreen from "../../../components/Organisms/LoadingScreen/LoadingScreen";
+import sweetAlert from "../../../utils/sweetAlert";
 
 const RegisterForm: React.FC = () => {
   const [step, setStep] = useState(1);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const navigate = useNavigate();
   const { isLoading, enableLoading, disableLoading } = useAppContext();
 
@@ -108,10 +107,26 @@ const RegisterForm: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    enableLoading();
-
     if (step === 1 && !validateStep1()) return;
     if (step === 2 && !validateStep2()) return;
+
+    const confirm = await sweetAlert.confirm(
+      "Xác nhận thông tin cá nhân",
+      `Kính mong ứng viên <strong>${formData.fullName}</strong> 
+      vui lòng xác nhận email <strong>${formData.email}</strong> 
+      và số điện thoại <strong>${formData.phone}</strong> là chính xác! 
+
+            <br/><br/>
+      Chúng tôi sẽ liên hệ với bạn qua email và số điện thoại này. 
+      Xin bạn vui lòng kiểm tra lại lần cuối trước khi nộp hồ sơ.`,
+      "Xác nhận nộp",
+      "Kiểm tra lại",
+      "question"
+    );
+    if (!confirm) {
+      return;
+    }
+    enableLoading();
 
     // Tạo đối tượng FormData để gửi qua API
     const formDataToSubmit = new FormData();
@@ -137,7 +152,6 @@ const RegisterForm: React.FC = () => {
       const response =
         await registrationApi.createRegistration(formDataToSubmit);
       console.log("Registration Success", response);
-      setSuccessMessage("Nộp đơn thành công!");
       let process = await interviewProcessApi.createInterviewProcess({
         registrationId: response.data.data.id,
         name: RegistrationProcessTitle.NOP_HO_SO,
@@ -162,10 +176,15 @@ const RegisterForm: React.FC = () => {
         }).then(() => {
           navigate("/");
         });
-      }, 1000);
+      }, 200);
     } catch (error) {
       console.error("Error submitting registration", error);
-      setErrorMessage("Đã xảy ra lỗi khi nộp đơn.");
+      sweetAlert.alertFailed(
+        "Có lỗi xảy ra khi nộp đơn",
+        "Vui lòng thử lại lần sau",
+        5000,
+        26
+      );
     } finally {
       disableLoading();
     }
@@ -500,11 +519,6 @@ const RegisterForm: React.FC = () => {
               </>
             )}
           </form>
-
-          {errorMessage && <p className="text-red-500 mt-4">{errorMessage}</p>}
-          {successMessage && (
-            <p className="text-green-500 mt-4">{successMessage}</p>
-          )}
         </div>
       </div>
     </>

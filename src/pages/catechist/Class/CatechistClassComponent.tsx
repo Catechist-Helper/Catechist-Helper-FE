@@ -17,6 +17,12 @@ import {
   CatechistInSlotTypeEnum,
   CatechistInSlotTypeEnumString,
 } from "../../../enums/CatechistInSlot";
+import useAppContext from "../../../hooks/useAppContext";
+import ViewDetailAbsenceDialog from "../../admin/AbsenceRequest/ViewDetailAbsenceDialog";
+import {
+  AbsenceRequestStatus,
+  AbsenceRequestStatusString,
+} from "../../../enums/AbsenceRequest";
 
 const CatechistClassComponent = () => {
   const [userLogin, setUserLogin] = useState<any>(null);
@@ -31,6 +37,11 @@ const CatechistClassComponent = () => {
   const [slotAbsenceId, setSlotAbsenceId] = useState<string>("");
   const [classViewSlotId, setClassViewSlotId] = useState<string>("");
   const [absenceList, setAbsenceList] = useState<GetAbsenceItemResponse[]>([]);
+  const { enableLoading, disableLoading } = useAppContext();
+  const [openViewDetailDialog, setOpenViewDetailDialog] =
+    useState<boolean>(false);
+  const [selectedAbsence, setSelectedAbsence] =
+    useState<GetAbsenceItemResponse | null>(null);
 
   // Fetch thông tin người dùng đã đăng nhập
   useEffect(() => {
@@ -75,7 +86,6 @@ const CatechistClassComponent = () => {
             userLogin.catechistId,
             selectedPastoralYear
           );
-          console.log(userLogin.catechistId, selectedPastoralYear, response);
 
           let arr: any[] = [];
 
@@ -114,7 +124,7 @@ const CatechistClassComponent = () => {
     };
     fetchClasses();
   }, [userLogin, selectedPastoralYear]); // Khi userLogin hoặc selectedPastoralYear thay đổi, gọi lại API
-  console.log(classes);
+
   // Handle thay đổi niên khóa
   const handlePastoralYearChange = (
     event: React.ChangeEvent<{ value: unknown }>
@@ -140,18 +150,18 @@ const CatechistClassComponent = () => {
       headerName: "Số lượng giáo lý viên",
       width: 180,
     },
-    // {
-    //   field: "major",
-    //   headerName: "Ngành",
-    //   width: 150,
-    //   renderCell: (params) => params.row.majorName,
-    // },
-    // {
-    //   field: "grade",
-    //   headerName: "Khối",
-    //   width: 150,
-    //   renderCell: (params) => params.row.gradeName,
-    // },
+    {
+      field: "major",
+      headerName: "Ngành",
+      width: 150,
+      renderCell: (params) => params.row.majorName,
+    },
+    {
+      field: "grade",
+      headerName: "Khối",
+      width: 150,
+      renderCell: (params) => params.row.gradeName,
+    },
     {
       field: "startDate",
       headerName: "Ngày bắt đầu",
@@ -176,13 +186,13 @@ const CatechistClassComponent = () => {
         switch (params.value) {
           case ClassStatusEnum.Active:
             return (
-              <span className="rounded py-1 px-2 bg-warning text-black">
+              <span className="rounded-xl py-1 px-2 bg-warning text-black">
                 {ClassStatusString.Active}
               </span>
             );
           case ClassStatusEnum.Finished:
             return (
-              <span className="rounded py-1 px-2 bg-success text-white">
+              <span className="rounded-xl py-1 px-2 bg-success text-white">
                 {ClassStatusString.Finished}
               </span>
             );
@@ -190,11 +200,6 @@ const CatechistClassComponent = () => {
             return <></>;
         }
       },
-    },
-    {
-      field: "pastoralYearName",
-      headerName: "Niên khóa",
-      width: 180,
     },
     {
       field: "slotCount",
@@ -212,7 +217,6 @@ const CatechistClassComponent = () => {
                 onClick={() => {
                   setSelectedClassView(params.row);
                   handleViewSlots(params.row.id);
-                  console.log(params.row);
                 }}
               >
                 Xem tiết học
@@ -239,7 +243,6 @@ const CatechistClassComponent = () => {
       userLogin.catechistId
     );
     setAbsenceList(absenceRes.data.data ?? []);
-    console.log("aaaaaaaa", absenceRes.data.data);
 
     setSlots(sortedArray);
   };
@@ -254,8 +257,8 @@ const CatechistClassComponent = () => {
       sweetAlert.alertFailed(
         "Có lỗi xảy ra khi tải thông tin slot!",
         "",
-        1000,
-        22
+        3000,
+        30
       );
     }
   };
@@ -265,39 +268,34 @@ const CatechistClassComponent = () => {
       setClassViewSlotId("");
     }
   }, [openSlotsDialog]);
-
   const handleLeaveRequestSubmit = async (reason: string, slotId: string) => {
     try {
-      console.log({
+      enableLoading();
+      await absenceApi.submitAbsence({
         catechistId: userLogin.catechistId,
         reason: reason,
         slotId: slotId,
       });
-      const res = absenceApi.submitAbsence({
-        catechistId: userLogin.catechistId,
-        reason: reason,
-        slotId: slotId,
-      });
-      console.log("res", res);
 
       // Đóng dialog
       // setOpenLeaveDialog(false);
 
       // Thông báo gửi yêu cầu thành công
+      setOpenLeaveDialog(false);
+      if (classViewSlotId != "") {
+        await fetchSlotForViewing(classViewSlotId);
+      }
       sweetAlert.alertSuccess(
         "Yêu cầu nghỉ phép đã được gửi thành công!",
         "",
-        1000,
-        22
+        3000,
+        30
       );
-      setOpenLeaveDialog(false);
-      if (classViewSlotId != "") {
-        fetchSlotForViewing(classViewSlotId);
-      }
     } catch (error) {
       console.error("Error loading slots:", error);
-      sweetAlert.alertFailed("Có lỗi xảy ra khi gửi yêu cầu!", "", 1000, 22);
+      sweetAlert.alertFailed("Có lỗi xảy ra khi gửi yêu cầu!", "", 3000, 30);
     } finally {
+      disableLoading();
     }
   };
 
@@ -308,7 +306,7 @@ const CatechistClassComponent = () => {
         position: "absolute",
       }}
     >
-      <h1 className="text-center text-[2.2rem] bg-primary_color text-text_primary_light py-2 font-bold">
+      <h1 className="text-center text-[2.2rem] bg_title text-text_primary_light py-2 font-bold">
         Thông tin lớp giáo lý
       </h1>
       <div className="w-full px-3">
@@ -429,27 +427,38 @@ const CatechistClassComponent = () => {
               {
                 field: "action",
                 headerName: "Hành động",
-                width: 250,
+                width: 500,
                 renderCell: (params: any) => {
+                  const absence = absenceList.find(
+                    (item) =>
+                      item.slotId == params.row.id &&
+                      item.catechistId == userLogin.catechistId
+                  );
                   return (
                     <>
                       {new Date().getTime() -
                         new Date(params.row.date).getTime() <
                       0 ? (
                         <>
-                          {absenceList.length > 0 &&
-                          absenceList.find(
-                            (item) =>
-                              item.slotId == params.row.id &&
-                              item.catechistId == userLogin.catechistId
-                          ) ? (
+                          {absenceList.length > 0 && absence ? (
                             <>
+                              <span className="">
+                                {
+                                  AbsenceRequestStatusString[
+                                    AbsenceRequestStatus[
+                                      absence.status
+                                    ] as keyof typeof AbsenceRequestStatusString
+                                  ]
+                                }
+                              </span>
                               <Button
                                 color="secondary"
                                 variant="contained"
                                 onClick={() => {
-                                  setSlotAbsenceId(params.row.id);
+                                  setSelectedAbsence(absence ?? null);
+                                  setOpenViewDetailDialog(true);
                                 }} // Mở dialog khi nhấn
+                                sx={{ marginLeft: "10px" }}
                               >
                                 Xem nghỉ phép
                               </Button>
@@ -490,12 +499,26 @@ const CatechistClassComponent = () => {
             localeText={viVNGridTranslation}
           />
         </div>
-        <RequestLeaveDialog
-          open={openLeaveDialog}
-          slotId={slotAbsenceId}
-          onClose={() => setOpenLeaveDialog(false)} // Đóng dialog
-          onSubmit={handleLeaveRequestSubmit} // Hàm xử lý khi gửi yêu cầu nghỉ phép
-        />
+        {openLeaveDialog ? (
+          <>
+            <RequestLeaveDialog
+              open={openLeaveDialog}
+              slotId={slotAbsenceId}
+              onClose={() => setOpenLeaveDialog(false)} // Đóng dialog
+              onSubmit={handleLeaveRequestSubmit} // Hàm xử lý khi gửi yêu cầu nghỉ phép
+            />
+          </>
+        ) : (
+          <></>
+        )}
+
+        {openViewDetailDialog && selectedAbsence && (
+          <ViewDetailAbsenceDialog
+            open={openViewDetailDialog}
+            onClose={() => setOpenViewDetailDialog(false)}
+            absence={selectedAbsence}
+          />
+        )}
       </Dialog>
     </Paper>
   );

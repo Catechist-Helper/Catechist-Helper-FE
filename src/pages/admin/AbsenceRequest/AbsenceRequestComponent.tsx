@@ -262,20 +262,12 @@ const AbsencePage = () => {
         position: "absolute",
       }}
     >
-      <h1 className="text-center text-[2.2rem] bg-primary_color text-text_primary_light py-2 font-bold">
+      <h1 className="text-center text-[2.2rem] bg_title text-text_primary_light py-2 font-bold">
         Danh sách đơn xin nghỉ phép
       </h1>
       <div className="my-2 flex justify-between mx-3">
         <div className="min-w-[10px]"></div>
         <div className="flex gap-x-2">
-          <Button
-            onClick={() => fetchAbsences()}
-            variant="outlined"
-            color="primary"
-            style={{ marginBottom: "16px" }}
-          >
-            Tạo đơn
-          </Button>
           <Button
             onClick={() => fetchAbsences()}
             variant="contained"

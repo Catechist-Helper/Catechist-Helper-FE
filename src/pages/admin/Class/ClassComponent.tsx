@@ -111,7 +111,6 @@ export default function ClassComponent() {
   const [openDialogUpdateClassMode, setOpenDialogUpdateClassMode] =
     useState<boolean>(false);
 
-  console.log(pastoralYears);
   useEffect(() => {
     if (!openDialogCreateUpdateClass) {
       setOpenDialogUpdateClassMode(false);
@@ -139,7 +138,6 @@ export default function ClassComponent() {
             setSelectedMajor(majorId);
             await fetchGrades(majorId, gradeId);
           } else if (location.state.classIds) {
-            console.log("location.state.classIds", location.state.classIds);
             enableLoading();
             setTimeout(() => {
               fetchClasses(undefined, undefined, location.state.classIds);
@@ -209,13 +207,13 @@ export default function ClassComponent() {
         switch (params.value) {
           case ClassStatusEnum.Active:
             return (
-              <span className="rounded py-1 px-2 bg-warning text-black">
+              <span className="rounded-xl py-1 px-2 bg-warning text-black">
                 {ClassStatusString.Active}
               </span>
             );
           case ClassStatusEnum.Finished:
             return (
-              <span className="rounded py-1 px-2 bg-success text-white">
+              <span className="rounded-xl py-1 px-2 bg-success text-white">
                 {ClassStatusString.Finished}
               </span>
             );
@@ -233,7 +231,6 @@ export default function ClassComponent() {
           <p>
             {params.row.slotCount <= 0 ? (
               <Button
-                variant="contained"
                 color="success"
                 onClick={() => handleOpenSlotDialog(params.row)}
               >
@@ -241,7 +238,6 @@ export default function ClassComponent() {
               </Button>
             ) : (
               <Button
-                variant="contained"
                 color="info"
                 onClick={() => {
                   setSelectedClassView(params.row);
@@ -262,7 +258,6 @@ export default function ClassComponent() {
       renderCell: (params: any) => {
         return (
           <Button
-            variant="contained"
             color="primary"
             onClick={() => {
               const action = async () => {
@@ -276,13 +271,16 @@ export default function ClassComponent() {
                   const blob = new Blob([data], {
                     type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                   });
-                  FileSaver.saveAs(blob, `${params.row.name}.xlsx`);
+                  FileSaver.saveAs(
+                    blob,
+                    `Danh sách thông tin tiết học của ${params.row.name}.xlsx`
+                  );
                 } catch (error) {
                   console.error("Lỗi khi xuất danh sách:", error);
                   sweetAlert.alertFailed(
                     "Có lỗi xảy ra khi xuất danh sách!",
                     "",
-                    1000,
+                    2500,
                     22
                   );
                 } finally {
@@ -297,6 +295,7 @@ export default function ClassComponent() {
         );
       },
     },
+    { field: "note", headerName: "Ghi chú", width: 200 },
   ];
 
   const fetchClasses = async (
@@ -563,7 +562,6 @@ export default function ClassComponent() {
 
       // Gọi hàm xử lý
       processItems().then(() => {
-        // console.log(fetchItems);
         setCatechists(fetchItems);
       });
 
@@ -574,6 +572,27 @@ export default function ClassComponent() {
   };
 
   const handleConfirm = async () => {
+    if ((!selectedRoom || selectedRoom == "") && !updateSlotMode) {
+      sweetAlert.alertWarning("Vui lòng chọn phòng học", "", 3000, 22);
+      return;
+    }
+
+    if (
+      selectedClass?.numberOfCatechist &&
+      assignedCatechists.length < selectedClass?.numberOfCatechist
+    ) {
+      sweetAlert.alertWarning(
+        `Chưa đủ số lượng giáo lý viên`,
+        `
+    Lớp ${selectedClass.name} cần ít nhất ${selectedClass.numberOfCatechist} giáo lý viên
+    <br/>
+    Số lượng hiện tại: ${assignedCatechists.length} `,
+        8000,
+        30
+      );
+      return;
+    }
+
     if (updateSlotMode) {
       try {
         enableLoading();
@@ -593,10 +612,6 @@ export default function ClassComponent() {
             catechists: updateCates,
           }
         );
-
-        console.log(selectedClass ? selectedClass.id : "", {
-          catechists: updateCates,
-        });
 
         // setTimeout(() => {
         if (updateRes.data.statusCode.toString().startsWith("2")) {
@@ -635,16 +650,6 @@ export default function ClassComponent() {
 
       return;
     } else {
-      if (!selectedRoom || assignedCatechists.length === 0) {
-        sweetAlert.alertFailed(
-          "Vui lòng chọn phòng và giáo lý viên!",
-          "",
-          1000,
-          22
-        );
-        return;
-      }
-
       const catechistsInClassData: CreateCatechistInClassRequest = {
         classId: selectedClass ? selectedClass.id : "",
         catechistIds: assignedCatechists.map((catechist) => catechist.id),
@@ -653,7 +658,7 @@ export default function ClassComponent() {
 
       const slotData: CreateSlotRequest = {
         classId: selectedClass ? selectedClass.id : "",
-        roomId: selectedRoom,
+        roomId: selectedRoom ?? "",
         catechists: assignedCatechists.map((catechist) => ({
           catechistId: catechist.id,
           isMain: catechist.id === mainCatechistId,
@@ -724,9 +729,10 @@ export default function ClassComponent() {
       sweetAlert.alertSuccess(
         "Thêm dữ liệu năm học mới thành công!",
         "",
-        1000,
-        23
+        2500,
+        30
       );
+
       setOpenTimetableDialog(false); // Đóng modal
 
       await fetchPastoralYears();
@@ -735,8 +741,8 @@ export default function ClassComponent() {
       sweetAlert.alertFailed(
         "Có lỗi xảy ra khi tạo năm học mới!",
         "",
-        1000,
-        22
+        2500,
+        27
       );
     } finally {
       disableLoading();
@@ -899,20 +905,22 @@ export default function ClassComponent() {
     slotId: string
   ) => {
     try {
-      absenceApi.submitAbsence({
+      enableLoading();
+      await absenceApi.submitAbsence({
         catechistId: catechistId,
         reason: reason,
         slotId: slotId,
       });
-      sweetAlert.alertSuccess("Tạo đơn nghỉ phép thành công", "", 1000, 22);
+      sweetAlert.alertSuccess("Tạo đơn nghỉ phép thành công", "", 2500, 25);
       setOpenLeaveDialog(false);
       // if (classViewSlotId != "") {
       //   fetchSlotForViewing(classViewSlotId);
       // }
     } catch (error) {
       console.error("Error loading slots:", error);
-      sweetAlert.alertFailed("Lỗi khi tạo đơn nghỉ phép", "", 1000, 22);
+      sweetAlert.alertFailed("Lỗi khi tạo đơn nghỉ phép", "", 2500, 25);
     } finally {
+      disableLoading();
     }
   };
 
@@ -934,7 +942,7 @@ export default function ClassComponent() {
         return;
       }
       await classApi.deleteClass(deletedClass.id);
-      sweetAlert.alertSuccess("Xoá thành công", "", 5000, 22);
+      sweetAlert.alertSuccess("Xoá thành công", "", 2500, 20);
       fetchClasses();
     } catch (error: any) {
       console.error("Error loading slots:", error);
@@ -948,7 +956,7 @@ export default function ClassComponent() {
           );
         }
       } else {
-        sweetAlert.alertFailed("Có lỗi khi xóa lớp", "", 5000, 22);
+        sweetAlert.alertFailed("Có lỗi khi xóa lớp", "", 2500, 22);
       }
     } finally {
       disableLoading();
@@ -957,7 +965,7 @@ export default function ClassComponent() {
 
   return (
     <Paper sx={{ width: "calc(100% - 3.8rem)", position: "absolute" }}>
-      <h1 className="text-center text-[2.2rem] bg-primary_color text-text_primary_light py-2 font-bold">
+      <h1 className="text-center text-[2.2rem] bg_title text-text_primary_light py-2 font-bold">
         Danh sách lớp học
       </h1>
 
@@ -1080,7 +1088,8 @@ export default function ClassComponent() {
                     onClick={() => {
                       handleDeleteClass();
                     }}
-                    variant="contained"
+                    className="btn btn-danger"
+                    variant="outlined"
                     color="error"
                     style={{ marginBottom: "16px" }}
                   >
@@ -1092,8 +1101,9 @@ export default function ClassComponent() {
                     onClick={() => {
                       handleOpenDialogCreateUpdateClass(true);
                     }} // Mở dialog thêm dữ liệu năm học mới
-                    variant="contained"
+                    variant="outlined"
                     color="warning"
+                    className="btn btn-warning"
                     style={{ marginBottom: "16px" }}
                   >
                     Cập nhật
@@ -1108,8 +1118,9 @@ export default function ClassComponent() {
                 onClick={() => {
                   handleOpenDialogCreateUpdateClass();
                 }} // Mở dialog thêm dữ liệu năm học mới
-                variant="contained"
-                color="primary"
+                variant="outlined"
+                className="btn btn-success"
+                color="success"
                 style={{ marginBottom: "16px" }}
               >
                 Tạo mới
@@ -1118,8 +1129,9 @@ export default function ClassComponent() {
             <div>
               <Button
                 onClick={handleOpenTimetableDialog} // Mở dialog thêm dữ liệu năm học mới
-                variant="contained"
+                variant="outlined"
                 color="primary"
+                className="btn btn-primary"
                 style={{ marginBottom: "16px" }}
               >
                 Thêm dữ liệu năm học mới
@@ -1151,7 +1163,7 @@ export default function ClassComponent() {
                       sweetAlert.alertFailed(
                         "Có lỗi xảy ra khi xuất danh sách!",
                         "",
-                        1000,
+                        2500,
                         22
                       );
                     } finally {
@@ -1205,6 +1217,7 @@ export default function ClassComponent() {
       {openDialogCreateUpdateClass ? (
         <>
           <CreateUpdateClassDialog
+            rows={rows}
             open={openDialogCreateUpdateClass}
             onClose={() => {
               setOpenDialogCreateUpdateClass(false);
@@ -1236,26 +1249,42 @@ export default function ClassComponent() {
         onClose={() => setOpenSlotDialog(false)}
       >
         <div style={{ padding: "20px" }}>
-          <h3 className="mb-3">
+          <h3
+            className={`mb-3 text-[1.2rem] ${updateSlotMode ? "text-primary" : "text-success"}`}
+          >
             <strong>
               {updateSlotMode ? "Cập nhật" : "Tạo"} tiết học cho{" "}
               {selectedClass?.name}
             </strong>
           </h3>
-          <h4 className="mb-2">
-            <strong>Phòng học</strong>
-          </h4>
           <FormControl fullWidth>
             <InputLabel>
               {updateSlotMode
                 ? "Chọn phòng học mới (nếu muốn cập nhật)"
-                : "Chọn phòng học"}
+                : "Chọn phòng học "}
+              {!updateSlotMode ? (
+                <span style={{ color: "red" }}>*</span>
+              ) : (
+                <></>
+              )}
             </InputLabel>
             <Select
               value={selectedRoom}
               onChange={(e) => {
                 setSelectedRoom(e.target.value);
               }}
+              label={
+                <span>
+                  {updateSlotMode
+                    ? "Chọn phòng học mới (nếu muốn cập nhật)"
+                    : "Chọn phòng học "}
+                  {!updateSlotMode ? (
+                    <span style={{ color: "red" }}>*</span>
+                  ) : (
+                    <></>
+                  )}
+                </span>
+              }
             >
               {rooms.map((room) => (
                 <MenuItem
@@ -1367,16 +1396,20 @@ export default function ClassComponent() {
             disableRowSelectionOnClick
           />
 
-          <div className="flex justify-end mt-3">
-            <Button variant="contained" color="success" onClick={handleConfirm}>
-              Xác nhận
-            </Button>
+          <div className="flex justify-end mt-3 gap-x-2">
             <Button
               variant="outlined"
-              color="error"
+              color={updateSlotMode ? "primary" : "success"}
               onClick={() => setOpenSlotDialog(false)}
             >
               Hủy bỏ
+            </Button>
+            <Button
+              variant="contained"
+              color={updateSlotMode ? "primary" : "success"}
+              onClick={handleConfirm}
+            >
+              Xác nhận
             </Button>
           </div>
         </div>
@@ -1561,7 +1594,7 @@ export default function ClassComponent() {
           <input type="file" accept=".xlsx" onChange={handleFileChange} />
           {/* {file && <p>{file.name}</p>}  */}
           {/* Hiển thị tên file đã chọn */}
-          <div style={{ marginTop: "20px" }}>
+          <div className="flex gap-x-2" style={{ marginTop: "20px" }}>
             <Button
               onClick={handleConfirmUpload}
               variant="contained"

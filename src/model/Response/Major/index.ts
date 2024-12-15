@@ -50,6 +50,7 @@ export type CatechistResponse = {
 export type MajorResponse = {
   id: string;
   name: string;
+  hierarchyLevel: number;
 };
 
 export type LevelResponse = {

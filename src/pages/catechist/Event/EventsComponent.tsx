@@ -4,10 +4,20 @@ import {
   // GridRowSelectionModel
 } from "@mui/x-data-grid";
 import Paper from "@mui/material/Paper";
-import { Button } from "@mui/material";
+import {
+  Button,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+} from "@mui/material";
 import { useState, useEffect } from "react";
 import eventApi from "../../../api/Event";
-import { EventItemResponse } from "../../../model/Response/Event";
+import {
+  BudgetTransactionResponseItem,
+  EventItemResponse,
+  ParticipantResponseItem,
+} from "../../../model/Response/Event";
 import { RoleEventName } from "../../../enums/RoleEventEnum"; // Import enum
 import sweetAlert from "../../../utils/sweetAlert";
 import viVNGridTranslation from "../../../locale/MUITable";
@@ -15,6 +25,13 @@ import { getUserInfo } from "../../../utils/utils";
 import { formatDate } from "../../../utils/formatDate";
 import { useNavigate } from "react-router-dom";
 import { PATH_CATECHIST } from "../../../routes/paths";
+import { formatPrice } from "../../../utils/formatPrice";
+import BudgetDialog from "../../admin/Event/BudgetDialog";
+import { EventCategoryItemResponse } from "../../../model/Response/EventCategory";
+import eventCategoryApi from "../../../api/EventCategory";
+import OrganizersDialog from "../../admin/Event/OrganizersDialog";
+import ParticipantsDialog from "../../admin/Event/ParticipantsDialog";
+import { EventStatus, EventStatusString } from "../../../enums/Event";
 
 export default function EventsComponent() {
   const [rows, setRows] = useState<EventItemResponse[]>([]);
@@ -24,7 +41,27 @@ export default function EventsComponent() {
   const [userRoles, setUserRoles] = useState<{ [key: string]: RoleEventName }>(
     {}
   );
+  const [eventCategories, setEventCategories] = useState<
+    EventCategoryItemResponse[]
+  >([]);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<
+    string | "Tất cả"
+  >("Tất cả");
   const navigate = useNavigate();
+
+  // Fetch Event Categories
+  const fetchEventCategories = async () => {
+    try {
+      const { data } = await eventCategoryApi.getAllEventCategories();
+      setEventCategories(data.data.items);
+    } catch (error) {
+      console.error("Lỗi khi tải danh mục sự kiện:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchEventCategories(); // Fetch event categories khi component được mount
+  }, []);
 
   const fetchUser = async () => {
     try {
@@ -38,10 +75,20 @@ export default function EventsComponent() {
   const fetchEvents = async () => {
     try {
       setLoading(true);
-      // Get events where user is part of the organizer group
-      const { data } = await eventApi.getAllEvents(); // Or any other suitable method to fetch events
+      const firstRes =
+        selectedCategoryId === "Tất cả"
+          ? await eventApi.getAllEvents()
+          : await eventApi.getAllEvents(selectedCategoryId);
+      const { data } =
+        selectedCategoryId === "Tất cả"
+          ? await eventApi.getAllEvents(undefined, 1, firstRes.data.data.total)
+          : await eventApi.getAllEvents(
+              selectedCategoryId,
+              1,
+              firstRes.data.data.total
+            );
       const eventsWithUserRole = await fetchUserEventsRole(data.data.items);
-      setRows(eventsWithUserRole);
+      await fetchAdditionalData(eventsWithUserRole);
     } catch (error) {
       console.error("Error fetching events:", error);
       sweetAlert.alertFailed("Không thể tải danh sách sự kiện!", "", 1000, 22);
@@ -85,6 +132,37 @@ export default function EventsComponent() {
     return eventsWithRole.filter((event) => event !== null);
   };
 
+  const fetchAdditionalData = async (events: EventItemResponse[]) => {
+    const updatedEvents = await Promise.all(
+      events.map(async (event) => {
+        try {
+          // Gọi API để lấy số người trong ban tổ chức
+          const organizersResponse = await eventApi.getEventMembers(event.id);
+          const organizersCount = organizersResponse.data.data.items.length;
+
+          // Gọi API để lấy số người tham gia
+          const participantsResponse = await eventApi.getEventParticipants(
+            event.id
+          );
+          const participantsCount = participantsResponse.data.data.items.length;
+
+          return {
+            ...event,
+            organizersCount,
+            participantsCount,
+          };
+        } catch (error) {
+          console.error(
+            `Lỗi khi tải dữ liệu bổ sung cho sự kiện ${event.id}:`,
+            error
+          );
+          return { ...event, organizersCount: 0, participantsCount: 0 };
+        }
+      })
+    );
+    setRows(updatedEvents);
+  };
+
   // Map roleEvent from API response to our enum
   const mapRoleToEnum = (roleEvent: string): RoleEventName => {
     switch (roleEvent) {
@@ -98,6 +176,97 @@ export default function EventsComponent() {
         return RoleEventName.MEMBER_BTC; // Default to member if no match
     }
   };
+  const [openBudgetDialog, setOpenBudgetDialog] = useState(false);
+  const [budgetTransactions, setBudgetTransactions] = useState<
+    BudgetTransactionResponseItem[]
+  >([]);
+  const [selectedEventNameForBudget, setSelectedEventNameForBudget] =
+    useState<string>("");
+  const handleBudgetTransactions = async (
+    eventId: string,
+    eventName: string
+  ) => {
+    try {
+      setLoading(true);
+      setSelectedEventNameForBudget(eventName);
+
+      const firstRes = await eventApi.getEventBudgetTransactions(eventId);
+      const { data } = await eventApi.getEventBudgetTransactions(
+        eventId,
+        1,
+        firstRes.data.data.total
+      );
+      const sortedTransactions = data.data.items.sort(
+        (a, b) =>
+          new Date(b.transactionAt).getTime() -
+          new Date(a.transactionAt).getTime()
+      );
+
+      setBudgetTransactions(sortedTransactions);
+      setOpenBudgetDialog(true); // Mở dialog
+    } catch (error) {
+      console.error("Lỗi khi tải danh sách giao dịch ngân sách:", error);
+      sweetAlert.alertFailed(
+        "Không thể tải danh sách ngân sách!",
+        "",
+        1000,
+        22
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(null); // ID của sự kiện được chọn
+  const [openOrganizersDialog, setOpenOrganizersDialog] =
+    useState<boolean>(false);
+  const [viewOrganizersDialogMode, setViewOrganizersDialogMode] =
+    useState<boolean>(false);
+  const handleOrganizers = (eventId: string, hasOrganizers: boolean) => {
+    if (hasOrganizers) {
+      setSelectedEventId(eventId); // Lưu lại ID sự kiện
+      setOpenOrganizersDialog(true); // Mở dialog
+    } else {
+      setSelectedEventId(eventId); // Lưu lại ID sự kiện
+      setOpenOrganizersDialog(true); // Mở dialog
+    }
+    setViewOrganizersDialogMode(hasOrganizers);
+  };
+
+  const [openParticipantsDialog, setOpenParticipantsDialog] = useState(false);
+  const [participants, setParticipants] = useState<ParticipantResponseItem[]>(
+    []
+  );
+  const [
+    selectedEventNameForParticipants,
+    setSelectedEventNameForParticipants,
+  ] = useState<string>("");
+  const handleParticipants = async (eventId: string, eventName: string) => {
+    try {
+      setLoading(true);
+      setSelectedEventNameForParticipants(eventName);
+
+      const firstRes = await eventApi.getEventParticipants(eventId);
+      const { data } = await eventApi.getEventParticipants(
+        eventId,
+        1,
+        firstRes.data.data.total
+      );
+      setParticipants(data.data.items);
+
+      setOpenParticipantsDialog(true); // Mở dialog
+    } catch (error) {
+      console.error("Lỗi khi tải danh sách người tham gia:", error);
+      sweetAlert.alertFailed(
+        "Không thể tải danh sách người tham gia!",
+        "",
+        1000,
+        22
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const columns: GridColDef[] = [
     { field: "name", headerName: "Tên sự kiện", width: 200 },
@@ -105,21 +274,80 @@ export default function EventsComponent() {
     {
       field: "startTime",
       headerName: "Thời gian bắt đầu",
-      width: 160,
+      width: 150,
       renderCell: (params) => formatDate.DD_MM_YYYY(params.row.startTime),
     },
     {
       field: "endTime",
       headerName: "Thời gian kết thúc",
-      width: 160,
+      width: 150,
       renderCell: (params) => formatDate.DD_MM_YYYY(params.row.endTime),
     },
     {
-      field: "userRole",
-      headerName: "Vai trò trong sự kiện",
+      field: "current_budget",
+      headerName: "Ngân sách hiện tại",
       width: 200,
       renderCell: (params) => {
-        return <span>{params.row.userRole}</span>;
+        return (
+          <div style={{ display: "flex", alignItems: "center" }}>
+            {params.row.userRole == RoleEventName.TRUONG_BTC ? (
+              <Button
+                variant="contained"
+                color={"primary"}
+                style={{ marginRight: "10px" }}
+                onClick={() =>
+                  handleBudgetTransactions(params.row.id, params.row.name)
+                }
+              >
+                Xem
+              </Button>
+            ) : (
+              <></>
+            )}{" "}
+            <span> ₫ {formatPrice(params.value)}</span>
+          </div>
+        );
+      },
+    },
+    {
+      field: "eventCategory",
+      headerName: "Danh mục",
+      width: 120,
+      renderCell: (params) => params.row.eventCategory?.name || "N/A",
+    },
+    {
+      field: "eventStatus",
+      headerName: "Trạng thái",
+      width: 140,
+      renderCell: (params) => {
+        switch (params.value) {
+          case EventStatus.Not_Started:
+            return (
+              <span className="rounded-xl px-2 py-1 bg-black text-white">
+                {EventStatusString.Not_Started}
+              </span>
+            );
+          case EventStatus.In_Progress:
+            return (
+              <span className="rounded-xl px-2 py-1 bg-warning text-black">
+                {EventStatusString.In_Progress}
+              </span>
+            );
+          case EventStatus.Completed:
+            return (
+              <span className="rounded-xl px-2 py-1 bg-success text-white">
+                {EventStatusString.Completed}
+              </span>
+            );
+          case EventStatus.Cancelled:
+            return (
+              <span className="rounded-xl px-2 py-1 bg-danger text-white">
+                {EventStatusString.Cancelled}
+              </span>
+            );
+          default:
+            return <></>;
+        }
       },
     },
     {
@@ -134,9 +362,18 @@ export default function EventsComponent() {
               <Button
                 variant="contained"
                 color="primary"
-                onClick={() =>
-                  handleEventManagement(params.row.id, params.row.userRole)
-                }
+                onClick={() => {
+                  if (params.row.eventStatus == EventStatus.Not_Started) {
+                    sweetAlert.alertWarning(
+                      "Sự kiện này chưa bắt đầu",
+                      "",
+                      3000,
+                      25
+                    );
+                  } else {
+                    handleEventManagement(params.row.id, params.row.userRole);
+                  }
+                }}
               >
                 Quản lý sự kiện
               </Button>
@@ -152,6 +389,65 @@ export default function EventsComponent() {
                 Xem sự kiện
               </Button>
             )}
+          </div>
+        );
+      },
+    },
+    {
+      field: "userRole",
+      headerName: "Vai trò trong sự kiện",
+      width: 180,
+      renderCell: (params) => {
+        return <span>{params.row.userRole}</span>;
+      },
+    },
+
+    {
+      field: "organizers",
+      headerName: "Ban tổ chức",
+      width: 120,
+      renderCell: (params) => {
+        const organizersCount = params.row.organizersCount || 0;
+        return (
+          <div style={{ display: "flex", alignItems: "center" }}>
+            <span>{organizersCount}</span>
+            {organizersCount > 0 ? (
+              <>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  style={{ marginLeft: "10px" }}
+                  onClick={() =>
+                    handleOrganizers(params.row.id, organizersCount > 0)
+                  }
+                >
+                  Xem
+                </Button>
+              </>
+            ) : (
+              <></>
+            )}
+          </div>
+        );
+      },
+    },
+    {
+      field: "participants",
+      headerName: "Người tham gia",
+      width: 140,
+      renderCell: (params) => {
+        const participantsCount = params.row.participantsCount || 0;
+        return (
+          <div style={{ display: "flex", alignItems: "center" }}>
+            <span>{participantsCount}</span>
+            <Button
+              variant="contained"
+              color="primary"
+              style={{ marginLeft: "10px" }}
+              onClick={() => handleParticipants(params.row.id, params.row.name)}
+            >
+              Xem
+            </Button>
           </div>
         );
       },
@@ -174,6 +470,12 @@ export default function EventsComponent() {
     }
   }, [userLogin]);
 
+  if (!userLogin || !userLogin.id) {
+    return <></>;
+  }
+
+  console.log(rows);
+
   return (
     <div>
       <Paper
@@ -182,14 +484,72 @@ export default function EventsComponent() {
           position: "absolute",
         }}
       >
-        <DataGrid
-          rows={rows}
-          columns={columns}
-          loading={loading}
-          checkboxSelection
-          //   disableSelectionOnClick
-          localeText={viVNGridTranslation}
-        />
+        <h1 className="text-center text-[2.2rem] bg_title text-text_primary_light py-2 font-bold">
+          Danh sách các sự kiện
+        </h1>
+
+        <div className="my-2 flex justify-between mx-3 mt-3">
+          {/* Bộ lọc danh mục sự kiện */}
+          <FormControl variant="outlined" style={{ minWidth: 200 }}>
+            <InputLabel>Danh mục sự kiện</InputLabel>
+            <Select
+              value={selectedCategoryId}
+              onChange={(e) => setSelectedCategoryId(e.target.value)}
+              label="Danh mục sự kiện"
+            >
+              <MenuItem value="Tất cả">Tất cả</MenuItem>
+              {eventCategories.map((category) => (
+                <MenuItem key={category.id} value={category.id}>
+                  {category.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          {/* Các nút thêm, sửa, xóa */}
+          <div className="space-x-2">
+            <Button onClick={fetchEvents} variant="contained" color="primary">
+              Tải lại
+            </Button>
+          </div>
+        </div>
+        <div className="w-full px-3">
+          <DataGrid
+            rows={rows}
+            columns={columns}
+            loading={loading}
+            localeText={viVNGridTranslation}
+            disableRowSelectionOnClick
+          />
+        </div>
+        {openBudgetDialog && (
+          <BudgetDialog
+            open={openBudgetDialog}
+            onClose={() => setOpenBudgetDialog(false)}
+            transactions={budgetTransactions}
+            eventName={selectedEventNameForBudget}
+          />
+        )}
+        {openOrganizersDialog && selectedEventId && (
+          <OrganizersDialog
+            catechistMode={true}
+            viewOrganizersDialogMode={viewOrganizersDialogMode}
+            open={openOrganizersDialog}
+            onClose={() => {
+              setOpenOrganizersDialog(false); // Đóng dialog
+              setSelectedEventId(null); // Xóa ID sự kiện sau khi đóng
+            }}
+            eventId={selectedEventId}
+            refresh={fetchEvents} // Hàm refresh danh sách sự kiện
+          />
+        )}
+        {openParticipantsDialog && (
+          <ParticipantsDialog
+            open={openParticipantsDialog}
+            onClose={() => setOpenParticipantsDialog(false)}
+            participants={participants}
+            eventName={selectedEventNameForParticipants}
+          />
+        )}
       </Paper>
     </div>
   );

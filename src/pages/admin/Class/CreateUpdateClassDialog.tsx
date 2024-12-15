@@ -42,6 +42,7 @@ interface CreateUpdateClassDialogProps {
   pastoralYearId: string;
   pastoralYearName: string;
   refresh: () => void;
+  rows?: any[];
 }
 
 const CreateUpdateClassDialog: React.FC<CreateUpdateClassDialogProps> = ({
@@ -51,6 +52,7 @@ const CreateUpdateClassDialog: React.FC<CreateUpdateClassDialogProps> = ({
   classData,
   pastoralYearId,
   pastoralYearName,
+  rows,
   refresh,
 }) => {
   const [grades, setGrades] = useState<any[]>([]);
@@ -80,6 +82,22 @@ const CreateUpdateClassDialog: React.FC<CreateUpdateClassDialogProps> = ({
   }, [updateMode]);
 
   const handleSubmit = async (values: any) => {
+    if (
+      rows &&
+      rows?.findIndex(
+        (item) =>
+          item.name.trim().toLowerCase() == values.name.trim().toLowerCase()
+      ) >= 0
+    ) {
+      sweetAlert.alertWarning(
+        "Tên lớp này đã tồn tại trong niên khóa này",
+        "",
+        2500,
+        30
+      );
+      return;
+    }
+
     const data = {
       name: values.name,
       numberOfCatechist: values.numberOfCatechist,
@@ -95,11 +113,11 @@ const CreateUpdateClassDialog: React.FC<CreateUpdateClassDialogProps> = ({
         .then(() => {
           onClose();
           refresh();
-          sweetAlert.alertSuccess("Cập nhật thành công", "", 5000, 25);
+          sweetAlert.alertSuccess("Cập nhật thành công", "", 2500, 22);
         })
         .catch((err) => {
           console.error("Lỗi khi cập nhật lớp:", err);
-          sweetAlert.alertFailed("Có lỗi khi cập nhật lớp", "", 5000, 23);
+          sweetAlert.alertFailed("Có lỗi khi cập nhật lớp", "", 2500, 23);
         })
         .finally(() => {
           disableLoading();
@@ -110,11 +128,11 @@ const CreateUpdateClassDialog: React.FC<CreateUpdateClassDialogProps> = ({
         .then(() => {
           onClose();
           refresh();
-          sweetAlert.alertSuccess("Tạo thành công", "", 5000, 23);
+          sweetAlert.alertSuccess("Tạo thành công", "", 2500, 22);
         })
         .catch((err) => {
           console.error("Lỗi khi tạo lớp:", err);
-          sweetAlert.alertFailed("Có lỗi khi tạo lớp", "", 5000, 23);
+          sweetAlert.alertFailed("Có lỗi khi tạo lớp", "", 2500, 23);
         })
         .finally(() => {
           disableLoading();
@@ -281,8 +299,10 @@ const CreateUpdateClassDialog: React.FC<CreateUpdateClassDialogProps> = ({
               />
 
               <DialogActions>
-                <Button onClick={onClose}>Hủy</Button>
-                <Button type="submit" color="primary">
+                <Button onClick={onClose} color="secondary" variant="outlined">
+                  Hủy
+                </Button>
+                <Button type="submit" color="primary" variant="outlined">
                   {updateMode ? "Cập nhật" : "Tạo lớp"}
                 </Button>
               </DialogActions>

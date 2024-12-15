@@ -110,7 +110,7 @@ const BudgetDialog: React.FC<{
         />
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose} color="secondary">
+        <Button onClick={onClose} color="primary">
           Đóng
         </Button>
       </DialogActions>

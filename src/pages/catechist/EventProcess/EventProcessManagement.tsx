@@ -56,11 +56,13 @@ const EventProcessManagement: React.FC = () => {
       let sumFees = 0;
       let actualSumFees = 0;
       response.data.data.items.forEach((item) => {
-        if (item.fee) {
-          sumFees += item.fee;
-        }
-        if (item.actualFee) {
-          actualSumFees += item.actualFee;
+        if (item.status != EventProcessStatus.Cancelled) {
+          if (item.fee) {
+            sumFees += item.fee;
+          }
+          if (item.actualFee) {
+            actualSumFees += item.actualFee;
+          }
         }
       });
       setSummaryFees(sumFees);
@@ -203,25 +205,25 @@ const EventProcessManagement: React.FC = () => {
         switch (params.value) {
           case EventProcessStatus.Not_Started:
             return (
-              <span className="rounded py-1 px-2 bg-warning text-black">
+              <span className="rounded-xl py-1 px-2 bg-warning text-black">
                 {EventProcessStringStatus.Not_Started}
               </span>
             );
           case EventProcessStatus.In_Progress:
             return (
-              <span className="rounded py-1 px-2 bg-primary text-white">
+              <span className="rounded-xl py-1 px-2 bg-primary text-white">
                 {EventProcessStringStatus.In_Progress}
               </span>
             );
           case EventProcessStatus.Completed:
             return (
-              <span className="rounded py-1 px-2 bg-success text-white">
+              <span className="rounded-xl py-1 px-2 bg-success text-white">
                 {EventProcessStringStatus.Completed}
               </span>
             );
           case EventProcessStatus.Cancelled:
             return (
-              <span className="rounded py-1 px-2 bg-danger text-white">
+              <span className="rounded-xl py-1 px-2 bg-danger text-white">
                 {EventProcessStringStatus.Cancelled}
               </span>
             );
@@ -232,7 +234,7 @@ const EventProcessManagement: React.FC = () => {
     },
     {
       field: "actions",
-      headerName: "Thao tác",
+      headerName: "Hành động",
       width: 200,
       renderCell: (params: any) => (
         <Box>
@@ -256,13 +258,19 @@ const EventProcessManagement: React.FC = () => {
           >
             Sửa
           </Button>
-          <Button
-            variant="outlined"
-            color="error"
-            onClick={() => handleDeleteProcess(params.id as string)}
-          >
-            Xóa
-          </Button>
+          {params.row.status == EventProcessStatus.Not_Started ? (
+            <>
+              <Button
+                variant="outlined"
+                color="error"
+                onClick={() => handleDeleteProcess(params.id as string)}
+              >
+                Xóa
+              </Button>
+            </>
+          ) : (
+            <></>
+          )}
         </Box>
       ),
     },
@@ -407,10 +415,9 @@ const EventProcessManagement: React.FC = () => {
       ) : (
         <></>
       )}
-
-      {truongBTCRole ? (
-        <>
-          <div className="flex gap-x-2 mt-3 justify-end">
+      <div className="flex gap-x-2 mt-3 justify-end">
+        {truongBTCRole ? (
+          <>
             <Button
               variant="contained"
               color="secondary"
@@ -419,25 +426,30 @@ const EventProcessManagement: React.FC = () => {
             >
               Tạo mới
             </Button>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={fetchEventProcesses}
-              style={{ marginBottom: "20px" }}
-            >
-              Tải lại
-            </Button>
-          </div>
-        </>
-      ) : (
-        <></>
-      )}
+          </>
+        ) : (
+          <></>
+        )}
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={fetchEventProcesses}
+          style={{ marginBottom: "20px" }}
+        >
+          Tải lại
+        </Button>
+      </div>
 
       {eventProcesses.length === 0 ? (
         <Typography>Không có quá trình nào cho sự kiện này.</Typography>
       ) : (
         <div style={{ height: 400, width: "100%" }}>
-          <DataGrid rows={rows} columns={columns} />
+          <DataGrid
+            rows={rows}
+            columns={columns}
+            disableRowSelectionOnClick
+            paginationMode="client"
+          />
         </div>
       )}
       {/* Event Process Dialog */}
@@ -447,6 +459,7 @@ const EventProcessManagement: React.FC = () => {
         onClose={handleCloseDialog}
         eventId={eventId}
         processData={selectedProcess}
+        event={selectedEvent ? selectedEvent : undefined}
       />
     </Paper>
   );

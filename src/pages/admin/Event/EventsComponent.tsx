@@ -1,4 +1,9 @@
-import { DataGrid, GridColDef, GridRowSelectionModel } from "@mui/x-data-grid";
+import {
+  DataGrid,
+  GridColDef,
+  GridPaginationModel,
+  GridRowSelectionModel,
+} from "@mui/x-data-grid";
 import Paper from "@mui/material/Paper";
 import {
   Button,
@@ -27,6 +32,7 @@ import ParticipantsDialog from "./ParticipantsDialog";
 import BudgetDialog from "./BudgetDialog";
 import { PATH_ADMIN } from "../../../routes/paths";
 import { useNavigate } from "react-router-dom";
+import { EventStatus, EventStatusString } from "../../../enums/Event";
 
 export default function EventsComponent() {
   const [rows, setRows] = useState<EventItemResponse[]>([]);
@@ -47,6 +53,10 @@ export default function EventsComponent() {
     useState<boolean>(false); // Trạng thái mở/đóng của dialog
   const [openAddDialog, setOpenAddDialog] = useState<boolean>(false);
   const [selectedEventName, setSelectedEventName] = useState<string>("");
+  const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({
+    page: 0,
+    pageSize: 10,
+  });
   const navigate = useNavigate();
 
   const openAddParticipantsDialog = (eventId: string, eventName: string) => {
@@ -68,25 +78,25 @@ export default function EventsComponent() {
     {
       field: "startTime",
       headerName: "Thời gian bắt đầu",
-      width: 160,
+      width: 150,
       renderCell: (params) => formatDate.DD_MM_YYYY(params.row.startTime),
     },
     {
       field: "endTime",
       headerName: "Thời gian kết thúc",
-      width: 160,
+      width: 150,
       renderCell: (params) => formatDate.DD_MM_YYYY(params.row.endTime),
     },
     {
       field: "current_budget",
       headerName: "Ngân sách hiện tại",
-      width: 250,
+      width: 180,
       renderCell: (params) => {
         return (
           <div style={{ display: "flex", alignItems: "center" }}>
             <Button
               variant="contained"
-              color={"info"}
+              color={"primary"}
               style={{ marginRight: "10px" }}
               onClick={() =>
                 handleBudgetTransactions(params.row.id, params.row.name)
@@ -94,7 +104,7 @@ export default function EventsComponent() {
             >
               Xem
             </Button>{" "}
-            <span>{formatPrice(params.value)} ₫</span>
+            <span> ₫ {formatPrice(params.value)}</span>
           </div>
         );
       },
@@ -102,28 +112,91 @@ export default function EventsComponent() {
     {
       field: "eventCategory",
       headerName: "Danh mục",
-      width: 160,
+      width: 120,
       renderCell: (params) => params.row.eventCategory?.name || "N/A",
+    },
+    {
+      field: "eventStatus",
+      headerName: "Trạng thái",
+      width: 140,
+      renderCell: (params) => {
+        switch (params.value) {
+          case EventStatus.Not_Started:
+            return (
+              <span className="rounded-xl px-2 py-1 bg-black text-white">
+                {EventStatusString.Not_Started}
+              </span>
+            );
+          case EventStatus.In_Progress:
+            return (
+              <span className="rounded-xl px-2 py-1 bg-warning text-black">
+                {EventStatusString.In_Progress}
+              </span>
+            );
+          case EventStatus.Completed:
+            return (
+              <span className="rounded-xl px-2 py-1 bg-success text-white">
+                {EventStatusString.Completed}
+              </span>
+            );
+          case EventStatus.Cancelled:
+            return (
+              <span className="rounded-xl px-2 py-1 bg-danger text-white">
+                {EventStatusString.Cancelled}
+              </span>
+            );
+          default:
+            return <></>;
+        }
+      },
     },
     {
       field: "organizers",
       headerName: "Ban tổ chức",
-      width: 200,
+      width: 120,
       renderCell: (params) => {
         const organizersCount = params.row.organizersCount || 0;
         return (
           <div style={{ display: "flex", alignItems: "center" }}>
             <span>{organizersCount}</span>
-            <Button
-              variant="contained"
-              color={organizersCount > 0 ? "primary" : "secondary"}
-              style={{ marginLeft: "10px" }}
-              onClick={() =>
-                handleOrganizers(params.row.id, organizersCount > 0)
-              }
-            >
-              {organizersCount > 0 ? "Cập nhật" : "Thêm"}
-            </Button>
+            {params.row.eventStatus == EventStatus.Completed ||
+            params.row.eventStatus == EventStatus.Cancelled ? (
+              <>
+                {organizersCount > 0 ? (
+                  <>
+                    <Button
+                      variant="contained"
+                      color={"primary"}
+                      style={{ marginLeft: "10px" }}
+                      onClick={() =>
+                        handleOrganizers(
+                          params.row.id,
+                          organizersCount > 0,
+                          true
+                        )
+                      }
+                    >
+                      Xem
+                    </Button>
+                  </>
+                ) : (
+                  <></>
+                )}
+              </>
+            ) : (
+              <>
+                <Button
+                  variant="contained"
+                  color={organizersCount > 0 ? "primary" : "secondary"}
+                  style={{ marginLeft: "10px" }}
+                  onClick={() =>
+                    handleOrganizers(params.row.id, organizersCount > 0)
+                  }
+                >
+                  {organizersCount > 0 ? "Xem" : "Thêm"}
+                </Button>
+              </>
+            )}
           </div>
         );
       },
@@ -147,7 +220,6 @@ export default function EventsComponent() {
             </Button>
 
             <Button
-              variant="contained"
               color="secondary"
               style={{ marginLeft: "10px" }}
               onClick={() =>
@@ -197,10 +269,19 @@ export default function EventsComponent() {
   const fetchEvents = async () => {
     try {
       setLoading(true);
-      const { data } =
+
+      const firstRes =
         selectedCategoryId === "Tất cả"
           ? await eventApi.getAllEvents()
           : await eventApi.getAllEvents(selectedCategoryId);
+      const { data } =
+        selectedCategoryId === "Tất cả"
+          ? await eventApi.getAllEvents(undefined, 1, firstRes.data.data.total)
+          : await eventApi.getAllEvents(
+              selectedCategoryId,
+              1,
+              firstRes.data.data.total
+            );
       await fetchAdditionalData(data.data.items); // Gọi thêm fetch dữ liệu bổ sung
     } catch (error) {
       console.error("Lỗi khi tải danh sách sự kiện:", error);
@@ -210,7 +291,16 @@ export default function EventsComponent() {
     }
   };
 
-  const handleOrganizers = (eventId: string, hasOrganizers: boolean) => {
+  const [viewOrganizersDialogMode, setViewOrganizersDialogMode] =
+    useState<boolean>(false);
+  const [cateMode, setCateMode] = useState<boolean>(false);
+
+  const handleOrganizers = (
+    eventId: string,
+    hasOrganizers: boolean,
+    cateMode?: boolean
+  ) => {
+    setCateMode(cateMode ? true : false);
     if (hasOrganizers) {
       setSelectedEventId(eventId); // Lưu lại ID sự kiện
       setOpenOrganizersDialog(true); // Mở dialog
@@ -218,7 +308,13 @@ export default function EventsComponent() {
       setSelectedEventId(eventId); // Lưu lại ID sự kiện
       setOpenOrganizersDialog(true); // Mở dialog
     }
+    setViewOrganizersDialogMode(hasOrganizers);
   };
+  useEffect(() => {
+    if (!openOrganizersDialog) {
+      setViewOrganizersDialogMode(false);
+    }
+  }, [openOrganizersDialog]);
 
   const [openParticipantsDialog, setOpenParticipantsDialog] = useState(false);
   const [participants, setParticipants] = useState<ParticipantResponseItem[]>(
@@ -234,7 +330,12 @@ export default function EventsComponent() {
       setLoading(true);
       setSelectedEventNameForParticipants(eventName);
 
-      const { data } = await eventApi.getEventParticipants(eventId, 1, 50); // Lấy dữ liệu với phân trang
+      const firstRes = await eventApi.getEventParticipants(eventId);
+      const { data } = await eventApi.getEventParticipants(
+        eventId,
+        1,
+        firstRes.data.data.total
+      );
       setParticipants(data.data.items);
 
       setOpenParticipantsDialog(true); // Mở dialog
@@ -265,11 +366,11 @@ export default function EventsComponent() {
     try {
       setLoading(true);
       setSelectedEventNameForBudget(eventName);
-
+      const firstRes = await eventApi.getEventBudgetTransactions(eventId);
       const { data } = await eventApi.getEventBudgetTransactions(
         eventId,
         1,
-        50
+        firstRes.data.data.total
       ); // Gọi API với phân trang
       const sortedTransactions = data.data.items.sort(
         (a, b) =>
@@ -341,15 +442,35 @@ export default function EventsComponent() {
 
     const selectedEvent = rows.find((row) => row.id === selectedIds[0]);
     if (selectedEvent) {
-      const now = new Date();
-      const startTime = new Date(selectedEvent.startTime);
+      // const now = new Date();
+      // const startTime = new Date(selectedEvent.startTime);
 
-      if (now > startTime) {
+      // if (now > startTime) {
+      //   sweetAlert.alertWarning(
+      //     "Sự kiện đã bắt đầu, không thể chỉnh sửa!",
+      //     "",
+      //     5000,
+      //     30
+      //   );
+      //   return;
+      // }
+
+      if (selectedEvent.eventStatus == EventStatus.Completed) {
         sweetAlert.alertWarning(
-          "Sự kiện đã bắt đầu, không thể chỉnh sửa!",
+          "Sự kiện đã kết thúc, không thể chỉnh sửa!",
           "",
-          1000,
-          22
+          3000,
+          30
+        );
+        return;
+      }
+
+      if (selectedEvent.eventStatus == EventStatus.Cancelled) {
+        sweetAlert.alertWarning(
+          "Sự kiện đã hủy bỏ, không thể chỉnh sửa!",
+          "",
+          3000,
+          30
         );
         return;
       }
@@ -361,7 +482,11 @@ export default function EventsComponent() {
 
   // Xử lý xóa sự kiện
   const handleDeleteEvent = async () => {
-    if (selectedIds.length === 0) {
+    const event: any = rows.find(
+      (item) => item.id == selectedIds[0].toString()
+    );
+
+    if (selectedIds.length === 0 || !event) {
       sweetAlert.alertWarning("Vui lòng chọn sự kiện để xóa!", "", 1000, 22);
       return;
     }
@@ -372,20 +497,21 @@ export default function EventsComponent() {
     );
 
     if (invalidEvents.length > 0) {
-      sweetAlert.alertWarning(
+      sweetAlert.alertFailed(
         "Một hoặc nhiều sự kiện đã bắt đầu, không thể xóa!",
         "",
-        1000,
-        22
+        5000,
+        30
       );
       return;
     }
 
     const confirm = await sweetAlert.confirm(
       "Xác nhận xóa",
-      `Bạn có chắc muốn xóa ${selectedIds.length} sự kiện?`,
+      `Xác nhận xóa sự kiện ${event ? event?.name : ""}?`,
       "Xóa",
-      "Hủy"
+      "Hủy",
+      "question"
     );
     if (!confirm) return;
 
@@ -393,11 +519,11 @@ export default function EventsComponent() {
       await Promise.all(
         selectedIds.map((id) => eventApi.deleteEvent(id.toString()))
       );
-      sweetAlert.alertSuccess("Xóa sự kiện thành công!", "", 1000, 22);
+      sweetAlert.alertSuccess("Xóa sự kiện thành công!", "", 3000, 22);
       fetchEvents();
     } catch (error) {
       console.error("Lỗi khi xóa sự kiện:", error);
-      sweetAlert.alertFailed("Không thể xóa sự kiện!", "", 1000, 22);
+      sweetAlert.alertFailed("Không thể xóa sự kiện!", "", 3000, 22);
     }
   };
 
@@ -408,10 +534,10 @@ export default function EventsComponent() {
         position: "absolute",
       }}
     >
-      <h1 className="text-center text-[2.2rem] bg-primary_color text-text_primary_light py-2 font-bold">
+      <h1 className="text-center text-[2.2rem] bg_title text-text_primary_light py-2 font-bold">
         Quản lý sự kiện
       </h1>
-      <div className="my-2 flex justify-between mx-3">
+      <div className="my-2 flex justify-between mx-3 mt-3">
         {/* Bộ lọc danh mục sự kiện */}
         <FormControl variant="outlined" style={{ minWidth: 200 }}>
           <InputLabel>Danh mục sự kiện</InputLabel>
@@ -430,25 +556,43 @@ export default function EventsComponent() {
         </FormControl>
         {/* Các nút thêm, sửa, xóa */}
         <div className="space-x-2">
-          <Button variant="contained" color="primary" onClick={handleAddEvent}>
+          {selectedIds.length === 1 ? (
+            <>
+              <Button
+                variant="outlined"
+                color="warning"
+                className="btn btn-warning"
+                onClick={handleEditEvent}
+              >
+                Chỉnh sửa
+              </Button>
+              <Button
+                variant="outlined"
+                color="error"
+                className="btn btn-danger"
+                onClick={handleDeleteEvent}
+              >
+                Xóa
+              </Button>
+              <Button
+                variant="outlined"
+                color="primary"
+                className="btn btn-primary"
+                onClick={handleViewProcesses}
+              >
+                Xem hoạt động
+              </Button>
+            </>
+          ) : (
+            <></>
+          )}
+          <Button
+            variant="outlined"
+            color="success"
+            className="btn btn-success"
+            onClick={handleAddEvent}
+          >
             Thêm mới
-          </Button>
-          <Button
-            variant="contained"
-            color="secondary"
-            onClick={handleEditEvent}
-          >
-            Chỉnh sửa
-          </Button>
-          <Button
-            variant="contained"
-            color="info"
-            onClick={handleViewProcesses}
-          >
-            Xem hoạt động
-          </Button>
-          <Button variant="contained" color="error" onClick={handleDeleteEvent}>
-            Xóa
           </Button>
           <Button onClick={fetchEvents} variant="contained" color="primary">
             Tải lại
@@ -459,7 +603,9 @@ export default function EventsComponent() {
         rows={rows}
         columns={columns}
         loading={loading}
-        pageSizeOptions={[8, 25, 50]}
+        paginationModel={paginationModel}
+        onPaginationModelChange={setPaginationModel}
+        pageSizeOptions={[10, 25, 50, 100, 250]}
         checkboxSelection
         disableRowSelectionOnClick
         onRowSelectionModelChange={(newSelection) =>
@@ -469,18 +615,21 @@ export default function EventsComponent() {
         sx={{
           border: 0,
         }}
+        disableMultipleRowSelection
       />
       {/* Dialog thêm/chỉnh sửa */}
       {openDialog && (
         <EventDialog
           open={openDialog}
           onClose={() => setOpenDialog(false)}
-          event={editingEvent}
+          event={editingEvent ?? undefined}
           refresh={fetchEvents}
         />
       )}
       {openOrganizersDialog && selectedEventId && (
         <OrganizersDialog
+          catechistMode={cateMode}
+          viewOrganizersDialogMode={viewOrganizersDialogMode}
           open={openOrganizersDialog}
           onClose={() => {
             setOpenOrganizersDialog(false); // Đóng dialog

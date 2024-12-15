@@ -57,6 +57,15 @@ const getCalendarOfAccount = (id: string) => {
   return request.get<BasicResponse<EventCalendar[]>>(`${ROOT_ACCOUNT}/${id}/calendar`);
 };
 
+const updatePassword = ( data: 
+  {
+    email: string,
+    newPassword: string,
+    oldPassword: string
+  }) => {
+  return request.patch<BasicResponse<boolean>>(`${ROOT_ACCOUNT}`, data);
+};
+
 const accountApi = {
   getAllAccounts,
   createAccount,
@@ -64,7 +73,8 @@ const accountApi = {
   updateAccount,
   deleteAccount,
   getRecruitersByMeetingTime,
-  getCalendarOfAccount
+  getCalendarOfAccount,
+  updatePassword
 };
 
 export default accountApi;

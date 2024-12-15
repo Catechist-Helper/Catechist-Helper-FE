@@ -15,7 +15,7 @@ import { RegistrationStatus } from "../../../enums/Registration";
 import { formatDate } from "../../../utils/formatDate";
 import { getUserInfo } from "../../../utils/utils";
 import sweetAlert from "../../../utils/sweetAlert";
-import { Button, Modal } from "@mui/material";
+import { Button, MenuItem, Modal, Select } from "@mui/material";
 import CkEditorComponent from "../../../components/ckeditor5/CkEditor";
 import useAppContext from "../../../hooks/useAppContext";
 import interviewApi from "../../../api/Interview";
@@ -35,9 +35,7 @@ export default function CatechistRegistrationsTable() {
   const [userLogin, setUserLogin] = useState<any>(null);
 
   // State cho loại đơn hiện tại
-  const [currentFilter, setCurrentFilter] = useState<
-    "waiting" | "accepted" | "rejected"
-  >("waiting");
+  const [currentFilter, setCurrentFilter] = useState<string>("waiting");
   const [openDialogRegisDetail, setOpenDialogRegisDetail] =
     useState<boolean>(false);
   const [selectedRegistration, setSelectedRegistration] =
@@ -322,30 +320,27 @@ export default function CatechistRegistrationsTable() {
   const renderFilterButtons = () => {
     return (
       <div>
-        {currentFilter !== "waiting" && (
-          <button
-            className="btn btn-info ml-1"
-            onClick={() => setCurrentFilter("waiting")}
-          >
+        <Select
+          labelId="result-label"
+          value={currentFilter}
+          onChange={(e) => setCurrentFilter(e.target.value)}
+          className={`
+               h-[40px] w-[200px]
+              ${currentFilter == "waiting" ? "bg-primary text-white" : ""}
+              ${currentFilter == "accepted" ? "bg-success text-white" : ""}
+              ${currentFilter == "rejected" ? "bg-danger text-white" : ""}
+              `}
+        >
+          <MenuItem value="waiting" className="bg-primary text-white py-2">
             Đơn chờ phỏng vấn
-          </button>
-        )}
-        {currentFilter !== "accepted" && (
-          <button
-            className="btn btn-success ml-1"
-            onClick={() => setCurrentFilter("accepted")}
-          >
+          </MenuItem>
+          <MenuItem value="accepted" className="bg-success text-white py-2">
             Đơn chấp nhận
-          </button>
-        )}
-        {currentFilter !== "rejected" && (
-          <button
-            className="btn btn-danger ml-1"
-            onClick={() => setCurrentFilter("rejected")}
-          >
+          </MenuItem>
+          <MenuItem value="rejected" className="bg-danger text-white py-2">
             Đơn từ chối
-          </button>
-        )}
+          </MenuItem>
+        </Select>
       </div>
     );
   };
@@ -477,10 +472,7 @@ export default function CatechistRegistrationsTable() {
       }}
     >
       <h1
-        className={`text-center text-[2rem] py-2 font-bold 
-        ${currentFilter == "waiting" ? "bg-info text-text_primary_dark" : ""} 
-        ${currentFilter == "accepted" ? "bg-success text-text_primary_light" : ""} 
-        ${currentFilter == "rejected" ? "bg-danger text-text_primary_light" : ""}`}
+        className={`text-center text-[2rem] py-2 font-bold bg_title text-text_primary_light`}
       >
         {currentFilter == "waiting" ? "Danh sách ứng viên chờ phỏng vấn" : ""}
         {currentFilter == "accepted" ? "Danh sách ứng viên đậu phỏng vấn" : ""}
@@ -490,13 +482,13 @@ export default function CatechistRegistrationsTable() {
       <div className="flex justify-between items-center w-full my-3">
         {/* Chọn ngày filter */}
         <div className="flex justify-start px-3">
+          {renderFilterButtons()}
           <input
             type="date"
             className="w-[200px] py-2 px-2 border rounded-md"
             value={selectedDate}
             onChange={(e) => setSelectedDate(e.target.value)}
           />
-          {renderFilterButtons()}
         </div>
         <div className="flex">
           {selectedRegistrations.length == 1 && currentFilter == "waiting" ? (

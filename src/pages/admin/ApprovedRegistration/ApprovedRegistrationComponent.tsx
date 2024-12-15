@@ -30,7 +30,6 @@ import { RegistrationItemResponse } from "../../../model/Response/Registration";
 import { RegistrationStatus } from "../../../enums/Registration";
 import sweetAlert from "../../../utils/sweetAlert";
 import { formatDate } from "../../../utils/formatDate";
-import { AccountRoleString } from "../../../enums/Account";
 import useAppContext from "../../../hooks/useAppContext";
 import CreateAccountAndCatechistDialog from "./CreateAccountAndCatechistDialog";
 import {
@@ -40,130 +39,11 @@ import {
 import { RoleNameEnum } from "../../../enums/RoleEnum";
 import CkEditor from "../../../components/ckeditor5/CkEditor";
 import { RecruitersByMeetingTimeItemResponse } from "../../../model/Response/Account";
+import catechistApi from "../../../api/Catechist";
 
 // import { RegistrationProcessTitle } from "../../../enums/RegistrationProcess";
 
 // Cấu hình các cột trong DataGrid
-const columns: GridColDef[] = [
-  { field: "fullName", headerName: "Tên đầy đủ", width: 180 },
-  { field: "gender", headerName: "Giới tính", width: 100 },
-  {
-    field: "dateOfBirth",
-    headerName: "Ngày sinh",
-    width: 110,
-    renderCell: (params) => {
-      return formatDate.DD_MM_YYYY(params.value); // Format ngày tháng
-    },
-  },
-  { field: "email", headerName: "Email", width: 200 },
-  { field: "phone", headerName: "Số điện thoại", width: 120 },
-  { field: "address", headerName: "Địa chỉ", width: 180 },
-  {
-    field: "isTeachingBefore",
-    headerName: "Đã từng dạy",
-    width: 120,
-    renderCell: (params) => (params.value ? "Có" : "Không"),
-  },
-  { field: "yearOfTeaching", headerName: "Số năm giảng dạy", width: 150 },
-  {
-    field: "meetingTime",
-    headerName: "Thời gian phỏng vấn",
-    width: 180,
-    renderCell: (params) => {
-      return params.row.interview
-        ? formatDate.DD_MM_YYYY_Time(params.row.interview.meetingTime)
-        : "Chưa có lịch";
-    },
-    sortComparator: (a, b) => {
-      if (!a || !b) return 0;
-      return dayjs(a).isBefore(dayjs(b)) ? -1 : 1; // Sắp xếp theo ngày giờ từ sớm tới muộn
-    },
-  },
-  {
-    field: "interviewType",
-    headerName: "Hình thức",
-    width: 100,
-    renderCell: (params) => {
-      return params.row.interview && params.row.interview.interviewType == 1 ? (
-        <span className="text-white bg-success rounded-xl py-1 px-2">
-          Online
-        </span>
-      ) : (
-        <span className="text-white bg-black rounded-xl py-1 px-2">
-          Trực tiếp
-        </span>
-      );
-    },
-    sortComparator: (a, b) => {
-      if (!a || !b) return 0;
-      return dayjs(a).isBefore(dayjs(b)) ? -1 : 1; // Sắp xếp theo ngày giờ từ sớm tới muộn
-    },
-  },
-  {
-    field: "interview.recruiters",
-    headerName: "Người phỏng vấn",
-    width: 200,
-    renderCell: (params) => {
-      return params.row.interview.recruiters
-        ? params.row.interview.recruiters
-            .map((recruiter: any) => recruiter.fullName)
-            .join(", ")
-        : "";
-    },
-  },
-  {
-    field: "note",
-    headerName: "Ghi chú",
-    width: 200,
-    renderCell: (params) =>
-      params.value ? params.value.replace("\n", ".") : "",
-  },
-  // {
-  //   field: "interviews",
-  //   headerName: "Kết quả phỏng vấn",
-  //   width: 200,
-  //   renderCell: (params) => {
-  //     return params.row.interview?.note || ""; // Hiển thị ghi chú nếu có
-  //   },
-  // },
-  {
-    field: "status",
-    headerName: "Trạng thái",
-    width: 150,
-    renderCell: (params) => {
-      const status = params.value as RegistrationStatus;
-      switch (status) {
-        case RegistrationStatus.Approved_Duyet_Don:
-          return (
-            <span className="inline px-2 py-1 bg-info text-text_primary_dark rounded-lg">
-              Chờ phỏng vấn
-            </span>
-          );
-        case RegistrationStatus.Approved_Phong_Van:
-          return (
-            <span className="inline px-2 py-1 bg-success text-text_primary_light rounded-lg">
-              Đã chấp nhận
-            </span>
-          );
-        case RegistrationStatus.Rejected_Phong_Van:
-          return (
-            <span className="inline px-2 py-1 bg-danger rounded-lg text-text_primary_light">
-              Bị từ chối
-            </span>
-          );
-        default:
-          return "Không xác định";
-      }
-    },
-    // renderCell: () => {
-    //   return (
-    //     <span className="inline px-2 py-1 bg-info rounded-lg">
-    //       Chờ phỏng vấn
-    //     </span>
-    //   );
-    // },
-  },
-];
 
 // Hàm chính để hiển thị danh sách đơn
 export default function ApprovedRegistrationsTable() {
@@ -172,7 +52,7 @@ export default function ApprovedRegistrationsTable() {
   const [loading, setLoading] = useState<boolean>(true);
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({
     page: 0,
-    pageSize: 8,
+    pageSize: 10,
   });
   const [rowCount, setRowCount] = useState<number>(0);
   const [selectedDate, setSelectedDate] = useState<string>("");
@@ -202,9 +82,7 @@ export default function ApprovedRegistrationsTable() {
   //   useState<string>("");
 
   // State cho loại đơn hiện tại
-  const [currentFilter, setCurrentFilter] = useState<
-    "waiting" | "accepted" | "rejected"
-  >("waiting");
+  const [currentFilter, setCurrentFilter] = useState<string>("waiting");
   const [openDialog, setOpenDialog] = useState<boolean>(false);
   const [openDialogRegisDetail, setOpenDialogRegisDetail] =
     useState<boolean>(false);
@@ -216,16 +94,160 @@ export default function ApprovedRegistrationsTable() {
     RecruitersByMeetingTimeItemResponse[]
   >([]);
 
+  const columns: GridColDef[] = [
+    { field: "fullName", headerName: "Tên đầy đủ", width: 180 },
+    { field: "gender", headerName: "Giới tính", width: 100 },
+    {
+      field: "dateOfBirth",
+      headerName: "Ngày sinh",
+      width: 110,
+      renderCell: (params) => {
+        return formatDate.DD_MM_YYYY(params.value); // Format ngày tháng
+      },
+    },
+    { field: "email", headerName: "Email", width: 200 },
+    { field: "phone", headerName: "Số điện thoại", width: 120 },
+    { field: "address", headerName: "Địa chỉ", width: 180 },
+    {
+      field: "isTeachingBefore",
+      headerName: "Đã từng dạy",
+      width: 120,
+      renderCell: (params) => (params.value ? "Có" : "Không"),
+    },
+    { field: "yearOfTeaching", headerName: "Số năm giảng dạy", width: 150 },
+    {
+      field: "meetingTime",
+      headerName: "Thời gian phỏng vấn",
+      width: 180,
+      renderCell: (params) => {
+        return params.row.interview
+          ? formatDate.DD_MM_YYYY_Time(params.row.interview.meetingTime)
+          : "Chưa có lịch";
+      },
+      sortComparator: (a, b) => {
+        if (!a || !b) return 0;
+        return dayjs(a).isBefore(dayjs(b)) ? -1 : 1; // Sắp xếp theo ngày giờ từ sớm tới muộn
+      },
+    },
+    {
+      field: "interviewType",
+      headerName: "Hình thức",
+      width: 100,
+      renderCell: (params) => {
+        return params.row.interview &&
+          params.row.interview.interviewType == 1 ? (
+          <span className="text-white bg-success rounded-xl py-1 px-2">
+            Online
+          </span>
+        ) : (
+          <span className="text-white bg-black rounded-xl py-1 px-2">
+            Trực tiếp
+          </span>
+        );
+      },
+      sortComparator: (a, b) => {
+        if (!a || !b) return 0;
+        return dayjs(a).isBefore(dayjs(b)) ? -1 : 1; // Sắp xếp theo ngày giờ từ sớm tới muộn
+      },
+    },
+    {
+      field: "interview.recruiters",
+      headerName: "Người phỏng vấn",
+      width: 200,
+      renderCell: (params) => {
+        return params.row.interview && params.row.interview.recruiters
+          ? params.row.interview.recruiters
+              .map((recruiter: any) => recruiter.fullName)
+              .join(", ")
+          : "";
+      },
+    },
+    {
+      field: "note",
+      headerName: "Ghi chú",
+      width: 200,
+      renderCell: (params) =>
+        params.value ? params.value.replace("\n", ".") : "",
+    },
+    // {
+    //   field: "interviews",
+    //   headerName: "Kết quả phỏng vấn",
+    //   width: 200,
+    //   renderCell: (params) => {
+    //     return params.row.interview?.note || ""; // Hiển thị ghi chú nếu có
+    //   },
+    // },
+    {
+      field: "status",
+      headerName: "Trạng thái",
+      width: 150,
+      renderCell: (params) => {
+        const status = params.value as RegistrationStatus;
+        switch (status) {
+          case RegistrationStatus.Approved_Duyet_Don:
+            return (
+              <span className="inline px-2 py-1 bg-info text-text_primary_dark rounded-lg">
+                Chờ phỏng vấn
+              </span>
+            );
+          case RegistrationStatus.Approved_Phong_Van:
+            return (
+              <span className="inline px-2 py-1 bg-success text-text_primary_light rounded-lg">
+                Đã chấp nhận
+              </span>
+            );
+          case RegistrationStatus.Rejected_Phong_Van:
+            return (
+              <span className="inline px-2 py-1 bg-danger rounded-lg text-text_primary_light">
+                Bị từ chối
+              </span>
+            );
+          default:
+            return "Không xác định";
+        }
+      },
+      // renderCell: () => {
+      //   return (
+      //     <span className="inline px-2 py-1 bg-info rounded-lg">
+      //       Chờ phỏng vấn
+      //     </span>
+      //   );
+      // },
+    },
+  ];
+
   // Lấy danh sách accounts (recruiters)
   const fetchRecruiters = async () => {
     try {
-      const { data } = await accountApi.getAllAccounts(1, 10000);
-      setRecruiters(
-        data.data.items.filter(
+      setRecruiters([]);
+      const firstRes = await accountApi.getAllAccounts(1, 10000);
+
+      const { data } = await accountApi.getAllAccounts(
+        1,
+        firstRes.data.data.total
+      );
+
+      const firstCateRes = await catechistApi.getAllCatechists();
+      const cateRes = await catechistApi.getAllCatechists(
+        1,
+        firstCateRes.data.data.total
+      );
+      data.data.items
+        .filter(
           (item: any) =>
             !item.isDeleted && item.role.roleName == RoleNameEnum.Catechist
         )
-      );
+        .forEach((item) => {
+          const action = async () => {
+            const cate = cateRes.data.data.items.find(
+              (cate) => cate.account.id == item.id
+            );
+            if (cate) {
+              setRecruiters((prev) => [...prev, { ...item, cate: cate }]);
+            }
+          };
+          action();
+        });
     } catch (error) {
       console.error("Lỗi khi tải danh sách accounts:", error);
     }
@@ -299,14 +321,15 @@ export default function ApprovedRegistrationsTable() {
 
       finalData =
         (deleteModeOn === true || deleteMode) && deleteModeOn != "false"
-          ? [...finalData].filter(
-              (item) =>
-                Number(formatDate.YYYY(item.createdAt)) <
-                Number(
-                  formatDate.YYYY(formatDate.getISODateInVietnamTimeZone())
-                )
-            )
-          : [...finalData];
+          ? [...finalData]
+          : // .filter(
+            //     (item) =>
+            //       Number(formatDate.YYYY(item.createdAt)) <
+            //       Number(
+            //         formatDate.YYYY(formatDate.getISODateInVietnamTimeZone())
+            //       )
+            //   )
+            [...finalData];
 
       setRowCount(finalData.length);
       setRows(finalData);
@@ -346,7 +369,7 @@ export default function ApprovedRegistrationsTable() {
         setSelectedRegistrationOfModal(res.data.data);
       })
       .catch((err) => {
-        console.log(err);
+        console.error(err);
       });
   };
 
@@ -368,7 +391,7 @@ export default function ApprovedRegistrationsTable() {
     const currentTime = new Date();
 
     if (currentTime < meetingTime) {
-      sweetAlert.alertFailed(
+      sweetAlert.alertWarning(
         `Chưa đến thời điểm phỏng vấn. Vui lòng quay lại sau ${formatDate.DD_MM_YYYY_Time(
           selectedRow.interview.meetingTime
         )}`,
@@ -376,7 +399,7 @@ export default function ApprovedRegistrationsTable() {
         10000,
         30
       );
-      return;
+      // return;
     }
 
     if (selectedRow) {
@@ -392,7 +415,7 @@ export default function ApprovedRegistrationsTable() {
     setInterviewNote(""); // Reset các trường input
     setInterviewResult("");
   };
-  console.log(rows);
+
   // Mở modal cập nhật phỏng vấn
   const handleOpenUpdateModal = (registrationId: string) => {
     const selectedRow = rows.find((row) => row.id === registrationId);
@@ -402,7 +425,7 @@ export default function ApprovedRegistrationsTable() {
       setSelectedRecruiters(
         selectedRow.interview.recruiters.map((recruiter: any) => ({
           value: recruiter.id,
-          label: `${recruiter.fullName} ${recruiter.role && recruiter.role.roleName.toUpperCase() == AccountRoleString.ADMIN ? " - Admin" : ""} ${recruiter.role && recruiter.role.roleName.toUpperCase() == AccountRoleString.MANAGER ? " - Quản lý" : ""} ${recruiter.role && recruiter.role.roleName.toUpperCase() == AccountRoleString.CATECHIST ? " - Giáo lý viên" : ""}`,
+          label: `${recruiter.fullName}`,
         }))
       );
       setMeetingTime(
@@ -434,8 +457,14 @@ export default function ApprovedRegistrationsTable() {
   // Xác nhận phỏng vấn
   const handleConfirmInterview = async () => {
     enableLoading();
+    if (!interviewNote || interviewNote.trim() === "") {
+      sweetAlert.alertWarning("Vui lòng nhập nhận xét ứng viên", "", 5000, 26);
+      disableLoading();
+      return;
+    }
+
     if (!interviewResult) {
-      alert("Vui lòng chọn kết quả phỏng vấn.");
+      sweetAlert.alertWarning("Vui lòng chọn kết quả phỏng vấn", "", 5000, 26);
       disableLoading();
       return;
     }
@@ -477,11 +506,12 @@ export default function ApprovedRegistrationsTable() {
 
         handleCloseApprovalModal();
         setSelectedRegistrations([]);
-        sweetAlert.alertSuccess("Phê duyệt thành công", "", 1000, 20);
+        sweetAlert.alertSuccess("Phê duyệt thành công", "", 2000, 24);
         fetchApprovedRegistrations();
       }
     } catch (error) {
       console.error("Lỗi khi cập nhật phỏng vấn:", error);
+      sweetAlert.alertFailed("Có lỗi xảy ra khi phê duyệt", "", 2000, 24);
     } finally {
       disableLoading();
     }
@@ -490,12 +520,30 @@ export default function ApprovedRegistrationsTable() {
 
   // Xác nhận cập nhật phỏng vấn
   const handleUpdateInterview = async () => {
+    if (selectedRecruiters.length <= 0) {
+      sweetAlert.alertWarning(
+        "Danh sách người phỏng vấn đang trống",
+        "Vui lòng chọn ít nhất 1 người phỏng vấn",
+        5000,
+        29
+      );
+      return;
+    }
+    if (!meetingTime || meetingTime == "") {
+      sweetAlert.alertWarning(
+        "Thời gian phỏng vấn đang trống",
+        "Vui lòng chọn thời gian phỏng vấn",
+        5000,
+        29
+      );
+      return;
+    }
     if (!updatedInterviewReason || updatedInterviewReason.trim() == "") {
-      sweetAlert.alertFailed(
+      sweetAlert.alertWarning(
         "Lý do cập nhật lịch đang bị trống",
         "Vui lòng nhập lý do để tiếp tục",
-        10000,
-        27
+        5000,
+        29
       );
       return;
     }
@@ -593,43 +641,62 @@ export default function ApprovedRegistrationsTable() {
   const renderFilterButtons = () => {
     return (
       <div>
-        {currentFilter !== "waiting" && (
-          <button
-            className="btn btn-info ml-1"
-            onClick={() => setCurrentFilter("waiting")}
-          >
+        <MuiSelect
+          labelId="result-label"
+          value={currentFilter}
+          onChange={(e) => setCurrentFilter(e.target.value)}
+          className={`
+               h-[40px] w-[200px]
+              ${currentFilter == "waiting" ? "bg-primary text-white" : ""}
+              ${currentFilter == "accepted" ? "bg-success text-white" : ""}
+              ${currentFilter == "rejected" ? "bg-danger text-white" : ""}
+              `}
+        >
+          <MenuItem value="waiting" className="bg-primary text-white py-2">
             Đơn chờ phỏng vấn
-          </button>
-        )}
-        {currentFilter !== "accepted" && (
-          <button
-            className="btn btn-success ml-1"
-            onClick={() => setCurrentFilter("accepted")}
-          >
+          </MenuItem>
+          <MenuItem value="accepted" className="bg-success text-white py-2">
             Đơn chấp nhận
-          </button>
-        )}
-        {currentFilter !== "rejected" && (
-          <button
-            className="btn btn-danger ml-1"
-            onClick={() => setCurrentFilter("rejected")}
-          >
+          </MenuItem>
+          <MenuItem value="rejected" className="bg-danger text-white py-2">
             Đơn từ chối
-          </button>
-        )}
+          </MenuItem>
+        </MuiSelect>
       </div>
     );
   };
 
   const fetchAccounts = async () => {
     try {
-      const { data } = await accountApi.getAllAccounts(1, 10000);
-      setAccounts(
-        data.data.items.filter(
+      setAccounts([]);
+      const firstRes = await accountApi.getAllAccounts(1, 10000);
+
+      const { data } = await accountApi.getAllAccounts(
+        1,
+        firstRes.data.data.total
+      );
+
+      const firstCateRes = await catechistApi.getAllCatechists();
+      const cateRes = await catechistApi.getAllCatechists(
+        1,
+        firstCateRes.data.data.total
+      );
+      data.data.items
+        .filter(
           (item: any) =>
             !item.isDeleted && item.role.roleName == RoleNameEnum.Catechist
         )
-      );
+        .forEach((item) => {
+          const action = async () => {
+            const cate = cateRes.data.data.items.find(
+              (cate) => cate.account.id == item.id
+            );
+            if (cate) {
+              setAccounts((prev) => [...prev, { ...item, cate: cate }]);
+            }
+          };
+          action();
+        });
     } catch (error) {
       console.error("Lỗi khi tải danh sách accounts:", error);
     }
@@ -677,32 +744,16 @@ export default function ApprovedRegistrationsTable() {
         return;
       }
 
-      // await registrationApi.updateRegistration(registrationId, {
-      //   status: RegistrationStatus.Approved_Duyet_Don,
-      // });
+      await registrationApi.updateRegistration(registrationId, {
+        status: RegistrationStatus.Approved_Duyet_Don,
+      });
 
-      console.log("res", {
+      await interviewApi.createInterview({
         registrationId,
         meetingTime: meetingTime,
         interviewType: interviewTypeOption,
         accounts: selectedAccountIds,
       });
-      const res = await interviewApi.createInterview({
-        registrationId,
-        meetingTime: meetingTime,
-        interviewType: interviewTypeOption,
-        accounts: selectedAccountIds,
-      });
-      console.log(
-        "res",
-        {
-          registrationId,
-          meetingTime: meetingTime,
-          interviewType: interviewTypeOption,
-          accounts: selectedAccountIds,
-        },
-        res
-      );
 
       let process = await interviewProcessApi.createInterviewProcess({
         registrationId: registrationId,
@@ -807,10 +858,7 @@ export default function ApprovedRegistrationsTable() {
       }}
     >
       <h1
-        className={`text-center text-[2rem] py-2 font-bold 
-        ${!deleteMode && currentFilter == "waiting" ? "bg-info text-text_primary_dark" : ""} 
-        ${!deleteMode && currentFilter == "accepted" ? "bg-success text-text_primary_light" : ""} 
-        ${!deleteMode && currentFilter == "rejected" ? "bg-danger text-text_primary_light" : ""}
+        className={`text-center text-[2rem] py-2 font-bold bg_title text-text_primary_light
         ${deleteMode ? "bg-black text-text_primary_light" : ""}`}
       >
         {!deleteMode && currentFilter == "waiting"
@@ -830,25 +878,27 @@ export default function ApprovedRegistrationsTable() {
         <div className="flex justify-start px-3 min-w-[10px]">
           {!deleteMode ? (
             <>
+              {renderFilterButtons()}
               <input
                 type="date"
-                className="w-[200px] py-2 px-2 border rounded-md"
+                className="w-[200px] py-2 px-2 ml-2 border-1 border-black border rounded-md"
                 value={selectedDate}
                 onChange={(e) => setSelectedDate(e.target.value)}
               />
-              {renderFilterButtons()}
             </>
           ) : (
             <></>
           )}
         </div>
-        <div className="flex">
+        <div className="flex px-3 gap-x-2">
           {selectedRegistrations.length > 0 && !disableActions && (
-            <div className="flex justify-end">
+            <>
               {selectedRegistrations.length === 1 ? (
                 <>
-                  <button
-                    className="btn btn-success ml-1"
+                  <Button
+                    color="success"
+                    variant="outlined"
+                    className="btn btn-success"
                     onClick={() =>
                       handleOpenApprovalModal(
                         selectedRegistrations[0].toString()
@@ -856,26 +906,22 @@ export default function ApprovedRegistrationsTable() {
                     }
                   >
                     Phê duyệt phỏng vấn
-                  </button>
-                  <button
-                    className="btn btn-warning ml-1"
+                  </Button>
+                  <Button
+                    color="warning"
+                    variant="outlined"
+                    className="btn btn-warning"
                     onClick={() =>
                       handleOpenUpdateModal(selectedRegistrations[0].toString())
                     }
                   >
                     Cập nhật lịch phỏng vấn
-                  </button>
+                  </Button>
                 </>
               ) : (
                 <></>
               )}
-              {/* <button
-                onClick={handleOpenDeleteModal}
-                className="btn btn-danger ml-1"
-              >
-                Xóa lịch phỏng vấn
-              </button> */}
-            </div>
+            </>
           )}
           {selectedRegistrations.length > 0 && !disableActionsApproved && (
             <div className="flex justify-end">
@@ -892,12 +938,14 @@ export default function ApprovedRegistrationsTable() {
                   (item) => item.name == RegistrationProcessTitle.TAO_TAI_KHOAN
                 ) ? (
                 <>
-                  <button
-                    className="btn btn-success ml-1"
+                  <Button
+                    className="btn btn-success"
+                    color="success"
+                    variant="outlined"
                     onClick={() => setOpenDialog(true)}
                   >
                     Tạo tài khoản
-                  </button>
+                  </Button>
                 </>
               ) : (
                 <></>
@@ -912,12 +960,14 @@ export default function ApprovedRegistrationsTable() {
           )}
           {selectedRegistrations.length == 1 ? (
             <>
-              <button
-                className="btn btn-info ml-1"
+              <Button
+                className="hover:bg-purple-800 hover:text-white hover:border-purple-800"
                 onClick={() => setOpenDialogRegisDetail(true)}
+                variant="outlined"
+                color="secondary"
               >
                 Xem chi tiết
-              </button>
+              </Button>
             </>
           ) : (
             <></>
@@ -928,13 +978,12 @@ export default function ApprovedRegistrationsTable() {
           selectedRegistrations.length > 0 ? (
             <>
               <Button
-                className="btn bg-primary_color text-text_primary_light hover:text-text_primary_dark
-          hover:bg-gray-400"
+                className="btn btn-danger"
                 onClick={() => {
                   handleDeleteRegistrations();
                 }}
                 variant="outlined"
-                color="primary"
+                color="error"
               >
                 Xóa đơn
               </Button>
@@ -945,15 +994,13 @@ export default function ApprovedRegistrationsTable() {
           {currentFilter === "rejected" && !deleteMode ? (
             <>
               <Button
-                className="btn bg-primary_color text-text_primary_light hover:text-text_primary_dark
-          hover:bg-gray-400"
                 onClick={() => {
                   setDeleteMode(true);
                   fetchApprovedRegistrations(true);
                   setSelectedRegistrations([]);
                 }}
                 variant="outlined"
-                color="primary"
+                color="secondary"
               >
                 Lọc đơn
               </Button>
@@ -964,8 +1011,6 @@ export default function ApprovedRegistrationsTable() {
           {currentFilter === "rejected" && deleteMode ? (
             <>
               <Button
-                className="btn bg-primary_color text-text_primary_light hover:text-text_primary_dark
-          hover:bg-gray-400"
                 onClick={() => {
                   setDeleteMode(false);
                   fetchApprovedRegistrations("false");
@@ -999,14 +1044,15 @@ export default function ApprovedRegistrationsTable() {
           ) : (
             <></>
           )}
-          <button
-            className="btn btn-primary ml-1 mr-2"
+          <Button
+            variant="contained"
+            color="primary"
             onClick={() => {
               handleRefresh();
             }}
           >
             Tải lại
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -1028,7 +1074,7 @@ export default function ApprovedRegistrationsTable() {
               initialState={{ pagination: { paginationModel } }}
               paginationModel={paginationModel}
               onPaginationModelChange={setPaginationModel} // Cập nhật paginationModel khi thay đổi
-              pageSizeOptions={[8, 25, 50]}
+              pageSizeOptions={[10, 25, 50, 100, 250]}
               onRowSelectionModelChange={handleSelectionChange}
               rowSelectionModel={selectedRegistrations}
               checkboxSelection
@@ -1036,6 +1082,7 @@ export default function ApprovedRegistrationsTable() {
                 border: 0,
               }}
               localeText={viVNGridTranslation}
+              disableMultipleRowSelection={!deleteMode}
             />
           </>
         )}
@@ -1262,7 +1309,7 @@ export default function ApprovedRegistrationsTable() {
             <Select
               options={recruiters.map((acc: any) => ({
                 value: acc.id,
-                label: `${acc.fullName} ${acc.role && acc.role.roleName.toUpperCase() == AccountRoleString.ADMIN ? " - Admin" : ""} ${acc.role && acc.role.roleName.toUpperCase() == AccountRoleString.MANAGER ? " - Quản lý" : ""} ${acc.role && acc.role.roleName.toUpperCase() == AccountRoleString.CATECHIST ? " - Giáo lý viên" : ""}`,
+                label: `${acc.fullName} ${acc.cate ? ` - ${acc.cate.code}` : ""}`,
               }))}
               isMulti
               value={selectedRecruiters}
@@ -1311,18 +1358,18 @@ export default function ApprovedRegistrationsTable() {
             }}
           >
             <Button
-              onClick={handleUpdateInterview}
-              variant="contained"
-              color="warning"
-            >
-              Cập nhật
-            </Button>
-            <Button
               onClick={handleCloseUpdateModal}
               variant="outlined"
               color="warning"
             >
               Hủy bỏ
+            </Button>
+            <Button
+              onClick={handleUpdateInterview}
+              variant="contained"
+              color="warning"
+            >
+              Cập nhật
             </Button>
           </div>
         </div>
@@ -1416,7 +1463,7 @@ export default function ApprovedRegistrationsTable() {
               <Select
                 options={accounts.map((acc: any) => ({
                   value: acc.id,
-                  label: `${acc.fullName} ${acc.role && acc.role.roleName.toUpperCase() == AccountRoleString.ADMIN ? " - Admin" : ""} ${acc.role && acc.role.roleName.toUpperCase() == AccountRoleString.MANAGER ? " - Quản lý" : ""} ${acc.role && acc.role.roleName.toUpperCase() == AccountRoleString.CATECHIST ? " - Giáo lý viên" : ""}`,
+                  label: `${acc.fullName}`,
                 }))}
                 isMulti
                 onChange={(newValue) =>

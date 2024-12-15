@@ -15,11 +15,18 @@ import {
   CreateProcessRequest,
   UpdateProcessRequest,
 } from "../../../model/Request/EventProcess"; // Import đúng model request
-import { EventStatus, EventProcessStringStatus } from "../../../enums/Event";
+import {
+  EventStatus,
+  EventProcessStringStatus,
+  EventProcessStatus,
+} from "../../../enums/Event";
 import sweetAlert from "../../../utils/sweetAlert";
 import MemberOfProcessDialog, {
   MemberOfProcessDialogHandle,
 } from "./MemberOfProcessDialog";
+import { formatCurrencyVND } from "../../../utils/formatPrice";
+import { EventItemResponse } from "../../../model/Response/Event";
+import { formatDate } from "../../../utils/formatDate";
 
 interface EventProcessDialogProps {
   open: boolean;
@@ -27,6 +34,7 @@ interface EventProcessDialogProps {
   eventId: string;
   processData?: any; // Thêm kiểu dữ liệu nếu cần
   viewModeDialog?: boolean;
+  event?: EventItemResponse;
 }
 
 const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
@@ -35,6 +43,7 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
   eventId,
   processData,
   viewModeDialog,
+  event,
 }) => {
   const [name, setName] = useState<string>("");
   const [description, setDescription] = useState<string>("");
@@ -69,7 +78,6 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
   useEffect(() => {
     resetFields();
     if (processData) {
-      console.log(processData);
       setName(processData.name);
       setDescription(processData.description);
       setStartTime(processData.startTime);
@@ -93,43 +101,6 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
     }
   }, [processData]);
 
-  // Hàm tính lại thời gian kết thúc
-  const handleStartTimeChange = (date: string) => {
-    setStartTime(date);
-    // const startParse = new Date(date);
-    // if (
-    //   date &&
-    //   durationDays >= 0 &&
-    //   durationHours >= 0 &&
-    //   durationMinutes >= 0
-    // ) {
-    //   const durationInMillis =
-    //     durationDays * 24 * 60 * 60 * 1000 +
-    //     durationHours * 60 * 60 * 1000 +
-    //     durationMinutes * 60 * 1000;
-    //   const end = new Date(startParse.getTime() + durationInMillis);
-    //   setEndTime(end.toISOString());
-    // }
-  };
-
-  const handleEndimeChange = (date: string) => {
-    setEndTime(date);
-    // const startParse = new Date(date);
-    // if (
-    //   date &&
-    //   durationDays >= 0 &&
-    //   durationHours >= 0 &&
-    //   durationMinutes >= 0
-    // ) {
-    //   const durationInMillis =
-    //     durationDays * 24 * 60 * 60 * 1000 +
-    //     durationHours * 60 * 60 * 1000 +
-    //     durationMinutes * 60 * 1000;
-    //   const end = new Date(startParse.getTime() + durationInMillis);
-    //   setEndTime(end.toISOString());
-    // }
-  };
-
   useEffect(() => {
     setDurationDays(0);
     setDurationHours(0);
@@ -144,11 +115,11 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
       const diffInMilliseconds = end - start;
 
       if (diffInMilliseconds <= 0) {
-        sweetAlert.alertFailed(
+        sweetAlert.alertWarning(
           "Thời gian kết thúc phải sau hơn thời gian bắt đầu",
           "",
           5000,
-          30
+          35
         );
       } else {
         // Tính toán số ngày, giờ, phút từ chênh lệch
@@ -170,20 +141,56 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
 
   // Hàm để validate form trước khi submit
   const handleSubmit = async () => {
-    if (!startTime || new Date(startTime).getTime() <= new Date().getTime()) {
-      alert("Start time must be in the future.");
+    if (!name || name.trim() == "") {
+      sweetAlert.alertWarning("Tên hoạt động là bắt buộc", "", 3000, 25);
       return;
     }
-    if (fee < 0) {
-      alert("Fee cannot be negative.");
+
+    if (!description || description.trim() == "") {
+      sweetAlert.alertWarning("Mô tả hoạt động là bắt buộc", "", 3000, 25);
       return;
     }
+
+    if (!startTime || startTime.trim() == "") {
+      sweetAlert.alertWarning("Thời gian bắt đầu là bắt buộc", "", 3000, 25);
+      return;
+    }
+
+    if (!endTime || endTime.trim() == "") {
+      sweetAlert.alertWarning("Thời gian kết thúc là bắt buộc", "", 3000, 25);
+      return;
+    }
+
     if (
       endTime &&
-      new Date(endTime).getTime() <=
-        new Date(startTime).getTime() + 1 * 60 * 1000
+      new Date(endTime).getTime() <= new Date(startTime).getTime() + 3600000
     ) {
-      alert("End time must be greater than start time by at least 1 minute.");
+      sweetAlert.alertWarning(
+        "Thời gian kết thúc phải sau thời gian bắt đầu ít nhất 1 giờ",
+        "",
+        3000,
+        38
+      );
+      return;
+    }
+
+    if (fee < 0) {
+      sweetAlert.alertWarning(
+        "Chi phí dự tính không được nhỏ hơn 0",
+        "",
+        3000,
+        30
+      );
+      return;
+    }
+
+    if (actualFee < 0) {
+      sweetAlert.alertWarning(
+        "Chi phí thực tế không được nhỏ hơn 0",
+        "",
+        3000,
+        30
+      );
       return;
     }
 
@@ -204,26 +211,30 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
       actualFee,
       note,
     };
-    console.log(data);
 
     try {
       let createdProcessId = "";
       if (processData) {
         // Update process
         await processApi.updateProcess(processData.id, data);
+        sweetAlert.alertSuccess("Cập nhật hoạt động thanh công", "", 3000, 25);
+
         createdProcessId = processData.id;
       } else {
         // Create new process
         data.actualFee = data.fee;
         data.status = EventStatus.Not_Started;
         const createdDataRes = await processApi.createProcess(data);
+        sweetAlert.alertSuccess("Tạo hoạt động thanh công", "", 3000, 25);
+
         createdProcessId = createdDataRes.data.data.id;
       }
       childRef.current?.handleChangeMemberOfProcess(createdProcessId);
-      onClose(); // Close the dialog after successful submission
+
+      onClose();
     } catch (error) {
       console.error("Error creating/updating process:", error);
-      alert("An error occurred while creating/updating the process.");
+      sweetAlert.alertFailed("Có lỗi xảy ra", "", 3000, 20);
     }
   };
 
@@ -243,78 +254,116 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
         <Grid container spacing={2}>
           <Grid item xs={12}>
             <TextField
-              label={`Tên hoạt động`}
+              label={
+                <span>
+                  Tên hoạt động <span style={{ color: "red" }}>*</span>
+                </span>
+              }
               className="mt-2"
               fullWidth
               value={name}
               onChange={(e) => setName(e.target.value)}
-              disabled={viewMode}
-              sx={{
-                "& .MuiInputBase-input.Mui-disabled": {
-                  color: "rgba(0, 0, 0)",
-                  WebkitTextFillColor: "rgba(0, 0, 0)",
-                  opacity: 1,
-                },
-                "& .MuiInputLabel-root.Mui-disabled": {
-                  color: "rgba(0, 0, 0, 0.6)",
-                },
-              }}
+              disabled={
+                viewMode ||
+                (processData &&
+                  processData.status != EventProcessStatus.Not_Started)
+              }
             />
           </Grid>
           <Grid item xs={12}>
             <TextField
-              label="Mô tả"
+              label={
+                <span>
+                  Mô tả <span style={{ color: "red" }}>*</span>
+                </span>
+              }
               fullWidth
               multiline
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              disabled={viewMode}
-              sx={{
-                "& .MuiInputBase-input.Mui-disabled": {
-                  color: "rgba(0, 0, 0)",
-                  WebkitTextFillColor: "rgba(0, 0, 0)",
-                  opacity: 1,
-                },
-                "& .MuiInputLabel-root.Mui-disabled": {
-                  color: "rgba(0, 0, 0, 0.6)",
-                },
-              }}
+              disabled={
+                viewMode ||
+                (processData &&
+                  processData.status != EventProcessStatus.Not_Started)
+              }
             />
           </Grid>
           <Grid item xs={12} sm={6}>
-            <label htmlFor="" className="ml-2 text-gray-500 text-[0.8rem] ">
-              Thời gian bắt đầu
-            </label>
-            <input
-              className="w-full rounded py-2 px-2 border-1 border-gray-400"
-              placeholder="Start Time"
+            {event && event.startTime ? (
+              <p className="text-gray-500 ml-2 mt-1">
+                Thời gian bắt đầu sự kiện:{" "}
+                {formatDate.DD_MM_YYYY(event?.startTime)}
+              </p>
+            ) : (
+              <></>
+            )}
+            <TextField
+              label={
+                <span>
+                  Thời gian bắt đầu <span style={{ color: "red" }}>*</span>
+                </span>
+              }
               type="datetime-local"
-              value={startTime ?? ""}
-              onChange={(e) => handleStartTimeChange(e.target.value)}
-              disabled={viewMode}
-              style={{
-                color: "rgba(0, 0, 0) !important",
-                WebkitTextFillColor: "rgba(0, 0, 0) !important",
-                opacity: 1,
+              fullWidth
+              value={startTime}
+              onChange={(e) => {
+                let value = e.target.value;
+
+                // Tách phần năm từ giá trị datetime-local
+                const [datePart, timePart] = value.split("T");
+                const year = datePart.split("-")[0];
+
+                // Kiểm tra nếu năm dài hơn 4 chữ số, cắt bớt chỉ lấy 4 chữ số
+                if (year.length > 4) {
+                  const newYear = year.slice(0, 4);
+                  value = `${newYear}-${datePart.split("-")[1]}-${datePart.split("-")[2]}T${timePart}`;
+                }
+                setStartTime(value); // Set giá trị hợp lệ vào state
               }}
+              margin="normal"
+              InputLabelProps={{
+                shrink: true,
+              }}
+              disabled={viewMode}
             />
           </Grid>
           <Grid item xs={12} sm={6}>
-            <label htmlFor="" className="ml-2 text-gray-500 text-[0.8rem] ">
-              Thời gian kết thúc
-            </label>
-            <input
-              className="w-full rounded py-2 px-2 border-1 border-gray-400"
-              placeholder="Start Time"
+            {event && event.endTime ? (
+              <p className="text-gray-500 ml-2 mt-1">
+                Thời gian bắt đầu kết thúc:{" "}
+                {formatDate.DD_MM_YYYY(event?.endTime)}
+              </p>
+            ) : (
+              <></>
+            )}
+            <TextField
+              label={
+                <span>
+                  Thời gian kết thúc <span style={{ color: "red" }}>*</span>
+                </span>
+              }
               type="datetime-local"
-              value={endTime ?? ""}
-              onChange={(e) => handleEndimeChange(e.target.value)}
-              disabled={viewMode}
-              style={{
-                color: "rgba(0, 0, 0) !important",
-                WebkitTextFillColor: "rgba(0, 0, 0) !important",
-                opacity: 1,
+              fullWidth
+              value={endTime}
+              onChange={(e) => {
+                let value = e.target.value;
+
+                // Tách phần năm từ giá trị datetime-local
+                const [datePart, timePart] = value.split("T");
+                const year = datePart.split("-")[0];
+
+                // Kiểm tra nếu năm dài hơn 4 chữ số, cắt bớt chỉ lấy 4 chữ số
+                if (year.length > 4) {
+                  const newYear = year.slice(0, 4);
+                  value = `${newYear}-${datePart.split("-")[1]}-${datePart.split("-")[2]}T${timePart}`;
+                }
+                setEndTime(value); // Set giá trị hợp lệ vào state
               }}
+              margin="normal"
+              InputLabelProps={{
+                shrink: true,
+              }}
+              disabled={viewMode}
             />
           </Grid>
           <Grid item xs={12} sm={4}>
@@ -325,16 +374,6 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
               value={durationDays}
               onChange={(e) => setDurationDays(Number(e.target.value))}
               disabled
-              sx={{
-                "& .MuiInputBase-input.Mui-disabled": {
-                  color: "rgba(0, 0, 0, 0.6)",
-                  WebkitTextFillColor: "rgba(0, 0, 0, 0.6)",
-                  opacity: 1,
-                },
-                "& .MuiInputLabel-root.Mui-disabled": {
-                  color: "rgba(0, 0, 0, 0.6)",
-                },
-              }}
             />
           </Grid>
           <Grid item xs={12} sm={4}>
@@ -345,16 +384,6 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
               value={durationHours}
               onChange={(e) => setDurationHours(Number(e.target.value))}
               disabled
-              sx={{
-                "& .MuiInputBase-input.Mui-disabled": {
-                  color: "rgba(0, 0, 0, 0.6)",
-                  WebkitTextFillColor: "rgba(0, 0, 0, 0.6)",
-                  opacity: 1,
-                },
-                "& .MuiInputLabel-root.Mui-disabled": {
-                  color: "rgba(0, 0, 0, 0.6)",
-                },
-              }}
             />
           </Grid>
           <Grid item xs={12} sm={4}>
@@ -365,70 +394,62 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
               value={durationMinutes}
               onChange={(e) => setDurationMinutes(Number(e.target.value))}
               disabled
-              sx={{
-                "& .MuiInputBase-input.Mui-disabled": {
-                  color: "rgba(0, 0, 0, 0.6)",
-                  WebkitTextFillColor: "rgba(0, 0, 0, 0.6)",
-                  opacity: 1,
-                },
-                "& .MuiInputLabel-root.Mui-disabled": {
-                  color: "rgba(0, 0, 0, 0.6)",
-                },
-              }}
             />
           </Grid>
           <Grid item xs={12} sm={6}>
             <TextField
-              label="Chi phí dự tính"
-              type="number"
+              label={
+                <span>
+                  Chi phí dự tính <span style={{ color: "red" }}>*</span>
+                </span>
+              }
+              // type="number"
               className="mt-3"
               fullWidth
-              value={fee}
-              onChange={(e) => setFee(Number(e.target.value))}
+              value={formatCurrencyVND(fee)}
+              onChange={(e) => {
+                const numericValue = Number(
+                  e.target.value.replace(/[^\d]/g, "")
+                );
+                setFee(numericValue);
+              }}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">₫</InputAdornment>
                 ),
               }}
-              disabled={viewMode}
-              sx={{
-                "& .MuiInputBase-input.Mui-disabled": {
-                  color: "rgba(0, 0, 0)",
-                  WebkitTextFillColor: "rgba(0, 0, 0)",
-                  opacity: 1,
-                },
-                "& .MuiInputLabel-root.Mui-disabled": {
-                  color: "rgba(0, 0, 0, 0.6)",
-                },
-              }}
+              disabled={
+                viewMode ||
+                (processData &&
+                  processData.status != EventProcessStatus.Not_Started)
+              }
             />
           </Grid>
           {processData ? (
             <>
               <Grid item xs={12} sm={6}>
                 <TextField
-                  label="Chi phí thực tế"
-                  type="number"
+                  label={
+                    <span>
+                      Chi phí thực tế <span style={{ color: "red" }}>*</span>
+                    </span>
+                  }
+                  // type="number"
                   className="mt-3"
                   fullWidth
-                  value={actualFee}
-                  onChange={(e) => setActualFee(Number(e.target.value))}
+                  value={formatCurrencyVND(actualFee)}
+                  onChange={(e) => {
+                    const numericValue = Number(
+                      e.target.value.replace(/[^\d]/g, "")
+                    );
+                    setActualFee(numericValue);
+                  }}
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">₫</InputAdornment>
                     ),
                   }}
                   disabled={viewMode}
-                  sx={{
-                    "& .MuiInputBase-input.Mui-disabled": {
-                      color: "rgba(0, 0, 0)",
-                      WebkitTextFillColor: "rgba(0, 0, 0)",
-                      opacity: 1,
-                    },
-                    "& .MuiInputLabel-root.Mui-disabled": {
-                      color: "rgba(0, 0, 0)",
-                    },
-                  }}
                 />
               </Grid>
             </>
@@ -464,13 +485,13 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
                   htmlFor=""
                   className="ml-2 text-gray-500 text-[0.8rem] mt-0"
                 >
-                  Trạng thái
+                  Trạng thái <span style={{ color: "red" }}>*</span>
                 </label>
                 <Select
                   aria-label="Trạng thái"
                   className="border-1 border-gray-300 rounded w-[100%] mt-0"
                   options={
-                    status == EventStatus.Not_Started
+                    processData.status == EventStatus.Not_Started
                       ? [
                           {
                             value: EventStatus.Not_Started,
@@ -479,10 +500,6 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
                           {
                             value: EventStatus.In_Progress,
                             label: EventProcessStringStatus.In_Progress,
-                          },
-                          {
-                            value: EventStatus.Completed,
-                            label: EventProcessStringStatus.Completed,
                           },
                           {
                             value: EventStatus.Cancelled,
@@ -554,7 +571,29 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
                     }),
                     singleValue: (base) => ({
                       ...base,
-                      color: "rgba(0, 0, 0, 0.87)", // Màu chữ khi chọn
+                      padding: "10px 5px",
+                      color: `${
+                        status == EventProcessStatus.Not_Started
+                          ? "rgba(0, 0, 0, 0.87)"
+                          : `white`
+                      }`,
+                      background: `${
+                        status == EventProcessStatus.Not_Started
+                          ? "white"
+                          : `${
+                              status == EventProcessStatus.In_Progress
+                                ? "rgba(0, 0, 0, 0.87)"
+                                : `${
+                                    status == EventProcessStatus.Completed
+                                      ? "green"
+                                      : `${
+                                          status == EventProcessStatus.Cancelled
+                                            ? "red"
+                                            : ""
+                                        }`
+                                  }`
+                            }`
+                      }`,
                     }),
                     placeholder: (base) => ({
                       ...base,

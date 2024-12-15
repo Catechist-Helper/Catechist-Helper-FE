@@ -191,7 +191,7 @@ const MemberOfProcessDialog = forwardRef<
       <div>
         <DialogTitle>Thành viên đảm nhận</DialogTitle>
         <DialogContent>
-          <h4>Danh sách Người Dùng</h4>
+          <h4>Danh sách Chưa Gán</h4>
           <DataGrid
             disableRowSelectionOnClick
             rows={sortedAvailables}
@@ -240,67 +240,75 @@ const MemberOfProcessDialog = forwardRef<
             autoHeight
           />
           <h4 className="mt-3">Danh sách Ban Tổ Chức</h4>
-          <DataGrid
-            disableRowSelectionOnClick
-            rows={sortedMembersOfProcess}
-            columns={[
-              {
-                field: "avatar",
-                headerName: "Ảnh",
-                width: 100,
-                renderCell: (params) => (
-                  <img
-                    src={params.row.avatar || "https://via.placeholder.com/50"}
-                    alt="Avatar"
-                    width={50}
-                    height={50}
-                    style={{ borderRadius: "3px" }}
-                  />
-                ),
-              },
-              { field: "fullName", headerName: "Họ và Tên", width: 200 },
-              { field: "gender", headerName: "Giới tính", width: 105 },
-              { field: "email", headerName: "Email", width: 200 },
-              { field: "phone", headerName: "Số Điện Thoại", width: 150 },
-              {
-                field: "roleEventId",
-                headerName: "Vai trò",
-                width: 200,
-                renderCell: (params) => {
-                  const role = roles.find((r) => r.id === params.value);
-                  return role ? role.name : "N/A";
-                },
-              },
-              {
-                field: "main",
-                headerName: "Đảm nhận chính",
-                width: 150,
-                renderCell: (params) => (
-                  <input
-                    type="checkbox"
-                    checked={mainMember === params.row.id}
-                    onChange={() => {
-                      handleMainCatechistChange(params.row.id);
-                    }}
-                  />
-                ),
-              },
-              {
-                field: "action",
-                headerName: "Xóa",
-                width: 150,
-                renderCell: (params) => (
-                  <Button
-                    color="error"
-                    onClick={() => handleRemoveMember(params.row.id)}
-                  >
-                    Xóa
-                  </Button>
-                ),
-              },
-            ]}
-            autoHeight
-          />
+          {sortedMembersOfProcess.length > 0 ? (
+            <>
+              <DataGrid
+                disableRowSelectionOnClick
+                rows={sortedMembersOfProcess}
+                columns={[
+                  {
+                    field: "avatar",
+                    headerName: "Ảnh",
+                    width: 100,
+                    renderCell: (params) => (
+                      <img
+                        src={
+                          params.row.avatar || "https://via.placeholder.com/50"
+                        }
+                        alt="Avatar"
+                        width={50}
+                        height={50}
+                        style={{ borderRadius: "3px" }}
+                      />
+                    ),
+                  },
+                  { field: "fullName", headerName: "Họ và Tên", width: 200 },
+                  { field: "gender", headerName: "Giới tính", width: 105 },
+                  { field: "email", headerName: "Email", width: 200 },
+                  { field: "phone", headerName: "Số Điện Thoại", width: 150 },
+                  {
+                    field: "roleEventId",
+                    headerName: "Vai trò",
+                    width: 200,
+                    renderCell: (params) => {
+                      const role = roles.find((r) => r.id === params.value);
+                      return role ? role.name : "N/A";
+                    },
+                  },
+                  {
+                    field: "main",
+                    headerName: "Đảm nhận chính",
+                    width: 150,
+                    renderCell: (params) => (
+                      <input
+                        type="checkbox"
+                        checked={mainMember === params.row.id}
+                        onChange={() => {
+                          handleMainCatechistChange(params.row.id);
+                        }}
+                      />
+                    ),
+                  },
+                  {
+                    field: "action",
+                    headerName: "Xóa",
+                    width: 150,
+                    renderCell: (params) => (
+                      <Button
+                        color="error"
+                        onClick={() => handleRemoveMember(params.row.id)}
+                      >
+                        Xóa
+                      </Button>
+                    ),
+                  },
+                ]}
+                autoHeight
+              />
+            </>
+          ) : (
+            <p className="text-primary mt-2">Hiện tại chưa có ai</p>
+          )}
         </DialogContent>
       </div>
     </>

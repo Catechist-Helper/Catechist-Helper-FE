@@ -153,21 +153,23 @@ export default function GradeComponent() {
         gradeName &&
         gradeName != ""
       ) {
-        console.log({
-          name: gradeName,
-          majorId: selectedMajorCreateGrade,
-        });
         await gradeApi.createGrade({
           name: gradeName,
           majorId: selectedMajorCreateGrade,
         });
         fetchGrades(selectedMajor);
         setOpenDialog(false);
+        sweetAlert.alertSuccess("Tạo thành công!", "", 2500, 20);
       } else {
-        sweetAlert.alertFailed("Vui lòng điền đầy đủ thông tin!", "", 1000, 22);
+        sweetAlert.alertWarning(
+          "Vui lòng điền đầy đủ thông tin!",
+          "",
+          2500,
+          26
+        );
       }
     } catch (error: any) {
-      console.log(error);
+      console.error(error);
       if (
         (error.message &&
           error.message.includes(
@@ -183,7 +185,7 @@ export default function GradeComponent() {
           25
         );
       } else {
-        sweetAlert.alertFailed("Có lỗi xảy ra khi tạo khối!", "", 1000, 22);
+        sweetAlert.alertFailed("Có lỗi xảy ra khi tạo khối!", "", 2500, 22);
       }
     } finally {
       disableLoading();
@@ -324,6 +326,18 @@ export default function GradeComponent() {
       const selectedRow: any = rows.find(
         (row) => row.id === selectedRows[0].toString()
       );
+      const confirm = await sweetAlert.confirm(
+        `
+      Xác nhận xóa khối ${selectedRow.name}`,
+        "",
+        undefined,
+        undefined,
+        "question"
+      );
+
+      if (!confirm) {
+        return;
+      }
       if (!selectedRow) {
         sweetAlert.alertFailed(
           "Có lỗi khi xóa khối",
@@ -335,10 +349,10 @@ export default function GradeComponent() {
       }
 
       await gradeApi.deleteGrade(selectedRows[0].toString());
-      sweetAlert.alertSuccess("Xoá thành công", "", 1000, 18);
+      sweetAlert.alertSuccess("Xoá thành công", "", 2500, 18);
       fetchGrades();
     } catch (error: any) {
-      console.log("error", error);
+      console.error("error", error);
 
       if (
         error.message &&
@@ -361,7 +375,7 @@ export default function GradeComponent() {
           25
         );
       } else {
-        sweetAlert.alertFailed("Có lỗi xảy ra khi xóa", "", 1000, 20);
+        sweetAlert.alertFailed("Có lỗi xảy ra khi xóa", "", 2500, 20);
       }
     } finally {
     }
@@ -369,8 +383,8 @@ export default function GradeComponent() {
 
   return (
     <Paper sx={{ width: "calc(100% - 3.8rem)", position: "absolute" }}>
-      <h1 className="text-center text-[2.2rem] bg-primary_color text-text_primary_light py-2 font-bold">
-        Danh sách các khối
+      <h1 className="text-center text-[2.2rem] bg_title text-text_primary_light py-2 font-bold">
+        Danh sách khối
       </h1>
 
       <div className="my-2 flex justify-between mx-3">
@@ -424,8 +438,9 @@ export default function GradeComponent() {
             <>
               <div>
                 <Button
-                  variant="contained"
+                  variant="outlined"
                   color="error"
+                  className="btn btn-danger"
                   onClick={() => {
                     handleDeleteGrade();
                   }}
@@ -440,11 +455,21 @@ export default function GradeComponent() {
           {/* Nút Thêm Khối */}
           <div className="ml-1">
             <Button
-              variant="contained"
+              variant="outlined"
               color="primary"
+              className="btn btn-primary"
               onClick={() => setOpenDialog(true)}
             >
               Thêm Khối
+            </Button>
+          </div>
+          <div className="ml-1">
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => fetchGrades(selectedMajor)}
+            >
+              Tải lại
             </Button>
           </div>
         </div>
@@ -488,7 +513,9 @@ export default function GradeComponent() {
                 },
               }}
             >
-              <InputLabel>Chọn Ngành</InputLabel>
+              <InputLabel>
+                Chọn Ngành <span style={{ color: "red" }}>*</span>
+              </InputLabel>
               <Select
                 value={selectedMajorCreateGrade}
                 onChange={(event: any) => {
@@ -505,7 +532,11 @@ export default function GradeComponent() {
           </div>
           <div className="my-2 mt-3">
             <TextField
-              label="Tên khối"
+              label={
+                <span>
+                  Tên khối <span style={{ color: "red" }}>*</span>
+                </span>
+              }
               value={gradeName}
               onChange={(e) => setGradeName(e.target.value)}
               fullWidth

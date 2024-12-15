@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Dialog,
   DialogActions,
@@ -10,178 +10,130 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  FormControlLabel,
-  Checkbox,
+  // FormControlLabel,
+  // Checkbox,
 } from "@mui/material";
-import eventApi from "../../../api/Event";
-import eventCategoryApi from "../../../api/EventCategory";
-import budgetTransactionApi from "../../../api/BudgetTransaction";
+import { Formik, Form, ErrorMessage } from "formik";
+import * as Yup from "yup";
 import sweetAlert from "../../../utils/sweetAlert";
+import eventCategoryApi from "../../../api/EventCategory";
+import eventApi from "../../../api/Event";
+import budgetTransactionApi from "../../../api/BudgetTransaction";
 import { EventItemResponse } from "../../../model/Response/Event";
-import { EventCategoryItemResponse } from "../../../model/Response/EventCategory";
+import { formatCurrencyVND } from "../../../utils/formatPrice";
 import ReasonDialog from "./ReasonDialog";
-
-// Hàm format từ ISO thành YYYY-MM-DD
-const formatToDateInput = (isoString: string | undefined): string => {
-  if (!isoString) return "";
-  const date = new Date(isoString);
-  return date.toISOString().split("T")[0];
-};
+import useAppContext from "../../../hooks/useAppContext";
+import { EventStatus, EventStatusString } from "../../../enums/Event";
 
 interface EventDialogProps {
   open: boolean;
   onClose: () => void;
-  event?: EventItemResponse | null; // null nếu thêm mới
-  refresh: () => void; // Callback để làm mới danh sách
+  refresh: () => void;
+  event?: EventItemResponse; // null nếu thêm mới
 }
 
 const EventDialog: React.FC<EventDialogProps> = ({
   open,
   onClose,
-  event,
   refresh,
+  event,
 }) => {
-  const [name, setName] = useState<string>("");
-  const [description, setDescription] = useState<string>("");
-  const [startTime, setStartTime] = useState<string>(""); // YYYY-MM-DD
-  const [endTime, setEndTime] = useState<string>(""); // YYYY-MM-DD
-  const [currentBudget, setCurrentBudget] = useState<number>(0);
-  const [eventCategories, setEventCategories] = useState<
-    EventCategoryItemResponse[]
-  >([]);
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(
-    null
-  );
-  const [isPeriodic, setIsPeriodic] = useState<boolean>(false);
-  const [isCheckedIn, setIsCheckedIn] = useState<boolean>(false);
-  const [address, setAddress] = useState<string>("");
-  const [loading, setLoading] = useState<boolean>(false);
+  const [eventCategories, setEventCategories] = useState<any[]>([]);
   const [openReasonDialog, setOpenReasonDialog] = useState<boolean>(false);
-  // const [budgetReason, setBudgetReason] = useState<string>(""); // Lý do thay đổi ngân sách
+
   const [pendingBudgetChange, setPendingBudgetChange] = useState<number | null>(
     null
-  ); // Giá trị ngân sách mới (chờ xử lý)
-
-  // Fetch event categories
-  const fetchEventCategories = async () => {
-    try {
-      const { data } = await eventCategoryApi.getAllEventCategories();
-      setEventCategories(data.data.items);
-    } catch (error) {
-      console.error("Lỗi khi tải danh mục sự kiện:", error);
-    }
-  };
+  );
+  const { enableLoading, disableLoading } = useAppContext();
 
   useEffect(() => {
+    const fetchEventCategories = async () => {
+      try {
+        const { data } = await eventCategoryApi.getAllEventCategories();
+        setEventCategories(data.data.items);
+      } catch (error) {
+        console.error("Lỗi khi tải danh mục sự kiện:", error);
+      }
+    };
     fetchEventCategories();
   }, []);
 
-  useEffect(() => {
-    if (event) {
-      // Nếu chỉnh sửa, điền sẵn dữ liệu của sự kiện
-      setName(event.name);
-      setDescription(event.description || "");
-      setStartTime(formatToDateInput(event.startTime)); // Chuyển đổi thành YYYY-MM-DD
-      setEndTime(formatToDateInput(event.endTime)); // Chuyển đổi thành YYYY-MM-DD
-      setCurrentBudget(event.current_budget || 0);
-      setSelectedCategoryId(event.eventCategory?.id || null);
-      setIsPeriodic(event.isPeriodic || false);
-      setIsCheckedIn(event.isCheckedIn || false);
-      setAddress(event.address || "");
-    } else {
-      // Nếu thêm mới, reset form
-      setName("");
-      setDescription("");
-      setStartTime("");
-      setEndTime("");
-      setCurrentBudget(0);
-      setSelectedCategoryId(null);
-      setIsPeriodic(false);
-      setIsCheckedIn(false);
-      setAddress("");
-    }
-  }, [event]);
+  // Schema validation bằng Yup
+  const validationSchema = Yup.object().shape({
+    startTime: Yup.date()
+      .nullable()
+      .transform((value, originalValue) => {
+        console.log(value);
+        if (originalValue === "" || originalValue === null) return null; // Xử lý chuỗi rỗng
+        return new Date(originalValue); // Chuyển đổi thành Date
+      })
+      .required("Thời gian bắt đầu là bắt buộc")
+      .min(new Date(), "Thời gian bắt đầu phải là ngày trong tương lai"),
 
-  const handleSave = async () => {
-    if (!name.trim()) {
-      sweetAlert.alertWarning("Tên sự kiện không được để trống!", "", 1000, 22);
-      return;
-    }
+    endTime: Yup.date()
+      .nullable()
+      .transform((value, originalValue) => {
+        console.log(value);
 
-    if (!selectedCategoryId) {
-      sweetAlert.alertWarning("Vui lòng chọn danh mục sự kiện!", "", 1000, 22);
-      return;
-    }
+        if (originalValue === "" || originalValue === null) return null;
+        return new Date(originalValue);
+      })
+      .required("Thời gian kết thúc là bắt buộc")
+      .when("startTime", (startTime, schema) => {
+        return startTime && startTime.toString() != ""
+          ? schema.min(
+              new Date(startTime.toString()),
+              "Thời gian kết thúc phải sau thời gian bắt đầu"
+            )
+          : schema;
+      }),
 
-    if (!address.trim()) {
-      sweetAlert.alertWarning("Địa chỉ không được để trống!", "", 1000, 22);
-      return;
-    }
+    eventCategoryId: Yup.string().required("Danh mục sự kiện là bắt buộc"),
+    name: Yup.string().required("Tên sự kiện không được để trống"),
+    description: Yup.string().required("Mô tả là bắt buộc"),
+    address: Yup.string().required("Địa chỉ tổ chức là bắt buộc"),
+    current_budget: Yup.number()
+      .min(0, "Ngân sách phải lớn hơn hoặc bằng 0")
+      .required("Ngân sách hiện tại là bắt buộc"),
+  });
 
-    if (new Date(startTime) <= new Date()) {
-      sweetAlert.alertWarning(
-        "Thời gian bắt đầu phải sau ngày hiện tại!",
-        "",
-        1000,
-        22
-      );
-      return;
-    }
-
-    if (new Date(endTime) <= new Date(startTime)) {
-      sweetAlert.alertWarning(
-        "Thời gian kết thúc phải sau thời gian bắt đầu!",
-        "",
-        1000,
-        22
-      );
-      return;
-    }
-
+  const handleSubmit = async (values: any) => {
     try {
-      setLoading(true);
       const dataToSend = {
-        name,
-        description,
-        isPeriodic,
-        isCheckedIn,
-        address,
-        startTime: new Date(startTime).toISOString(),
-        endTime: new Date(endTime).toISOString(),
-        current_budget: currentBudget,
-        eventStatus: 0,
-        eventCategoryId: selectedCategoryId,
+        ...values,
+        startTime: new Date(values.startTime).toISOString(),
+        endTime: new Date(values.endTime).toISOString(),
       };
-
+      enableLoading();
       if (event) {
-        // Nếu chỉnh sửa
-        if (event.current_budget !== currentBudget) {
-          // Nếu ngân sách thay đổi, mở popup để nhập lý do
-          setPendingBudgetChange(currentBudget);
+        if (event.current_budget !== values.current_budget) {
+          setPendingBudgetChange(values.current_budget);
           setOpenReasonDialog(true);
           return;
         }
         await eventApi.updateEvent(event.id, dataToSend);
-        sweetAlert.alertSuccess("Cập nhật sự kiện thành công!", "", 1000, 22);
+
+        sweetAlert.alertSuccess("Cập nhật sự kiện thành công!", "", 3000, 25);
       } else {
-        // Nếu thêm mới
         const newEvent = await eventApi.createEvent(dataToSend);
+
         await budgetTransactionApi.createBudgetTransaction({
           eventId: newEvent.data.data.id,
           fromBudget: 0,
-          toBudget: currentBudget,
-          note: "Ngân sách khởi tạo", // Ghi chú mặc định khi thêm mới
+          toBudget: values.current_budget,
+          note: "Ngân sách khởi tạo",
           transactionImages: [],
         });
-        sweetAlert.alertSuccess("Thêm sự kiện mới thành công!", "", 1000, 22);
+        sweetAlert.alertSuccess("Thêm sự kiện mới thành công!", "", 3000, 25);
       }
-      refresh(); // Làm mới danh sách sự kiện
-      onClose(); // Đóng dialog
+
+      refresh();
+      onClose();
     } catch (error) {
       console.error("Lỗi khi lưu sự kiện:", error);
-      sweetAlert.alertFailed("Có lỗi xảy ra khi lưu sự kiện!", "", 1000, 22);
+      sweetAlert.alertFailed("Có lỗi xảy ra khi lưu sự kiện!", "", 3000, 25);
     } finally {
-      setLoading(false);
+      disableLoading();
     }
   };
 
@@ -191,151 +143,373 @@ const EventDialog: React.FC<EventDialogProps> = ({
         {event ? "Chỉnh sửa sự kiện" : "Thêm mới sự kiện"}
       </DialogTitle>
       <DialogContent>
-        <FormControl fullWidth margin="normal">
-          <InputLabel>Danh mục sự kiện</InputLabel>
-          <Select
-            value={selectedCategoryId || ""}
-            onChange={(e) => setSelectedCategoryId(e.target.value)}
-            label="Danh mục sự kiện"
-            disabled={loading}
-          >
-            {eventCategories.map((category) => (
-              <MenuItem key={category.id} value={category.id}>
-                {category.name}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-        <TextField
-          label="Tên sự kiện"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          fullWidth
-          margin="normal"
-          disabled={loading}
-        />
-        <TextField
-          label="Mô tả"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          fullWidth
-          margin="normal"
-          multiline
-          rows={4}
-          disabled={loading}
-        />
-        <TextField
-          label="Thời gian bắt đầu"
-          type="date"
-          value={startTime}
-          onChange={(e) => setStartTime(e.target.value)}
-          fullWidth
-          margin="normal"
-          InputLabelProps={{
-            shrink: true,
+        <Formik
+          initialValues={{
+            eventCategoryId: event?.eventCategory?.id || "",
+            name: event?.name || "",
+            description: event?.description || "",
+            startTime: event?.startTime?.split("T")[0] || "",
+            endTime: event?.endTime?.split("T")[0] || "",
+            address: event?.address || "",
+            current_budget: event?.current_budget || 0,
+            isPeriodic: event?.isPeriodic || false,
+            isCheckedIn: event?.isCheckedIn || false,
+            eventStatus: event?.eventStatus || 0,
           }}
-          disabled={loading}
-        />
-        <TextField
-          label="Thời gian kết thúc"
-          type="date"
-          value={endTime}
-          onChange={(e) => setEndTime(e.target.value)}
-          fullWidth
-          margin="normal"
-          InputLabelProps={{
-            shrink: true,
-          }}
-          disabled={loading}
-        />
-        <TextField
-          label="Địa chỉ tổ chức"
-          value={address}
-          onChange={(e) => setAddress(e.target.value)}
-          fullWidth
-          margin="normal"
-          disabled={loading}
-        />
-        <TextField
-          label="Ngân sách hiện tại"
-          type="number"
-          value={currentBudget}
-          onChange={(e) => setCurrentBudget(Number(e.target.value))}
-          fullWidth
-          margin="normal"
-          disabled={loading}
-        />
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={isPeriodic}
-              onChange={(e) => setIsPeriodic(e.target.checked)}
-              disabled={loading}
-            />
-          }
-          label="Sự kiện định kì"
-        />
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={isCheckedIn}
-              onChange={(e) => setIsCheckedIn(e.target.checked)}
-              disabled={loading}
-            />
-          }
-          label="Có điểm danh"
-        />
+          validationSchema={validationSchema}
+          onSubmit={handleSubmit}
+        >
+          {({ values, handleChange, setFieldValue, errors, touched }) => (
+            <Form>
+              {/* Danh mục sự kiện */}
+              <FormControl
+                fullWidth
+                margin="normal"
+                error={touched.eventCategoryId && !!errors.eventCategoryId}
+              >
+                <InputLabel>
+                  Danh mục sự kiện <span style={{ color: "red" }}>*</span>
+                </InputLabel>
+                <Select
+                  name="eventCategoryId"
+                  value={values.eventCategoryId}
+                  onChange={handleChange}
+                  label={
+                    <span>
+                      Danh mục sự kiện <span style={{ color: "red" }}>*</span>
+                    </span>
+                  }
+                  disabled={event ? true : false}
+                >
+                  {eventCategories.map((category) => (
+                    <MenuItem key={category.id} value={category.id}>
+                      {category.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+                <ErrorMessage name="eventCategoryId">
+                  {(msg) => (
+                    <p className="ml-3 text-[0.8rem]" style={{ color: "red" }}>
+                      {msg}
+                    </p>
+                  )}
+                </ErrorMessage>
+              </FormControl>
+
+              {/* Tên sự kiện */}
+              <TextField
+                fullWidth
+                label={
+                  <span>
+                    Tên sự kiện <span style={{ color: "red" }}>*</span>
+                  </span>
+                }
+                name="name"
+                value={values.name}
+                onChange={handleChange}
+                margin="normal"
+                error={touched.name && !!errors.name}
+                helperText={touched.name && errors.name}
+                disabled={values.eventStatus != EventStatus.Not_Started}
+              />
+
+              {/* Mô tả */}
+              <TextField
+                fullWidth
+                label={
+                  <span>
+                    Mô tả <span style={{ color: "red" }}>*</span>
+                  </span>
+                }
+                name="description"
+                value={values.description}
+                onChange={handleChange}
+                margin="normal"
+                multiline
+                rows={3}
+                disabled={values.eventStatus != EventStatus.Not_Started}
+                error={touched.description && !!errors.description}
+                helperText={touched.description && errors.description}
+              />
+
+              {/* Thời gian */}
+              <TextField
+                label={
+                  <span>
+                    Thời gian bắt đầu <span style={{ color: "red" }}>*</span>
+                  </span>
+                }
+                name="startTime"
+                type="date"
+                value={values.startTime || ""}
+                onChange={handleChange}
+                InputLabelProps={{ shrink: true }}
+                error={touched.startTime && !!errors.startTime}
+                helperText={touched.startTime && errors.startTime}
+                fullWidth
+                rows={3}
+                margin="normal"
+                disabled={values.eventStatus != EventStatus.Not_Started}
+              />
+
+              <TextField
+                label={
+                  <span>
+                    Thời gian kết thúc <span style={{ color: "red" }}>*</span>
+                  </span>
+                }
+                name="endTime"
+                type="date"
+                value={values.endTime || ""}
+                onChange={handleChange}
+                InputLabelProps={{ shrink: true }}
+                error={touched.endTime && !!errors.endTime}
+                helperText={touched.endTime && errors.endTime}
+                fullWidth
+                rows={3}
+                margin="normal"
+                disabled={
+                  values.eventStatus != EventStatus.Not_Started &&
+                  values.eventStatus != EventStatus.In_Progress
+                }
+              />
+
+              {/* Địa chỉ */}
+              <TextField
+                fullWidth
+                label={
+                  <span>
+                    Địa chỉ tổ chức <span style={{ color: "red" }}>*</span>
+                  </span>
+                }
+                name="address"
+                value={values.address}
+                onChange={handleChange}
+                margin="normal"
+                error={touched.address && !!errors.address}
+                helperText={touched.address && errors.address}
+                disabled={
+                  values.eventStatus != EventStatus.Not_Started &&
+                  values.eventStatus != EventStatus.In_Progress
+                }
+              />
+
+              {/* Ngân sách */}
+              <TextField
+                fullWidth
+                label={
+                  <span>
+                    Ngân sách hiện tại <span style={{ color: "red" }}>*</span>
+                  </span>
+                }
+                name="current_budget"
+                // type="number"
+                value={formatCurrencyVND(values.current_budget)}
+                onChange={(e) => {
+                  const numericValue = Number(
+                    e.target.value.replace(/[^\d]/g, "")
+                  );
+                  setFieldValue("current_budget", numericValue); // Chỉ giữ lại số
+                }}
+                margin="normal"
+                error={touched.current_budget && !!errors.current_budget}
+                helperText={touched.current_budget && errors.current_budget}
+                InputProps={{
+                  startAdornment: <span style={{ marginRight: "5px" }}>₫</span>,
+                }}
+                disabled={
+                  values.eventStatus != EventStatus.Not_Started &&
+                  values.eventStatus != EventStatus.In_Progress
+                }
+              />
+
+              {event ? (
+                <>
+                  <FormControl fullWidth margin="normal">
+                    <InputLabel>
+                      Trạng thái sự kiện <span style={{ color: "red" }}>*</span>
+                    </InputLabel>
+
+                    {event.eventStatus == EventStatus.Not_Started ? (
+                      <>
+                        <Select
+                          name="eventStatus"
+                          value={values.eventStatus}
+                          onChange={handleChange}
+                          fullWidth
+                          label={
+                            <span>
+                              Trạng thái sự kiện{" "}
+                              <span style={{ color: "red" }}>*</span>
+                            </span>
+                          }
+                          className={`
+                ${values.eventStatus == EventStatus.Not_Started ? " text-black" : ""}
+                ${values.eventStatus == EventStatus.In_Progress ? " text-yellow-600" : ""}
+                ${values.eventStatus == EventStatus.Completed ? " text-success" : ""}
+              ${values.eventStatus == EventStatus.Cancelled ? " text-danger" : ""}`}
+                        >
+                          <MenuItem
+                            value={EventStatus.Not_Started}
+                            className="bg-success text-white bg-black py-3"
+                          >
+                            {EventStatusString.Not_Started}
+                          </MenuItem>
+
+                          <MenuItem
+                            value={EventStatus.In_Progress}
+                            className="bg-success text-black bg-warning py-3"
+                          >
+                            {EventStatusString.In_Progress}
+                          </MenuItem>
+
+                          <MenuItem
+                            value={EventStatus.Cancelled}
+                            className="bg-success text-white bg-danger py-3"
+                          >
+                            {EventStatusString.Cancelled}
+                          </MenuItem>
+                        </Select>
+                      </>
+                    ) : (
+                      <></>
+                    )}
+
+                    {event.eventStatus == EventStatus.In_Progress ? (
+                      <>
+                        <Select
+                          name="eventStatus"
+                          value={values.eventStatus}
+                          onChange={handleChange}
+                          fullWidth
+                          label={
+                            <span>
+                              Trạng thái sự kiện{" "}
+                              <span style={{ color: "red" }}>*</span>
+                            </span>
+                          }
+                          className={`
+                ${values.eventStatus == EventStatus.Not_Started ? " text-black" : ""}
+                ${values.eventStatus == EventStatus.In_Progress ? " text-yellow-600" : ""}
+                ${values.eventStatus == EventStatus.Completed ? " text-success" : ""}
+              ${values.eventStatus == EventStatus.Cancelled ? " text-danger" : ""}`}
+                        >
+                          <MenuItem
+                            value={EventStatus.In_Progress}
+                            className="bg-success text-black bg-warning py-3"
+                          >
+                            {EventStatusString.In_Progress}
+                          </MenuItem>
+
+                          <MenuItem
+                            value={EventStatus.Completed}
+                            className="bg-success text-white bg-success py-3"
+                          >
+                            {EventStatusString.Completed}
+                          </MenuItem>
+
+                          <MenuItem
+                            value={EventStatus.Cancelled}
+                            className="bg-success text-white bg-danger py-3"
+                          >
+                            {EventStatusString.Cancelled}
+                          </MenuItem>
+                        </Select>
+                      </>
+                    ) : (
+                      <></>
+                    )}
+                  </FormControl>
+                </>
+              ) : (
+                <></>
+              )}
+
+              {/* Checkbox */}
+              {/* <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={values.isPeriodic}
+                    onChange={(e) =>
+                      setFieldValue("isPeriodic", e.target.checked)
+                    }
+                  />
+                }
+                label="Sự kiện định kỳ"
+              />
+
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={values.isCheckedIn}
+                    onChange={(e) =>
+                      setFieldValue("isCheckedIn", e.target.checked)
+                    }
+                  />
+                }
+                label="Có điểm danh"
+              /> */}
+
+              <ReasonDialog
+                open={openReasonDialog}
+                onClose={() => setOpenReasonDialog(false)}
+                onConfirm={async (reason, images) => {
+                  if (!event) return;
+                  enableLoading();
+                  try {
+                    const dataToSend = {
+                      ...values,
+                      startTime: new Date(values.startTime).toISOString(),
+                      endTime: new Date(values.endTime).toISOString(),
+                    };
+                    await eventApi.updateEvent(event.id, dataToSend);
+
+                    await budgetTransactionApi.createBudgetTransaction({
+                      eventId: event.id,
+                      fromBudget: event.current_budget,
+                      toBudget: pendingBudgetChange!,
+                      note: reason,
+                      transactionImages: images,
+                    });
+
+                    sweetAlert.alertSuccess(
+                      "Cập nhật sự kiện thành công!",
+                      "",
+                      3000,
+                      25
+                    );
+
+                    refresh();
+                    onClose();
+                  } catch (error) {
+                    console.error("Lỗi khi cập nhật:", error);
+                    sweetAlert.alertFailed(
+                      "Có lỗi xảy ra khi lưu sự kiện!",
+                      "",
+                      3000,
+                      25
+                    );
+                  } finally {
+                    setOpenReasonDialog(false);
+                    setPendingBudgetChange(null);
+                    disableLoading();
+                  }
+                }}
+              />
+
+              {/* Actions */}
+              <DialogActions>
+                <Button onClick={onClose} color="secondary">
+                  Hủy
+                </Button>
+                <Button type="submit" color="primary">
+                  Lưu
+                </Button>
+              </DialogActions>
+            </Form>
+          )}
+        </Formik>
       </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose} color="secondary" disabled={loading}>
-          Hủy
-        </Button>
-        <Button onClick={handleSave} color="primary" disabled={loading}>
-          Lưu
-        </Button>
-      </DialogActions>
-
-      <ReasonDialog
-        open={openReasonDialog}
-        onClose={() => setOpenReasonDialog(false)}
-        onConfirm={async (reason, images) => {
-          if (!event) return;
-
-          try {
-            await eventApi.updateEvent(event.id, {
-              name,
-              description,
-              isPeriodic,
-              isCheckedIn,
-              address,
-              startTime: new Date(startTime).toISOString(),
-              endTime: new Date(endTime).toISOString(),
-              current_budget: currentBudget,
-              eventStatus: 0,
-              eventCategoryId: selectedCategoryId ?? "",
-            });
-
-            await budgetTransactionApi.createBudgetTransaction({
-              eventId: event.id,
-              fromBudget: event.current_budget,
-              toBudget: pendingBudgetChange!,
-              note: reason,
-              transactionImages: images,
-            });
-
-            sweetAlert.alertSuccess("Cập nhật thành công!", "", 1000, 22);
-            refresh();
-            onClose();
-          } catch (error) {
-            console.error("Lỗi khi cập nhật:", error);
-            sweetAlert.alertFailed("Không thể cập nhật!", "", 1000, 22);
-          } finally {
-            setLoading(false);
-            setOpenReasonDialog(false);
-            setPendingBudgetChange(null);
-          }
-        }}
-      />
     </Dialog>
   );
 };

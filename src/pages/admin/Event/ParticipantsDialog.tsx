@@ -48,12 +48,12 @@ const ParticipantsDialog: React.FC<{
             id: participant.id,
           }))}
           columns={columns}
-          autoHeight
-          pageSizeOptions={[5, 10, 25]}
+          paginationMode="client"
+          disableRowSelectionOnClick
         />
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose} color="secondary">
+        <Button onClick={onClose} color="primary">
           Đóng
         </Button>
       </DialogActions>

@@ -1,3 +1,5 @@
+import { CatechistItemResponse } from "../Catechist";
+
 // src/model/Response/account/AccountResponse.ts
 export type RoleInAccountResponse = {
     id: string;
@@ -32,6 +34,7 @@ export type AccountResponse = {
     avatar: string,
     role: RoleInAccountResponse;
     interviews: InterviewResponse[];
+    cate?:CatechistItemResponse
   };
 
   export type RecruitersByMeetingTimeResponse = {

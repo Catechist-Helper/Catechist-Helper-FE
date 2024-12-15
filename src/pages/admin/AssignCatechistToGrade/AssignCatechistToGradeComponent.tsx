@@ -57,7 +57,7 @@ export default function AssignCatechistToGradeComponent() {
   const [paginationModel3, setPaginationModel3] = useState<GridPaginationModel>(
     {
       page: 0,
-      pageSize: 100,
+      pageSize: 10,
     }
   );
   const [viewMode, setViewMode] = useState<boolean>(false);
@@ -441,13 +441,6 @@ export default function AssignCatechistToGradeComponent() {
         disableLoading();
         return;
       }
-
-      console.log("hehhehehehe", {
-        gradeId: selectedGradeToMove.value,
-        catechistIds: selectedOverLevelCatechists.map((item) => {
-          return item.toString();
-        }),
-      });
       await catechistInGradeApi.replaceCatechistToAnotherGrade({
         gradeId: selectedGradeToMove.value,
         catechistIds: selectedOverLevelCatechists.map((item) => {
@@ -469,7 +462,7 @@ export default function AssignCatechistToGradeComponent() {
 
   return (
     <Paper sx={{ width: "calc(100% - 3.8rem)", position: "absolute" }}>
-      <h1 className="text-center text-[2.2rem] bg-primary_color text-text_primary_light py-2 font-bold">
+      <h1 className="text-center text-[2.2rem] bg_title text-text_primary_light py-2 font-bold">
         Giáo lý viên thuộc {gradeName}
       </h1>
 
@@ -515,7 +508,7 @@ export default function AssignCatechistToGradeComponent() {
                   rowCount={catechists.length}
                   loading={loading}
                   paginationModel={paginationModel}
-                  pageSizeOptions={[2, 25, 50]}
+                  pageSizeOptions={[4, 10, 25, 50, 100, 250]}
                   onPaginationModelChange={setPaginationModel}
                   checkboxSelection
                   sx={{ border: 0 }}
@@ -548,7 +541,7 @@ export default function AssignCatechistToGradeComponent() {
               onPaginationModelChange={(newModel) =>
                 setPaginationModel2(newModel)
               }
-              pageSizeOptions={[4, 25, 50]}
+              pageSizeOptions={[4, 10, 25, 50, 100, 250]}
               checkboxSelection
               sx={{ border: 0 }}
               localeText={viVNGridTranslation}
@@ -617,7 +610,7 @@ export default function AssignCatechistToGradeComponent() {
               onPaginationModelChange={(newModel) =>
                 setPaginationModel3(newModel)
               }
-              pageSizeOptions={[100, 250, 500]}
+              pageSizeOptions={[10, 25, 50, 100, 250]}
               checkboxSelection
               sx={{ border: 0 }}
               localeText={viVNGridTranslation}
@@ -666,7 +659,7 @@ export default function AssignCatechistToGradeComponent() {
               </Button>
               <Button
                 variant="outlined"
-                color="error"
+                color="success"
                 onClick={() => navigate(-1)}
               >
                 Hủy bỏ

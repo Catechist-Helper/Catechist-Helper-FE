@@ -9,7 +9,7 @@ import {
   MenuItem,
   FormControl,
 } from "@mui/material";
-import { DataGrid } from "@mui/x-data-grid";
+import { DataGrid, GridColDef, GridPaginationModel } from "@mui/x-data-grid";
 import memberApi from "../../../api/EventMember";
 import eventApi from "../../../api/Event";
 import accountApi from "../../../api/Account";
@@ -24,6 +24,8 @@ interface OrganizersDialogProps {
   onClose: () => void;
   eventId: string;
   refresh: () => void;
+  viewOrganizersDialogMode: boolean;
+  catechistMode?: boolean;
 }
 
 const OrganizersDialog: React.FC<OrganizersDialogProps> = ({
@@ -31,6 +33,8 @@ const OrganizersDialog: React.FC<OrganizersDialogProps> = ({
   onClose,
   eventId,
   refresh,
+  viewOrganizersDialogMode,
+  catechistMode,
 }) => {
   const [availableAccounts, setAvailableAccounts] = useState<any[]>([]);
   const [organizers, setOrganizers] = useState<
@@ -42,6 +46,16 @@ const OrganizersDialog: React.FC<OrganizersDialogProps> = ({
   >([]);
   const [roles, setRoles] = useState<any[]>([]);
   const { enableLoading, disableLoading } = useAppContext();
+  const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({
+    page: 0,
+    pageSize: 8,
+  });
+  const [paginationModel2, setPaginationModel2] = useState<GridPaginationModel>(
+    {
+      page: 0,
+      pageSize: 8,
+    }
+  );
 
   useEffect(() => {
     const fetchAccountsAndRoles = async () => {
@@ -113,8 +127,8 @@ const OrganizersDialog: React.FC<OrganizersDialogProps> = ({
       sweetAlert.alertWarning(
         "Chỉ được có 1 Trưởng Ban Tổ Chức!",
         "",
-        1000,
-        22
+        3000,
+        27
       );
       return;
     }
@@ -162,57 +176,56 @@ const OrganizersDialog: React.FC<OrganizersDialogProps> = ({
         RoleEventName.TRUONG_BTC
     ).length;
 
-    // const phoCount = organizers.filter(
-    //   (org) =>
-    //     roles.find((r) => r.id === org.roleEventId)?.name ===
-    //     RoleEventName.PHO_BTC
-    // ).length;
+    const phoCount = organizers.filter(
+      (org) =>
+        roles.find((r) => r.id === org.roleEventId)?.name ===
+        RoleEventName.PHO_BTC
+    ).length;
 
-    // const memberCount = organizers.filter(
-    //   (org) =>
-    //     roles.find((r) => r.id === org.roleEventId)?.name ===
-    //     RoleEventName.MEMBER_BTC
-    // ).length;
+    const memberCount = organizers.filter(
+      (org) =>
+        roles.find((r) => r.id === org.roleEventId)?.name ===
+        RoleEventName.MEMBER_BTC
+    ).length;
 
     if (truongCount !== 1) {
       sweetAlert.alertWarning(
         "Cần chính xác 1 Trưởng Ban Tổ Chức!",
         "",
-        1000,
-        22
+        2500,
+        26
+      );
+      return;
+    }
+    if (phoCount < 1 || phoCount > 2) {
+      sweetAlert.alertWarning(
+        "Cần chính xác 1 hoặc 2 Phó Ban Tổ Chức!",
+        "",
+        2500,
+        30
       );
       return;
     }
 
-    // if (phoCount < 1 || phoCount > 2) {
-    //   sweetAlert.alertWarning(
-    //     "Cần ít nhất 1 và tối đa 2 Phó Ban Tổ Chức!",
-    //     "",
-    //     1000,
-    //     22
-    //   );
-    //   return;
-    // }
-
-    // if (memberCount < 1) {
-    //   sweetAlert.alertWarning(
-    //     "Cần ít nhất 1 Thành Viên Ban Tổ Chức!",
-    //     "",
-    //     1000,
-    //     22
-    //   );
-    //   return;
-    // }
+    if (memberCount <= 0) {
+      sweetAlert.alertWarning(
+        "Cần ít nhất 1 Thành Viên Ban Tổ Chức!",
+        "",
+        2500,
+        30
+      );
+      return;
+    }
 
     try {
       await memberApi.updateEventMember(eventId, organizers);
-      sweetAlert.alertSuccess("Cập nhật ban tổ chức thành công!", "", 1000, 22);
+      sweetAlert.alertSuccess("Cập nhật ban tổ chức thành công!", "", 3000, 28);
       refresh();
       onClose();
     } catch (error) {
       console.error("Error saving organizers:", error);
+      sweetAlert.alertFailed("Có lỗi khi cập nhật ban tổ chức!", "", 3000, 28);
     } finally {
-      sweetAlert.alertSuccess("Cập nhật ban tổ chức thành công!", "", 1000, 22);
       refresh();
       onClose();
     }
@@ -237,142 +250,239 @@ const OrganizersDialog: React.FC<OrganizersDialogProps> = ({
 
     return getRoleOrder(roleNameA) - getRoleOrder(roleNameB);
   });
+  const [updateMode, setUpdateMode] = useState<boolean>(false);
+  const columns: GridColDef[] = [
+    {
+      field: "avatar",
+      headerName: "Avatar",
+      width: 100,
+      renderCell: (params) => (
+        <img
+          src={params.row.avatar || "https://via.placeholder.com/50"}
+          alt="Avatar"
+          width={50}
+          height={50}
+          style={{ borderRadius: "3px" }}
+        />
+      ),
+    },
+    { field: "fullName", headerName: "Họ và Tên", width: 200 },
+    { field: "phone", headerName: "Số Điện Thoại", width: 150 },
+    {
+      field: "roleEventId",
+      headerName: "Vai trò",
+      width: 300,
+      renderCell: (params) =>
+        viewOrganizersDialogMode ? (
+          <>
+            {roles.find((r) => r.id === params.value)
+              ? roles.find((r) => r.id === params.value).name
+              : ""}
+          </>
+        ) : (
+          <>
+            <FormControl fullWidth>
+              <MuiSelect
+                onChange={(e) => {
+                  handleAddOrganizer(
+                    params.row,
+                    e.target.value as string,
+                    () => {
+                      handleRemoveOrganizer(params.row.id);
+                    }
+                  );
+                }}
+                defaultValue={
+                  roles.find((r) => r.id === params.value)
+                    ? roles.find((r) => r.id === params.value).id
+                    : ""
+                }
+                value={
+                  organizers.find((item) => item.id == params.row.id)
+                    ?.roleEventId
+                }
+                disabled={viewOrganizersDialogMode}
+              >
+                <MenuItem value="" disabled>
+                  Chọn vai trò
+                </MenuItem>
+                {roles.map((role) => (
+                  <MenuItem key={role.id} value={role.id}>
+                    {role.name}
+                  </MenuItem>
+                ))}
+              </MuiSelect>
+            </FormControl>
+          </>
+        ),
+    },
+  ];
+
+  if (!viewOrganizersDialogMode || (viewOrganizersDialogMode && updateMode)) {
+    columns.push({
+      field: "action",
+      headerName: "Xóa",
+      width: 150,
+      renderCell: (params) => (
+        <Button
+          color="error"
+          onClick={() => handleRemoveOrganizer(params.row.id)}
+        >
+          Xóa
+        </Button>
+      ),
+    });
+  }
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="xl" fullWidth>
-      <DialogTitle>Cập nhật Ban Tổ Chức</DialogTitle>
+      <DialogTitle>
+        {viewOrganizersDialogMode ? (
+          <>{updateMode ? "Cập Nhật Ban Tổ Chức" : "Xem Ban Tổ Chức"}</>
+        ) : (
+          "Thêm Ban Tổ Chức"
+        )}
+      </DialogTitle>
       <DialogContent>
-        <h4>Danh sách Người Dùng</h4>
-        <DataGrid
-          rows={availableAccounts}
-          columns={[
-            {
-              field: "avatar",
-              headerName: "Avatar",
-              width: 100,
-              renderCell: (params) => (
-                <img
-                  src={params.row.avatar || "https://via.placeholder.com/50"}
-                  alt="Avatar"
-                  width={50}
-                  height={50}
-                  style={{ borderRadius: "3px" }}
-                />
-              ),
-            },
-            { field: "fullName", headerName: "Họ và Tên", width: 200 },
-            { field: "phone", headerName: "Số Điện Thoại", width: 150 },
-            {
-              field: "action",
-              headerName: "Thêm",
-              width: 300,
-              renderCell: (params) => (
-                <FormControl fullWidth>
-                  <MuiSelect
-                    onChange={(e) =>
-                      handleAddOrganizer(params.row, e.target.value as string)
-                    }
-                    defaultValue=""
-                    value={
-                      availableAccounts.find((item) => item.id == params.row.id)
-                        .roleEventId
-                    }
-                  >
-                    <MenuItem value="" disabled>
-                      Chọn vai trò
-                    </MenuItem>
-                    {roles.map((role) => (
-                      <MenuItem key={role.id} value={role.id}>
-                        {role.name}
-                      </MenuItem>
-                    ))}
-                  </MuiSelect>
-                </FormControl>
-              ),
-            },
-          ]}
-          autoHeight
-        />
-        <h4 className="mt-3">Danh sách Ban Tổ Chức</h4>
-        <DataGrid
-          rows={sortedOrganizers}
-          columns={[
-            {
-              field: "avatar",
-              headerName: "Avatar",
-              width: 100,
-              renderCell: (params) => (
-                <img
-                  src={params.row.avatar || "https://via.placeholder.com/50"}
-                  alt="Avatar"
-                  width={50}
-                  height={50}
-                  style={{ borderRadius: "3px" }}
-                />
-              ),
-            },
-            { field: "fullName", headerName: "Họ và Tên", width: 200 },
-            { field: "phone", headerName: "Số Điện Thoại", width: 150 },
-            {
-              field: "roleEventId",
-              headerName: "Vai trò",
-              width: 300,
-              renderCell: (params) => (
-                <FormControl fullWidth>
-                  <MuiSelect
-                    onChange={(e) => {
-                      handleAddOrganizer(
-                        params.row,
-                        e.target.value as string,
-                        () => {
-                          handleRemoveOrganizer(params.row.id);
+        {!viewOrganizersDialogMode ||
+        (viewOrganizersDialogMode && updateMode) ? (
+          <>
+            <h4>Danh sách Chưa Gán</h4>
+            <DataGrid
+              rows={availableAccounts}
+              columns={[
+                {
+                  field: "avatar",
+                  headerName: "Ảnh",
+                  width: 100,
+                  renderCell: (params) => (
+                    <img
+                      src={
+                        params.row.avatar || "https://via.placeholder.com/50"
+                      }
+                      alt="Avatar"
+                      width={50}
+                      height={50}
+                      style={{ borderRadius: "3px" }}
+                    />
+                  ),
+                },
+                { field: "fullName", headerName: "Họ và Tên", width: 200 },
+                { field: "phone", headerName: "Số Điện Thoại", width: 150 },
+                {
+                  field: "action",
+                  headerName: "Thêm",
+                  width: 300,
+                  renderCell: (params) => (
+                    <FormControl fullWidth>
+                      <MuiSelect
+                        onChange={(e) =>
+                          handleAddOrganizer(
+                            params.row,
+                            e.target.value as string
+                          )
                         }
-                      );
-                    }}
-                    defaultValue={
-                      roles.find((r) => r.id === params.value)
-                        ? roles.find((r) => r.id === params.value).id
-                        : ""
-                    }
-                    value={
-                      organizers.find((item) => item.id == params.row.id)
-                        ?.roleEventId
-                    }
-                  >
-                    <MenuItem value="" disabled>
-                      Chọn vai trò
-                    </MenuItem>
-                    {roles.map((role) => (
-                      <MenuItem key={role.id} value={role.id}>
-                        {role.name}
-                      </MenuItem>
-                    ))}
-                  </MuiSelect>
-                </FormControl>
-              ),
-            },
-            {
-              field: "action",
-              headerName: "Xóa",
-              width: 150,
-              renderCell: (params) => (
-                <Button
-                  color="error"
-                  onClick={() => handleRemoveOrganizer(params.row.id)}
-                >
-                  Xóa
-                </Button>
-              ),
-            },
-          ]}
-          autoHeight
-        />
+                        defaultValue=""
+                        value={
+                          availableAccounts.find(
+                            (item) => item.id == params.row.id
+                          ).roleEventId
+                        }
+                      >
+                        <MenuItem value="" disabled>
+                          Chọn vai trò
+                        </MenuItem>
+                        {roles.map((role) => (
+                          <MenuItem key={role.id} value={role.id}>
+                            {role.name}
+                          </MenuItem>
+                        ))}
+                      </MuiSelect>
+                    </FormControl>
+                  ),
+                },
+              ]}
+              paginationModel={paginationModel}
+              onPaginationModelChange={setPaginationModel}
+              pageSizeOptions={[8, 10, 25, 50, 100, 250]}
+              autoHeight
+              disableRowSelectionOnClick
+            />
+          </>
+        ) : (
+          <></>
+        )}
+
+        <h4 className="mt-3">Danh sách Ban Tổ Chức</h4>
+        {sortedOrganizers.length > 0 ? (
+          <>
+            <DataGrid
+              rows={sortedOrganizers}
+              columns={columns}
+              paginationModel={paginationModel2}
+              onPaginationModelChange={setPaginationModel2}
+              pageSizeOptions={[8, 10, 25, 50, 100, 250]}
+              autoHeight
+              checkboxSelection={viewOrganizersDialogMode ? false : true}
+              disableRowSelectionOnClick
+            />
+          </>
+        ) : (
+          <p className="text-primary mt-2">Hiện chưa có ai trong ban tổ chức</p>
+        )}
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Hủy</Button>
-        <Button onClick={handleSave} color="primary">
-          Lưu
-        </Button>
+        {viewOrganizersDialogMode ? (
+          <>
+            {updateMode ? (
+              <>
+                <Button variant="outlined" onClick={handleSave} color="primary">
+                  Lưu
+                </Button>
+                <Button
+                  variant="outlined"
+                  color="secondary"
+                  onClick={() => {
+                    setUpdateMode(false);
+                  }}
+                >
+                  Hủy
+                </Button>
+              </>
+            ) : (
+              <>
+                {catechistMode ? (
+                  <></>
+                ) : (
+                  <>
+                    <Button
+                      variant="contained"
+                      onClick={() => {
+                        setUpdateMode(true);
+                      }}
+                      color="primary"
+                    >
+                      Cập nhật
+                    </Button>
+                  </>
+                )}
+
+                <Button variant="contained" color="secondary" onClick={onClose}>
+                  Đóng
+                </Button>
+              </>
+            )}
+          </>
+        ) : (
+          <>
+            <Button variant="outlined" color="secondary" onClick={onClose}>
+              Hủy
+            </Button>
+            <Button variant="outlined" onClick={handleSave} color="primary">
+              Lưu
+            </Button>
+          </>
+        )}
       </DialogActions>
     </Dialog>
   );

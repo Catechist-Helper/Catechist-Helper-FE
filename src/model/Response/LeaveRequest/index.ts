@@ -1,16 +1,15 @@
-export interface GetLeaveRequestItemResponse {
+export interface GetLeaveRequestItemResponse 
+{
   id: string,
-      status: number,
-      approverId: string|null,
-      comment: string,
-      approvalDate: string|null,
-      createAt: string,
-      updateAt: string,
-      leaveDate: string,
-      catechistName: string,
-      approver: string|null,
-      catechistId: string,
-      reason: string,
-      replacementCatechistId?: string|null,
-      replacementCatechistName?: string|null,
-    }
+  reason: string,
+  comment: string | null,
+  approvalDate: string | null,
+  catechistId: string,
+  catechistName: string,
+  approver: any,
+  status: number,
+  approverId:  string | null,
+  createAt: string,
+  updateAt:  string | null,
+  leaveDate: string | null
+}

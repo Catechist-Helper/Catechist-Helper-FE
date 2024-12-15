@@ -160,12 +160,37 @@ export default function MajorComponent() {
 
   // Handle creating Major
   const handleCreateMajor = async () => {
+    if (majorName == "") {
+      sweetAlert.alertWarning("Vui lòng nhập tên ngành", "", 3000, 23);
+      return;
+    } else if (
+      majorName &&
+      rows.find(
+        (item) =>
+          item.name.trim().toLowerCase() == majorName.trim().toLowerCase()
+      )
+    ) {
+      sweetAlert.alertWarning("Tên ngành này đã tồn tại", "", 3000, 23);
+      return;
+    }
+
+    if (!majorLevel || majorLevel <= 0) {
+      sweetAlert.alertWarning("Vui lòng nhập cấp độ lớn hơn 0", "", 3000, 26);
+      return;
+    } else if (
+      majorLevel &&
+      rows.find((item) => item.hierarchyLevel == majorLevel)
+    ) {
+      sweetAlert.alertWarning("Cấp độ ngành này đã tồn tại", "", 3000, 25);
+      return;
+    }
+
     try {
       await majorApi.createMajor({
         name: majorName,
         hierarchyLevel: majorLevel ?? 0,
       });
-      sweetAlert.alertSuccess("Tạo ngành thành công!", "", 5000, 25);
+      sweetAlert.alertSuccess("Tạo ngành thành công!", "", 2500, 24);
       fetchMajors();
       setOpenDialog(false);
     } catch (error: any) {
@@ -180,7 +205,7 @@ export default function MajorComponent() {
           25
         );
       } else {
-        sweetAlert.alertFailed("Có lỗi xảy ra khi tạo ngành", "", 5000, 25);
+        sweetAlert.alertFailed("Có lỗi xảy ra khi tạo ngành", "", 2500, 25);
       }
     }
   };
@@ -200,6 +225,19 @@ export default function MajorComponent() {
       const selectedRow: any = rows.find(
         (row) => row.id === selectedRows[0].toString()
       );
+
+      const confirm = await sweetAlert.confirm(
+        `
+      Xác nhận xóa ngành ${selectedRow.name}`,
+        "",
+        undefined,
+        undefined,
+        "question"
+      );
+
+      if (!confirm) {
+        return;
+      }
       if (!selectedRow) {
         sweetAlert.alertFailed(
           "Có lỗi khi xóa ngành",
@@ -273,8 +311,9 @@ export default function MajorComponent() {
                 onClick={() => {
                   handleDeleteMajor();
                 }}
-                variant="contained"
+                variant="outlined"
                 color="error"
+                className="btn btn-danger"
                 style={{ marginBottom: "16px" }}
               >
                 Xóa Ngành
@@ -285,8 +324,9 @@ export default function MajorComponent() {
 
             <Button
               onClick={handleOpenDialog}
-              variant="contained"
+              variant="outlined"
               color="primary"
+              className="btn btn-primary"
               style={{ marginBottom: "16px" }}
             >
               Thêm Ngành
@@ -295,7 +335,7 @@ export default function MajorComponent() {
             <Button
               onClick={handleRefresh}
               variant="contained"
-              color="secondary"
+              color="primary"
               style={{ marginBottom: "16px" }}
             >
               Tải lại
@@ -331,14 +371,21 @@ export default function MajorComponent() {
         maxWidth="sm"
       >
         <div style={{ padding: "20px" }}>
+          <label htmlFor="" className="ml-2 text-[1rem] text-gray-400">
+            Tên ngành <span style={{ color: "red" }}>*</span>
+          </label>
           <input
             type="text"
             name="nameMajor"
             value={majorName}
             onChange={(e) => setMajorName(e.target.value)}
             className="block w-full p-2 border border-gray-800 rounded-sm"
-            placeholder="Tên ngành"
+            placeholder="Nhập tên ngành"
           />
+
+          <label htmlFor="" className="ml-2 text-[1rem] text-gray-400 mt-4">
+            Cấp độ ngành <span style={{ color: "red" }}>*</span>
+          </label>
           <input
             type="number"
             name="levelMajor"
@@ -346,20 +393,11 @@ export default function MajorComponent() {
             onChange={(e) => {
               setMajorLevel(parseInt(e.target.value, 10));
             }}
-            className="block w-full p-2 border border-gray-800 rounded-sm my-3"
+            className="block w-full p-2 border border-gray-800 rounded-sm"
             min="0"
             placeholder="Cấp độ ngành"
           />
-          <div className="w-full flex justify-between">
-            <div>
-              <Button
-                onClick={handleCreateMajor}
-                variant="contained"
-                color="primary"
-              >
-                Lưu
-              </Button>
-            </div>
+          <div className="w-full flex justify-between mt-4">
             <div>
               <Button
                 onClick={() => {
@@ -369,6 +407,15 @@ export default function MajorComponent() {
                 color="primary"
               >
                 Hủy bỏ
+              </Button>
+            </div>
+            <div>
+              <Button
+                onClick={handleCreateMajor}
+                variant="contained"
+                color="primary"
+              >
+                Lưu
               </Button>
             </div>
           </div>

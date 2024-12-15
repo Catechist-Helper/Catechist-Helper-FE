@@ -21,11 +21,11 @@ const ReasonDialog: React.FC<{
 
   const handleConfirm = () => {
     if (!reason.trim()) {
-      sweetAlert.alertWarning("Vui lòng nhập lý do!", "", 1000, 22);
+      sweetAlert.alertWarning("Vui lòng nhập lý do!", "", 2500, 22);
       return;
     }
     onConfirm(reason, formData.images);
-    setReason(""); // Reset lý do sau khi xác nhận
+    setReason("");
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -61,11 +61,15 @@ const ReasonDialog: React.FC<{
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogContent>
-        <label className="block mb-1 text-sm font-medium">
+        <label className="block mb-3 text-sm font-medium">
           Lý do thay đổi ngân sách
         </label>
         <TextField
-          label="Nhập lý do"
+          label={
+            <span>
+              Nhập lý do <span style={{ color: "red" }}>*</span>
+            </span>
+          }
           value={reason}
           onChange={(e) => setReason(e.target.value)}
           fullWidth

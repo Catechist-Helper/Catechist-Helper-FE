@@ -27,78 +27,13 @@ import { formatDate } from "../../../utils/formatDate";
 import { formatPhone } from "../../../utils/utils";
 import sweetAlert from "../../../utils/sweetAlert";
 import useAppContext from "../../../hooks/useAppContext";
-import { AccountRoleString } from "../../../enums/Account";
 import {
   RegistrationProcessStatus,
   RegistrationProcessTitle,
 } from "../../../enums/RegistrationProcess";
 import { RoleNameEnum } from "../../../enums/RoleEnum";
 import RegistrationDetailDialog from "../ApprovedRegistration/RegistrationDetailDialog";
-
-const columns: GridColDef[] = [
-  { field: "fullName", headerName: "Tên đầy đủ", width: 230 },
-  { field: "gender", headerName: "Giới tính", width: 100 },
-  {
-    field: "dateOfBirth",
-    headerName: "Ngày sinh",
-    width: 110,
-    renderCell: (params) => {
-      return formatDate.DD_MM_YYYY(params.value);
-    },
-  },
-  { field: "email", headerName: "Email", width: 200 },
-  {
-    field: "phone",
-    headerName: "Số điện thoại",
-    width: 120,
-    renderCell: (params) => {
-      return formatPhone(params.value);
-    },
-  },
-  { field: "address", headerName: "Địa chỉ", width: 200 },
-  {
-    field: "isTeachingBefore",
-    headerName: "Đã từng dạy",
-    width: 120,
-    renderCell: (params) => (params.value ? "Có" : "Không"),
-  },
-  { field: "yearOfTeaching", headerName: "Số năm giảng dạy", width: 150 },
-  {
-    field: "createdAt",
-    headerName: "Thời gian nộp đơn",
-    width: 150,
-    renderCell: (params) => {
-      return formatDate.DD_MM_YYYY_Time(params.value);
-    },
-  },
-  { field: "note", headerName: "Ghi chú", width: 200 },
-  {
-    field: "status",
-    headerName: "Trạng thái",
-    width: 150,
-    renderCell: (params) => {
-      const status = params.value as RegistrationStatus;
-      switch (status) {
-        case RegistrationStatus.Pending:
-          return (
-            <span className="inline px-2 py-1 bg-yellow-400 rounded-lg">
-              Chờ duyệt
-            </span>
-          );
-        case RegistrationStatus.Approved_Duyet_Don:
-          return "Đã phê duyệt";
-        case RegistrationStatus.Rejected_Duyet_Don:
-          return (
-            <span className="inline px-2 py-1 bg-danger rounded-lg text-text_primary_light">
-              Bị từ chối
-            </span>
-          );
-        default:
-          return "Không xác định";
-      }
-    },
-  },
-];
+import catechistApi from "../../../api/Catechist";
 
 export default function RegistrationDataTable() {
   const [rows, setRows] = useState<RegistrationItemResponse[]>([]);
@@ -106,8 +41,14 @@ export default function RegistrationDataTable() {
   const { enableLoading, disableLoading } = useAppContext();
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({
     page: 0, // zero-based index for MUI DataGrid
-    pageSize: 8, // Default page size
+    pageSize: 10, // Default page size
   });
+  const [paginationModel2, setPaginationModel2] = useState<GridPaginationModel>(
+    {
+      page: 0,
+      pageSize: 8,
+    }
+  );
   const [rowCount, setRowCount] = useState<number>(0);
   const [selectedIds, setSelectedIds] = useState<GridRowSelectionModel>([]); // Cập nhật kiểu dữ liệu
   const [hasFunction, setHasFunction] = useState<boolean>(false);
@@ -128,6 +69,71 @@ export default function RegistrationDataTable() {
     useState<boolean>(false);
 
   const [viewMode, setViewMode] = useState<"pending" | "rejected">("pending"); // Trạng thái xem hiện tại
+
+  const columns: GridColDef[] = [
+    { field: "fullName", headerName: "Tên đầy đủ", width: 230 },
+    { field: "gender", headerName: "Giới tính", width: 100 },
+    {
+      field: "dateOfBirth",
+      headerName: "Ngày sinh",
+      width: 110,
+      renderCell: (params) => {
+        return formatDate.DD_MM_YYYY(params.value);
+      },
+    },
+    { field: "email", headerName: "Email", width: 200 },
+    {
+      field: "phone",
+      headerName: "Số điện thoại",
+      width: 120,
+      renderCell: (params) => {
+        return formatPhone(params.value);
+      },
+    },
+    { field: "address", headerName: "Địa chỉ", width: 200 },
+    {
+      field: "isTeachingBefore",
+      headerName: "Đã từng dạy",
+      width: 120,
+      renderCell: (params) => (params.value ? "Có" : "Không"),
+    },
+    { field: "yearOfTeaching", headerName: "Số năm giảng dạy", width: 150 },
+    {
+      field: "createdAt",
+      headerName: "Thời gian nộp đơn",
+      width: 150,
+      renderCell: (params) => {
+        return formatDate.DD_MM_YYYY_Time(params.value);
+      },
+    },
+    { field: "note", headerName: "Ghi chú", width: 200 },
+    {
+      field: "status",
+      headerName: "Trạng thái",
+      width: 150,
+      renderCell: (params) => {
+        const status = params.value as RegistrationStatus;
+        switch (status) {
+          case RegistrationStatus.Pending:
+            return (
+              <span className="inline px-2 py-1 bg-yellow-400 rounded-lg">
+                Chờ duyệt
+              </span>
+            );
+          case RegistrationStatus.Approved_Duyet_Don:
+            return "Đã phê duyệt";
+          case RegistrationStatus.Rejected_Duyet_Don:
+            return (
+              <span className="inline px-2 py-1 bg-danger rounded-lg text-text_primary_light">
+                Bị từ chối
+              </span>
+            );
+          default:
+            return "Không xác định";
+        }
+      },
+    },
+  ];
 
   // Hàm fetch các đơn đăng ký
   const fetchRegistrations = async (deleteModeOn?: boolean | string) => {
@@ -165,14 +171,15 @@ export default function RegistrationDataTable() {
       // Lọc các đơn theo chế độ xem hiện tại
       const filteredRegistrations =
         (deleteModeOn === true || deleteMode) && deleteModeOn != "false"
-          ? data.data.items.filter(
-              (item) =>
-                Number(formatDate.YYYY(item.createdAt)) <
-                Number(
-                  formatDate.YYYY(formatDate.getISODateInVietnamTimeZone())
-                )
-            )
-          : data.data.items;
+          ? data.data.items
+          : // .filter(
+            //     (item) =>
+            //       Number(formatDate.YYYY(item.createdAt)) <
+            //       Number(
+            //         formatDate.YYYY(formatDate.getISODateInVietnamTimeZone())
+            //       )
+            //   )
+            data.data.items;
 
       // Cập nhật state với dữ liệu mới
       setRows(filteredRegistrations);
@@ -198,34 +205,13 @@ export default function RegistrationDataTable() {
     setSelectedIds(newSelectionModel); // Cập nhật danh sách các ID được chọn
   };
 
-  // Hàm xóa các đơn đã chọn
-  /* const handleDeleteRegistrations = async () => {
-    try {
-      enableLoading();
-      setHasFunction(true); // Bắt đầu quá trình xóa
-      const deletePromises = selectedIds.map((id) =>
-        registrationApi.deleteRegistration(id as string)
-      );
-      await Promise.all(deletePromises); // Thực hiện xóa song song
-      sweetAlert.alertSuccess("Xoá đơn thành công", "", 1000, 20);
-      setSelectedIds([]); // Xóa trạng thái chọn
-      fetchRegistrations(); // Load lại danh sách sau khi xóa
-    } catch (error) {
-      console.error("Lỗi khi xóa đơn:", error);
-      sweetAlert.alertFailed("Có lỗi xảy ra khi xóa đơn!", "", 1000, 22);
-    } finally {
-      setHasFunction(false); // Kết thúc quá trình xóa
-      disableLoading();
-    }
-  }; */
-
   // Hàm xử lý khi nhấn nút "Từ chối đơn"
   const handleRejectApplications = async () => {
     if (!rejectedReason || rejectedReason.trim() == "") {
-      sweetAlert.alertFailed(
+      sweetAlert.alertWarning(
         "Lý do từ chối đang bị trống",
         "Vui lòng nhập lý do để tiếp tục",
-        10000,
+        3000,
         27
       );
       return;
@@ -256,14 +242,15 @@ export default function RegistrationDataTable() {
           );
         })
       );
-      sweetAlert.alertSuccess("Từ chối đơn thành công", "", 1000, 21);
+      sweetAlert.alertSuccess("Từ chối đơn thành công", "", 2000, 23);
       setSelectedIds([]); // Clear lựa chọn sau khi thực hiện
       fetchRegistrations(); // Reload danh sách
       setRejectedReason("");
       handleCloseModalRejected();
       setHasFunction(false);
     } catch (error) {
-      sweetAlert.alertFailed("Có lỗi xảy ra khi từ chối đơn!", "", 1000, 23);
+      console.error("Có lỗi xảy ra khi từ chối đơn!", error);
+      sweetAlert.alertFailed("Có lỗi xảy ra khi từ chối đơn!", "", 2500, 25);
     } finally {
       disableLoading();
       fetchRegistrations();
@@ -273,13 +260,35 @@ export default function RegistrationDataTable() {
   // Fetch Account data
   const fetchAccounts = async () => {
     try {
-      const { data } = await accountApi.getAllAccounts(1, 10000);
-      setAccounts(
-        data.data.items.filter(
+      setAccounts([]);
+      const firstRes = await accountApi.getAllAccounts(1, 10000);
+
+      const { data } = await accountApi.getAllAccounts(
+        1,
+        firstRes.data.data.total
+      );
+
+      const firstCateRes = await catechistApi.getAllCatechists();
+      const cateRes = await catechistApi.getAllCatechists(
+        1,
+        firstCateRes.data.data.total
+      );
+      data.data.items
+        .filter(
           (item: any) =>
             !item.isDeleted && item.role.roleName == RoleNameEnum.Catechist
         )
-      );
+        .forEach((item) => {
+          const action = async () => {
+            const cate = cateRes.data.data.items.find(
+              (cate) => cate.account.id == item.id
+            );
+            if (cate) {
+              setAccounts((prev) => [...prev, { ...item, cate: cate }]);
+            }
+          };
+          action();
+        });
     } catch (error) {
       console.error("Lỗi khi tải danh sách accounts:", error);
     }
@@ -292,7 +301,7 @@ export default function RegistrationDataTable() {
         setSelectedRegistration(res.data.data);
       })
       .catch((err) => {
-        console.log(err);
+        console.error(err);
       });
   };
 
@@ -326,34 +335,35 @@ export default function RegistrationDataTable() {
   const [interviewTypeOption, setInterviewTypeOption] = useState<number>(-1);
   const handleScheduleInterview = async () => {
     try {
-      enableLoading();
-      const registrationId: string = selectedIds[0].toString();
-      const selectedAccountIds = selectedAccounts.map((acc: any) => acc.value);
-
       if (meetingTime == "") {
-        sweetAlert.alertFailed(
+        sweetAlert.alertWarning(
           "Vui lòng chọn thời gian phỏng vấn",
           "",
-          6000,
+          4000,
           27
         );
         return;
       }
 
       if (interviewTypeOption < 0) {
-        sweetAlert.alertFailed(
+        sweetAlert.alertWarning(
           "Vui lòng chọn hình thức phỏng vấn",
           "",
-          6000,
+          4000,
           27
         );
         return;
       }
 
+      const selectedAccountIds = selectedAccounts.map((acc: any) => acc.value);
+
       if (selectedAccountIds.length <= 0) {
-        sweetAlert.alertFailed("Vui lòng chọn người phỏng vấn", "", 6000, 26);
+        sweetAlert.alertWarning("Vui lòng chọn người phỏng vấn", "", 6000, 26);
         return;
       }
+
+      enableLoading();
+      const registrationId: string = selectedIds[0].toString();
 
       if (viewMode === "pending") {
         await registrationApi.updateRegistration(registrationId, {
@@ -404,9 +414,10 @@ export default function RegistrationDataTable() {
       sweetAlert.alertSuccess(
         "Đã xếp lịch phỏng vấn thành công!",
         "",
-        1000,
+        2500,
         28
       );
+
       handleCloseModal();
       fetchRegistrations(); // Refresh registration data after scheduling
       setSelectedIds([]);
@@ -414,17 +425,19 @@ export default function RegistrationDataTable() {
       setInterviewTypeOption(-1);
     } catch (error: any) {
       console.error("Lỗi khi xếp lịch phỏng vấn:", error);
-      if (error && error.message) {
-        if (
-          error.message.toString().toLowerCase().includes("scheduled at least")
-        ) {
-          sweetAlert.alertFailed(
-            "Lỗi khi xếp lịch phỏng vấn",
-            `Lịch phỏng vấn phải cách ngày hiện tại ít nhất ${error.message.split("scheduled at least ")[1].split(" ")[0].trim()} ngày`,
-            10000,
-            24
-          );
-        }
+      if (
+        error &&
+        error.message &&
+        error.message.toString().toLowerCase().includes("scheduled at least")
+      ) {
+        sweetAlert.alertFailed(
+          "Lỗi khi xếp lịch phỏng vấn",
+          `Lịch phỏng vấn phải cách ngày hiện tại ít nhất ${error.message.split("scheduled at least ")[1].split(" ")[0].trim()} ngày`,
+          10000,
+          24
+        );
+      } else {
+        sweetAlert.alertFailed("Có lỗi khi xếp lịch phỏng vấn", ``, 2500, 24);
       }
     } finally {
       disableLoading();
@@ -439,14 +452,35 @@ export default function RegistrationDataTable() {
     } else if (meetingTime && meetingTime != "") {
       const action = async () => {
         const res = await accountApi.getRecruitersByMeetingTime(meetingTime);
-        setPreviewAccounts(
-          res.data.data.items.sort((a: any, b: any) => {
+        const firstCateRes = await catechistApi.getAllCatechists();
+        const cateRes = await catechistApi.getAllCatechists(
+          1,
+          firstCateRes.data.data.total
+        );
+
+        // setPreviewAccounts(
+        res.data.data.items
+          .sort((a: any, b: any) => {
             if (a.interviews && b.interviews) {
               return a.interviews.length - b.interviews.length;
             }
             return -1;
           })
-        );
+          .forEach((item) => {
+            const action = async () => {
+              const cate = cateRes.data.data.items.find(
+                (cate) => cate.account.id == item.id
+              );
+              if (cate) {
+                setPreviewAccounts((prev) => [
+                  ...prev,
+                  { ...item, cate: cate },
+                ]);
+              }
+            };
+            action();
+          });
+        // );
       };
       action();
     }
@@ -491,7 +525,7 @@ export default function RegistrationDataTable() {
     >
       <h1
         className={`text-center text-[2.2rem]  text-text_primary_light py-2 font-bold 
-          ${!deleteMode ? `${viewMode === "pending" ? "bg-primary_color" : "bg-danger"}` : "bg-black"}`}
+          ${!deleteMode ? `${viewMode === "pending" ? "bg_title" : "bg-danger"}` : "bg-black"}`}
       >
         {!deleteMode ? (
           <>
@@ -509,25 +543,27 @@ export default function RegistrationDataTable() {
           {!deleteMode ? (
             <>
               {viewMode === "pending" ? (
-                <button
-                  className="mx-1 btn btn-danger"
+                <Button
+                  color="error"
+                  variant="contained"
                   disabled={hasFunction}
                   onClick={() => {
                     setViewMode("rejected");
                   }}
                 >
                   Đơn bị từ chối
-                </button>
+                </Button>
               ) : (
-                <button
-                  className="mx-1 btn btn-warning"
+                <Button
+                  color="secondary"
+                  variant="contained"
                   disabled={hasFunction}
                   onClick={() => {
                     setViewMode("pending");
                   }}
                 >
                   Đơn chờ duyệt
-                </button>
+                </Button>
               )}
             </>
           ) : (
@@ -562,7 +598,7 @@ export default function RegistrationDataTable() {
                         }}
                         disabled={hasFunction}
                         variant="outlined"
-                        color="primary"
+                        color="error"
                       >
                         Từ chối đơn
                       </Button>
@@ -591,10 +627,10 @@ export default function RegistrationDataTable() {
           {selectedIds.length == 1 ? (
             <>
               <Button
-                className="btn btn-info"
+                className="hover:bg-purple-800 hover:text-white hover:border-purple-800"
                 onClick={() => setOpenDialogRegisDetail(true)}
                 variant="outlined"
-                color="primary"
+                color="secondary"
               >
                 Xem chi tiết
               </Button>
@@ -605,14 +641,13 @@ export default function RegistrationDataTable() {
           {viewMode == "rejected" && deleteMode && selectedIds.length > 0 ? (
             <>
               <Button
-                className="btn bg-primary_color text-text_primary_light hover:text-text_primary_dark
-          hover:bg-gray-400"
+                className="btn btn-danger"
                 onClick={() => {
                   handleDeleteRegistrations();
                 }}
                 disabled={hasFunction}
                 variant="outlined"
-                color="primary"
+                color="error"
               >
                 Xóa đơn
               </Button>
@@ -623,15 +658,13 @@ export default function RegistrationDataTable() {
           {viewMode == "rejected" && !deleteMode ? (
             <>
               <Button
-                className="btn bg-primary_color text-text_primary_light hover:text-text_primary_dark
-          hover:bg-gray-400"
                 onClick={() => {
                   setDeleteMode(true);
                   fetchRegistrations(true);
                 }}
                 disabled={hasFunction}
                 variant="outlined"
-                color="primary"
+                color="secondary"
               >
                 Lọc đơn
               </Button>
@@ -642,7 +675,6 @@ export default function RegistrationDataTable() {
           {deleteMode ? (
             <>
               <Button
-                className="btn btn-primary"
                 disabled={hasFunction}
                 onClick={() => {
                   setDeleteMode(false);
@@ -658,13 +690,11 @@ export default function RegistrationDataTable() {
             <></>
           )}
           <Button
-            className="btn bg-primary_color text-text_primary_light hover:text-text_primary_dark
-          hover:bg-gray-400"
             onClick={() => {
               fetchRegistrations();
             }}
             disabled={hasFunction}
-            variant="outlined"
+            variant="contained"
             color="primary"
           >
             Tải lại
@@ -682,7 +712,7 @@ export default function RegistrationDataTable() {
           initialState={{ pagination: { paginationModel } }}
           paginationModel={paginationModel}
           onPaginationModelChange={handlePaginationChange}
-          pageSizeOptions={[3, 25, 50]} // Đặt pageSizeOptions đúng
+          pageSizeOptions={[10, 25, 50, 100, 250]}
           checkboxSelection
           rowSelectionModel={selectedIds}
           onRowSelectionModelChange={handleSelectionChange} // Gọi hàm khi thay đổi lựa chọn
@@ -690,6 +720,7 @@ export default function RegistrationDataTable() {
             border: 0,
           }}
           localeText={viVNGridTranslation}
+          disableMultipleRowSelection={!deleteMode}
         />
       </div>
 
@@ -698,7 +729,7 @@ export default function RegistrationDataTable() {
         open={isModalOpen}
         className="z-[1000] flex justify-center items-center"
         fullWidth
-        maxWidth="md"
+        maxWidth="lg"
       >
         <div
           className="modal-container bg-white py-5 px-5 rounded-lg
@@ -781,9 +812,10 @@ export default function RegistrationDataTable() {
               <Select
                 options={accounts.map((acc: any) => ({
                   value: acc.id,
-                  label: `${acc.fullName} ${acc.role && acc.role.roleName.toUpperCase() == AccountRoleString.ADMIN ? " - Admin" : ""} ${acc.role && acc.role.roleName.toUpperCase() == AccountRoleString.MANAGER ? " - Quản lý" : ""} ${acc.role && acc.role.roleName.toUpperCase() == AccountRoleString.CATECHIST ? " - Giáo lý viên" : ""}`,
+                  label: `${acc.fullName} ${acc.cate ? ` - ${acc.cate.code}` : ""}`,
                 }))}
                 isMulti
+                value={selectedAccounts}
                 onChange={(newValue) =>
                   setSelectedAccounts(
                     newValue as { value: string; label: string }[]
@@ -797,7 +829,15 @@ export default function RegistrationDataTable() {
                 {formatDate.DD_MM_YYYY(meetingTime)}
               </label>
               <DataGrid
-                rows={previewAccounts}
+                rows={
+                  previewAccounts
+                  //   .sort((a, b) => {
+                  //   if (a.cate && b.cate) {
+                  //     return b.cate.levelName.localeCompare(a.cate.levelName);
+                  //   }
+                  //   return -1;
+                  // })
+                }
                 columns={[
                   {
                     field: "avatar",
@@ -815,8 +855,31 @@ export default function RegistrationDataTable() {
                       />
                     ),
                   },
+                  {
+                    field: "code",
+                    headerName: "Mã giáo lý viên",
+                    width: 150,
+                    renderCell: (params) =>
+                      params.row.cate ? params.row.cate.code : "",
+                  },
                   { field: "fullName", headerName: "Họ và Tên", width: 200 },
-                  { field: "gender", headerName: "Giới tính", width: 150 },
+                  { field: "gender", headerName: "Giới tính", width: 100 },
+                  {
+                    field: "dateOfBirth",
+                    headerName: "Ngày sinh",
+                    width: 130,
+                    renderCell: (params) =>
+                      params.row.cate
+                        ? formatDate.DD_MM_YYYY(params.row.cate.dateOfBirth)
+                        : "",
+                  },
+                  {
+                    field: "levelName",
+                    headerName: "Cấp bậc",
+                    width: 100,
+                    renderCell: (params) =>
+                      params.row.cate ? params.row.cate.levelName : "",
+                  },
                   {
                     field: "interviewCount",
                     headerName: "Số lượng phỏng vấn",
@@ -842,11 +905,50 @@ export default function RegistrationDataTable() {
                       </>
                     ),
                   },
+
+                  {
+                    field: "action",
+                    headerName: "Hành động",
+                    width: 100,
+                    renderCell: (params) => {
+                      return (
+                        <>
+                          {selectedAccounts.findIndex(
+                            (item) => item.value == params.row.id
+                          ) < 0 ? (
+                            <Button
+                              onClick={() => {
+                                const newValue = accounts.find(
+                                  (item) => item.id == params.row.id
+                                );
+                                if (newValue) {
+                                  setSelectedAccounts((prev) => [
+                                    ...prev,
+                                    {
+                                      value: newValue.id,
+                                      label: `${newValue.fullName} ${newValue.cate ? ` - ${newValue.cate.code}` : ""}`,
+                                    },
+                                  ]);
+                                }
+                              }}
+                            >
+                              Thêm
+                            </Button>
+                          ) : (
+                            <span className="ml-1 text-success"> Đã thêm</span>
+                          )}
+                        </>
+                      );
+                    },
+                  },
                 ]}
                 paginationMode="client"
                 rowCount={previewAccounts.length}
                 loading={loading}
-                initialState={{ pagination: { paginationModel } }}
+                initialState={{
+                  pagination: { paginationModel: paginationModel2 },
+                }}
+                onPaginationModelChange={setPaginationModel2}
                 pageSizeOptions={[8, 25, 50]}
                 disableRowSelectionOnClick
                 sx={{
@@ -859,15 +961,7 @@ export default function RegistrationDataTable() {
             <></>
           )}
 
-          <div className="modal-buttons flex justify-center gap-x-3 mt-4">
-            <Button
-              onClick={() => {
-                handleScheduleInterview();
-              }}
-              variant="contained"
-            >
-              Xác nhận
-            </Button>
+          <div className="modal-buttons flex justify-between gap-x-3 mt-4">
             <Button
               onClick={() => {
                 handleCloseModal();
@@ -875,6 +969,14 @@ export default function RegistrationDataTable() {
               variant="outlined"
             >
               Hủy bỏ
+            </Button>
+            <Button
+              onClick={() => {
+                handleScheduleInterview();
+              }}
+              variant="contained"
+            >
+              Xác nhận
             </Button>
           </div>
         </div>
@@ -938,16 +1040,7 @@ export default function RegistrationDataTable() {
               className="block w-full p-2 border border-gray-700 rounded-lg"
             />
           </div>
-          <div className="modal-buttons flex justify-center gap-x-3 mt-4">
-            <Button
-              onClick={() => {
-                handleRejectApplications();
-              }}
-              variant="contained"
-              className="bg-danger"
-            >
-              Xác nhận
-            </Button>
+          <div className="modal-buttons flex justify-between gap-x-3 mt-4">
             <Button
               onClick={() => {
                 handleCloseModalRejected();
@@ -956,6 +1049,15 @@ export default function RegistrationDataTable() {
               className="border-danger text-danger"
             >
               Hủy bỏ
+            </Button>
+            <Button
+              onClick={() => {
+                handleRejectApplications();
+              }}
+              variant="contained"
+              className="bg-danger"
+            >
+              Xác nhận
             </Button>
           </div>
         </div>

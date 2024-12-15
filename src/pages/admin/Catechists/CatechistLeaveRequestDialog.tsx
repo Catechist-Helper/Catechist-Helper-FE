@@ -38,11 +38,11 @@ const CatechistLeaveRequestDialog: React.FC<
 
   const handleSubmit = async () => {
     if (!reason || !comment) {
-      sweetAlert.alertFailed(
+      sweetAlert.alertWarning(
         "Lý do xin nghỉ và Ghi chú phê duyệt là bắt buộc!",
         "",
         6000,
-        22
+        33
       );
       return;
     }
@@ -73,7 +73,7 @@ const CatechistLeaveRequestDialog: React.FC<
         await leaveRequestApi.submitLeaveRequest(submitData);
 
       if (!submitResponse.data) {
-        sweetAlert.alertFailed("Gửi yêu cầu nghỉ thất bại!", "", 1000, 22);
+        sweetAlert.alertFailed("Gửi yêu cầu nghỉ thất bại!", "", 3000, 26);
         return;
       }
 
@@ -102,8 +102,8 @@ const CatechistLeaveRequestDialog: React.FC<
             sweetAlert.alertSuccess(
               "Yêu cầu nghỉ đã được duyệt!",
               "",
-              1000,
-              22
+              3000,
+              26
             );
             refreshCatechists(); // Refresh danh sách catechists
             onClose(); // Đóng dialog sau khi thành công
@@ -111,8 +111,8 @@ const CatechistLeaveRequestDialog: React.FC<
             sweetAlert.alertFailed(
               "Có lỗi khi phê duyệt yêu cầu nghỉ!",
               "",
-              1000,
-              22
+              3000,
+              26
             );
           }
         };
@@ -120,7 +120,7 @@ const CatechistLeaveRequestDialog: React.FC<
       }, 1000);
     } catch (error) {
       console.log("Error: ", error);
-      sweetAlert.alertFailed("Có lỗi xảy ra!", "", 1000, 22);
+      sweetAlert.alertFailed("Có lỗi xảy ra!", "", 3000, 22);
     } finally {
       setLoading(false);
       setTimeout(() => {
@@ -132,39 +132,50 @@ const CatechistLeaveRequestDialog: React.FC<
   if (!userLogin || !userLogin.id) return <></>;
 
   return (
-    <Dialog open={open}>
+    <Dialog open={open} fullWidth>
       <DialogContent>
         <h2 className="font-bold text-[1.5rem]">
           Thông tin đơn xin nghỉ giảng dạy
         </h2>
         <TextField
-          label="Lý do xin nghỉ"
+          label={
+            <span>
+              Lý do xin nghỉ <span style={{ color: "red" }}>*</span>
+            </span>
+          }
           variant="outlined"
           fullWidth
           multiline
           rows={4}
           value={reason}
           onChange={(e) => setReason(e.target.value)}
-          required
           className="mt-3"
         />
         <TextField
-          label="Ghi chú phê duyệt"
+          label={
+            <span>
+              Ghi chú phê duyệt <span style={{ color: "red" }}>*</span>
+            </span>
+          }
           variant="outlined"
           fullWidth
           multiline
           rows={4}
           value={comment}
           onChange={(e) => setComment(e.target.value)}
-          required
           className="mt-3"
         />
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose} color="primary">
+        <Button onClick={onClose} color="secondary" variant="outlined">
           Hủy
         </Button>
-        <Button onClick={handleSubmit} color="primary" disabled={loading}>
+        <Button
+          onClick={handleSubmit}
+          color="primary"
+          variant="outlined"
+          disabled={loading}
+        >
           {loading ? <CircularProgress size={24} /> : "Duyệt"}
         </Button>
       </DialogActions>

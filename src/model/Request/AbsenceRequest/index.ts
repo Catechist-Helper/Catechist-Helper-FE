@@ -3,7 +3,8 @@ export interface SubmitAbsenceRequest {
   catechistId: string; // ID người yêu cầu
   slotId: string; // ID của slot
   reason: string; // Lý do
-  replacementCatechistId?: string; // ID người thay thế
+  replacementCatechistId?: string;
+  
 }
 
 // Xử lý yêu cầu (phê duyệt hoặc từ chối)

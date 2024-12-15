@@ -39,16 +39,16 @@ const AdminRequestLeaveDialog: React.FC<AdminRequestLeaveDialogProps> = ({
 
   const handleSubmit = () => {
     if (!(selectedCateId && selectedCateId.value)) {
-      sweetAlert.alertFailed(
+      sweetAlert.alertWarning(
         "Vui lòng chọn giáo lý viên nghỉ phép",
         "",
-        5000,
-        27
+        2500,
+        28
       );
       return;
     }
     if (!reason || reason.trim() == "") {
-      sweetAlert.alertFailed("Vui lòng nhập lý do nghỉ phép", "", 5000, 25);
+      sweetAlert.alertWarning("Vui lòng nhập lý do nghỉ phép", "", 2500, 25);
       return;
     }
     onSubmit(
@@ -63,13 +63,15 @@ const AdminRequestLeaveDialog: React.FC<AdminRequestLeaveDialogProps> = ({
   return (
     <Dialog open={open} fullWidth maxWidth="md">
       <DialogTitle>
-        <h2 className="font-bold text-[1.5rem]">Xin nghỉ phép</h2>
+        <h2 className="font-bold text-[1.5rem] text-primary">Xin nghỉ phép</h2>
       </DialogTitle>
       <DialogContent>
         <p className="mb-2 font-bold">
           Ngày nghỉ: {formatDate.DD_MM_YYYY(date)}
         </p>
-        <label className="font-bold mt-1">Chọn giáo lý viên nghỉ phép</label>
+        <label className="font-bold mt-1">
+          Chọn giáo lý viên nghỉ phép <span style={{ color: "red" }}>*</span>
+        </label>
         <Select
           options={catechists.map((cate) => ({
             value: cate.catechist.id,
@@ -83,7 +85,11 @@ const AdminRequestLeaveDialog: React.FC<AdminRequestLeaveDialogProps> = ({
           className="mt-1 z-[999]"
         />
         <TextField
-          label="Lý do nghỉ phép"
+          label={
+            <span>
+              Lý do nghỉ phép <span style={{ color: "red" }}>*</span>
+            </span>
+          }
           multiline
           fullWidth
           rows={4}

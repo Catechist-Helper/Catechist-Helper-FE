@@ -22,6 +22,8 @@ import CatechistLeaveRequestDialog from "./CatechistLeaveRequestDialog";
 import Select from "react-select";
 import { useNavigate } from "react-router-dom";
 import { PATH_ADMIN } from "../../../routes/paths";
+import LeaveRequestDialog from "./LeaveRequestDialog";
+import { GetLeaveRequestItemResponse } from "../../../model/Response/LeaveRequest";
 
 export default function CatechistComponent() {
   const [rows, setRows] = useState<CatechistItemResponse[]>([]);
@@ -57,7 +59,42 @@ export default function CatechistComponent() {
     setDialogOpen(false); // Đóng dialog
     setSelectedCatechist(null); // Reset selectedCatechist
   };
+
+  const [openViewLeaveRequest, setOpenViewLeaveRequest] =
+    useState<boolean>(false);
+
+  const handleOpenViewLeaveRequest = () => setOpenViewLeaveRequest(true);
+  const handleCloseViewLeaveRequest = () => setOpenViewLeaveRequest(false);
+  const mockLeaveRequest: GetLeaveRequestItemResponse = {
+    id: "123",
+    reason: "Nghỉ phép cá nhân",
+    comment: "Tôi có công việc gia đình",
+    approvalDate: "2024-06-20T12:00:00Z",
+    catechistId: "456",
+    catechistName: "Nguyễn Văn A",
+    approver: null,
+    status: 1, // Approved
+    approverId: null,
+    createAt: "2024-06-19T08:30:00Z",
+    updateAt: null,
+    leaveDate: null,
+  };
   const columns: GridColDef[] = [
+    {
+      field: "no",
+      headerName: "STT",
+      width: 50,
+      renderCell: (params) => {
+        {
+          const rowIndex = params.api.getRowIndexRelativeToVisibleRows(
+            params.row.id
+          );
+          return rowIndex != null && rowIndex != undefined && rowIndex >= 0
+            ? rowIndex + 1
+            : 0;
+        }
+      },
+    },
     {
       field: "imageUrl",
       headerName: "Ảnh",
@@ -79,7 +116,7 @@ export default function CatechistComponent() {
     { field: "fullName", headerName: "Tên đầy đủ", width: 200 },
     {
       field: "christianName",
-      headerName: "Tên thánh",
+      headerName: "Tên Thánh",
       width: 150,
       renderCell: (params) => params.row.christianName || "N/A", // Chỉnh sửa hiển thị tên thánh
     },
@@ -113,7 +150,7 @@ export default function CatechistComponent() {
     { field: "address", headerName: "Địa chỉ", width: 200 },
     { field: "fatherName", headerName: "Tên cha", width: 150 },
     { field: "motherName", headerName: "Tên mẹ", width: 150 },
-    { field: "note", headerName: "Ghi chú", width: 200 },
+    // { field: "note", headerName: "Ghi chú", width: 200 },
     {
       field: "certificates",
       headerName: "Chứng chỉ",
@@ -121,14 +158,14 @@ export default function CatechistComponent() {
       renderCell: (params) =>
         params.row.certificates.length > 0
           ? params.row.certificates.map((cert: any) => cert.name).join(", ")
-          : "N/A", // Hiển thị danh sách chứng chỉ
+          : "N/A",
     },
     {
       field: "isTeaching",
       headerName: "Trạng thái giảng dạy",
       width: 250,
-      renderCell: (params) =>
-        params.value ? (
+      renderCell: (params) => {
+        return params.value ? (
           <div className="flex gap-x-1">
             <div>
               <span className="bg-success text-white px-2 py-1 rounded-xl">
@@ -137,7 +174,7 @@ export default function CatechistComponent() {
             </div>
             <div>
               <Button
-                color="secondary"
+                color="primary"
                 onClick={() => {
                   handleChangeIsTeaching(params.row);
                 }}
@@ -155,13 +192,19 @@ export default function CatechistComponent() {
                 </span>
               </div>
               <div>
-                <Button color="secondary" onClick={() => {}}>
+                <Button
+                  color="secondary"
+                  onClick={() => {
+                    handleOpenViewLeaveRequest();
+                  }}
+                >
                   Xem phê duyệt
                 </Button>
               </div>
             </div>
           </>
-        ),
+        );
+      },
     },
   ];
 
@@ -247,11 +290,7 @@ export default function CatechistComponent() {
         await catechistInClassApi.getClassesRemainingSlotsOfCatechist(
           catechist.id
         );
-      console.log(
-        "remainingClassHavingSlots",
-        remainingClassHavingSlots.data.data.length,
-        remainingClassHavingSlots.data.data
-      );
+
       if (remainingClassHavingSlots.data.data.length > 0) {
         disableLoading();
         const confirm = await sweetAlert.confirm(
@@ -296,7 +335,7 @@ export default function CatechistComponent() {
         position: "absolute",
       }}
     >
-      <h1 className="text-center text-[2.2rem] bg-primary_color text-text_primary_light py-2 font-bold">
+      <h1 className="text-center text-[2.2rem] bg_title text-text_primary_light py-2 font-bold">
         Danh sách giáo lý viên
       </h1>
       {/* Thêm nút Refresh ở đây */}
@@ -334,6 +373,7 @@ export default function CatechistComponent() {
             <>
               <div>
                 <Button
+                  className="btn btn-primary"
                   onClick={() => {
                     handleUpdateCatechist();
                   }} // Open dialog
@@ -350,9 +390,10 @@ export default function CatechistComponent() {
           )}
           <div>
             <Button
+              className="btn btn-success"
               onClick={handleAddCatechist} // Open dialog
-              variant="contained"
-              color="primary"
+              variant="outlined"
+              color="success"
               style={{ marginBottom: "16px" }}
             >
               Thêm giáo lý viên
@@ -362,7 +403,7 @@ export default function CatechistComponent() {
             <Button
               onClick={handleExportCatechists} // Xuất danh sách
               variant="contained"
-              color="secondary"
+              color="primary"
               style={{ marginBottom: "16px" }}
             >
               Xuất danh sách
@@ -417,6 +458,17 @@ export default function CatechistComponent() {
           catechistId={selectedCatechist.id}
           refreshCatechists={fetchCatechists} // Cập nhật lại danh sách catechists sau khi phê duyệt
         />
+      )}
+      {openViewLeaveRequest ? (
+        <>
+          <LeaveRequestDialog
+            open={openViewLeaveRequest}
+            onClose={handleCloseViewLeaveRequest}
+            leaveRequest={mockLeaveRequest}
+          />
+        </>
+      ) : (
+        <></>
       )}
     </Paper>
   );

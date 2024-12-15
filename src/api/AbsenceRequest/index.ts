@@ -11,7 +11,20 @@ const ROOT_API = "/absences";
 
 // 1. POST: Gửi yêu cầu vắng mặt
 const submitAbsence = (data: SubmitAbsenceRequest) => {
-  return request.post<AbsenceResponse<boolean>>(`${ROOT_API}/submit`, data);
+  
+  let formData = new FormData();
+  formData.append("catechistId",data.catechistId)
+  formData.append("reason",data.reason)
+  formData.append("slotId",data.slotId)
+  if(data.replacementCatechistId){
+  formData.append("replacementCatechistId",data.replacementCatechistId)
+  }
+
+  return request.post<AbsenceResponse<boolean>>(`${ROOT_API}/submit`, data, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
 };
 
 // 2. POST: Xử lý yêu cầu vắng mặt (Phê duyệt hoặc Từ chối)

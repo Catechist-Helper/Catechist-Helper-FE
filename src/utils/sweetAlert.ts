@@ -117,7 +117,7 @@ const sweetAlert = {
     title: string,
     text: string,
     confirmButtonText: string = "Xác nhận",
-    cancelButtonText: string = "Hủy",
+    cancelButtonText: string = "Hủy bỏ",
     icon: "warning" | "info" | "question" | "success" | "error" = "warning"
   ): Promise<boolean> {
     const result = await Swal.fire({
