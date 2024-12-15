@@ -5,7 +5,7 @@ import trainApi from "../../../api/TrainingList";
 import levelApi from "../../../api/Level";
 import { AxiosResponse } from "axios";
 import { BasicResponse } from "../../../model/Response/BasicResponse";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import sweetAlert from "../../../utils/sweetAlert";
 import viVNGridTranslation from "../../../locale/MUITable";
 import {
@@ -124,9 +124,105 @@ const ListAllTrain: React.FC = () => {
       }
     }
   };
+  interface TrainingLists {
+    startDate: string | number | Date;
+    id: string;
+    name: string;
+    description: string;
+    certificateId: string;
+    certificate: Certificate;
+    previousLevelId: string;
+    nextLevelId: string;
+    previousLevel?: Level; // Optional if API provides it
+    nextLevel?: Level; // Optional if API provides it
+    startTime: string;
+    endTime: string;
+    trainingListStatus: number;
+  }
+  interface Certificate {
+    id: string;
+    name: string;
+    image: File | null;
+    description: string;
+    levelId: string;
+  }
+  interface Level {
+    id: string;
+    hierarchyLevel: number; // Hoặc kiểu dữ liệu phù hợp
+  }
+  const determineStatusLabel = (train: TrainingLists): string => {
+    if (train.trainingListStatus == 0) {
+      return trainingListStatusLabel[trainingListStatus.NotStarted]; // "Chưa bắt đầu"
+    }
+    if (train.trainingListStatus == 1) {
+      return trainingListStatusLabel[trainingListStatus.Training]; // "Chưa bắt đầu"
+    }
+    if (train.trainingListStatus == 2) {
+      return trainingListStatusLabel[trainingListStatus.Finished]; // "Chưa bắt đầu"
+    }
+
+    return ""; // Default empty if no status applies
+  };
+
+  const handleAddOrUpdateCatechist = (
+    trainId: string,
+    catechistCount: number
+  ) => {
+    const selectedTrain = trains.find((train) => train.id === trainId);
+    if (selectedTrain) {
+      navigate("/admin/training-catechist", {
+        state: {
+          trainingInfo: {
+            id: selectedTrain.id,
+            name: selectedTrain.name,
+            previousLevel:
+              selectedTrain.previousLevel?.hierarchyLevel ||
+              levelMap[selectedTrain.previousLevelId],
+            nextLevel:
+              selectedTrain.nextLevel?.hierarchyLevel ||
+              levelMap[selectedTrain.nextLevelId],
+            startTime: selectedTrain.startTime,
+            endTime: selectedTrain.endTime,
+            description: selectedTrain.description,
+            currentCatechistCount: catechistCount,
+          },
+        },
+      });
+    }
+  };
 
   const columns: GridColDef[] = [
-    { field: "name", headerName: "Tên", width: 200 },
+    {
+      field: "name",
+      headerName: "Tên",
+      width: 200,
+      renderCell: (params) => {
+        return (
+          <Link
+            to={`/admin/training-list/${params.row.id}/catechists`}
+            className="py-2 px-2 text-dark hover:bg-blue-300 rounded-xl hover:text-white"
+            state={{
+              trainingInfo: {
+                id: params.row.id,
+                name: params.row.name,
+                previousLevel:
+                  params.row.previousLevel?.hierarchyLevel ||
+                  levelMap[params.row.previousLevelId],
+                nextLevel:
+                  params.row.nextLevel?.hierarchyLevel ||
+                  levelMap[params.row.nextLevelId],
+                startTime: params.row.startTime,
+                endTime: params.row.endTime,
+                description: params.row.description,
+                currentCatechistCount: catechists[params.row.id]?.length || 0,
+              },
+            }}
+          >
+            {params.row.name}
+          </Link>
+        );
+      },
+    },
     { field: "description", headerName: "Mô tả", width: 200 },
     {
       field: "previousLevel",
@@ -168,19 +264,28 @@ const ListAllTrain: React.FC = () => {
         catechists[params.row.id]?.length ? (
           <>
             {catechists[params.row.id]?.length}
-            <Button
-              className="btn btn-primary"
-              color="primary"
-              variant="outlined"
-              onClick={() =>
-                navigate("/admin/training-catechist", {
-                  state: { trainingId: params.row.id },
-                })
-              }
-              sx={{ marginLeft: "10px" }}
-            >
-              Cập nhật
-            </Button>
+            {determineStatusLabel(params.row) ===
+              trainingListStatusLabel[trainingListStatus.NotStarted] && (
+              <Button
+                className="btn btn-primary"
+                color="primary"
+                variant="outlined"
+                // onClick={() =>
+                //   navigate("/admin/training-catechist", {
+                //     state: { trainingId: params.row.id },
+                //   })
+                // }
+                onClick={() =>
+                  handleAddOrUpdateCatechist(
+                    params.row.id,
+                    catechists[params.row.id]?.length || 0
+                  )
+                }
+                sx={{ marginLeft: "10px" }}
+              >
+                Cập nhật
+              </Button>
+            )}
           </>
         ) : (
           <Button
