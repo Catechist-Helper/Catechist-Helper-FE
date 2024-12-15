@@ -9,6 +9,7 @@ import levelApi from "../../../api/Level";
 import { AxiosResponse } from "axios";
 import { BasicResponse } from "../../../model/Response/BasicResponse";
 import { trainingListStatus } from "../../../enums/TrainingList";
+import { useLocation } from 'react-router-dom';
 import { message } from "antd";
 const UpdateTrain: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -18,6 +19,8 @@ const UpdateTrain: React.FC = () => {
     const navigate = useNavigate();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [certificates, setCertificates] = useState<any[]>([]);
+    const location = useLocation();
+    const editStatusOnly = location.state?.editStatusOnly;
 
     const fetchCertificatesByNextLevel = async (nextLevelId: string) => {
         try {
@@ -79,6 +82,10 @@ const UpdateTrain: React.FC = () => {
             }
         },
     });
+    const isInputDisabled = editStatusOnly;
+
+    // Disable radio "Đào tạo" khi đã chuyển sang "Kết thúc"
+    const isTrainingRadioDisabled = formik.values.trainingListStatus === trainingListStatus.Finished;
 
     useEffect(() => {
         const fetchTrain = async () => {
@@ -175,6 +182,7 @@ const UpdateTrain: React.FC = () => {
                             id="name"
                             name="name"
                             type="text"
+                            disabled={isInputDisabled}
                             className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                             onChange={formik.handleChange}
                             value={formik.values.name}
@@ -191,6 +199,7 @@ const UpdateTrain: React.FC = () => {
                             id="description"
                             name="description"
                             type="text"
+                            disabled={isInputDisabled}
                             className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                             onChange={formik.handleChange}
                             value={formik.values.description}
@@ -206,6 +215,7 @@ const UpdateTrain: React.FC = () => {
                         <select
                             id="certificateId"
                             name="certificateId"
+                            disabled={isInputDisabled}
                             className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                             onChange={formik.handleChange}
                             value={formik.values.certificateId}
@@ -228,6 +238,7 @@ const UpdateTrain: React.FC = () => {
                         <select
                             id="previousLevelId"
                             name="previousLevelId"
+                            disabled={isInputDisabled}
                             className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                             onChange={handlePreviousLevelChange}
                             value={formik.values.previousLevelId}
@@ -250,6 +261,7 @@ const UpdateTrain: React.FC = () => {
                         <input
                             id="nextLevelId"
                             name="nextLevelId"
+                            disabled={isInputDisabled}
                             type="text"
                             className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                             value={
@@ -275,6 +287,7 @@ const UpdateTrain: React.FC = () => {
                                     id="startTime"
                                     name="startTime"
                                     type="datetime-local"
+                                    disabled={isInputDisabled}
                                     className="text-gray-900 dark:text-white text-base font-medium block w-full border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                     onChange={formik.handleChange}
                                     value={formik.values.startTime}
@@ -293,6 +306,7 @@ const UpdateTrain: React.FC = () => {
                                     id="endTime"
                                     name="endTime"
                                     type="datetime-local"
+                                    disabled={isInputDisabled}
                                     className="text-gray-900 dark:text-white text-base font-medium block w-full border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                     onChange={formik.handleChange}
                                     value={formik.values.endTime}
@@ -300,7 +314,7 @@ const UpdateTrain: React.FC = () => {
                             </div>
                         </div>
                     </div>
-                    {/* <div className="mb-5">
+                    <div className="mb-5">
                         <label className="block mb-1 text-sm font-medium">Trạng thái</label>
                         <div className="flex items-center space-x-4">
                             <div className="flex items-center">
@@ -310,9 +324,10 @@ const UpdateTrain: React.FC = () => {
                                     value={trainingListStatus.Training}
                                     checked={formik.values.trainingListStatus === trainingListStatus.Training}
                                     onChange={() => formik.setFieldValue('trainingListStatus', trainingListStatus.Training)}
-                                    className="w-4 h-4 text-blue-600"
+                                    disabled={isTrainingRadioDisabled}
+                                    className={`w-4 h-4 text-blue-600 ${isTrainingRadioDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
                                 />
-                                <label className="ml-2">Đào tạo</label>
+                                <label className={`ml-2 ${isTrainingRadioDisabled ? 'text-gray-400' : ''}`}>Đào tạo</label>
                             </div>
                             <div className="flex items-center">
                                 <input
@@ -326,8 +341,7 @@ const UpdateTrain: React.FC = () => {
                                 <label className="ml-2">Kết thúc</label>
                             </div>
                         </div>
-                    </div> */}
-
+                    </div>
                     <div className="flex items-start mb-5">
                         <button
                             type="submit"
