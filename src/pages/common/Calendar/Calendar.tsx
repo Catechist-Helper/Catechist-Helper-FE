@@ -16,6 +16,7 @@ import {
 } from "@mui/material";
 import "./Calendar.css";
 import { formatDate } from "../../../utils/formatDate";
+import accountApi from "../../../api/Account";
 
 export type EventCalendar = {
   title: string;
@@ -44,20 +45,50 @@ export type EventCalendar = {
 //   },
 // ];
 
-interface CalendarComponentProps {
-  events: EventCalendar[];
-}
-
-const CalendarComponent: React.FC<CalendarComponentProps> = ({ events }) => {
+const CalendarComponent: React.FC = () => {
   const [open, setOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<EventCalendar | null>(
     null
   );
   const [eventList, setEventList] = useState<EventCalendar[]>([]);
 
+  const fetchClassesSlotData = async () => {
+    try {
+      const userInfo = JSON.parse(
+        window.localStorage.getItem("USER_INFO") || "{}"
+      );
+      const id = userInfo.id || null;
+
+      if (!id) {
+        console.error("User ID is not available in local storage.");
+        return;
+      }
+
+      // Fetch calendar data
+      const response = await accountApi.getCalendarOfAccount(id);
+
+      if (response && response.data && Array.isArray(response.data.data)) {
+        // Map the fetched events to the format required by FullCalendar
+        const events = response.data.data.map((event: EventCalendar) => ({
+          title: event.title,
+          description: event.description,
+          start: event.start,
+          end: event.end || undefined,
+        }));
+
+        // Update the eventList state
+        setEventList(events);
+      } else {
+        console.error("Unexpected API response structure or no data received.");
+      }
+    } catch (error) {
+      console.error("Error fetching calendar data:", error);
+    }
+  };
+
   useEffect(() => {
-    setEventList([...events]);
-  }, [events]);
+    fetchClassesSlotData();
+  }, []);
 
   const handleEventClick = (info: { event: any }) => {
     const clickedEvent: EventCalendar = {
