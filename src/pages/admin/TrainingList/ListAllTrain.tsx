@@ -6,8 +6,9 @@ import { BasicResponse } from "../../../model/Response/BasicResponse";
 import { useNavigate, Link } from "react-router-dom";
 import sweetAlert from "../../../utils/sweetAlert";
 import { trainingListStatus, trainingListStatusLabel } from "../../../enums/TrainingList";
-import { AxiosError } from "axios";
+
 interface TrainingLists {
+    startDate: string | number | Date;
     id: string;
     name: string;
     description: string;
@@ -96,184 +97,143 @@ const ListAllTrain: React.FC = () => {
     };
 
     const determineStatusLabel = (train: TrainingLists): string => {
-        const now = new Date();
-        const startDate = new Date(train.startTime);
-        const endDate = new Date(train.endTime);
-
-        if (now < startDate) {
+        console.log("hhhhh", train);
+        if (train.trainingListStatus == 0) {
             return trainingListStatusLabel[trainingListStatus.NotStarted]; // "Chưa bắt đầu"
-        } else if (now >= startDate && now <= endDate) {
-            return trainingListStatusLabel[trainingListStatus.Training]; // "Đào tạo"
-        } else if (train.trainingListStatus === trainingListStatus.Finished) {
-            return trainingListStatusLabel[trainingListStatus.Finished]; // "Kết thúc"
+        }
+        if (train.trainingListStatus == 1) {
+            return trainingListStatusLabel[trainingListStatus.Training]; // "Chưa bắt đầu"
+        }
+        if (train.trainingListStatus == 2) {
+            return trainingListStatusLabel[trainingListStatus.Finished]; // "Chưa bắt đầu"
         }
 
         return ""; // Default empty if no status applies
     };
 
     const renderActionCell = (train: TrainingLists): JSX.Element => {
-        const now = new Date();
-        const endDate = new Date(train.endTime);
-
-        // Show Complete button only after the end date
-        if (now > endDate && train.trainingListStatus !== trainingListStatus.Finished) {
-            return (
-                <button
-                    className="btn btn-success"
-                    onClick={() => handleComplete(train)}
-                >
-                    Hoàn thành
-                </button>
-            );
-        }
-
-        // Show status label if not Finished
         return <span>{determineStatusLabel(train)}</span>;
     };
-
-    const handleComplete = async (train: TrainingLists): Promise<void> => {
-        try {
-            const previousLevelId = train.previousLevel?.id || ""; // Gửi ID thực hoặc giữ trống
-            const nextLevelId = train.nextLevel?.id || ""; // Gửi ID thực hoặc giữ trống
-            const certificateId = train.certificate?.id || ""; // Gửi ID thực hoặc giữ trống
-            // Cập nhật payload với status là Finished
-            const payload = {
-                id: train.id,
-                name: train.name,
-                description: train.description,
-                certificateId: certificateId, // Giữ nguyên giá trị certificateId từ state
-                previousLevelId: previousLevelId, // Gửi ID hợp lệ
-                nextLevelId: nextLevelId, // Gửi ID hợp lệ
-                startTime: train.startTime,
-                endTime: train.endTime,
-                trainingListStatus: trainingListStatus.Finished, // Chuyển trạng thái thành Finished
-            };
-
-            console.log("Payload gửi lên:", payload);
-
-            // Gọi API để cập nhật trạng thái
-            await trainApi.updateTrain(
-                payload.id,
-                payload.name,
-                payload.description,
-                payload.certificateId,
-                payload.previousLevelId,
-                payload.nextLevelId,
-                payload.startTime,
-                payload.endTime,
-                payload.trainingListStatus
-            );
-
-            // Cập nhật trạng thái trong state
-            setTrains((prevTrains) =>
-                prevTrains.map((t) =>
-                    t.id === train.id
-                        ? { ...t, trainingListStatus: trainingListStatus.Finished } // Cập nhật trạng thái trong state
-                        : t
-                )
-            );
-
-            // Hiển thị thông báo thành công
-            sweetAlert.alertSuccess(
-                "Hoàn thành!",
-                `Đào tạo đã được đánh dấu là hoàn thành.`,
-                2000,
-                false
-            );
-        } catch (err: unknown) {
-            console.error("Lỗi khi hoàn thành đào tạo:", err);
-
-            const error = err as AxiosError<{ message: string }>;
-            sweetAlert.alertFailed(
-                "Thất bại!",
-                `Không thể hoàn thành đào tạo. ${error.response?.data?.message || "Đã xảy ra lỗi."
-                }`,
-                2000,
-                false
-            );
-        }
-    };
-
 
     const handleCreate = () => {
         navigate("/admin/create-training-lists");
     };
 
-    // const handleEditTrainClick = (id: string): void => {
-    //     if (catechists[id]?.length > 0) {
-    //         sweetAlert.alertWarning(
-    //             "Không thể chỉnh sửa!",
-    //             "Danh sách đào tạo đã có Giáo lí viên, không thể chỉnh sửa.",
-    //             2000,
-    //             false
-    //         );
-    //         return; // Ngăn chặn điều hướng
-    //     }
-    //     navigate(`/admin/update-training-lists/${id}`);
-    // };
     const handleEditTrainClick = (id: string): void => {
-        navigate(`/admin/update-training-lists/${id}`);
-    }
+        const train = trains.find(t => t.id === id);
+        if (!train) return;
+
+        if (train.trainingListStatus === 0) {
+            // Chưa bắt đầu - cho phép chỉnh sửa tất cả
+            navigate(`/admin/update-training-lists/${id}`);
+        } else if (train.trainingListStatus === 1) {
+            // Đang đào tạo - chỉ cho phép chỉnh sửa status
+            navigate(`/admin/update-training-lists/${id}`, {
+                state: { editStatusOnly: true }
+            });
+        } else {
+            // Đã kết thúc - không cho chỉnh sửa gì cả
+            sweetAlert.alertWarning(
+                "Không thể chỉnh sửa!",
+                "Danh sách đào tạo đã kết thúc, không thể chỉnh sửa.",
+                2000,
+                false
+            );
+        }
+    };
+    // const handleEditTrainClick = (id: string): void => {
+    //     navigate(`/admin/update-training-lists/${id}`);
+    // }
 
     const handleTrainingCatechistClick = () => {
         navigate(`/admin/training-catechist`);
     }
 
-    const handleDeleteTrainClick = (id: string): void => {
-        if (window.confirm("Bạn có chắc là muốn xóa đào tạo này không?")) {
-            trainApi
-                .deleteTrain(id)
-                .then(() => {
-                    sweetAlert.alertSuccess(
-                        "Xóa thành công!",
-                        `Train đã được xóa thành công.`,
-                        2000,
-                        false
-                    );
-                    setTrains(trains.filter((train) => train.id !== id));
-                })
-                .catch((err: Error) => {
-                    console.error(`Không thể cập nhật train với ID: ${name}`, err);
-                });
-        }
-    };
     // const handleDeleteTrainClick = (id: string): void => {
-    //     // Kiểm tra số lượng Catechist trong training
-    //     const trainingCatechists = catechists[id] || [];
-        
-    //     if (trainingCatechists.length > 0) {
-    //         sweetAlert.alertWarning(
-    //             "Không thể xóa!",
-    //             "Không thể xóa khóa đào tạo đã có Giáo lý viên tham gia.",
-    //             2000,
-    //             false
-    //         );
-    //         return;
-    //     }
-    
     //     if (window.confirm("Bạn có chắc là muốn xóa đào tạo này không?")) {
     //         trainApi
     //             .deleteTrain(id)
     //             .then(() => {
     //                 sweetAlert.alertSuccess(
     //                     "Xóa thành công!",
-    //                     `Khóa đào tạo đã được xóa thành công.`,
+    //                     `Train đã được xóa thành công.`,
     //                     2000,
     //                     false
     //                 );
     //                 setTrains(trains.filter((train) => train.id !== id));
     //             })
     //             .catch((err: Error) => {
-    //                 console.error(`Không thể xóa khóa đào tạo với ID: ${id}`, err);
-    //                 sweetAlert.alertFailed(
-    //                     "Xóa thất bại!",
-    //                     "Đã xảy ra lỗi khi xóa khóa đào tạo.",
-    //                     2000,
-    //                     false
-    //                 );
+    //                 console.error(`Không thể cập nhật train với ID: ${name}`, err);
     //             });
     //     }
     // };
+    const handleDeleteTrainClick = (id: string): void => {
+        // Lấy thông tin khóa đào tạo cần xóa
+        const trainingToDelete = trains.find(train => train.id === id);
+
+        if (!trainingToDelete) {
+            sweetAlert.alertWarning(
+                "Lỗi!",
+                "Không tìm thấy thông tin khóa đào tạo.",
+                2000,
+                false
+            );
+            return;
+        }
+
+        // Kiểm tra ngày đào tạo
+        const trainingDate = new Date(trainingToDelete.startDate); // Giả sử có trường startDate
+        const currentDate = new Date();
+
+        if (trainingDate <= currentDate) {
+            sweetAlert.alertWarning(
+                "Không thể xóa!",
+                "Không thể xóa khóa đào tạo đã bắt đầu hoặc đã kết thúc.",
+                2000,
+                false
+            );
+            return;
+        }
+
+        // Kiểm tra số lượng Catechist trong training
+        const trainingCatechists = catechists[id] || [];
+
+        if (trainingCatechists.length > 0) {
+            sweetAlert.alertWarning(
+                "Không thể xóa!",
+                "Không thể xóa khóa đào tạo đã có Giáo lý viên tham gia.",
+                2000,
+                false
+            );
+            return;
+        }
+
+        if (window.confirm("Bạn có chắc là muốn xóa đào tạo này không?")) {
+            trainApi
+                .deleteTrain(id)
+                .then(() => {
+                    sweetAlert.alertSuccess(
+                        "Xóa thành công!",
+                        `Khóa đào tạo đã được xóa thành công.`,
+                        2000,
+                        false
+                    );
+                    setTrains(trains.filter((train) => train.id !== id));
+                })
+                .catch((err: Error) => {
+                    console.error(`Không thể xóa khóa đào tạo với ID: ${id}`, err);
+                    sweetAlert.alertFailed(
+                        "Xóa thất bại!",
+                        "Đã xảy ra lỗi khi xóa khóa đào tạo.",
+                        2000,
+                        false
+                    );
+                });
+        }
+
+
+
+    };
 
     // const handleAddOrUpdateCatechist = (trainId: string, catechistCount: number) => {
     //     if (catechistCount === 0) {
@@ -293,20 +253,17 @@ const ListAllTrain: React.FC = () => {
                 const response = await trainApi.getCatechistsByTrainingListId(trainId);
                 const items = response.data.data.items;
 
-                const now = new Date();
-                const startDate = new Date(train.startTime);
-
-                // Nếu khóa chưa bắt đầu, chỉ đếm những catechist không có status = 2
-                if (now < startDate) {
+                // Nếu training chưa bắt đầu (status = 0), loại bỏ catechist có status = 3 (Không đạt)
+                if (train.trainingListStatus === 0) {
                     const activeItems = items.filter(
-                        (item: any) => item.catechistInTrainingStatus !== 2
+                        (item: any) => item.catechistInTrainingStatus !== 3
                     );
                     setCatechists(prev => ({
                         ...prev,
                         [trainId]: activeItems
                     }));
                 } else {
-                    // Nếu khóa đã bắt đầu hoặc kết thúc, đếm tất cả
+                    // Nếu training đang đào tạo (1) hoặc kết thúc (2), hiển thị tất cả
                     setCatechists(prev => ({
                         ...prev,
                         [trainId]: items
@@ -396,6 +353,18 @@ const ListAllTrain: React.FC = () => {
                                                 <Link
                                                     to={`/admin/training-list/${train.id}/catechists`}
                                                     className="text-dark"
+                                                    state={{
+                                                        trainingInfo: {
+                                                            id: train.id,
+                                                            name: train.name,
+                                                            previousLevel: train.previousLevel?.hierarchyLevel || levelMap[train.previousLevelId],
+                                                            nextLevel: train.nextLevel?.hierarchyLevel || levelMap[train.nextLevelId],
+                                                            startTime: train.startTime,
+                                                            endTime: train.endTime,
+                                                            description: train.description,
+                                                            currentCatechistCount: catechists[train.id]?.length || 0
+                                                        }
+                                                    }}
                                                 >
                                                     {train.name}
                                                 </Link>
