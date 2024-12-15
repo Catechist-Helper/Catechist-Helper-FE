@@ -101,6 +101,46 @@ const ListAllTrain: React.FC = () => {
   };
 
   const handleDeleteTrainClick = async (id: string) => {
+    // Lấy thông tin khóa đào tạo cần xóa
+    const trainingToDelete = trains.find((train) => train.id === id);
+
+    if (!trainingToDelete) {
+      sweetAlert.alertWarning(
+        "Lỗi!",
+        "Không tìm thấy thông tin khóa đào tạo.",
+        2000,
+        false
+      );
+      return;
+    }
+
+    // Kiểm tra ngày đào tạo
+    const trainingDate = new Date(trainingToDelete.startDate); // Giả sử có trường startDate
+    const currentDate = new Date();
+
+    if (trainingDate <= currentDate) {
+      sweetAlert.alertWarning(
+        "Không thể xóa!",
+        "Không thể xóa khóa đào tạo đã bắt đầu hoặc đã kết thúc.",
+        2000,
+        false
+      );
+      return;
+    }
+
+    // Kiểm tra số lượng Catechist trong training
+    const trainingCatechists = catechists[id] || [];
+
+    if (trainingCatechists.length > 0) {
+      sweetAlert.alertWarning(
+        "Không thể xóa!",
+        "Không thể xóa khóa đào tạo đã có Giáo lý viên tham gia.",
+        2000,
+        false
+      );
+      return;
+    }
+
     const confirm = await sweetAlert.confirm(
       "Bạn có chắc là muốn xóa đào tạo này không?",
       "",
@@ -108,22 +148,33 @@ const ListAllTrain: React.FC = () => {
       undefined,
       "question"
     );
-    if (confirm) {
-      try {
-        await trainApi.deleteTrain(id);
+
+    if (!confirm) {
+      return;
+    }
+
+    trainApi
+      .deleteTrain(id)
+      .then(() => {
         sweetAlert.alertSuccess(
           "Xóa thành công!",
-          "Khóa đào tạo đã được xóa.",
+          `Khóa đào tạo đã được xóa thành công.`,
           2000,
           false
         );
-        setTrains((prev) => prev.filter((train) => train.id !== id));
-      } catch (err) {
-        console.error("Xóa đào tạo thất bại:", err);
-        sweetAlert.alertFailed("Xóa thất bại!", "Đã xảy ra lỗi.", 2000, false);
-      }
-    }
+        setTrains(trains.filter((train) => train.id !== id));
+      })
+      .catch((err: Error) => {
+        console.error(`Không thể xóa khóa đào tạo với ID: ${id}`, err);
+        sweetAlert.alertFailed(
+          "Xóa thất bại!",
+          "Đã xảy ra lỗi khi xóa khóa đào tạo.",
+          2000,
+          false
+        );
+      });
   };
+
   interface TrainingLists {
     startDate: string | number | Date;
     id: string;
@@ -270,11 +321,6 @@ const ListAllTrain: React.FC = () => {
                 className="btn btn-primary"
                 color="primary"
                 variant="outlined"
-                // onClick={() =>
-                //   navigate("/admin/training-catechist", {
-                //     state: { trainingId: params.row.id },
-                //   })
-                // }
                 onClick={() =>
                   handleAddOrUpdateCatechist(
                     params.row.id,
@@ -292,9 +338,10 @@ const ListAllTrain: React.FC = () => {
             color="secondary"
             variant="contained"
             onClick={() =>
-              navigate("/admin/training-catechist", {
-                state: { trainingId: params.row.id },
-              })
+              handleAddOrUpdateCatechist(
+                params.row.id,
+                catechists[params.row.id]?.length || 0
+              )
             }
           >
             Thêm
