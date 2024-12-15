@@ -340,7 +340,6 @@ const ListAllTrainCatechist: React.FC = () => {
                             const keyNum = parseInt(key, 10);
                             const isDisabled =
                               // 1. Khi Training chưa bắt đầu (status = 0)
-                              (trainingStatus === 0 && keyNum === 2) ||
                               (trainingStatus === 0 && (keyNum === 1 || keyNum === 2)) ||
                               // 2. Khi Training đang đào tạo (status = 1)
                               (trainingStatus === 1 &&
