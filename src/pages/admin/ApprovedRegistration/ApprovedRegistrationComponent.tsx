@@ -476,10 +476,6 @@ export default function ApprovedRegistrationsTable() {
 
     try {
       if (selectedRegistration) {
-        await registrationApi.updateRegistration(selectedRegistration.id, {
-          status: registrationStatus,
-        });
-
         const interviewId = selectedRegistration.interview?.id;
         if (interviewId) {
           await interviewApi.updateInterview(interviewId, {
@@ -488,6 +484,10 @@ export default function ApprovedRegistrationsTable() {
             isPassed,
           });
         }
+
+        await registrationApi.updateRegistration(selectedRegistration.id, {
+          status: registrationStatus,
+        });
 
         let processRes = await interviewProcessApi.createInterviewProcess({
           registrationId: selectedRegistration.id,
@@ -585,57 +585,6 @@ export default function ApprovedRegistrationsTable() {
       disableLoading();
     }
   };
-
-  // const handleDeleteInterview = async () => {
-  //   // enableLoading();
-  //   if (selectedRegistrations.length === 0) return;
-
-  //   for (let registrationId of selectedRegistrations) {
-  //     const selectedRow = rows.find((row) => row.id === registrationId);
-
-  //     if (!selectedRow || selectedRow.interview) {
-  //       console.error("Không tìm thấy phỏng vấn để xóa.");
-  //       continue;
-  //     }
-
-  //     const interviewId = selectedRow.interview.id; // Lấy id của interview
-
-  //     try {
-  //       // Xóa interview của đơn đăng ký
-  //       await interviewApi.deleteInterview(interviewId);
-
-  //       // if (selectedRow.interviewProcesses) {
-  //       //   // Cập nhật status của Interview Process
-  //       //   const interviewProcessId = selectedRow.interviewProcesses.filter(
-  //       //     (process: any) =>
-  //       //       process.name.startsWith(RegistrationProcessTitle.DUYET_DON)
-  //       //   )[0]?.id;
-  //       //   if (interviewProcessId) {
-  //       //     await interviewProcessApi.updateInterviewProcess(
-  //       //       interviewProcessId,
-  //       //       {
-  //       //         name: RegistrationProcessTitle.DUYET_DON,
-  //       //         status: 0,
-  //       //       }
-  //       //     );
-  //       //   }
-  //       // }
-
-  //       // Cập nhật trạng thái đơn đăng ký thành Pending
-  //       await registrationApi.updateRegistration(registrationId.toString(), {
-  //         status: RegistrationStatus.Pending,
-  //       });
-  //       setSelectedRegistrations([]);
-  //     } catch (error) {
-  //       console.error("Lỗi khi xóa phỏng vấn:", error);
-  //     } finally {
-  //       disableLoading();
-  //     }
-  //   }
-
-  //   // Tải lại danh sách sau khi xóa
-  //   fetchApprovedRegistrations();
-  // };
 
   // Xử lý hiển thị các nút khi lọc
   const renderFilterButtons = () => {
@@ -744,15 +693,15 @@ export default function ApprovedRegistrationsTable() {
         return;
       }
 
-      await registrationApi.updateRegistration(registrationId, {
-        status: RegistrationStatus.Approved_Duyet_Don,
-      });
-
       await interviewApi.createInterview({
         registrationId,
         meetingTime: meetingTime,
         interviewType: interviewTypeOption,
         accounts: selectedAccountIds,
+      });
+
+      await registrationApi.updateRegistration(registrationId, {
+        status: RegistrationStatus.Approved_Duyet_Don,
       });
 
       let process = await interviewProcessApi.createInterviewProcess({
@@ -1456,7 +1405,7 @@ export default function ApprovedRegistrationsTable() {
                 <FormControlLabel
                   value={0}
                   control={<Radio />}
-                  label="Offline"
+                  label="Trực tiếp"
                 />
                 <FormControlLabel
                   value={1}

@@ -9,7 +9,7 @@ import {
 } from "../../../enums/RegistrationProcess";
 import useAppContext from "../../../hooks/useAppContext";
 import sweetAlert from "../../../utils/sweetAlert";
-import { Button } from "@mui/material";
+import { Button, FormControlLabel, Radio, RadioGroup } from "@mui/material";
 import HomeTemplate from "../../../components/Templates/HomeTemplate/HomeTemplate";
 
 const RegisterForm: React.FC = () => {
@@ -248,28 +248,23 @@ const RegisterForm: React.FC = () => {
                   Giới tính <span className="text-red-500">*</span>
                 </label>
                 <div className="flex items-center">
-                  <div className="flex items-center mr-4">
-                    <input
-                      type="radio"
-                      name="gender"
-                      value="Nam"
-                      checked={formData.gender === "Nam"}
-                      onChange={handleChange}
-                      className="w-4 h-4 text-blue-600"
+                  <RadioGroup
+                    aria-labelledby="demo-radio-buttons-group-label"
+                    name="gender"
+                    value={formData.gender}
+                    onChange={handleChange}
+                  >
+                    <FormControlLabel
+                      value={"Nam"}
+                      control={<Radio />}
+                      label="Nam"
                     />
-                    <label className="ml-2">Nam</label>
-                  </div>
-                  <div className="flex items-center">
-                    <input
-                      type="radio"
-                      name="gender"
-                      value="Nữ"
-                      checked={formData.gender === "Nữ"}
-                      onChange={handleChange}
-                      className="w-4 h-4 text-blue-600"
+                    <FormControlLabel
+                      value={"Nữ"}
+                      control={<Radio />}
+                      label="Nữ"
                     />
-                    <label className="ml-2">Nữ</label>
-                  </div>
+                  </RadioGroup>
                 </div>
                 {errors.gender && (
                   <p className="text-red-500 text-sm">{errors.gender}</p>
@@ -381,32 +376,24 @@ const RegisterForm: React.FC = () => {
                   Đã từng làm Giáo lý viên{" "}
                   <span className="text-red-500">*</span>
                 </label>
-                <div className="flex items-center">
-                  <input
-                    type="radio"
-                    name="isTeachingBefore"
-                    value="true"
-                    checked={formData.isTeachingBefore === true}
-                    onChange={() =>
-                      setFormData({ ...formData, isTeachingBefore: true })
-                    }
-                    className="w-4 h-4 text-blue-600"
+
+                <RadioGroup
+                  aria-labelledby="demo-radio-buttons-group-label"
+                  name="isTeachingBefore"
+                  value={formData.isTeachingBefore}
+                  onChange={handleChange}
+                >
+                  <FormControlLabel
+                    value={"true"}
+                    control={<Radio />}
+                    label="Đã từng"
                   />
-                  <label className="ml-2">Đã từng</label>
-                </div>
-                <div className="flex items-center mt-1">
-                  <input
-                    type="radio"
-                    name="isTeachingBefore"
-                    value="false"
-                    checked={formData.isTeachingBefore === false}
-                    onChange={() =>
-                      setFormData({ ...formData, isTeachingBefore: false })
-                    }
-                    className="w-4 h-4 text-blue-600"
+                  <FormControlLabel
+                    value={"false"}
+                    control={<Radio />}
+                    label="Chưa từng"
                   />
-                  <label className="ml-2">Chưa từng</label>
-                </div>
+                </RadioGroup>
                 {errors.isTeachingBefore && (
                   <p className="text-red-500 text-sm">
                     {errors.isTeachingBefore}

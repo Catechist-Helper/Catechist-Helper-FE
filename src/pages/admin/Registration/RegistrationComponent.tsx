@@ -1046,7 +1046,7 @@ export default function RegistrationDataTable() {
               onChange={(e) => {
                 setRejectedReason(e.target.value);
               }}
-              className="block w-full p-2 border border-gray-700 rounded-lg"
+              className="block w-full p-2 border border-gray-700 rounded-lg bg-white"
             />
           </div>
           <div className="modal-buttons flex justify-between gap-x-3 mt-4">
