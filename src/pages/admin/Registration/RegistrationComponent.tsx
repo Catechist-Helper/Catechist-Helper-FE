@@ -367,6 +367,13 @@ export default function RegistrationDataTable() {
       enableLoading();
       const registrationId: string = selectedIds[0].toString();
 
+      await interviewApi.createInterview({
+        registrationId,
+        meetingTime: meetingTime,
+        interviewType: interviewTypeOption,
+        accounts: selectedAccountIds,
+      });
+
       if (viewMode === "pending") {
         await registrationApi.updateRegistration(registrationId, {
           status: RegistrationStatus.Approved_Duyet_Don,
@@ -389,13 +396,6 @@ export default function RegistrationDataTable() {
           });
         }
       }
-
-      await interviewApi.createInterview({
-        registrationId,
-        meetingTime: meetingTime,
-        interviewType: interviewTypeOption,
-        accounts: selectedAccountIds,
-      });
 
       let process = await interviewProcessApi.createInterviewProcess({
         registrationId: registrationId,

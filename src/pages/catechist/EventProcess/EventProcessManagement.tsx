@@ -248,25 +248,31 @@ const EventProcessManagement: React.FC = () => {
           >
             Xem
           </Button>
-          <Button
-            variant="outlined"
-            color="primary"
-            onClick={() =>
-              handleUpdateProcess(params.row as ProcessResponseItem)
-            }
-            style={{ marginRight: 10 }}
-          >
-            Sửa
-          </Button>
-          {params.row.status == EventProcessStatus.Not_Started ? (
+          {truongBTCRole ? (
             <>
               <Button
                 variant="outlined"
-                color="error"
-                onClick={() => handleDeleteProcess(params.id as string)}
+                color="primary"
+                onClick={() =>
+                  handleUpdateProcess(params.row as ProcessResponseItem)
+                }
+                style={{ marginRight: 10 }}
               >
-                Xóa
+                Sửa
               </Button>
+              {params.row.status == EventProcessStatus.Not_Started ? (
+                <>
+                  <Button
+                    variant="outlined"
+                    color="error"
+                    onClick={() => handleDeleteProcess(params.id as string)}
+                  >
+                    Xóa
+                  </Button>
+                </>
+              ) : (
+                <></>
+              )}
             </>
           ) : (
             <></>

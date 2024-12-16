@@ -54,7 +54,7 @@ const CreateTrain: React.FC = () => {
 
       if (!values.endTime) {
         errors.endTime = "Vui lòng nhập thời gian kết thúc.";
-      } else if (endDate <= startDate) {
+      } else if (endDate < startDate) {
         errors.endTime = "Thời gian kết thúc phải lớn hơn thời gian bắt đầu.";
       }
 
