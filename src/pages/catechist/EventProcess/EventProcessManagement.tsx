@@ -183,13 +183,13 @@ const EventProcessManagement: React.FC = () => {
     {
       field: "fee",
       headerName: "Chi phí dự tính",
-      width: 150,
+      width: 140,
       renderCell: (params) => formatPrice(params.value),
     },
     {
       field: "actualFee",
       headerName: "Chi phí thực tế",
-      width: 150,
+      width: 140,
       renderCell: (params) => formatPrice(params.value),
     },
     {
@@ -200,7 +200,7 @@ const EventProcessManagement: React.FC = () => {
     {
       field: "status",
       headerName: "Trạng thái",
-      width: 100,
+      width: 130,
       renderCell: (params) => {
         switch (params.value) {
           case EventProcessStatus.Not_Started:
@@ -248,7 +248,9 @@ const EventProcessManagement: React.FC = () => {
           >
             Xem
           </Button>
-          {truongBTCRole ? (
+          {truongBTCRole &&
+          params.row.status != EventProcessStatus.Completed &&
+          params.row.status != EventProcessStatus.Cancelled ? (
             <>
               <Button
                 variant="outlined"
@@ -258,7 +260,7 @@ const EventProcessManagement: React.FC = () => {
                 }
                 style={{ marginRight: 10 }}
               >
-                Sửa
+                Cập nhật
               </Button>
               {params.row.status == EventProcessStatus.Not_Started ? (
                 <>
@@ -313,9 +315,10 @@ const EventProcessManagement: React.FC = () => {
               onClick={() => {
                 navigate(-1);
               }}
-              style={{ marginRight: "20px" }}
+              style={{ marginRight: "15px" }}
               variant="outlined"
-              color="inherit"
+              color="primary"
+              className="btn btn-primary"
             >
               Quay lại
             </Button>
@@ -427,7 +430,7 @@ const EventProcessManagement: React.FC = () => {
           <>
             <Button
               variant="contained"
-              color="secondary"
+              color="primary"
               onClick={handleCreateProcess}
               style={{ marginBottom: "20px" }}
             >
@@ -467,14 +470,21 @@ const EventProcessManagement: React.FC = () => {
         </div>
       )}
       {/* Event Process Dialog */}
-      <EventProcessDialog
-        open={openDialog}
-        viewModeDialog={viewMode}
-        onClose={handleCloseDialog}
-        eventId={eventId}
-        processData={selectedProcess}
-        event={selectedEvent ? selectedEvent : undefined}
-      />
+      {openDialog ? (
+        <>
+          {" "}
+          <EventProcessDialog
+            open={openDialog}
+            viewModeDialog={viewMode}
+            onClose={handleCloseDialog}
+            eventId={eventId}
+            processData={selectedProcess}
+            event={selectedEvent ? selectedEvent : undefined}
+          />
+        </>
+      ) : (
+        <></>
+      )}
     </Paper>
   );
 };

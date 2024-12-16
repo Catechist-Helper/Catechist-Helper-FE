@@ -194,6 +194,13 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
       return;
     }
 
+    if (!childRef?.current?.checkValidMemberOfProcess()) {
+      sweetAlert.alertWarning(
+        "Nếu đã gán người đảm nhận thì cần có 1 người đảm nhận chính"
+      );
+      return;
+    }
+
     // const durationTicks =
     //   durationDays * 24 * 60 * 60 * 10000000 +
     //   durationHours * 60 * 60 * 10000000 +
@@ -629,20 +636,15 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
             eventId={eventId}
             processId={processData ? processData.id : ""}
             ref={childRef}
+            viewMode={viewMode}
           />
         </Grid>
       </DialogContent>
       <DialogActions>
-        <Button
-          variant="contained"
-          onClick={() => {
-            handleCloseDialog();
-          }}
-          color="secondary"
-        >
-          {!viewMode ? <>Hủy bỏ</> : <>Đóng</>}
-        </Button>
-        {viewMode && processData ? (
+        {viewMode &&
+        processData &&
+        processData.status != EventProcessStatus.Completed &&
+        processData.status != EventProcessStatus.Cancelled ? (
           <>
             <Button
               variant="outlined"
@@ -657,6 +659,15 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
         ) : (
           <></>
         )}
+        <Button
+          variant={!viewMode ? "contained" : "outlined"}
+          onClick={() => {
+            handleCloseDialog();
+          }}
+          color="secondary"
+        >
+          {!viewMode ? <>Hủy bỏ</> : <>Đóng</>}
+        </Button>
         {!viewMode ? (
           <>
             <Button variant="contained" onClick={handleSubmit} color="primary">

@@ -46,20 +46,24 @@ const CreateTrain: React.FC = () => {
       const startDate = new Date(values.startTime);
       const endDate = new Date(values.endTime);
 
+      // Kiểm tra ngày bắt đầu
       if (!values.startTime) {
         errors.startTime = "Vui lòng nhập thời gian bắt đầu.";
       } else if (startDate <= now) {
         errors.startTime = "Thời gian bắt đầu phải lớn hơn ngày hiện tại.";
       }
 
+      // Kiểm tra ngày kết thúc
       if (!values.endTime) {
         errors.endTime = "Vui lòng nhập thời gian kết thúc.";
-      } else if (endDate < startDate) {
-        errors.endTime = "Thời gian kết thúc phải lớn hơn thời gian bắt đầu.";
-      }
+      } else {
+        // Kiểm tra xem có cùng ngày không
+        const isSameDay = startDate.toDateString() === endDate.toDateString();
 
-      if (startDate.getTime() === endDate.getTime()) {
-        errors.endTime = "Thời gian bắt đầu và kết thúc không được trùng nhau.";
+        if (isSameDay || endDate <= startDate) {
+          errors.endTime =
+            "Ngày kết thúc phải lớn hơn ngày bắt đầu và không được trùng ngày.";
+        }
       }
 
       return errors;

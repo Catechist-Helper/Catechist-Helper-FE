@@ -1,6 +1,6 @@
 import { useState, useEffect, useImperativeHandle, forwardRef } from "react";
 import { DialogContent, DialogTitle, Button } from "@mui/material";
-import { DataGrid } from "@mui/x-data-grid";
+import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import memberApi from "../../../api/EventMember";
 import eventApi from "../../../api/Event";
 import roleEventApi from "../../../api/RoleEvent";
@@ -16,16 +16,18 @@ import processApi from "../../../api/EventProcess";
 interface MemberOfProcessDialogProps {
   eventId: string;
   processId: string;
+  viewMode?: boolean;
 }
 
 export interface MemberOfProcessDialogHandle {
   handleChangeMemberOfProcess: (processId: string) => void;
+  checkValidMemberOfProcess: () => void;
 }
 
 const MemberOfProcessDialog = forwardRef<
   MemberOfProcessDialogHandle,
   MemberOfProcessDialogProps
->(({ eventId, processId }: MemberOfProcessDialogProps, ref) => {
+>(({ eventId, processId, viewMode }: MemberOfProcessDialogProps, ref) => {
   const [availableAccounts, setAvailableAccounts] = useState<any[]>([]);
   const [membersOfProcess, setMembersOfProcess] = useState<
     (UpdateMemberRequest & {
@@ -132,8 +134,16 @@ const MemberOfProcessDialog = forwardRef<
     await memberApi.updateProcessMember(processId.trim(), request);
   };
 
+  const checkValidMemberOfProcess = () => {
+    if (membersOfProcess.length > 0 && mainMember == "") {
+      return false;
+    }
+    return true;
+  };
+
   useImperativeHandle(ref, () => ({
     handleChangeMemberOfProcess,
+    checkValidMemberOfProcess,
   }));
 
   const handleRemoveMember = (accountId: string) => {
@@ -185,124 +195,123 @@ const MemberOfProcessDialog = forwardRef<
   const handleMainCatechistChange = (id: string) => {
     setMainMember(id);
   };
+  const columns1: GridColDef[] = [
+    {
+      field: "avatar",
+      headerName: "Ảnh",
+      width: 100,
+      renderCell: (params) => (
+        <img
+          src={params.row.avatar || "https://via.placeholder.com/50"}
+          alt="Avatar"
+          width={50}
+          height={50}
+          style={{ borderRadius: "3px" }}
+        />
+      ),
+    },
+    { field: "fullName", headerName: "Họ và Tên", width: 200 },
+    { field: "gender", headerName: "Giới tính", width: 105 },
+    { field: "email", headerName: "Email", width: 200 },
+    { field: "phone", headerName: "Số Điện Thoại", width: 150 },
+    {
+      field: "roleEventId",
+      headerName: "Vai trò",
+      width: 200,
+      renderCell: (params) => {
+        const role = roles.find((r) => r.id === params.value);
+        return role ? role.name : "N/A";
+      },
+    },
+  ];
+  const columns2: GridColDef[] = [
+    {
+      field: "avatar",
+      headerName: "Ảnh",
+      width: 100,
+      renderCell: (params) => (
+        <img
+          src={params.row.avatar || "https://via.placeholder.com/50"}
+          alt="Avatar"
+          width={50}
+          height={50}
+          style={{ borderRadius: "3px" }}
+        />
+      ),
+    },
+    { field: "fullName", headerName: "Họ và Tên", width: 200 },
+    { field: "gender", headerName: "Giới tính", width: 105 },
+    { field: "email", headerName: "Email", width: 200 },
+    { field: "phone", headerName: "Số Điện Thoại", width: 150 },
+    {
+      field: "roleEventId",
+      headerName: "Vai trò",
+      width: 200,
+      renderCell: (params) => {
+        const role = roles.find((r) => r.id === params.value);
+        return role ? role.name : "N/A";
+      },
+    },
+    {
+      field: "main",
+      headerName: "Đảm nhận chính",
+      width: 150,
+      renderCell: (params) => (
+        <input
+          type="checkbox"
+          checked={mainMember === params.row.id}
+          onChange={() => {
+            if (!viewMode) {
+              handleMainCatechistChange(params.row.id);
+            }
+          }}
+        />
+      ),
+    },
+  ];
 
+  if (!viewMode) {
+    columns2.push({
+      field: "action",
+      headerName: "Xóa",
+      width: 150,
+      renderCell: (params) => (
+        <Button color="error" onClick={() => handleRemoveMember(params.row.id)}>
+          Xóa
+        </Button>
+      ),
+    });
+
+    columns1.push({
+      field: "action",
+      headerName: "Xóa",
+      width: 150,
+      renderCell: (params) => (
+        <Button color="primary" onClick={() => handleAddMember(params.row.id)}>
+          Thêm
+        </Button>
+      ),
+    });
+  }
   return (
     <>
       <div>
         <DialogTitle>Thành viên đảm nhận</DialogTitle>
         <DialogContent>
-          <h4>Danh sách Chưa Gán</h4>
+          <h4>Danh sách chưa Gán</h4>
           <DataGrid
             disableRowSelectionOnClick
             rows={sortedAvailables}
-            columns={[
-              {
-                field: "avatar",
-                headerName: "Ảnh",
-                width: 100,
-                renderCell: (params) => (
-                  <img
-                    src={params.row.avatar || "https://via.placeholder.com/50"}
-                    alt="Avatar"
-                    width={50}
-                    height={50}
-                    style={{ borderRadius: "3px" }}
-                  />
-                ),
-              },
-              { field: "fullName", headerName: "Họ và Tên", width: 200 },
-              { field: "gender", headerName: "Giới tính", width: 105 },
-              { field: "email", headerName: "Email", width: 200 },
-              { field: "phone", headerName: "Số Điện Thoại", width: 150 },
-              {
-                field: "roleEventId",
-                headerName: "Vai trò",
-                width: 200,
-                renderCell: (params) => {
-                  const role = roles.find((r) => r.id === params.value);
-                  return role ? role.name : "N/A";
-                },
-              },
-              {
-                field: "action",
-                headerName: "Xóa",
-                width: 150,
-                renderCell: (params) => (
-                  <Button
-                    color="primary"
-                    onClick={() => handleAddMember(params.row.id)}
-                  >
-                    Thêm
-                  </Button>
-                ),
-              },
-            ]}
+            columns={columns1}
             autoHeight
           />
-          <h4 className="mt-3">Danh sách Ban Tổ Chức</h4>
+          <h4 className="mt-3">Danh sách người đảm nhận</h4>
           {sortedMembersOfProcess.length > 0 ? (
             <>
               <DataGrid
                 disableRowSelectionOnClick
                 rows={sortedMembersOfProcess}
-                columns={[
-                  {
-                    field: "avatar",
-                    headerName: "Ảnh",
-                    width: 100,
-                    renderCell: (params) => (
-                      <img
-                        src={
-                          params.row.avatar || "https://via.placeholder.com/50"
-                        }
-                        alt="Avatar"
-                        width={50}
-                        height={50}
-                        style={{ borderRadius: "3px" }}
-                      />
-                    ),
-                  },
-                  { field: "fullName", headerName: "Họ và Tên", width: 200 },
-                  { field: "gender", headerName: "Giới tính", width: 105 },
-                  { field: "email", headerName: "Email", width: 200 },
-                  { field: "phone", headerName: "Số Điện Thoại", width: 150 },
-                  {
-                    field: "roleEventId",
-                    headerName: "Vai trò",
-                    width: 200,
-                    renderCell: (params) => {
-                      const role = roles.find((r) => r.id === params.value);
-                      return role ? role.name : "N/A";
-                    },
-                  },
-                  {
-                    field: "main",
-                    headerName: "Đảm nhận chính",
-                    width: 150,
-                    renderCell: (params) => (
-                      <input
-                        type="checkbox"
-                        checked={mainMember === params.row.id}
-                        onChange={() => {
-                          handleMainCatechistChange(params.row.id);
-                        }}
-                      />
-                    ),
-                  },
-                  {
-                    field: "action",
-                    headerName: "Xóa",
-                    width: 150,
-                    renderCell: (params) => (
-                      <Button
-                        color="error"
-                        onClick={() => handleRemoveMember(params.row.id)}
-                      >
-                        Xóa
-                      </Button>
-                    ),
-                  },
-                ]}
+                columns={columns2}
                 autoHeight
               />
             </>

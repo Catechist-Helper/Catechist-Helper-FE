@@ -19,6 +19,7 @@ import {
   EventProcessStatus,
   EventProcessStringStatus,
 } from "../../../enums/Event";
+import EventProcessDialog from "../../catechist/EventProcess/EventProcessDialog";
 
 const EventProcessManagement: React.FC = () => {
   const location = useLocation();
@@ -81,9 +82,20 @@ const EventProcessManagement: React.FC = () => {
     fetchEventProcesses();
   }, [eventId]);
 
+  const [openDialog, setOpenDialog] = useState<boolean>(false);
+  const [selectedProcess, setSelectedProcess] =
+    useState<ProcessResponseItem | null>(null);
+  const handleViewProcess = (process: ProcessResponseItem) => {
+    setSelectedProcess(process);
+    setOpenDialog(true);
+  };
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+    setSelectedProcess(null);
+  };
   const columns: GridColDef[] = [
-    { field: "name", headerName: "Tên hoạt động", width: 200 },
-    { field: "description", headerName: "Mô tả", width: 300 },
+    { field: "name", headerName: "Tên hoạt động", width: 180 },
+    { field: "description", headerName: "Mô tả", width: 200 },
     {
       field: "startTime",
       headerName: "Thời gian bắt đầu",
@@ -99,13 +111,13 @@ const EventProcessManagement: React.FC = () => {
     {
       field: "fee",
       headerName: "Chi phí dự tính",
-      width: 150,
+      width: 140,
       renderCell: (params) => formatPrice(params.value),
     },
     {
       field: "actualFee",
       headerName: "Chi phí thực tế",
-      width: 150,
+      width: 140,
       renderCell: (params) => formatPrice(params.value),
     },
     {
@@ -116,7 +128,7 @@ const EventProcessManagement: React.FC = () => {
     {
       field: "status",
       headerName: "Trạng thái",
-      width: 180,
+      width: 130,
       renderCell: (params) => {
         switch (params.value) {
           case EventProcessStatus.Not_Started:
@@ -147,6 +159,23 @@ const EventProcessManagement: React.FC = () => {
             return <></>;
         }
       },
+    },
+    {
+      field: "actions",
+      headerName: "Hành động",
+      width: 200,
+      renderCell: (params: any) => (
+        <Box>
+          <Button
+            variant="outlined"
+            color="secondary"
+            onClick={() => handleViewProcess(params.row as ProcessResponseItem)}
+            style={{ marginRight: 10 }}
+          >
+            Xem
+          </Button>
+        </Box>
+      ),
     },
   ];
 
@@ -181,9 +210,10 @@ const EventProcessManagement: React.FC = () => {
               onClick={() => {
                 navigate(-1);
               }}
-              style={{ marginRight: "20px" }}
+              style={{ marginRight: "15px" }}
               variant="outlined"
-              color="inherit"
+              color="primary"
+              className="btn btn-primary"
             >
               Quay lại
             </Button>
@@ -322,6 +352,20 @@ const EventProcessManagement: React.FC = () => {
           </div>
         )}
       </div>
+      {openDialog ? (
+        <>
+          <EventProcessDialog
+            open={openDialog}
+            viewModeDialog={true}
+            onClose={handleCloseDialog}
+            eventId={eventId}
+            processData={selectedProcess}
+            event={selectedEvent ? selectedEvent : undefined}
+          />
+        </>
+      ) : (
+        <></>
+      )}
     </Paper>
   );
 };
