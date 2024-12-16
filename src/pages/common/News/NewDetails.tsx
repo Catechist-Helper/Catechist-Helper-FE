@@ -76,11 +76,12 @@ const NewDetails: React.FC = () => {
     let interval = setInterval(() => {
       addTargetBlankToLinks();
       count++;
-      if (count == 20) {
+      if (count == 5) {
         clearInterval(interval);
       }
-    }, 200);
+    }, 300);
   }, [id]);
+
   const navigate = useNavigate();
   return (
     <>

@@ -8,7 +8,6 @@ import {
   RegistrationProcessTitle,
 } from "../../../enums/RegistrationProcess";
 import useAppContext from "../../../hooks/useAppContext";
-import LoadingScreen from "../../../components/Organisms/LoadingScreen/LoadingScreen";
 import sweetAlert from "../../../utils/sweetAlert";
 import { isVietnamesePhoneNumberValid } from "../../../utils/validation";
 import { Button } from "@mui/material";
@@ -17,7 +16,7 @@ import HomeTemplate from "../../../components/Templates/HomeTemplate/HomeTemplat
 const RegisterForm: React.FC = () => {
   const [step, setStep] = useState(1);
   const navigate = useNavigate();
-  const { isLoading, enableLoading, disableLoading } = useAppContext();
+  const { enableLoading, disableLoading } = useAppContext();
 
   const [errors, setErrors] = useState({
     fullName: "",
@@ -55,6 +54,10 @@ const RegisterForm: React.FC = () => {
       newErrors.dateOfBirth = "Ngày sinh không được bỏ trống";
     if (!formData.address) newErrors.address = "Địa chỉ không được bỏ trống";
     if (!formData.email) newErrors.email = "Email không được bỏ trống";
+
+    if (new Date(formData.dateOfBirth) >= new Date()) {
+      errors.dateOfBirth = "Ngày sinh phải là một ngày trước hiện tại";
+    }
 
     const phoneRegex = /^0\d{9}$/;
     if (!formData.phone) {
@@ -220,15 +223,6 @@ const RegisterForm: React.FC = () => {
   return (
     <HomeTemplate>
       <div className="w-[95%] min-h-screen bg-gray-100 mx-auto my-3 rounded-md">
-        <div
-          className="w-full h-full absolute z-[9999]"
-          data-testid="loading-screen"
-          style={{
-            display: `${isLoading ? "block" : "none"}`,
-          }}
-        >
-          <LoadingScreen transparent={true} />
-        </div>
         <div className="w-full px-40 pt-3 mb-5 ">
           <h2 className="text-center text-2xl font-bold mb-3 text-primary_color">
             Đăng kí ứng tuyển làm Giáo Lý Viên

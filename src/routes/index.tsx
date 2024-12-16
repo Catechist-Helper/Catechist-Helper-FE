@@ -55,10 +55,10 @@ const Loadable = (Component: any) => (props: any) => {
         element2.innerHTML = text;
       }
       count++;
-      if (count == 20) {
+      if (count == 10) {
         clearInterval(theInterval);
       }
-    }, 100);
+    }, 300);
   }, []);
 
   return (
@@ -115,9 +115,9 @@ export default function Router() {
         {
           path: PATH_HOME.registration,
           element: (
-            // <GuestGuard>
-            <RegisterForm />
-            // </GuestGuard>
+            <GuestGuard>
+              <RegisterForm />
+            </GuestGuard>
           ),
         },
         {
@@ -254,9 +254,9 @@ export default function Router() {
           path: PATH_ADMIN.assign_catechist_to_grade,
           element: (
             <AuthGuard>
-              {/* <RoleBasedGuard accessibleRoles={[RoleNameEnum.Admin]}> */}
-              <AssignCatechistToGrade />
-              {/* </RoleBasedGuard> */}
+              <RoleBasedGuard accessibleRoles={[RoleNameEnum.Admin]}>
+                <AssignCatechistToGrade />
+              </RoleBasedGuard>
             </AuthGuard>
           ),
         },
