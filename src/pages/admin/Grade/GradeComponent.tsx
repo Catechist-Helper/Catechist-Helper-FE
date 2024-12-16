@@ -493,7 +493,13 @@ export default function GradeComponent() {
         checkboxSelection
         onRowSelectionModelChange={handleSelectionChange}
         rowSelectionModel={selectedRows}
-        sx={{ border: 0 }}
+        sx={{
+          maxHeight: 480,
+          overflowX: "auto",
+          "& .MuiDataGrid-root": {
+            overflowX: "auto",
+          },
+        }}
         localeText={viVNGridTranslation}
         disableMultipleRowSelection
       />

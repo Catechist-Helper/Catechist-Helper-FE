@@ -15,7 +15,6 @@ const HomeTemplate: FC<HomeTemplateProps> = ({ children }) => {
     <>
       <div className="overflow-hidden flex flex-col min-h-screen">
         {/* Add role="banner" for Header */}
-        <HeaderHome />
         <main
           role="main" // Main role
           className="overflow-hidden flex-grow w-[100vw] bg-[url(../src/assets/images/HomeTemplate/background.png)] relative"
@@ -36,6 +35,7 @@ const HomeTemplate: FC<HomeTemplateProps> = ({ children }) => {
           >
             <LoadingScreen transparent={true} />
           </div>
+          <HeaderHome />
           <div
             className="w-full h-full absolute z-1"
             style={{

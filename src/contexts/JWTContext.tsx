@@ -20,6 +20,7 @@ import { useNavigate } from "react-router-dom";
 import { AxiosResponse } from "axios";
 import { AccountRoleString } from "../enums/Account";
 import catechistApi from "../api/Catechist";
+import Swal from "sweetalert2";
 // import authApi from "@/api/auth/authApi";
 
 // ----------------------------------------------------------------------
@@ -260,6 +261,14 @@ function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem("USER_INFO");
     dispatch({ type: Types.Logout });
     navigateToPage("/");
+    setTimeout(() => {
+      Swal.fire({
+        title: "Đăng xuất thành công",
+        icon: "success",
+        showConfirmButton: false,
+        timer: 1000,
+      });
+    }, 150);
   };
 
   // const resetPassword = () => {};

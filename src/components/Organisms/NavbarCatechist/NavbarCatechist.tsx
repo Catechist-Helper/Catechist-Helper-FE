@@ -1,25 +1,22 @@
-import { useState, useEffect } from "react";
-import "./NavbarCatechist.scss";
-//import Search from "antd/es/input/Search";
-import Swal from "sweetalert2";
-import { getUserInfo } from "../../../utils/utils";
+import ReactDOM from "react-dom";
 import useAuth from "../../../hooks/useAuth";
-import ChangePasswordDialog from "../NavbarAdmin/ChangePasswordDialog";
-import useAppContext from "../../../hooks/useAppContext";
-import accountApi from "../../../api/Account";
+import { useEffect, useState } from "react";
+import Swal from "sweetalert2";
 import { AuthUser } from "../../../types/authentication";
+import { getUserInfo } from "../../../utils/utils";
+import accountApi from "../../../api/Account";
+import useAppContext from "../../../hooks/useAppContext";
 import sweetAlert from "../../../utils/sweetAlert";
+import ChangePasswordDialog from "../NavbarAdmin/ChangePasswordDialog";
+import ViewCatechistInfoDialog from "./ViewCatechistInfoDialog";
 
-const NavbarCatechist = () => {
-  // State for managing the visibility of the user profile menu
+const NavbarAdmin = () => {
   const [isUserProfileMenuOpen, setUserProfileMenuOpen] = useState(false);
   const [userLogin, setUserLogin] = useState<AuthUser>(null);
-  const { logout } = useAuth();
+  const [isDialogOpen, setDialogOpen] = useState(false);
+  const [isDialogViewInfoOpen, setDialogViewInfoOpen] = useState(false);
 
-  // Function to toggle the user profile menu
-  const toggleUserProfileMenu = () => {
-    setUserProfileMenuOpen(!isUserProfileMenuOpen);
-  };
+  const { logout } = useAuth();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -32,17 +29,71 @@ const NavbarCatechist = () => {
     };
     fetchUser();
   }, []);
-  const [isDialogOpen, setDialogOpen] = useState(false);
 
-  // Open Change Password Dialog
-  const handleOpenDialog = () => {
-    setDialogOpen(true);
+  const toggleUserProfileMenu = () => {
+    setUserProfileMenuOpen(!isUserProfileMenuOpen);
   };
 
-  // Close Change Password Dialog
-  const handleCloseDialog = () => {
-    setDialogOpen(false);
-  };
+  const handleCloseDialog = () => setDialogOpen(false);
+
+  // Dropdown Menu Component with Portal
+  const UserMenuDropdown = () =>
+    ReactDOM.createPortal(
+      <div
+        style={{
+          position: "absolute",
+          top: "60px", // Điều chỉnh vị trí
+          right: "20px",
+          zIndex: 9999, // Cực cao
+          backgroundColor: "#fff",
+          boxShadow: "0 4px 10px rgba(0, 0, 0, 0.2)",
+          borderRadius: "8px",
+          overflow: "hidden",
+        }}
+      >
+        <div
+          onClick={() => {
+            toggleUserProfileMenu();
+            setDialogViewInfoOpen(true);
+          }}
+          className="px-4 py-2 text-black cursor-pointer hover:bg-gray-200"
+        >
+          Xem hồ sơ
+        </div>
+        <div
+          onClick={() => {
+            toggleUserProfileMenu();
+            setDialogOpen(true);
+          }}
+          className="px-4 py-2 text-black cursor-pointer hover:bg-gray-200"
+        >
+          Đổi mật khẩu
+        </div>
+        <div
+          onClick={() => {
+            toggleUserProfileMenu();
+            Swal.fire({
+              title: "Bạn có chắc muốn đăng xuất?",
+              icon: "question",
+              showCancelButton: true,
+              confirmButtonColor: "#3085d6",
+              cancelButtonColor: "#d33",
+              confirmButtonText: "Đăng xuất",
+              cancelButtonText: "Hủy bỏ",
+            }).then((result) => {
+              if (result.isConfirmed) {
+                logout();
+              }
+            });
+          }}
+          className="px-4 py-2 text-black cursor-pointer hover:bg-gray-200"
+        >
+          Đăng xuất
+        </div>
+      </div>,
+      document.body
+    );
+
   const { enableLoading, disableLoading } = useAppContext();
   // Handle password change submit
   const handleChangePassword = async (values: {
@@ -74,152 +125,69 @@ const NavbarCatechist = () => {
       disableLoading();
     }
   };
+
   return (
     <nav
       className="flex-grow-0 justify-between px-10 py-2 items-center bg-white"
-      style={{
-        width: "calc(100% - 3.8rem)",
-        transform: "translateX(3.7rem)",
-      }}
+      style={{ width: "calc(100% - 3.8rem)", transform: "translateX(3.7rem)" }}
     >
       <div className="text-black flex items-center">
-        <div className="flex items-center">
-          <h1
-            className="header_component_title font-baloo mq900:text-[1.5rem] text-[2.15rem]"
-            style={{ fontWeight: "bolder" }}
-          >
-            Catechist Helper
-          </h1>
-        </div>
-        <div className="ml-auto">
-          <ul className="flex items-center space-x-6 justify-end">
-            <li>
-              {/* <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="#000"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M20 4H4C2.89543 4 2 4.89543 2 6V18C2 19.1046 2.89543 20 4 20H20C21.1046 20 22 19.1046 22 18V6C22 4.89543 21.1046 4 20 4ZM20 8L12 13L4 8"
-                />
-              </svg> */}
-            </li>
-            <div className="text-black user-profile flex">
-              <div style={{ marginRight: "0.5rem", textAlign: "right" }}>
-                <ul style={{ listStyle: "none", padding: 0 }}>
-                  <li style={{ fontWeight: "600" }}>
-                    {userLogin && userLogin.email ? userLogin.email : ""}
-                  </li>
-                  <li>Vai trò: Giáo lý viên</li>
-                </ul>
-              </div>
-              {/* Profile Picture */}
-              {/* <img
-                src="https://wac-cdn.atlassian.com/dam/jcr:ba03a215-2f45-40f5-8540-b2015223c918/Max-R_Headshot%20(1).jpg?cdnVersion=1605"
-                alt="User"
-              /> */}
-              {/* User Profile Menu Dropdown */}
-              {isUserProfileMenuOpen ? (
-                <div
-                  style={{
-                    zIndex: "999",
-                    position: "absolute",
-                    top: "50px",
-                    right: "0",
-                  }}
-                >
-                  <div
-                    onClick={() => {
-                      handleOpenDialog();
-                    }}
-                    className=" px-2 py-1 border-b-2 border-b-white text-[1rem] cursor-pointer bg-black text-white"
-                    style={{
-                      fontWeight: "600",
-                      borderTopLeftRadius: "8px",
-                      borderTopRightRadius: "8px",
-                    }}
-                  >
-                    Đổi mật khẩu
-                  </div>
-                  <ChangePasswordDialog
-                    open={isDialogOpen}
-                    onClose={handleCloseDialog}
-                    onSubmit={handleChangePassword}
-                  />
-                  <div
-                    onClick={() => {
-                      Swal.fire({
-                        title: "Bạn có chắc muốn đăng xuất?",
-                        icon: "question",
-                        showCancelButton: true,
-                        confirmButtonColor: "#3085d6",
-                        cancelButtonColor: "#d33",
-                        confirmButtonText: "Đăng xuất",
-                        cancelButtonText: "Hủy bỏ",
-                        focusConfirm: false,
-                        focusDeny: true,
-                      }).then((result) => {
-                        if (result.isConfirmed) {
-                          logout();
-                          setTimeout(() => {
-                            Swal.fire({
-                              title: "Đăng xuất thành công",
-                              icon: "success",
-                              showConfirmButton: false,
-                              timer: 1000,
-                            });
-                          }, 300);
-                        }
-                      });
-                    }}
-                    className="px-2 py-1 border-b-2 border-b-white text-[1rem] cursor-pointer bg-black text-white"
-                    style={{
-                      fontWeight: "600",
-                      borderBottomLeftRadius: "8px",
-                      borderBottomRightRadius: "8px",
-                    }}
-                  >
-                    Đăng xuất
-                  </div>
-                </div>
-              ) : (
-                <></>
-              )}
-              <li
-                style={{
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  marginLeft: "0.5rem",
-                }}
-                onClick={toggleUserProfileMenu}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="#000"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="1.5"
-                    d="M6 8L12 14L18 8"
-                  />
-                </svg>
-              </li>
-            </div>
-          </ul>
+        <h1 className="header_component_title font-baloo text-[2.15rem] font-bold">
+          Catechist Helper
+        </h1>
+
+        {/* User Profile */}
+        <div className="ml-auto flex items-center relative">
+          <div className="mr-2">
+            <span className="font-semibold">{userLogin?.email || ""}</span>
+            <div className="text-end">Vai trò: Giáo lý viên</div>
+          </div>
+          <div onClick={toggleUserProfileMenu} className="cursor-pointer">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="1.5"
+                d="M6 8L12 14L18 8"
+              />
+            </svg>
+          </div>
+
+          {/* Dropdown Portal */}
+          {isUserProfileMenuOpen && <UserMenuDropdown />}
         </div>
       </div>
+      {isDialogOpen ? (
+        <>
+          <ChangePasswordDialog
+            open={isDialogOpen}
+            onClose={handleCloseDialog}
+            onSubmit={handleChangePassword}
+          />
+        </>
+      ) : (
+        <></>
+      )}
+      {isDialogViewInfoOpen ? (
+        <>
+          <ViewCatechistInfoDialog
+            open={isDialogViewInfoOpen}
+            onClose={() => {
+              setDialogViewInfoOpen(false);
+            }}
+          />
+        </>
+      ) : (
+        <></>
+      )}
     </nav>
   );
 };
 
-export default NavbarCatechist;
+export default NavbarAdmin;

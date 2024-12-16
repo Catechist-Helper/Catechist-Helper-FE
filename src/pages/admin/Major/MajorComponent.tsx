@@ -299,7 +299,7 @@ export default function MajorComponent() {
         left: "3.8rem",
       }}
     >
-      <h1 className="text-center text-[2.2rem] bg-primary_color text-text_primary_light py-2 font-bold">
+      <h1 className="text-center text-[2.2rem] bg_title text-text_primary_light py-2 font-bold">
         Danh sách ngành
       </h1>
 
@@ -345,24 +345,30 @@ export default function MajorComponent() {
         </div>
       </div>
 
-      <DataGrid
-        rows={rows}
-        columns={columns}
-        paginationMode="client"
-        rowCount={rowCount}
-        loading={loading}
-        paginationModel={paginationModel}
-        onPaginationModelChange={(newModel) => setPaginationModel(newModel)}
-        pageSizeOptions={[10, 25, 50, 100, 250]}
-        checkboxSelection
-        onRowSelectionModelChange={handleSelectionChange}
-        rowSelectionModel={selectedRows} // Use selectedRows as controlled model
-        sx={{
-          border: 0,
-        }}
-        localeText={viVNGridTranslation}
-        disableMultipleRowSelection
-      />
+      <div className="w-full px-3">
+        <DataGrid
+          rows={rows}
+          columns={columns}
+          paginationMode="client"
+          rowCount={rowCount}
+          loading={loading}
+          paginationModel={paginationModel}
+          onPaginationModelChange={(newModel) => setPaginationModel(newModel)}
+          pageSizeOptions={[10, 25, 50, 100, 250]}
+          checkboxSelection
+          onRowSelectionModelChange={handleSelectionChange}
+          rowSelectionModel={selectedRows} // Use selectedRows as controlled model
+          localeText={viVNGridTranslation}
+          disableMultipleRowSelection
+          sx={{
+            maxHeight: 480,
+            overflowX: "auto",
+            "& .MuiDataGrid-root": {
+              overflowX: "auto",
+            },
+          }}
+        />
+      </div>
 
       {/* Dialog for creating new Major */}
       <Dialog

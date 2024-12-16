@@ -35,7 +35,9 @@ const ImageDialog: React.FC<ImageDialogProps> = ({
   return (
     <div>
       <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
-        <DialogTitle>{title}</DialogTitle>
+        <DialogTitle>
+          <h2 className="text-primary font-bold">{title}</h2>
+        </DialogTitle>
         <DialogContent>
           {images.length > 0 ? (
             images.map((image, index) => (

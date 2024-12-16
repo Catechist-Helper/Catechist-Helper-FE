@@ -138,21 +138,21 @@ const RegistrationDetailDialog: React.FC<RegistrationDetailDialogProps> = ({
         (registration.status === RegistrationStatus.Approved_Duyet_Don ||
           registration.status === RegistrationStatus.Approved_Phong_Van ||
           registration.status === RegistrationStatus.Rejected_Phong_Van)
-          ? "md"
+          ? "lg"
           : "sm"
       }`}
       fullWidth
     >
       <DialogContent>
         {registration ? (
-          <Grid container spacing={10}>
+          <Grid container spacing={15}>
             <Grid
               item
               xs={
                 registration.status === RegistrationStatus.Approved_Duyet_Don ||
                 registration.status === RegistrationStatus.Approved_Phong_Van ||
                 registration.status === RegistrationStatus.Rejected_Phong_Van
-                  ? 6
+                  ? 4
                   : 12
               }
             >
@@ -242,7 +242,7 @@ const RegistrationDetailDialog: React.FC<RegistrationDetailDialogProps> = ({
                 registration.status === RegistrationStatus.Approved_Duyet_Don ||
                 registration.status === RegistrationStatus.Approved_Phong_Van ||
                 registration.status === RegistrationStatus.Rejected_Phong_Van
-                  ? 6
+                  ? 4
                   : 12
               }
             >
@@ -260,23 +260,86 @@ const RegistrationDetailDialog: React.FC<RegistrationDetailDialogProps> = ({
                     })
                     .map((process) => (
                       <li className="mb-10 ms-6" key={process.id}>
-                        <span className="absolute flex items-center justify-center w-8 h-8 bg-green-200 rounded-full -start-4 ring-4 ring-white dark:ring-gray-900 dark:bg-green-900">
-                          <svg
-                            className="w-3.5 h-3.5 text-green-500 dark:text-green-400"
-                            aria-hidden="true"
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 16 12"
-                          >
-                            <path
-                              stroke="currentColor"
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                              stroke-width="2"
-                              d="M1 5.917 5.724 10.5 15 1.5"
-                            />
-                          </svg>
-                        </span>
+                        {process.status ==
+                        RegistrationProcessStatus.Approved ? (
+                          <>
+                            <span className="absolute flex items-center justify-center w-8 h-8 bg-green-200 rounded-full -start-4 ring-4 ring-white dark:ring-gray-900 dark:bg-green-900">
+                              <svg
+                                className="w-3.5 h-3.5 text-green-600 dark:text-green-600"
+                                aria-hidden="true"
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 16 12"
+                              >
+                                <path
+                                  stroke="currentColor"
+                                  stroke-linecap="round"
+                                  stroke-linejoin="round"
+                                  stroke-width="2"
+                                  d="M1 5.917 5.724 10.5 15 1.5"
+                                />
+                              </svg>
+                            </span>
+                          </>
+                        ) : (
+                          <></>
+                        )}
+                        {process.status ==
+                        RegistrationProcessStatus.Rejected ? (
+                          <>
+                            <span className="absolute flex items-center justify-center w-8 h-8 bg-red-200 rounded-full -start-4 ring-4 ring-white dark:ring-gray-900 dark:bg-green-900">
+                              <svg
+                                className="w-3.5 h-3.5 text-red-500 dark:text-red-400"
+                                aria-hidden="true"
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 16 16"
+                              >
+                                <path
+                                  stroke="currentColor"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth="2"
+                                  d="M4.5 4.5l7 7m0-7l-7 7"
+                                />
+                              </svg>
+                            </span>
+                          </>
+                        ) : (
+                          <></>
+                        )}
+                        {process.status == RegistrationProcessStatus.Pending ? (
+                          <>
+                            <span className="absolute flex items-center justify-center w-8 h-8 bg-yellow-200 rounded-full -start-4 ring-4 ring-white dark:ring-gray-900 dark:bg-green-900">
+                              <svg
+                                className="w-3.5 h-3.5 text-yellow-500 dark:text-yellow-400"
+                                aria-hidden="true"
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 16 16"
+                              >
+                                <circle
+                                  cx="8"
+                                  cy="8"
+                                  r="7"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                  fill="rgba(234, 179, 8, 0.2)"
+                                />
+
+                                <path
+                                  stroke="currentColor"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth="2"
+                                  d="M8 4v5m0 3h.01"
+                                />
+                              </svg>
+                            </span>
+                          </>
+                        ) : (
+                          <></>
+                        )}
                         <h3 className="font-medium leading-tight">
                           {formatDate.DD_MM_YYYY_Time(process.createdAt)}
                         </h3>
@@ -287,117 +350,115 @@ const RegistrationDetailDialog: React.FC<RegistrationDetailDialogProps> = ({
                     ))}
                 </ol>
               </div>
-              {(registration.status === RegistrationStatus.Approved_Duyet_Don ||
-                registration.status === RegistrationStatus.Approved_Phong_Van ||
-                registration.status ===
-                  RegistrationStatus.Rejected_Phong_Van) && (
-                <>
-                  <hr />
-                  <div>
-                    <h3 className="text-[1.2rem] mb-2 mt-3">
-                      <strong>Thông tin phỏng vấn</strong>
-                    </h3>
-                    <ul style={{ listStyle: "inside" }}>
-                      <li>
-                        <strong>Thời gian</strong>:{" "}
-                        {formatDate.DD_MM_YYYY_Time(
-                          registration.interview?.meetingTime
-                        )}
-                      </li>
-                      {registration.interview.recruiterInInterviews.findIndex(
-                        (item) => item.evaluation && item.evaluation != ""
-                      ) >= 0 ? (
-                        <li>
-                          <strong>Nhận xét của người phỏng vấn</strong>:
-                          {registration.interview &&
-                          registration.interview.recruiterInInterviews ? (
-                            <>
-                              {registration.interview.recruiterInInterviews.map(
-                                (item) => {
-                                  return (
-                                    <div
-                                      key={item.accountId}
-                                      className="my-2 ml-5"
-                                    >
-                                      <p>
-                                        - Nhận xét của{" "}
-                                        {
-                                          registration.interview.recruiters.find(
-                                            (item2) =>
-                                              item2.id == item.accountId
-                                          )?.fullName
-                                        }
-                                        :
-                                      </p>
-                                      <div
-                                        className="mt-2"
-                                        dangerouslySetInnerHTML={{
-                                          __html: item.evaluation,
-                                        }}
-                                      />
-                                    </div>
-                                  );
-                                }
-                              )}
-                            </>
-                          ) : (
-                            <></>
-                          )}
-                        </li>
-                      ) : (
-                        <></>
-                      )}
-                      <li>
-                        <strong>Người phỏng vấn</strong>:{" "}
-                        {registration.interview &&
-                        registration.interview.recruiters
-                          ? registration.interview.recruiters
-                              .map((recruiter) => recruiter.fullName)
-                              .join(", ")
-                          : ""}
-                      </li>
-                      <li>
-                        <strong>Kết quả</strong>:{" "}
-                        {registration.status ===
-                        RegistrationStatus.Approved_Duyet_Don ? (
-                          <span
-                            className="text-yellow-600"
-                            style={{ fontWeight: "600" }}
-                          >
-                            Chưa quyết định
-                          </span>
-                        ) : registration.interview?.isPassed ? (
-                          <span
-                            className="text-success"
-                            style={{ fontWeight: "600" }}
-                          >
-                            Đậu phỏng vấn
-                          </span>
-                        ) : (
-                          <span
-                            className="text-danger"
-                            style={{ fontWeight: "600" }}
-                          >
-                            Bị từ chối
-                          </span>
-                        )}
-                      </li>
-                      {registration.status !==
-                        RegistrationStatus.Approved_Duyet_Don && (
-                        <li>
-                          <strong>Nhận xét</strong>:
-                          <div
-                            dangerouslySetInnerHTML={{
-                              __html: registration.interview?.note || "",
-                            }}
-                          />
-                        </li>
-                      )}
-                    </ul>
-                  </div>
-                </>
-              )}
             </Grid>
+            {(registration.status === RegistrationStatus.Approved_Duyet_Don ||
+              registration.status === RegistrationStatus.Approved_Phong_Van ||
+              registration.status ===
+                RegistrationStatus.Rejected_Phong_Van) && (
+              <Grid item xs={4}>
+                <div>
+                  <h3 className="text-[1.2rem] mb-2">
+                    <strong>Thông tin phỏng vấn</strong>
+                  </h3>
+                  <ul style={{ listStyle: "inside" }}>
+                    <li>
+                      <strong>Thời gian</strong>:{" "}
+                      {formatDate.DD_MM_YYYY_Time(
+                        registration.interview?.meetingTime
+                      )}
+                    </li>
+                    {registration.interview.recruiterInInterviews.findIndex(
+                      (item) => item.evaluation && item.evaluation != ""
+                    ) >= 0 ? (
+                      <li>
+                        <strong>Nhận xét của người phỏng vấn</strong>:
+                        {registration.interview &&
+                        registration.interview.recruiterInInterviews ? (
+                          <>
+                            {registration.interview.recruiterInInterviews.map(
+                              (item) => {
+                                return (
+                                  <div
+                                    key={item.accountId}
+                                    className="my-2 ml-5"
+                                  >
+                                    <p>
+                                      - Nhận xét của{" "}
+                                      {
+                                        registration.interview.recruiters.find(
+                                          (item2) => item2.id == item.accountId
+                                        )?.fullName
+                                      }
+                                      :
+                                    </p>
+                                    <div
+                                      className="mt-2"
+                                      dangerouslySetInnerHTML={{
+                                        __html: item.evaluation,
+                                      }}
+                                    />
+                                  </div>
+                                );
+                              }
+                            )}
+                          </>
+                        ) : (
+                          <></>
+                        )}
+                      </li>
+                    ) : (
+                      <></>
+                    )}
+                    <li>
+                      <strong>Người phỏng vấn</strong>:{" "}
+                      {registration.interview &&
+                      registration.interview.recruiters
+                        ? registration.interview.recruiters
+                            .map((recruiter) => recruiter.fullName)
+                            .join(", ")
+                        : ""}
+                    </li>
+                    <li>
+                      <strong>Kết quả</strong>:{" "}
+                      {registration.status ===
+                      RegistrationStatus.Approved_Duyet_Don ? (
+                        <span
+                          className="text-yellow-600"
+                          style={{ fontWeight: "600" }}
+                        >
+                          Chưa quyết định
+                        </span>
+                      ) : registration.interview?.isPassed ? (
+                        <span
+                          className="text-success"
+                          style={{ fontWeight: "600" }}
+                        >
+                          Đậu phỏng vấn
+                        </span>
+                      ) : (
+                        <span
+                          className="text-danger"
+                          style={{ fontWeight: "600" }}
+                        >
+                          Bị từ chối
+                        </span>
+                      )}
+                    </li>
+                    {registration.status !==
+                      RegistrationStatus.Approved_Duyet_Don && (
+                      <li>
+                        <strong>Nhận xét của người phê duyệt</strong>:
+                        <div
+                          dangerouslySetInnerHTML={{
+                            __html: registration.interview?.note || "",
+                          }}
+                        />
+                      </li>
+                    )}
+                  </ul>
+                </div>
+              </Grid>
+            )}
           </Grid>
         ) : (
           <p>Đang tải...</p>

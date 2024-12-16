@@ -10,6 +10,9 @@ import {
 import useAppContext from "../../../hooks/useAppContext";
 import LoadingScreen from "../../../components/Organisms/LoadingScreen/LoadingScreen";
 import sweetAlert from "../../../utils/sweetAlert";
+import { isVietnamesePhoneNumberValid } from "../../../utils/validation";
+import { Button } from "@mui/material";
+import HomeTemplate from "../../../components/Templates/HomeTemplate/HomeTemplate";
 
 const RegisterForm: React.FC = () => {
   const [step, setStep] = useState(1);
@@ -45,19 +48,23 @@ const RegisterForm: React.FC = () => {
   const validateStep1 = () => {
     const newErrors = { ...errors };
 
-    if (!formData.fullName) newErrors.fullName = "Chỗ này không được bỏ trống";
-    if (!formData.gender) newErrors.gender = "Chỗ này không được bỏ trống";
+    if (!formData.fullName)
+      newErrors.fullName = "Họ và tên không được bỏ trống";
+    if (!formData.gender) newErrors.gender = "Giới tính không được bỏ trống";
     if (!formData.dateOfBirth)
-      newErrors.dateOfBirth = "Chỗ này không được bỏ trống";
-    if (!formData.address) newErrors.address = "Chỗ này không được bỏ trống";
-    if (!formData.email) newErrors.email = "Chỗ này không được bỏ trống";
+      newErrors.dateOfBirth = "Ngày sinh không được bỏ trống";
+    if (!formData.address) newErrors.address = "Địa chỉ không được bỏ trống";
+    if (!formData.email) newErrors.email = "Email không được bỏ trống";
 
     const phoneRegex = /^0\d{9}$/;
     if (!formData.phone) {
-      newErrors.phone = "Chỗ này không được bỏ trống";
-    } else if (!phoneRegex.test(formData.phone)) {
+      newErrors.phone = "Số điện thoại không được bỏ trống";
+    } else if (
+      !phoneRegex.test(formData.phone) ||
+      !isVietnamesePhoneNumberValid(formData.phone)
+    ) {
       newErrors.phone =
-        "Số điện thoại phải bắt đầu bằng số 0 và có đúng 10 chữ số";
+        "Số điện thoại phải là 1 số hợp lệ, bắt đầu bằng số 0 và có đúng 10 chữ số";
     }
 
     setErrors(newErrors);
@@ -211,8 +218,8 @@ const RegisterForm: React.FC = () => {
   };
 
   return (
-    <>
-      <div className="w-full min-h-screen bg-transparent absolute">
+    <HomeTemplate>
+      <div className="w-[95%] min-h-screen bg-gray-100 mx-auto my-3 rounded-md">
         <div
           className="w-full h-full absolute z-[9999]"
           data-testid="loading-screen"
@@ -222,8 +229,8 @@ const RegisterForm: React.FC = () => {
         >
           <LoadingScreen transparent={true} />
         </div>
-        <div className="w-full px-40 mt-5 mb-5">
-          <h2 className="text-center text-2xl font-bold mb-5">
+        <div className="w-full px-40 pt-3 mb-5 ">
+          <h2 className="text-center text-2xl font-bold mb-3 text-primary_color">
             Đăng kí ứng tuyển làm Giáo Lý Viên
           </h2>
           <form onSubmit={handleSubmit}>
@@ -242,7 +249,7 @@ const RegisterForm: React.FC = () => {
                     className="block w-full p-2 border border-gray-300 rounded-lg"
                   />
                   {errors.fullName && (
-                    <p className="text-red-500 text-xs">{errors.fullName}</p>
+                    <p className="text-red-500 text-sm">{errors.fullName}</p>
                   )}
                 </div>
 
@@ -276,7 +283,7 @@ const RegisterForm: React.FC = () => {
                     </div>
                   </div>
                   {errors.gender && (
-                    <p className="text-red-500 text-xs">{errors.gender}</p>
+                    <p className="text-red-500 text-sm">{errors.gender}</p>
                   )}
                 </div>
 
@@ -293,7 +300,7 @@ const RegisterForm: React.FC = () => {
                     className="block w-full p-2 border border-gray-300 rounded-lg"
                   />
                   {errors.dateOfBirth && (
-                    <p className="text-red-500 text-xs">{errors.dateOfBirth}</p>
+                    <p className="text-red-500 text-sm">{errors.dateOfBirth}</p>
                   )}
                 </div>
 
@@ -310,7 +317,7 @@ const RegisterForm: React.FC = () => {
                     className="block w-full p-2 border border-gray-300 rounded-lg"
                   />
                   {errors.address && (
-                    <p className="text-red-500 text-xs">{errors.address}</p>
+                    <p className="text-red-500 text-sm">{errors.address}</p>
                   )}
                 </div>
 
@@ -327,7 +334,7 @@ const RegisterForm: React.FC = () => {
                     className="block w-full p-2 border border-gray-300 rounded-lg"
                   />
                   {errors.email && (
-                    <p className="text-red-500 text-xs">{errors.email}</p>
+                    <p className="text-red-500 text-sm">{errors.email}</p>
                   )}
                 </div>
 
@@ -344,32 +351,35 @@ const RegisterForm: React.FC = () => {
                     className="block w-full p-2 border border-gray-300 rounded-lg"
                   />
                   {errors.phone && (
-                    <p className="text-red-500 text-xs">{errors.phone}</p>
+                    <p className="text-red-500 text-sm">{errors.phone}</p>
                   )}
                 </div>
 
                 <div
-                  className="w-full flex justify-between"
+                  className="w-full flex justify-between mt-4"
                   style={{ zIndex: "500" }}
                 >
-                  <button
+                  <Button
                     style={{ zIndex: "500" }}
                     type="button"
                     onClick={() => {
                       navigate(-1);
                     }}
-                    className="text-white bg-gray-500 px-4 py-2 rounded-lg"
+                    color="primary"
+                    variant="outlined"
+                    className="hover:border-gray-900 hover:bg-gray-900 hover:text-white"
                   >
                     Hủy bỏ
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     style={{ zIndex: "500" }}
                     type="button"
                     onClick={nextStep}
-                    className="text-white bg-blue-500 px-4 py-2 rounded-lg"
+                    color="primary"
+                    variant="contained"
                   >
                     Tiếp theo
-                  </button>
+                  </Button>
                 </div>
               </>
             )}
@@ -409,7 +419,7 @@ const RegisterForm: React.FC = () => {
                     <label className="ml-2">Chưa từng</label>
                   </div>
                   {errors.isTeachingBefore && (
-                    <p className="text-red-500 text-xs">
+                    <p className="text-red-500 text-sm">
                       {errors.isTeachingBefore}
                     </p>
                   )}
@@ -429,7 +439,7 @@ const RegisterForm: React.FC = () => {
                     min="0"
                   />
                   {errors.yearOfTeaching && (
-                    <p className="text-red-500 text-xs">
+                    <p className="text-red-500 text-sm">
                       {errors.yearOfTeaching}
                     </p>
                   )}
@@ -497,31 +507,34 @@ const RegisterForm: React.FC = () => {
             </div> */}
 
                 <div
-                  className="w-full flex justify-between"
+                  className="w-full flex justify-between mt-4"
                   style={{ zIndex: "500" }}
                 >
-                  <button
+                  <Button
                     style={{ zIndex: "500" }}
                     type="button"
                     onClick={prevStep}
-                    className="text-white bg-gray-500 px-4 py-2 rounded-lg"
+                    color="primary"
+                    variant="outlined"
+                    className="hover:border-gray-900 hover:bg-gray-900 hover:text-white"
                   >
                     Quay lại bước trước
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     style={{ zIndex: "500" }}
                     type="submit"
-                    className="text-white bg-green-500 px-4 py-2 rounded-lg"
+                    color="primary"
+                    variant="contained"
                   >
                     Nộp đơn ứng tuyển
-                  </button>
+                  </Button>
                 </div>
               </>
             )}
           </form>
         </div>
       </div>
-    </>
+    </HomeTemplate>
   );
 };
 
