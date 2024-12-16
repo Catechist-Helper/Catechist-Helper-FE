@@ -12,6 +12,8 @@ import {
   RadioGroup,
   FormControlLabel,
   Radio,
+  Select as MuiSelect,
+  MenuItem,
 } from "@mui/material";
 import Paper from "@mui/material/Paper";
 import { useState, useEffect } from "react";
@@ -68,7 +70,7 @@ export default function RegistrationDataTable() {
   const [openDialogRegisDetail, setOpenDialogRegisDetail] =
     useState<boolean>(false);
 
-  const [viewMode, setViewMode] = useState<"pending" | "rejected">("pending"); // Trạng thái xem hiện tại
+  const [viewMode, setViewMode] = useState<string>("pending"); // Trạng thái xem hiện tại
 
   const columns: GridColDef[] = [
     { field: "fullName", headerName: "Tên đầy đủ", width: 230 },
@@ -526,7 +528,7 @@ export default function RegistrationDataTable() {
     >
       <h1
         className={`text-center text-[2.2rem]  text-text_primary_light py-2 font-bold 
-          ${!deleteMode ? `${viewMode === "pending" ? "bg_title" : "bg-danger"}` : "bg-black"}`}
+          ${!deleteMode ? `bg_title` : "bg-black"}`}
       >
         {!deleteMode ? (
           <>
@@ -543,29 +545,31 @@ export default function RegistrationDataTable() {
         <div className="flex justify-start">
           {!deleteMode ? (
             <>
-              {viewMode === "pending" ? (
-                <Button
-                  color="error"
-                  variant="contained"
-                  disabled={hasFunction}
-                  onClick={() => {
-                    setViewMode("rejected");
-                  }}
+              <div>
+                <MuiSelect
+                  labelId="result-label"
+                  value={viewMode}
+                  onChange={(e) => setViewMode(e.target.value)}
+                  className={`
+               h-[40px] w-[200px]
+              ${viewMode == "pending" ? "bg-primary text-white" : ""}
+              ${viewMode == "rejected" ? "bg-danger text-white" : ""}
+              `}
                 >
-                  Đơn bị từ chối
-                </Button>
-              ) : (
-                <Button
-                  color="secondary"
-                  variant="contained"
-                  disabled={hasFunction}
-                  onClick={() => {
-                    setViewMode("pending");
-                  }}
-                >
-                  Đơn chờ duyệt
-                </Button>
-              )}
+                  <MenuItem
+                    value="pending"
+                    className="bg-primary text-white py-2"
+                  >
+                    Đơn chờ duyệt
+                  </MenuItem>
+                  <MenuItem
+                    value="rejected"
+                    className="bg-danger text-white py-2"
+                  >
+                    Đơn từ chối
+                  </MenuItem>
+                </MuiSelect>
+              </div>
             </>
           ) : (
             <></>
@@ -703,7 +707,7 @@ export default function RegistrationDataTable() {
         </div>
       </div>
 
-      <div className="px-2">
+      <div className="px-3 mt-2">
         <DataGrid
           rows={rows}
           columns={columns}
@@ -718,7 +722,11 @@ export default function RegistrationDataTable() {
           rowSelectionModel={selectedIds}
           onRowSelectionModelChange={handleSelectionChange} // Gọi hàm khi thay đổi lựa chọn
           sx={{
-            border: 0,
+            height: 480,
+            overflowX: "auto",
+            "& .MuiDataGrid-root": {
+              overflowX: "auto",
+            },
           }}
           localeText={viVNGridTranslation}
           disableMultipleRowSelection={!deleteMode}

@@ -35,6 +35,7 @@ const CatechistClassComponent = () => {
   const [slots, setSlots] = useState<any[]>([]);
   const [openLeaveDialog, setOpenLeaveDialog] = useState<boolean>(false);
   const [slotAbsenceId, setSlotAbsenceId] = useState<string>("");
+  const [slotAbsence, setSlotAbsence] = useState<any>();
   const [classViewSlotId, setClassViewSlotId] = useState<string>("");
   const [absenceList, setAbsenceList] = useState<GetAbsenceItemResponse[]>([]);
   const { enableLoading, disableLoading } = useAppContext();
@@ -266,13 +267,18 @@ const CatechistClassComponent = () => {
       setClassViewSlotId("");
     }
   }, [openSlotsDialog]);
-  const handleLeaveRequestSubmit = async (reason: string, slotId: string) => {
+  const handleLeaveRequestSubmit = async (
+    reason: string,
+    slotId: string,
+    images: File[]
+  ) => {
     try {
       enableLoading();
       await absenceApi.submitAbsence({
         catechistId: userLogin.catechistId,
         reason: reason,
         slotId: slotId,
+        requestImages: images,
       });
 
       // Đóng dialog
@@ -287,11 +293,11 @@ const CatechistClassComponent = () => {
         "Yêu cầu nghỉ phép đã được gửi thành công!",
         "",
         3000,
-        30
+        33
       );
     } catch (error) {
       console.error("Error loading slots:", error);
-      sweetAlert.alertFailed("Có lỗi xảy ra khi gửi yêu cầu!", "", 3000, 30);
+      sweetAlert.alertFailed("Có lỗi xảy ra khi gửi yêu cầu!", "", 3000, 32);
     } finally {
       disableLoading();
     }
@@ -337,13 +343,20 @@ const CatechistClassComponent = () => {
           </div>
         </div>
         {/* DataGrid hiển thị danh sách lớp học */}
-        <div style={{ height: 400, width: "100%" }}>
+        <div className="w-full px-3">
           <DataGrid
             rows={classes}
             columns={columns}
             loading={loading}
             disableRowSelectionOnClick
             localeText={viVNGridTranslation}
+            sx={{
+              height: 480,
+              overflowX: "auto",
+              "& .MuiDataGrid-root": {
+                overflowX: "auto",
+              },
+            }}
           />
         </div>
       </div>
@@ -485,6 +498,7 @@ const CatechistClassComponent = () => {
                                 onClick={() => {
                                   setOpenLeaveDialog(true);
                                   setSlotAbsenceId(params.row.id);
+                                  setSlotAbsence(params.row);
                                 }} // Mở dialog khi nhấn
                               >
                                 Xin nghỉ phép
@@ -518,6 +532,7 @@ const CatechistClassComponent = () => {
             <RequestLeaveDialog
               open={openLeaveDialog}
               slotId={slotAbsenceId}
+              slot={slotAbsence}
               onClose={() => setOpenLeaveDialog(false)} // Đóng dialog
               onSubmit={handleLeaveRequestSubmit} // Hàm xử lý khi gửi yêu cầu nghỉ phép
             />

@@ -122,7 +122,7 @@ const ListAllLevel: React.FC = () => {
           </Button>
         </div>
       </div>
-      <div className="px-2">
+      <div className="px-3">
         <DataGrid
           rows={levels}
           columns={columns}
@@ -130,6 +130,13 @@ const ListAllLevel: React.FC = () => {
           paginationMode="client"
           localeText={viVNGridTranslation}
           disableRowSelectionOnClick
+          sx={{
+            height: 480,
+            overflowX: "auto",
+            "& .MuiDataGrid-root": {
+              overflowX: "auto",
+            },
+          }}
         />
       </div>
     </Paper>

@@ -520,6 +520,13 @@ export default function EventsComponent() {
             loading={loading}
             localeText={viVNGridTranslation}
             disableRowSelectionOnClick
+            sx={{
+              height: 480,
+              overflowX: "auto",
+              "& .MuiDataGrid-root": {
+                overflowX: "auto",
+              },
+            }}
           />
         </div>
         {openBudgetDialog && (

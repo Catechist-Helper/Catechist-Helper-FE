@@ -7,10 +7,14 @@ import {
   Grid,
 } from "@mui/material";
 import registrationApi from "../../../api/Registration";
-import { RegistrationItemResponse } from "../../../model/Response/Registration";
+import {
+  CertificateOfCandidateResponse,
+  RegistrationItemResponse,
+} from "../../../model/Response/Registration";
 import { RegistrationStatus } from "../../../enums/Registration";
 import { RegistrationProcessStatus } from "../../../enums/RegistrationProcess";
 import { formatDate } from "../../../utils/formatDate";
+import ImageDialog from "../../../components/Molecules/ImageDialog";
 
 type RegistrationDetailDialogProps = {
   id: string;
@@ -98,6 +102,34 @@ const RegistrationDetailDialog: React.FC<RegistrationDetailDialogProps> = ({
     }
   };
 
+  const [dialogCertificateImageOpen, setDialogCertificateImageOpen] =
+    useState(false);
+  const [dialogData, setDialogData] = useState({
+    images: [],
+    title: "",
+  });
+
+  const handleOpenDialogCertificateImage = (
+    certificates: CertificateOfCandidateResponse[],
+    fullName: string
+  ) => {
+    console.log("certificates", certificates);
+    const images: any = certificates
+      .filter((cert) => cert.imageUrl)
+      .map((cert) => ({
+        url: cert.imageUrl,
+      }));
+
+    setDialogData({
+      images,
+      title: `Chứng chỉ của ứng viên ${fullName}`,
+    });
+    setDialogCertificateImageOpen(true);
+  };
+
+  const handleCloseDialogCertificateImage = () =>
+    setDialogCertificateImageOpen(false);
+
   return (
     <Dialog
       open={open}
@@ -171,31 +203,37 @@ const RegistrationDetailDialog: React.FC<RegistrationDetailDialogProps> = ({
                     <strong>Trạng thái:</strong>{" "}
                     {renderStatus(registration.status)}
                   </li>
+                  {registration.certificateOfCandidates.length > 0 && (
+                    <>
+                      <hr className="mt-2" />
+                      <p className="mt-3 flex items-center">
+                        <span>
+                          <span>
+                            <strong>Chứng chỉ: </strong>
+                            {registration.certificateOfCandidates.length} chứng
+                            chỉ
+                          </span>
+                          <span>
+                            <Button
+                              variant="contained"
+                              size="small"
+                              style={{ marginLeft: "15px" }}
+                              onClick={() =>
+                                handleOpenDialogCertificateImage(
+                                  registration.certificateOfCandidates,
+                                  registration.fullName
+                                )
+                              }
+                            >
+                              Xem
+                            </Button>
+                          </span>
+                        </span>
+                      </p>
+                    </>
+                  )}
                 </ul>
               </div>
-
-              {registration.certificateOfCandidates.length > 0 && (
-                <>
-                  <hr />
-                  <div className="my-2">
-                    <h3 className="text-[1.2rem]">
-                      <strong>Chứng chỉ</strong>
-                    </h3>
-                    {registration.certificateOfCandidates.map((certificate) => (
-                      <>
-                        <img
-                          key={certificate.id}
-                          src={certificate.imageUrl}
-                          alt="Certificate"
-                          width={300}
-                          height={300}
-                          style={{ margin: "5px" }}
-                        />
-                      </>
-                    ))}
-                  </div>
-                </>
-              )}
             </Grid>
 
             <Grid
@@ -368,6 +406,18 @@ const RegistrationDetailDialog: React.FC<RegistrationDetailDialogProps> = ({
       <DialogActions>
         <Button onClick={onClose}>Đóng</Button>
       </DialogActions>
+      {dialogCertificateImageOpen ? (
+        <>
+          <ImageDialog
+            images={dialogData.images}
+            title={dialogData.title}
+            open={dialogCertificateImageOpen}
+            onClose={handleCloseDialogCertificateImage}
+          />
+        </>
+      ) : (
+        <></>
+      )}
     </Dialog>
   );
 };

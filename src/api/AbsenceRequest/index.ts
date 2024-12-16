@@ -19,8 +19,13 @@ const submitAbsence = (data: SubmitAbsenceRequest) => {
   if(data.replacementCatechistId){
   formData.append("replacementCatechistId",data.replacementCatechistId)
   }
+  if(data.requestImages){
+    data.requestImages.forEach((image) => {
+      formData.append(`RequestImages`, image);
+    });
+  }
 
-  return request.post<AbsenceResponse<boolean>>(`${ROOT_API}/submit`, data, {
+  return request.post<AbsenceResponse<boolean>>(`${ROOT_API}/submit`, formData, {
     headers: {
       "Content-Type": "multipart/form-data",
     },

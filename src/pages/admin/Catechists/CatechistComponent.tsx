@@ -8,7 +8,10 @@ import Paper from "@mui/material/Paper";
 import { Button } from "@mui/material";
 import { useState, useEffect } from "react";
 import catechistApi from "../../../api/Catechist";
-import { CatechistItemResponse } from "../../../model/Response/Catechist";
+import {
+  CatechistItemResponse,
+  CertificateResponse,
+} from "../../../model/Response/Catechist";
 import { formatPhone } from "../../../utils/utils";
 import viVNGridTranslation from "../../../locale/MUITable";
 import sweetAlert from "../../../utils/sweetAlert";
@@ -26,6 +29,7 @@ import LeaveRequestDialog from "./LeaveRequestDialog";
 import { GetLeaveRequestItemResponse } from "../../../model/Response/LeaveRequest";
 import leaveRequestApi from "../../../api/LeaveRequest";
 import { LeaveRequestStatus } from "../../../enums/LeaveRequest";
+import ImageDialog from "../../../components/Molecules/ImageDialog";
 
 export default function CatechistComponent() {
   const [rows, setRows] = useState<CatechistItemResponse[]>([]);
@@ -69,6 +73,35 @@ export default function CatechistComponent() {
   const [selectedLeaveRequest, setSelectedLeaveRequest] = useState<
     GetLeaveRequestItemResponse | undefined
   >(undefined);
+
+  const [dialogCertificateImageOpen, setDialogCertificateImageOpen] =
+    useState(false);
+  const [dialogData, setDialogData] = useState({
+    images: [],
+    title: "",
+  });
+
+  const handleOpenDialogCertificateImage = (
+    certificates: CertificateResponse[],
+    fullName: string,
+    code: string
+  ) => {
+    const images: any = certificates
+      .filter((cert) => cert.image)
+      .map((cert) => ({
+        name: cert.name,
+        url: cert.image,
+      }));
+
+    setDialogData({
+      images,
+      title: `Chứng chỉ của giáo lý viên ${fullName} - ${code}`,
+    });
+    setDialogCertificateImageOpen(true);
+  };
+
+  const handleCloseDialogCertificateImage = () =>
+    setDialogCertificateImageOpen(false);
 
   const columns: GridColDef[] = [
     {
@@ -144,12 +177,52 @@ export default function CatechistComponent() {
     // { field: "note", headerName: "Ghi chú", width: 200 },
     {
       field: "certificates",
-      headerName: "Chứng chỉ",
-      width: 250,
-      renderCell: (params) =>
-        params.row.certificates.length > 0
-          ? params.row.certificates.map((cert: any) => cert.name).join(", ")
-          : "N/A",
+      headerName: "Số chứng chỉ",
+      width: 120,
+      renderCell: (params) => {
+        const { certificates, fullName, code } = params.row;
+        return (
+          <>
+            <span>{certificates.length}</span>
+            {certificates.length > 0 ? (
+              <>
+                <Button
+                  size="small"
+                  style={{ marginLeft: "8px" }}
+                  onClick={() =>
+                    handleOpenDialogCertificateImage(
+                      certificates,
+                      fullName,
+                      code
+                    )
+                  }
+                >
+                  Xem
+                </Button>
+              </>
+            ) : (
+              <></>
+            )}
+          </>
+        );
+      },
+    },
+    {
+      field: "numberOfClass",
+      headerName: "Lớp hiện tại",
+      width: 130,
+      renderCell: (params) => {
+        return (
+          <Button
+            color="secondary"
+            onClick={() => {
+              handleViewClassCatechist(params.row);
+            }}
+          >
+            Xem
+          </Button>
+        );
+      },
     },
     {
       field: "isTeaching",
@@ -348,6 +421,56 @@ export default function CatechistComponent() {
     }
   };
 
+  const handleViewClassCatechist = async (catechist: CatechistItemResponse) => {
+    try {
+      enableLoading();
+
+      const remainingClassHavingSlots =
+        await catechistInClassApi.getClassesRemainingSlotsOfCatechist(
+          catechist.id
+        );
+
+      if (remainingClassHavingSlots.data.data.length > 0) {
+        disableLoading();
+        const confirm = await sweetAlert.confirm(
+          ``,
+          `Giáo lý viên ${catechist.fullName} hiện đang dạy ở
+           lớp học sau:\n
+          ${remainingClassHavingSlots.data.data.map((item) => `${item.name} (Niên khóa ${formatDate.YYYY(item.startDate)}-${formatDate.YYYY(item.endDate)})`).join(", ")}`,
+          "Xem",
+          "Đóng",
+          "info"
+        );
+        if (confirm) {
+          let selectClassIds: string[] = [];
+          remainingClassHavingSlots.data.data.forEach((item) => {
+            selectClassIds.push(item.id);
+          });
+          navigate(`${PATH_ADMIN.class_management}`, {
+            state: {
+              classIds: selectClassIds,
+            },
+          });
+        }
+        return;
+      } else {
+        disableLoading();
+        sweetAlert.alertInfo(
+          ``,
+          `Giáo lý viên ${catechist.fullName} hiện đang không có tiết học ở
+           lớp nào`,
+          10000,
+          45
+        );
+      }
+    } catch (error) {
+      console.error("Lỗi khi tải:", error);
+      sweetAlert.alertFailed("Có lỗi xảy ra khi tải!", "", 1000, 22);
+    } finally {
+      disableLoading();
+    }
+  };
+
   return (
     <Paper
       sx={{
@@ -362,7 +485,7 @@ export default function CatechistComponent() {
       {/* Thêm nút Refresh ở đây */}
       <div className="my-2 flex justify-between mx-3">
         <div className="min-w-[10px] gap-x-10 flex">
-          <div>
+          <div className="z-999">
             <label htmlFor="" className="ml-2">
               Trạng thái giảng dạy
             </label>
@@ -442,27 +565,33 @@ export default function CatechistComponent() {
           </div>
         </div>
       </div>
-      <DataGrid
-        rows={rows}
-        columns={columns}
-        paginationMode="client"
-        rowCount={rowCount}
-        loading={loading}
-        paginationModel={paginationModel}
-        onPaginationModelChange={setPaginationModel}
-        pageSizeOptions={[50, 100, 250]}
-        rowSelectionModel={selectedIds}
-        sx={{
-          border: 0,
-        }}
-        localeText={viVNGridTranslation}
-        onRowSelectionModelChange={(newSelection) => {
-          setSelectedIds(newSelection);
-        }}
-        checkboxSelection
-        disableRowSelectionOnClick
-        disableMultipleRowSelection
-      />
+      <div className="w-full px-2">
+        <DataGrid
+          rows={rows}
+          columns={columns}
+          paginationMode="client"
+          rowCount={rowCount}
+          loading={loading}
+          paginationModel={paginationModel}
+          onPaginationModelChange={setPaginationModel}
+          pageSizeOptions={[50, 100, 250]}
+          rowSelectionModel={selectedIds}
+          sx={{
+            height: 480,
+            overflowX: "auto",
+            "& .MuiDataGrid-root": {
+              overflowX: "auto",
+            },
+          }}
+          localeText={viVNGridTranslation}
+          onRowSelectionModelChange={(newSelection) => {
+            setSelectedIds(newSelection);
+          }}
+          checkboxSelection
+          disableRowSelectionOnClick
+          disableMultipleRowSelection
+        />
+      </div>
       {openDialog && (
         <CatechistDialog
           open={openDialog}
@@ -486,6 +615,19 @@ export default function CatechistComponent() {
             open={openViewLeaveRequest}
             onClose={handleCloseViewLeaveRequest}
             leaveRequest={selectedLeaveRequest}
+          />
+        </>
+      ) : (
+        <></>
+      )}
+      {dialogCertificateImageOpen ? (
+        <>
+          <ImageDialog
+            images={dialogData.images}
+            title={dialogData.title}
+            open={dialogCertificateImageOpen}
+            onClose={handleCloseDialogCertificateImage}
+            imageTitle="Tên chứng chỉ"
           />
         </>
       ) : (

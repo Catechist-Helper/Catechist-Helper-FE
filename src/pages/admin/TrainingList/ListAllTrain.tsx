@@ -449,7 +449,7 @@ const ListAllTrain: React.FC = () => {
           Tải lại
         </Button>
       </div>
-      <div className="px-2">
+      <div className="px-3">
         {trains.length > 0 && init && !loading ? (
           <>
             <DataGrid
@@ -465,6 +465,13 @@ const ListAllTrain: React.FC = () => {
               }}
               checkboxSelection
               disableMultipleRowSelection
+              sx={{
+                height: 480,
+                overflowX: "auto",
+                "& .MuiDataGrid-root": {
+                  overflowX: "auto",
+                },
+              }}
             />
           </>
         ) : (

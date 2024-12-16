@@ -61,7 +61,7 @@ const ReasonDialog: React.FC<{
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogContent>
-        <label className="block mb-3 text-sm font-medium">
+        <label className="block mb-3 text-md font-bold text-primary">
           Lý do thay đổi ngân sách
         </label>
         <TextField

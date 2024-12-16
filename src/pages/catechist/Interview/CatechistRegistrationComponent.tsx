@@ -486,7 +486,7 @@ export default function CatechistRegistrationsTable() {
           {renderFilterButtons()}
           <input
             type="date"
-            className="w-[200px] py-2 px-2 border rounded-md bg-white"
+            className="w-[200px] py-2 px-2 border rounded-md bg-white ml-2 border-black border-1"
             value={selectedDate}
             onChange={(e) => setSelectedDate(e.target.value)}
           />
@@ -553,7 +553,11 @@ export default function CatechistRegistrationsTable() {
               rowSelectionModel={selectedRegistrations}
               checkboxSelection
               sx={{
-                border: 0,
+                height: 480,
+                overflowX: "auto",
+                "& .MuiDataGrid-root": {
+                  overflowX: "auto",
+                },
               }}
               localeText={viVNGridTranslation}
               disableMultipleRowSelection

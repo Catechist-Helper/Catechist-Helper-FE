@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Button } from "@mui/material";
+import { Button, Paper } from "@mui/material";
 import catechistApi from "../../../api/Catechist";
 import trainApi from "../../../api/TrainingList";
 import catInTrainApi from "../../../api/CatechistInTraining";
@@ -395,7 +395,7 @@ const ListCatechistByLevel: React.FC = () => {
     return (
       <div className="mb-6 p-6 border-4 border-[#AF8260] rounded-lg bg-white shadow-lg">
         <h2 className="text-center mb-6 text-3xl font-bold text-[#422A14]">
-          Thông tin của khóa đào tạo {currentTraining.name}
+          Thông tin khóa đào tạo {currentTraining.name}
         </h2>
         <div className="flex flex-col md:flex-row justify-between gap-8 px-4 ">
           <div className="flex-1 space-y-4 pl-10">
@@ -547,98 +547,120 @@ const ListCatechistByLevel: React.FC = () => {
 
   return (
     <AdminTemplate>
-      <div className="container mt-5">
-        {renderTrainingInfo()}
+      <Paper
+        sx={{
+          width: "calc(100% - 3.8rem)",
+          position: "absolute",
+          left: "3.8rem",
+        }}
+      >
+        <div className="container mt-5">
+          {renderTrainingInfo()}
 
-        {loading ? (
-          <></>
-        ) : (
-          <>
-            <div className="text-center text-l font-semibold">
-              <h2 className="text-center mb-6 text-3xl font-bold text-[#422A14]">
-                Danh sách Giáo lý viên tham gia khóa đào tạo
-              </h2>
-            </div>
-
-            {/* Danh sách catechists chưa gán */}
-            <div className="mt-4">
-              <h4 className="text-center text-xl font-semibold ">
-                Danh sách Giáo lý viên chưa gán
-              </h4>
-              <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
-                {catechists.length === 0 ? (
-                  <>
-                    <p className="px-6 py-3 text-left text-gray-500">
-                      Hiện không có Giáo lý viên nào trong danh sách
-                    </p>
-                  </>
-                ) : (
-                  <>
-                    <DataGrid
-                      rows={catechists}
-                      columns={columns}
-                      getRowId={(row) => row.id}
-                      disableRowSelectionOnClick
-                      localeText={viVNGridTranslation}
-                      paginationModel={paginationModel}
-                      pageSizeOptions={[8, 10, 25, 50, 100, 250]}
-                      onPaginationModelChange={setPaginationModel}
-                    />
-                  </>
-                )}
+          {loading ? (
+            <></>
+          ) : (
+            <>
+              <div className="text-center text-l font-semibold">
+                <h2 className="text-center mb-6 text-3xl font-bold text-[#422A14]">
+                  Danh sách Giáo lý viên tham gia khóa đào tạo
+                </h2>
               </div>
-            </div>
 
-            {/* Danh sách catechists đã gán */}
-            <div className="mt-4">
-              <h3 className="text-center text-xl font-semibold ">
-                Danh sách Giáo lý viên đã gán
-              </h3>
-              <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
-                {assignedCatechists.length === 0 ? (
-                  <>
-                    <p className="px-6 py-3 text-left text-gray-500">
-                      Không có Giáo lý viên nào đã gán
-                    </p>
-                  </>
-                ) : (
-                  <>
-                    <DataGrid
-                      rows={assignedCatechists}
-                      columns={columnsAssigned}
-                      getRowId={(row) => row.id}
-                      disableRowSelectionOnClick
-                      localeText={viVNGridTranslation}
-                      paginationModel={paginationModel2}
-                      pageSizeOptions={[8, 10, 25, 50, 100, 250]}
-                      onPaginationModelChange={setPaginationModel2}
-                    />
-                  </>
-                )}
+              {/* Danh sách catechists chưa gán */}
+              <div className="mt-4">
+                <h4 className="text-center text-xl font-semibold ">
+                  Danh sách Giáo lý viên chưa gán
+                </h4>
+                <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
+                  {catechists.length === 0 ? (
+                    <>
+                      <p className="px-6 py-3 text-left text-gray-500">
+                        Hiện không có Giáo lý viên nào trong danh sách
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <DataGrid
+                        rows={catechists}
+                        columns={columns}
+                        getRowId={(row) => row.id}
+                        disableRowSelectionOnClick
+                        localeText={viVNGridTranslation}
+                        paginationModel={paginationModel}
+                        pageSizeOptions={[8, 10, 25, 50, 100, 250]}
+                        onPaginationModelChange={setPaginationModel}
+                        sx={{
+                          height: 250,
+                          overflowX: "auto",
+                          "& .MuiDataGrid-root": {
+                            overflowX: "auto",
+                          },
+                        }}
+                      />
+                    </>
+                  )}
+                </div>
               </div>
-            </div>
 
-            <div className="text-end mt-4  flex justify-end gap-x-2">
-              <Button
-                variant="contained"
-                color="success"
-                onClick={handleConfirm}
-              >
-                Xác nhận
-              </Button>
-              <Button
-                type="button"
-                color="primary"
-                className="btn btn-primary"
-                variant="outlined"
-                onClick={handleGoBack}
-              >
-                Quay lại
-              </Button>
-            </div>
-          </>
-        )}
-      </div>
+              {/* Danh sách catechists đã gán */}
+              <div className="mt-4">
+                <h3 className="text-center text-xl font-semibold ">
+                  Danh sách Giáo lý viên đã gán
+                </h3>
+                <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
+                  {assignedCatechists.length === 0 ? (
+                    <>
+                      <p className="px-6 py-3 text-left text-gray-500">
+                        Không có Giáo lý viên nào đã gán
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <DataGrid
+                        rows={assignedCatechists}
+                        columns={columnsAssigned}
+                        getRowId={(row) => row.id}
+                        disableRowSelectionOnClick
+                        localeText={viVNGridTranslation}
+                        paginationModel={paginationModel2}
+                        pageSizeOptions={[8, 10, 25, 50, 100, 250]}
+                        onPaginationModelChange={setPaginationModel2}
+                        sx={{
+                          height: 250,
+                          overflowX: "auto",
+                          "& .MuiDataGrid-root": {
+                            overflowX: "auto",
+                          },
+                        }}
+                      />
+                    </>
+                  )}
+                </div>
+              </div>
+
+              <div className="text-end mt-4  flex justify-end gap-x-2">
+                <Button
+                  variant="contained"
+                  color="success"
+                  onClick={handleConfirm}
+                >
+                  Xác nhận
+                </Button>
+                <Button
+                  type="button"
+                  color="primary"
+                  className="btn btn-primary"
+                  variant="outlined"
+                  onClick={handleGoBack}
+                >
+                  Quay lại
+                </Button>
+              </div>
+            </>
+          )}
+        </div>
+      </Paper>
     </AdminTemplate>
   );
 };

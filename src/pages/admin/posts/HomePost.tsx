@@ -192,7 +192,7 @@ const HomePost: React.FC = () => {
             </Button>
           </div>
         </div>
-        <div className="px-2">
+        <div className="px-3">
           <DataGrid
             rows={posts}
             columns={columns}
@@ -201,6 +201,13 @@ const HomePost: React.FC = () => {
             localeText={viVNGridTranslation}
             getRowId={(row) => row.id}
             disableRowSelectionOnClick
+            sx={{
+              height: 480,
+              overflowX: "auto",
+              "& .MuiDataGrid-root": {
+                overflowX: "auto",
+              },
+            }}
           />
         </div>
       </Paper>

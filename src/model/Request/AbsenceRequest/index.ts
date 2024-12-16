@@ -4,7 +4,7 @@ export interface SubmitAbsenceRequest {
   slotId: string; // ID của slot
   reason: string; // Lý do
   replacementCatechistId?: string;
-  
+  requestImages:  File[];
 }
 
 // Xử lý yêu cầu (phê duyệt hoặc từ chối)

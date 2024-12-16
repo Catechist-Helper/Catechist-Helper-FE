@@ -28,7 +28,7 @@ export type CertificateResponse = {
   id: string;
   name: string;
   description: string;
-  imageUrl: string;
+  image: string;
   levelId: string;
 };
 

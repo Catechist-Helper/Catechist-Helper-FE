@@ -199,7 +199,11 @@ const CatechistTrainingComponent = () => {
               // checkboxSelection
               disableMultipleRowSelection
               sx={{
-                border: 0,
+                height: 480,
+                overflowX: "auto",
+                "& .MuiDataGrid-root": {
+                  overflowX: "auto",
+                },
               }}
               localeText={viVNGridTranslation}
             />

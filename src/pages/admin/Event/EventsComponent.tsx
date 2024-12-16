@@ -607,24 +607,30 @@ export default function EventsComponent() {
           </Button>
         </div>
       </div>
-      <DataGrid
-        rows={rows}
-        columns={columns}
-        loading={loading}
-        paginationModel={paginationModel}
-        onPaginationModelChange={setPaginationModel}
-        pageSizeOptions={[10, 25, 50, 100, 250]}
-        checkboxSelection
-        disableRowSelectionOnClick
-        onRowSelectionModelChange={(newSelection) =>
-          setSelectedIds(newSelection)
-        }
-        localeText={viVNGridTranslation}
-        sx={{
-          border: 0,
-        }}
-        disableMultipleRowSelection
-      />
+      <div className="w-full px-3">
+        <DataGrid
+          rows={rows}
+          columns={columns}
+          loading={loading}
+          paginationModel={paginationModel}
+          onPaginationModelChange={setPaginationModel}
+          pageSizeOptions={[10, 25, 50, 100, 250]}
+          checkboxSelection
+          disableRowSelectionOnClick
+          onRowSelectionModelChange={(newSelection) =>
+            setSelectedIds(newSelection)
+          }
+          localeText={viVNGridTranslation}
+          sx={{
+            height: 480,
+            overflowX: "auto",
+            "& .MuiDataGrid-root": {
+              overflowX: "auto",
+            },
+          }}
+          disableMultipleRowSelection
+        />
+      </div>
       {/* Dialog thêm/chỉnh sửa */}
       {openDialog && (
         <EventDialog

@@ -290,7 +290,7 @@ const EventProcessManagement: React.FC = () => {
         <></>
       )}
 
-      <div className="flex gap-x-2 mt-3 justify-end">
+      <div className="flex gap-x-2 mt-3 px-3 justify-end">
         <Button
           variant="contained"
           color="primary"
@@ -301,16 +301,23 @@ const EventProcessManagement: React.FC = () => {
         </Button>
       </div>
 
-      <div className="w-full mt-3">
+      <div className="w-full mt-1">
         {eventProcesses.length === 0 ? (
           <Typography>Không có quá trình nào cho sự kiện này.</Typography>
         ) : (
-          <div style={{ height: 400, width: "100%" }}>
+          <div className="px-3 w-full">
             <DataGrid
               rows={rows}
               columns={columns}
               disableRowSelectionOnClick
               paginationMode="client"
+              sx={{
+                height: 400,
+                overflowX: "auto",
+                "& .MuiDataGrid-root": {
+                  overflowX: "auto",
+                },
+              }}
             />
           </div>
         )}

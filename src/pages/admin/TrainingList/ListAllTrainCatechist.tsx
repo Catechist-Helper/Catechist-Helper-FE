@@ -11,7 +11,7 @@ import {
 } from "../../../enums/CatechistInTraining";
 import { useLocation } from "react-router-dom";
 import sweetAlert from "../../../utils/sweetAlert";
-import { Button, MenuItem, Select } from "@mui/material";
+import { Button, MenuItem, Paper, Select } from "@mui/material";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import viVNGridTranslation from "../../../locale/MUITable";
 
@@ -393,40 +393,55 @@ const ListAllTrainCatechist: React.FC = () => {
 
   return (
     <AdminTemplate>
-      <div className="container mt-5">
-        {renderTrainingInfo()}
-        <div className="mt-4">
-          <h2 className="text-center mb-6 text-3xl font-bold text-[#422A14]">
-            Danh sách giáo lý viên tham gia khóa đào tạo
-          </h2>
-          {catechists.length > 0 ? (
-            <>
-              <DataGrid
-                rows={catechists}
-                columns={columns}
-                getRowId={(row) => row.id}
-                disableRowSelectionOnClick
-                localeText={viVNGridTranslation}
-              />
-            </>
-          ) : (
-            <p className="text-center text-gray-500">
-              Hiện không có giáo lý viên nào trong danh sách đào tạo
-            </p>
-          )}
+      <Paper
+        sx={{
+          width: "calc(100% - 3.8rem)",
+          position: "absolute",
+          left: "3.8rem",
+        }}
+      >
+        <div className="container mt-5">
+          {renderTrainingInfo()}
+          <div className="mt-4">
+            <h2 className="text-center mb-6 text-3xl font-bold text-[#422A14]">
+              Danh sách giáo lý viên tham gia khóa đào tạo
+            </h2>
+            {catechists.length > 0 ? (
+              <>
+                <DataGrid
+                  rows={catechists}
+                  columns={columns}
+                  getRowId={(row) => row.id}
+                  disableRowSelectionOnClick
+                  localeText={viVNGridTranslation}
+                  sx={{
+                    height: 480,
+                    overflowX: "auto",
+                    "& .MuiDataGrid-root": {
+                      overflowX: "auto",
+                    },
+                  }}
+                />
+              </>
+            ) : (
+              <p className="text-center text-gray-500">
+                Hiện không có giáo lý viên nào trong danh sách đào tạo
+              </p>
+            )}
+          </div>
+          <div className="text-end mt-4 mb-3">
+            <Button
+              type="button"
+              color="primary"
+              className="btn btn-primary"
+              variant="outlined"
+              onClick={handleGoBack}
+            >
+              Quay lại
+            </Button>
+          </div>
         </div>
-        <div className="text-end mt-4">
-          <Button
-            type="button"
-            color="primary"
-            className="btn btn-primary"
-            variant="outlined"
-            onClick={handleGoBack}
-          >
-            Quay lại
-          </Button>
-        </div>
-      </div>
+      </Paper>
     </AdminTemplate>
   );
 };

@@ -31,5 +31,13 @@ export interface GetAbsenceItemResponse {
       slotId: string,
       reason: string,
       replacementCatechistId: string|null,
-      slot: SlotResponse
+      slot: SlotResponse,
+      requestImages:RequestImageResponse[]
+}
+
+export interface RequestImageResponse {
+  id: string,
+  absenceRequestId: string,
+  imageUrl: string,
+  uploadAt: string
 }

@@ -137,20 +137,26 @@ export default function EventCategoriesComponent() {
           </Button>
         </div>
       </div>
-      <DataGrid
-        rows={rows}
-        columns={columns}
-        loading={loading}
-        checkboxSelection
-        onRowSelectionModelChange={(newSelection) =>
-          setSelectedIds(newSelection)
-        }
-        localeText={viVNGridTranslation}
-        sx={{
-          border: 0,
-        }}
-        disableMultipleRowSelection
-      />
+      <div className="w-full px-3">
+        <DataGrid
+          rows={rows}
+          columns={columns}
+          loading={loading}
+          checkboxSelection
+          onRowSelectionModelChange={(newSelection) =>
+            setSelectedIds(newSelection)
+          }
+          localeText={viVNGridTranslation}
+          sx={{
+            height: 480,
+            overflowX: "auto",
+            "& .MuiDataGrid-root": {
+              overflowX: "auto",
+            },
+          }}
+          disableMultipleRowSelection
+        />
+      </div>
       {/* Dialog thêm/chỉnh sửa */}
       {openDialog && (
         <EventCategoryDialog

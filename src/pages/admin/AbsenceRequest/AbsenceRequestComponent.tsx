@@ -7,7 +7,10 @@ import {
 } from "@mui/x-data-grid";
 import Paper from "@mui/material/Paper";
 import absenceApi from "../../../api/AbsenceRequest";
-import { GetAbsenceItemResponse } from "../../../model/Response/AbsenceRequest";
+import {
+  GetAbsenceItemResponse,
+  RequestImageResponse,
+} from "../../../model/Response/AbsenceRequest";
 import { formatDate } from "../../../utils/formatDate";
 import viVNGridTranslation from "../../../locale/MUITable";
 import { Button } from "@mui/material";
@@ -19,6 +22,7 @@ import {
 import ApprovalDialog from "./ApprovalDialog";
 import ViewDetailAbsenceDialog from "./ViewDetailAbsenceDialog";
 import catechistApi from "../../../api/Catechist";
+import ImageDialog from "../../../components/Molecules/ImageDialog";
 
 const AbsencePage = () => {
   const [absences, setAbsences] = useState<GetAbsenceItemResponse[]>([]);
@@ -35,6 +39,33 @@ const AbsencePage = () => {
     useState<boolean>(false);
   const [selectedAbsence, setSelectedAbsence] =
     useState<GetAbsenceItemResponse | null>(null); // Selected absence for approval
+
+  const [dialogCertificateImageOpen, setDialogCertificateImageOpen] =
+    useState(false);
+  const [dialogData, setDialogData] = useState({
+    images: [],
+    title: "",
+  });
+
+  const handleOpenDialogCertificateImage = (
+    requestImages: RequestImageResponse[]
+  ) => {
+    const images: any = requestImages
+      .filter((item) => item.imageUrl)
+      .map((item) => ({
+        url: item.imageUrl,
+        createdAt: item.uploadAt,
+      }));
+
+    setDialogData({
+      images,
+      title: `Ảnh minh chứng xin nghỉ phép`,
+    });
+    setDialogCertificateImageOpen(true);
+  };
+
+  const handleCloseDialogCertificateImage = () =>
+    setDialogCertificateImageOpen(false);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -79,11 +110,41 @@ const AbsencePage = () => {
     {
       field: "slot.date",
       headerName: "Ngày vắng",
-      width: 180,
+      width: 120,
       renderCell: (params) =>
         params.row.slot && params.row.slot.date
           ? formatDate.DD_MM_YYYY(params.row.slot.date)
           : "",
+    },
+    {
+      field: "requestImages",
+      headerName: "Ảnh chứng minh",
+      width: 135,
+      renderCell: (params) => {
+        const { requestImages } = params.row;
+        const finalImages: RequestImageResponse[] = requestImages.filter(
+          (item: RequestImageResponse) =>
+            item.imageUrl && item.imageUrl.trim() != ""
+        );
+        return (
+          <>
+            <span>{finalImages.length}</span>
+            {finalImages.length > 0 ? (
+              <>
+                <Button
+                  size="small"
+                  style={{ marginLeft: "8px" }}
+                  onClick={() => handleOpenDialogCertificateImage(finalImages)}
+                >
+                  Xem
+                </Button>
+              </>
+            ) : (
+              <></>
+            )}
+          </>
+        );
+      },
     },
     { field: "reason", headerName: "Lý do", width: 200 },
     {
@@ -293,7 +354,11 @@ const AbsencePage = () => {
         rowSelectionModel={selectedAbsences}
         checkboxSelection
         sx={{
-          border: 0,
+          height: 480,
+          overflowX: "auto",
+          "& .MuiDataGrid-root": {
+            overflowX: "auto",
+          },
         }}
         localeText={viVNGridTranslation}
         disableRowSelectionOnClick
@@ -312,6 +377,18 @@ const AbsencePage = () => {
           onClose={() => setOpenViewDetailDialog(false)}
           absence={selectedAbsence}
         />
+      )}{" "}
+      {dialogCertificateImageOpen ? (
+        <>
+          <ImageDialog
+            images={dialogData.images}
+            title={dialogData.title}
+            open={dialogCertificateImageOpen}
+            onClose={handleCloseDialogCertificateImage}
+          />
+        </>
+      ) : (
+        <></>
       )}
     </Paper>
   );

@@ -189,6 +189,13 @@ const ListAllChristianNames: React.FC = () => {
           localeText={viVNGridTranslation}
           getRowId={(row) => row.id}
           disableRowSelectionOnClick
+          sx={{
+            height: 480,
+            overflowX: "auto",
+            "& .MuiDataGrid-root": {
+              overflowX: "auto",
+            },
+          }}
         />
       </div>
     </Paper>

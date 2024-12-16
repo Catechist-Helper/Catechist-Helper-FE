@@ -254,9 +254,9 @@ export default function Router() {
           path: PATH_ADMIN.assign_catechist_to_grade,
           element: (
             <AuthGuard>
-              <RoleBasedGuard accessibleRoles={[RoleNameEnum.Admin]}>
-                <AssignCatechistToGrade />
-              </RoleBasedGuard>
+              {/* <RoleBasedGuard accessibleRoles={[RoleNameEnum.Admin]}> */}
+              <AssignCatechistToGrade />
+              {/* </RoleBasedGuard> */}
             </AuthGuard>
           ),
         },

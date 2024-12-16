@@ -181,8 +181,30 @@ export default function AssignCatechistToGradeComponent() {
   };
 
   const handleMainCatechistChange = (id: string) => {
-    setMainCatechistId(id); // Cập nhật ID của trưởng khối
+    setMainCatechistId(id);
   };
+
+  useEffect(() => {
+    if (mainCatechistId) {
+      setAssignedCatechists((prevAssignedCatechists) => {
+        // Tìm object có id == MainCatechistId
+        const mainCatechist = prevAssignedCatechists.find(
+          (catechist) => catechist.id === mainCatechistId
+        );
+
+        // Nếu tìm thấy, đưa lên đầu
+        if (mainCatechist) {
+          const updatedCatechists = prevAssignedCatechists.filter(
+            (catechist) => catechist.id !== mainCatechistId
+          );
+          return [mainCatechist, ...updatedCatechists];
+        }
+
+        // Nếu không tìm thấy, trả về mảng ban đầu
+        return prevAssignedCatechists;
+      });
+    }
+  }, [mainCatechistId]);
 
   const handleConfirm = async () => {
     if (!mainCatechistId) {
@@ -336,6 +358,23 @@ export default function AssignCatechistToGradeComponent() {
       renderCell: (params) =>
         params.row.catechist.level ? params.row.catechist.level.name : "N/A",
     },
+    {
+      field: "main",
+      headerName: "Trưởng khối",
+
+      width: 120,
+      renderCell: (params) => (
+        <input
+          type="checkbox"
+          checked={mainCatechistId === params.row.catechist.id}
+          onChange={() => {
+            if (!viewMode) {
+              handleMainCatechistChange(params.row.catechist.id);
+            }
+          }}
+        />
+      ),
+    },
   ];
 
   if (!viewMode) {
@@ -354,35 +393,20 @@ export default function AssignCatechistToGradeComponent() {
       ),
     });
 
-    columns2.push(
-      {
-        field: "remove",
-        headerName: "Xóa",
-        width: 100,
-        renderCell: (params) => (
-          <Button
-            variant="contained"
-            color="error"
-            onClick={() => handleRemoveCatechist([params.row.catechist.id])}
-          >
-            Xóa
-          </Button>
-        ),
-      },
-      {
-        field: "main",
-        headerName: "Trưởng khối",
-
-        width: 120,
-        renderCell: (params) => (
-          <input
-            type="checkbox"
-            checked={mainCatechistId === params.row.catechist.id}
-            onChange={() => handleMainCatechistChange(params.row.catechist.id)}
-          />
-        ),
-      }
-    );
+    columns2.push({
+      field: "remove",
+      headerName: "Xóa",
+      width: 100,
+      renderCell: (params) => (
+        <Button
+          variant="contained"
+          color="error"
+          onClick={() => handleRemoveCatechist([params.row.catechist.id])}
+        >
+          Xóa
+        </Button>
+      ),
+    });
   }
 
   const columns3: GridColDef[] = [
@@ -517,7 +541,13 @@ export default function AssignCatechistToGradeComponent() {
                   pageSizeOptions={[4, 10, 25, 50, 100, 250]}
                   onPaginationModelChange={setPaginationModel}
                   checkboxSelection
-                  sx={{ border: 0 }}
+                  sx={{
+                    height: 250,
+                    overflowX: "auto",
+                    "& .MuiDataGrid-root": {
+                      overflowX: "auto",
+                    },
+                  }}
                   localeText={viVNGridTranslation}
                   disableRowSelectionOnClick
                 />
@@ -549,9 +579,15 @@ export default function AssignCatechistToGradeComponent() {
               }
               pageSizeOptions={[4, 10, 25, 50, 100, 250]}
               checkboxSelection
-              sx={{ border: 0 }}
               localeText={viVNGridTranslation}
               disableRowSelectionOnClick
+              sx={{
+                height: viewMode ? 350 : 250,
+                overflowX: "auto",
+                "& .MuiDataGrid-root": {
+                  overflowX: "auto",
+                },
+              }}
             />
           </>
         ) : (
@@ -618,16 +654,22 @@ export default function AssignCatechistToGradeComponent() {
               }
               pageSizeOptions={[10, 25, 50, 100, 250]}
               checkboxSelection
-              sx={{ border: 0 }}
               localeText={viVNGridTranslation}
               onRowSelectionModelChange={(newSelection) => {
                 setSelectedOverLevelCatechists(newSelection);
+              }}
+              sx={{
+                height: 350,
+                overflowX: "auto",
+                "& .MuiDataGrid-root": {
+                  overflowX: "auto",
+                },
               }}
             />
           </>
         )}
 
-        <div className="flex justify-end mt-3 gap-x-2">
+        <div className="flex justify-end mt-3 gap-x-2 mb-3 mx-3">
           {viewMode ? (
             <>
               {overLevelCatechists.length <= 0 ? (

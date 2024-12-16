@@ -154,7 +154,7 @@ const EventProcessManagement: React.FC = () => {
     {
       field: "no",
       headerName: "STT",
-      width: 90,
+      width: 10,
       renderCell: (params) => {
         {
           const rowIndex = params.api.getRowIndexRelativeToVisibleRows(
@@ -166,8 +166,8 @@ const EventProcessManagement: React.FC = () => {
         }
       },
     },
-    { field: "name", headerName: "Tên hoạt động", width: 200 },
-    { field: "description", headerName: "Mô tả", width: 250 },
+    { field: "name", headerName: "Tên hoạt động", width: 180 },
+    { field: "description", headerName: "Mô tả", width: 180 },
     {
       field: "startTime",
       headerName: "Thời gian bắt đầu",
@@ -200,7 +200,7 @@ const EventProcessManagement: React.FC = () => {
     {
       field: "status",
       headerName: "Trạng thái",
-      width: 180,
+      width: 100,
       renderCell: (params) => {
         switch (params.value) {
           case EventProcessStatus.Not_Started:
@@ -416,7 +416,7 @@ const EventProcessManagement: React.FC = () => {
       ) : (
         <></>
       )}
-      <div className="flex gap-x-2 mt-3 justify-end">
+      <div className="flex gap-x-2 mt-3 px-3 justify-end">
         {truongBTCRole ? (
           <>
             <Button
@@ -444,12 +444,19 @@ const EventProcessManagement: React.FC = () => {
       {eventProcesses.length === 0 ? (
         <Typography>Không có quá trình nào cho sự kiện này.</Typography>
       ) : (
-        <div style={{ height: 400, width: "100%" }}>
+        <div className="w-full px-3">
           <DataGrid
             rows={rows}
             columns={columns}
             disableRowSelectionOnClick
             paginationMode="client"
+            sx={{
+              height: 430,
+              overflowX: "auto",
+              "& .MuiDataGrid-root": {
+                overflowX: "auto",
+              },
+            }}
           />
         </div>
       )}

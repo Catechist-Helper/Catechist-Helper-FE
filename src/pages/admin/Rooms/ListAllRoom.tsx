@@ -164,7 +164,7 @@ const ListAllRooms: React.FC = () => {
           </Button>
         </div>
       </div>
-      <div className="px-2">
+      <div className="px-3">
         <DataGrid
           rows={rooms}
           columns={columns}
@@ -172,6 +172,13 @@ const ListAllRooms: React.FC = () => {
           paginationMode="client"
           rowHeight={200}
           localeText={viVNGridTranslation}
+          sx={{
+            height: 480,
+            overflowX: "auto",
+            "& .MuiDataGrid-root": {
+              overflowX: "auto",
+            },
+          }}
         />
       </div>
     </Paper>

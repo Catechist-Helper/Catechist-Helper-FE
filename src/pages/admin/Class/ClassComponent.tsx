@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import {
   // useNavigate,
   useLocation,
+  useNavigate,
 } from "react-router-dom";
 import {
   DataGrid,
@@ -45,6 +46,7 @@ import {
 import AdminRequestLeaveDialog from "./AdminRequestLeaveDialog";
 import absenceApi from "../../../api/AbsenceRequest";
 import CreateUpdateClassDialog from "./CreateUpdateClassDialog";
+import { PATH_ADMIN } from "../../../routes/paths";
 
 export default function ClassComponent() {
   const location = useLocation();
@@ -477,13 +479,6 @@ export default function ClassComponent() {
         1000,
         selectedPastoralYear
       );
-
-      // const fetchItems: any[] = [];
-      // [...data.data.items].forEach((item) => {
-      //   fetchItems.push({ ...item, id: item.catechist.id });
-      // });
-
-      // setCatechists(fetchItems);
       const catechistInClassUpdate = res.data.data.items;
       const catechistInGradeUpdate = secondRes.data.data.items;
 
@@ -503,9 +498,6 @@ export default function ClassComponent() {
         fetchItems.push({ ...item, id: item.catechist.id });
       });
       setAssignedCatechists([...assignedCatechists, ...fetchItems]);
-      // setCatechists(
-      //   catechists.filter((catechist) => !selectedIds.includes(catechist.id))
-      // );
     }
     setOpenSlotDialog(true);
   };
@@ -898,11 +890,12 @@ export default function ClassComponent() {
   const handleSelectionChange = (newSelectionModel: GridRowSelectionModel) => {
     setSelectedRows(newSelectionModel);
   };
-
+  const navigate = useNavigate();
   const handleLeaveRequestSubmit = async (
     catechistId: string,
     reason: string,
-    slotId: string
+    slotId: string,
+    images: File[]
   ) => {
     try {
       enableLoading();
@@ -910,12 +903,14 @@ export default function ClassComponent() {
         catechistId: catechistId,
         reason: reason,
         slotId: slotId,
+        requestImages: images,
       });
       sweetAlert.alertSuccess("Tạo đơn nghỉ phép thành công", "", 2500, 25);
       setOpenLeaveDialog(false);
       // if (classViewSlotId != "") {
       //   fetchSlotForViewing(classViewSlotId);
       // }
+      navigate(PATH_ADMIN.admin_management_absence);
     } catch (error) {
       console.error("Error loading slots:", error);
       sweetAlert.alertFailed("Lỗi khi tạo đơn nghỉ phép", "", 2500, 25);
@@ -1198,27 +1193,32 @@ export default function ClassComponent() {
           </div>
         </div>
       </div>
-
-      <DataGrid
-        rows={rows}
-        columns={columns}
-        paginationMode="client"
-        rowCount={rowCount}
-        loading={loading}
-        paginationModel={paginationModel}
-        onPaginationModelChange={(newModel) => setPaginationModel(newModel)}
-        pageSizeOptions={[8, 25, 50]}
-        onRowClick={() => {}}
-        onRowSelectionModelChange={handleSelectionChange}
-        rowSelectionModel={selectedRows}
-        sx={{
-          border: 0,
-        }}
-        localeText={viVNGridTranslation}
-        checkboxSelection
-        disableRowSelectionOnClick
-        disableMultipleRowSelection
-      />
+      <div className="px-3 w-full">
+        <DataGrid
+          rows={rows}
+          columns={columns}
+          paginationMode="client"
+          rowCount={rowCount}
+          loading={loading}
+          paginationModel={paginationModel}
+          onPaginationModelChange={(newModel) => setPaginationModel(newModel)}
+          pageSizeOptions={[8, 25, 50]}
+          onRowClick={() => {}}
+          onRowSelectionModelChange={handleSelectionChange}
+          rowSelectionModel={selectedRows}
+          sx={{
+            height: 480,
+            overflowX: "auto",
+            "& .MuiDataGrid-root": {
+              overflowX: "auto",
+            },
+          }}
+          localeText={viVNGridTranslation}
+          checkboxSelection
+          disableRowSelectionOnClick
+          disableMultipleRowSelection
+        />
+      </div>
 
       {openDialogCreateUpdateClass ? (
         <>

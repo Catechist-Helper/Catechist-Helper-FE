@@ -1080,7 +1080,11 @@ export default function ApprovedRegistrationsTable() {
               rowSelectionModel={selectedRegistrations}
               checkboxSelection
               sx={{
-                border: 0,
+                height: 480,
+                overflowX: "auto",
+                "& .MuiDataGrid-root": {
+                  overflowX: "auto",
+                },
               }}
               localeText={viVNGridTranslation}
               disableMultipleRowSelection={!deleteMode}
