@@ -115,7 +115,7 @@ const NavbarAdmin = () => {
                   <li style={{ fontWeight: "600" }}>
                     {userLogin && userLogin.email ? userLogin.email : ""}
                   </li>
-                  <li>Vai trò: Giáo lý viên</li>
+                  <li>Vai trò: Admin</li>
                 </ul>
               </div>
               {/* Profile Picture */}

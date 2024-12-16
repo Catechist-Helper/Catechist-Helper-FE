@@ -182,22 +182,24 @@ const UpdateTrain: React.FC = () => {
   };
 
   // 1. Cho các trường thông tin cơ bản (name, description, startTime, endTime)
-  const isBasicFieldsDisabled = editStatusOnly || 
-  formik.values.trainingListStatus === trainingListStatus.Training ||
-  formik.values.trainingListStatus === trainingListStatus.Finished;
-
-  // 2. Cho các trường đặc biệt (certificate, previous level, next level)
-  const isSpecialFieldsDisabled = editStatusOnly || 
-  formik.values.trainingListStatus === trainingListStatus.NotStarted ||
-  formik.values.trainingListStatus === trainingListStatus.Training ||
-  formik.values.trainingListStatus === trainingListStatus.Finished;
-
-  // 3. Cho radio buttons
-  const trainingRadioDisabled = isBeforeStartDate() ||
+  const isBasicFieldsDisabled =
+    editStatusOnly ||
+    formik.values.trainingListStatus === trainingListStatus.Training ||
     formik.values.trainingListStatus === trainingListStatus.Finished;
 
-  const finishedRadioDisabled = isBeforeStartDate() ||
-    !isAfterEndDate();
+  // 2. Cho các trường đặc biệt (certificate, previous level, next level)
+  const isSpecialFieldsDisabled =
+    editStatusOnly ||
+    formik.values.trainingListStatus === trainingListStatus.NotStarted ||
+    formik.values.trainingListStatus === trainingListStatus.Training ||
+    formik.values.trainingListStatus === trainingListStatus.Finished;
+
+  // 3. Cho radio buttons
+  const trainingRadioDisabled =
+    isBeforeStartDate() ||
+    formik.values.trainingListStatus === trainingListStatus.Finished;
+
+  const finishedRadioDisabled = isBeforeStartDate() || !isAfterEndDate();
 
   return (
     <AdminTemplate>
@@ -205,7 +207,7 @@ const UpdateTrain: React.FC = () => {
         <h3 className="text-center pt-10 fw-bold">
           CHỈNH SỬA DANH SÁCH ĐÀO TẠO
         </h3>
-        <form onSubmit={formik.handleSubmit} className="max-w-lg mx-auto mt-5">
+        <form onSubmit={formik.handleSubmit} className="max-w-7xl mx-auto mt-5">
           <div className="mb-5">
             <label
               htmlFor="name"
@@ -305,14 +307,14 @@ const UpdateTrain: React.FC = () => {
               value={
                 formik.values.previousLevelId
                   ? levels.find(
-                    (level: any) =>
-                      level.hierarchyLevel ===
-                      levels.find(
-                        (prev: any) =>
-                          prev.id === formik.values.previousLevelId
-                      )?.hierarchyLevel +
-                      1
-                  )?.name || "Không có cấp tiếp theo"
+                      (level: any) =>
+                        level.hierarchyLevel ===
+                        levels.find(
+                          (prev: any) =>
+                            prev.id === formik.values.previousLevelId
+                        )?.hierarchyLevel +
+                          1
+                    )?.name || "Không có cấp tiếp theo"
                   : "Vui lòng chọn cấp trước"
               }
               readOnly
@@ -392,7 +394,10 @@ const UpdateTrain: React.FC = () => {
                   type="radio"
                   name="trainingListStatus"
                   value={trainingListStatus.Training}
-                  checked={formik.values.trainingListStatus === trainingListStatus.Training}
+                  checked={
+                    formik.values.trainingListStatus ===
+                    trainingListStatus.Training
+                  }
                   onChange={() =>
                     formik.setFieldValue(
                       "trainingListStatus",
@@ -400,12 +405,14 @@ const UpdateTrain: React.FC = () => {
                     )
                   }
                   disabled={trainingRadioDisabled}
-                  className={`w-4 h-4 text-blue-600 ${trainingRadioDisabled ? "opacity-50 cursor-not-allowed" : ""
-                    }`}
+                  className={`w-4 h-4 text-blue-600 ${
+                    trainingRadioDisabled ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
                 />
                 <label
-                  className={`ml-2 ${trainingRadioDisabled ? "text-gray-400" : ""
-                    }`}
+                  className={`ml-2 ${
+                    trainingRadioDisabled ? "text-gray-400" : ""
+                  }`}
                 >
                   Đào tạo
                 </label>
@@ -415,7 +422,10 @@ const UpdateTrain: React.FC = () => {
                   type="radio"
                   name="trainingListStatus"
                   value={trainingListStatus.Finished}
-                  checked={formik.values.trainingListStatus === trainingListStatus.Finished}
+                  checked={
+                    formik.values.trainingListStatus ===
+                    trainingListStatus.Finished
+                  }
                   onChange={() =>
                     formik.setFieldValue(
                       "trainingListStatus",
@@ -423,12 +433,14 @@ const UpdateTrain: React.FC = () => {
                     )
                   }
                   disabled={finishedRadioDisabled}
-                  className={`w-4 h-4 text-blue-600 ${finishedRadioDisabled ? "opacity-50 cursor-not-allowed" : ""
-                    }`}
+                  className={`w-4 h-4 text-blue-600 ${
+                    finishedRadioDisabled ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
                 />
                 <label
-                  className={`ml-2 ${finishedRadioDisabled ? "text-gray-400" : ""
-                    }`}
+                  className={`ml-2 ${
+                    finishedRadioDisabled ? "text-gray-400" : ""
+                  }`}
                 >
                   Kết thúc
                 </label>

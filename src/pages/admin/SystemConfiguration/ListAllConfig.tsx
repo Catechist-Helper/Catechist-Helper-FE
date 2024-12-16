@@ -84,6 +84,16 @@ const ListAllConfig: React.FC = () => {
     navigate(`/admin/update-system-configurations/${id}`);
   };
 
+  const dayMap: Record<string, string> = {
+    Sunday: "Chủ nhật",
+    Monday: "Thứ hai",
+    Tuesday: "Thứ ba",
+    Wednesday: "Thứ tư",
+    Thursday: "Thứ năm",
+    Friday: "Thứ sáu",
+    Saturday: "Thứ bảy",
+  };
+
   const columns: GridColDef[] = [
     {
       field: "key",
@@ -91,7 +101,16 @@ const ListAllConfig: React.FC = () => {
       width: 350,
       renderCell: (params) => getSystemConfigEnumDescription(params.value),
     },
-    { field: "value", headerName: "Giá trị", width: 300 },
+    {
+      field: "value",
+      headerName: "Giá trị",
+      width: 300,
+      renderCell: (params) => {
+        return params.row.key == SystemConfigKey.WEEKDAY
+          ? `${dayMap[params.value] ? dayMap[params.value] : "Không xác định"}`
+          : params.value;
+      },
+    },
     {
       field: "actions",
       headerName: "Hành động",

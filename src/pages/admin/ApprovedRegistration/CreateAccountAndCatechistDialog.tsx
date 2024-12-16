@@ -73,23 +73,23 @@ const CreateAccountAndCatechistDialog: React.FC<
   });
   const [gender, setGender] = useState<string>(updatedCatechist?.gender ?? "");
 
-  useEffect(() => {
-    const fetchChristianNames = async () => {
-      try {
-        const { data } = await christianNamesApi.getAllChristianNames();
-        setChristianNames(
-          data.data.items
-            .filter((item: any) => item.gender == gender)
-            .map((item: any) => ({
-              value: item.id,
-              label: item.name,
-            }))
-        );
-      } catch (error) {
-        console.error("Error fetching Christian Names:", error);
-      }
-    };
+  const fetchChristianNames = async () => {
+    try {
+      const { data } = await christianNamesApi.getAllChristianNames();
+      setChristianNames(
+        data.data.items
+          .filter((item: any) => item.gender == gender)
+          .map((item: any) => ({
+            value: item.id,
+            label: item.name,
+          }))
+      );
+    } catch (error) {
+      console.error("Error fetching Christian Names:", error);
+    }
+  };
 
+  useEffect(() => {
     if (gender != "") {
       fetchChristianNames();
     }
@@ -114,6 +114,9 @@ const CreateAccountAndCatechistDialog: React.FC<
     };
 
     fetchLevels();
+    if (registrationItem?.gender) {
+      setGender(registrationItem.gender);
+    }
   }, []);
 
   const validateForm = (values: any) => {

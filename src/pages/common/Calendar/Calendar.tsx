@@ -23,27 +23,7 @@ export type EventCalendar = {
   description: string;
   start: string;
   end?: string;
-  widthDialog?: "md" | "lg" | "xs" | "sm" | "xl";
 };
-
-// const eventsInitData: EventCalendar[] = [
-//   {
-//     title: "Meeting with Team",
-//     description: "Discuss project progress",
-//     start: "2024-12-10T10:00:00",
-//   },
-//   {
-//     title: "Project Deadline",
-//     description: "Submit final report",
-//     start: "2024-12-15",
-//   },
-//   {
-//     title: "Conference",
-//     description: "Attend tech conference",
-//     start: "2024-12-20",
-//     end: "2024-12-22",
-//   },
-// ];
 
 const CalendarComponent: React.FC = () => {
   const [open, setOpen] = useState(false);
@@ -106,13 +86,62 @@ const CalendarComponent: React.FC = () => {
     setSelectedEvent(null);
   };
 
+  const translateTitles = (events: EventCalendar[]): EventCalendar[] => {
+    const translationMap: { [key: string]: string } = {
+      "Christmas Day": "Ngày Lễ Giáng Sinh",
+      "Easter Sunday": "Lễ Phục Sinh",
+      "International New Year's Day": "Tết Dương Lịch",
+      "International New Year's Eve": "Đêm Giao Thừa Dương Lịch",
+      "Vietnamese New Year": "Tết Nguyên Đán",
+      "Vietnamese New Year's Eve": "Đêm Giao Thừa",
+      "Hung Kings Festival": "Giỗ Tổ Hùng Vương",
+      "Liberation Day/Reunification Day": "Ngày Giải Phóng Miền Nam",
+      "Liberation Day/Reunification Day Holiday":
+        "Ngày Nghỉ Lễ Giải Phóng Miền Nam",
+      "Day off for Liberation Day/Reunification Day":
+        "Ngày Nghỉ Bù Cho Ngày Giải Phóng Miền Nam",
+      "International Labor Day": "Ngày Quốc Tế Lao Động",
+      "Day off for International Labor Day":
+        "Ngày Nghỉ Bù Cho Ngày Quốc Tế Lao Động",
+      "Independence Day": "Ngày Quốc Khánh",
+      "Independence Day observed": "Ngày Nghỉ Quốc Khánh",
+      "Tet Holiday": "Kỳ Nghỉ Tết",
+      "Christmas Eve": "Đêm Giáng Sinh",
+      Vesak: "Lễ Phật Đản",
+      "New Year's Eve": "Đêm Giao Thừa",
+      "Working day for Liberation Day Holiday":
+        "Ngày Làm Việc Cho Kỳ Nghỉ Giải Phóng",
+      "Day off for International New Year's Day":
+        "Ngày Nghỉ Bù Cho Tết Dương Lịch",
+      "Day off for Hung Kings Festival": "Ngày Nghỉ Bù Cho Giỗ Tổ Hùng Vương",
+    };
+
+    return events.map((event) => {
+      const matchedKey = Object.keys(translationMap).find((key) =>
+        event.title.includes(key)
+      );
+
+      if (matchedKey) {
+        const vietnameseTitle = event.title.replace(
+          matchedKey,
+          translationMap[matchedKey]
+        );
+        return { ...event, title: vietnameseTitle };
+      }
+
+      return event;
+    });
+  };
+
+  const translatedEvents = translateTitles(eventList);
+
   return (
     <div className="calendar-container">
       <FullCalendar
         plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
         initialView="dayGridMonth"
         locale={viLocale}
-        events={eventList}
+        events={translatedEvents}
         eventClick={handleEventClick}
         headerToolbar={{
           left: "prev,next today",
@@ -129,11 +158,7 @@ const CalendarComponent: React.FC = () => {
           style: { borderRadius: "12px", padding: "10px" },
         }}
         fullWidth
-        maxWidth={
-          selectedEvent && selectedEvent.widthDialog
-            ? selectedEvent.widthDialog
-            : "sm"
-        }
+        maxWidth={"md"}
       >
         <DialogTitle>
           <Typography variant="h5" component="div" color="primary">

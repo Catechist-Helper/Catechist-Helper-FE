@@ -10,12 +10,17 @@ import AdminTemplate from "../../../components/Templates/AdminTemplate/AdminTemp
 import { useLocation } from "react-router-dom";
 import levelApi from "../../../api/Level";
 import sweetAlert from "../../../utils/sweetAlert";
+import useAppContext from "../../../hooks/useAppContext";
+import { DataGrid, GridColDef, GridPaginationModel } from "@mui/x-data-grid";
+import viVNGridTranslation from "../../../locale/MUITable";
 
 interface TrainingInfo {
   id: string;
   name: string;
   previousLevel: string | number;
   nextLevel: string | number;
+  previousLevelId: string;
+  nextLevelId: string;
   startTime: string;
   endTime: string;
   description: string;
@@ -40,15 +45,17 @@ interface Catechist {
 const ListCatechistByLevel: React.FC = () => {
   const [catechists, setCatechists] = useState<any[]>([]); // Danh sách catechists chưa gán
   const [assignedCatechists, setAssignedCatechists] = useState<any[]>([]); // Danh sách catechists đã gán
-  const [catechistsToAssign, setCatechistsToAssign] = useState<any[]>([]); // Catechists chuẩn bị gán
-  const [trainings, setTrainings] = useState<any[]>([]); // Danh sách training từ API
+  // const [catechistsToAssign, setCatechistsToAssign] = useState<any[]>([]); // Catechists chuẩn bị gán
+  // const [trainings, setTrainings] = useState<any[]>([]); // Danh sách training từ API
   const navigate = useNavigate();
   const location = useLocation();
   const trainingInfo = location.state?.trainingInfo as TrainingInfo;
-  const [trainingCatechists, setTrainingCatechists] = useState<any[]>([]);
+  // const [trainingCatechists, setTrainingCatechists] = useState<any[]>([]);
   const [currentTraining, setCurrentTraining] = useState<TrainingInfo | null>(
     null
   );
+  const [loading, setLoading] = useState<boolean>(true);
+  const { enableLoading, disableLoading } = useAppContext();
 
   useEffect(() => {
     if (trainingInfo) {
@@ -64,42 +71,56 @@ const ListCatechistByLevel: React.FC = () => {
   };
   // Lấy danh sách catechists từ API
   useEffect(() => {
-    catechistApi
-      .getAllCatechists()
-      .then((res: AxiosResponse) => {
-        const data: BasicResponse = res.data;
-        if (data.statusCode === 200) {
-          setCatechists(data.data.items || []);
-        }
-      })
-      .catch((err) => {
-        console.error("Lỗi khi lấy danh sách Catechists:", err);
-      });
+    const fetch = async () => {
+      const firstRes = await catechistApi.getAllCatechists();
+      await catechistApi
+        .getAllCatechists(1, firstRes.data.data.total)
+        .then((res: AxiosResponse) => {
+          const data: BasicResponse = res.data;
+          if (data.statusCode === 200) {
+            setCatechists(
+              data.data.items.filter(
+                (item: any) =>
+                  item.isTeaching &&
+                  item.level.id == currentTraining?.previousLevelId
+              ) || []
+            );
+          }
+        })
+        .catch((err) => {
+          console.error("Lỗi khi lấy danh sách Catechists:", err);
+        });
+    };
+    fetch();
   }, []);
 
   // // Lấy danh sách trainings từ API
-  useEffect(() => {
-    trainApi
-      .getAllTrain()
-      .then((res: AxiosResponse) => {
-        const data: BasicResponse = res.data;
-        if (data.statusCode === 200) {
-          setTrainings(data.data.items || []);
-          console.log(trainings);
-        }
-      })
-      .catch((err) => {
-        console.error("Lỗi khi lấy danh sách Trainings:", err);
-      });
-  }, []);
+  // useEffect(() => {
+  //   trainApi
+  //     .getAllTrain()
+  //     .then((res: AxiosResponse) => {
+  //       const data: BasicResponse = res.data;
+  //       if (data.statusCode === 200) {
+  //         setTrainings(data.data.items || []);
+  //       }
+  //     })
+  //     .catch((err) => {
+  //       console.error("Lỗi khi lấy danh sách Trainings:", err);
+  //     });
+  // }, []);
 
   // Thêm useEffect để load danh sách Catechists đã gán khi component mount
   useEffect(() => {
     const loadInitialData = async () => {
+      enableLoading();
       if (currentTraining?.id) {
         try {
           // 1. Get all training lists first
-          const allTrainingsResponse = await trainApi.getAllTrain();
+          const firstTrainRes = await trainApi.getAllTrain();
+          const allTrainingsResponse = await trainApi.getAllTrain(
+            1,
+            firstTrainRes.data.data.total
+          );
           const allTrainings = allTrainingsResponse.data.data.items || [];
 
           // 2. Create a Set to store Catechist IDs that should not appear
@@ -156,8 +177,18 @@ const ListCatechistByLevel: React.FC = () => {
           );
 
           // 3. Lấy tất cả catechist và lọc
-          const allCatechistsResponse = await catechistApi.getAllCatechists();
-          const allCatechists = allCatechistsResponse.data.data.items || [];
+          const firstRes = await catechistApi.getAllCatechists();
+
+          const allCatechistsResponse = await catechistApi.getAllCatechists(
+            1,
+            firstRes.data.data.total
+          );
+          const allCatechists =
+            allCatechistsResponse.data.data.items.filter(
+              (item: any) =>
+                item.isTeaching &&
+                item.level.id == currentTraining?.previousLevelId
+            ) || [];
 
           const unassignedCatechists = allCatechists.filter((catechist) => {
             // Kiểm tra xem catechist có trong training hiện tại không
@@ -186,12 +217,19 @@ const ListCatechistByLevel: React.FC = () => {
 
           // 4. Set state
           setAssignedCatechists(mappedAssignedCatechists);
-          setTrainingCatechists(mappedAssignedCatechists);
-          console.table(trainingCatechists);
+          // setTrainingCatechists(mappedAssignedCatechists);
           setCatechists(unassignedCatechists);
         } catch (error) {
           console.error("Lỗi khi load dữ liệu ban đầu:", error);
+        } finally {
+          setTimeout(() => {
+            setLoading(false);
+            disableLoading();
+          }, 1000);
         }
+      } else {
+        setLoading(false);
+        disableLoading();
       }
     };
     loadInitialData();
@@ -223,11 +261,10 @@ const ListCatechistByLevel: React.FC = () => {
         prev.filter((catechist) => catechist.id !== catechistId)
       );
 
-      setCatechistsToAssign((prev) => [
-        ...prev,
-        { ...selectedCatechist, status: 0 },
-      ]);
-      console.log(catechistsToAssign);
+      // setCatechistsToAssign((prev) => [
+      //   ...prev,
+      //   { ...selectedCatechist, status: 0 },
+      // ]);
     }
   };
 
@@ -279,9 +316,9 @@ const ListCatechistByLevel: React.FC = () => {
           if (currentTraining.trainingListStatus !== 0) {
             setCatechists((prev) => [removedCatechist, ...prev]);
           }
-          setCatechistsToAssign((prev) =>
-            prev.filter((cat) => cat.id !== catechistId)
-          );
+          // setCatechistsToAssign((prev) =>
+          //   prev.filter((cat) => cat.id !== catechistId)
+          // );
         } else {
           sweetAlert.alertFailed("Có lỗi xảy ra khi cập nhật danh sách!");
         }
@@ -316,7 +353,7 @@ const ListCatechistByLevel: React.FC = () => {
 
       if (response.status === 200 || response.status === 201) {
         // Cập nhật lại danh sách training
-        setTrainingCatechists(assignedCatechists);
+        // setTrainingCatechists(assignedCatechists);
         sweetAlert.alertSuccess("Cập nhật danh sách giáo lý viên thành công!");
         navigate("/admin/training-lists");
       }
@@ -358,7 +395,7 @@ const ListCatechistByLevel: React.FC = () => {
     return (
       <div className="mb-6 p-6 border-4 border-[#AF8260] rounded-lg bg-white shadow-lg">
         <h2 className="text-center mb-6 text-3xl font-bold text-[#422A14]">
-          Danh sách giáo lý viên tham gia khóa đào tạo ({currentTraining.name})
+          Thông tin của khóa đào tạo {currentTraining.name}
         </h2>
         <div className="flex flex-col md:flex-row justify-between gap-8 px-4 ">
           <div className="flex-1 space-y-4 pl-10">
@@ -420,166 +457,187 @@ const ListCatechistByLevel: React.FC = () => {
     );
   };
 
+  const columns: GridColDef[] = [
+    {
+      field: "fullName",
+      headerName: "Tên",
+      flex: 1,
+      minWidth: 200,
+    },
+    {
+      field: "hierarchyLevel",
+      headerName: "Cấp bậc",
+      flex: 1,
+      minWidth: 150,
+      renderCell: (params) => params.row.level?.hierarchyLevel || "N/A",
+    },
+    {
+      field: "actions",
+      headerName: "Hành động",
+      flex: 1,
+      minWidth: 150,
+      sortable: false,
+      renderCell: (params) => (
+        <Button
+          variant="contained"
+          color={
+            isValidLevel(params.row.level?.hierarchyLevel)
+              ? "primary"
+              : "inherit"
+          }
+          disabled={!isValidLevel(params.row.level?.hierarchyLevel)}
+          onClick={() => handleAddCatechistToTraining(params.row.id)}
+          sx={{
+            textTransform: "none",
+            fontSize: "0.875rem",
+          }}
+        >
+          Thêm
+        </Button>
+      ),
+    },
+  ];
+
+  const columnsAssigned: GridColDef[] = [
+    {
+      field: "fullName",
+      headerName: "Tên",
+      flex: 1,
+      minWidth: 200,
+    },
+    {
+      field: "hierarchyLevel",
+      headerName: "Cấp bậc",
+      flex: 1,
+      minWidth: 150,
+      renderCell: (params) => params.row.level?.hierarchyLevel || "N/A",
+    },
+    {
+      field: "actions",
+      headerName: "Hành động",
+      flex: 1,
+      minWidth: 150,
+      sortable: false,
+      renderCell: (params) => (
+        <Button
+          variant="contained"
+          color={"error"}
+          onClick={() => handleRemoveCatechistFromTraining(params.row.id)}
+          sx={{
+            textTransform: "none",
+            fontSize: "0.875rem",
+          }}
+        >
+          Xóa
+        </Button>
+      ),
+    },
+  ];
+
+  const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({
+    page: 0,
+    pageSize: 8,
+  });
+  const [paginationModel2, setPaginationModel2] = useState<GridPaginationModel>(
+    {
+      page: 0,
+      pageSize: 8,
+    }
+  );
+
   return (
     <AdminTemplate>
       <div className="container mt-5">
         {renderTrainingInfo()}
-        <div className="text-center text-l font-semibold">
-          <h1>Danh sách Giáo lý viên</h1>
-        </div>
 
-        {/* Danh sách catechists chưa gán */}
-        <div className="mt-4">
-          <h4 className="text-center text-2xl font-semibold ">
-            Danh sách Giáo lý viên chưa gán
-          </h4>
-          <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
-            <table className="w-full text-sm text-left">
-              <thead className="text-sm text-white uppercase bg-[#422A14] h-12">
-                {" "}
-                {/* Giảm height */}
-                <tr className="text-center">
-                  <th scope="col" className="px-6 py-3 w-1/3">
-                    Tên
-                  </th>{" "}
-                  {/* Thêm width cố định */}
-                  <th scope="col" className="px-6 py-3 w-1/3">
-                    Cấp bậc
-                  </th>{" "}
-                  {/* Căn giữa */}
-                  <th scope="col" className="px-6 py-3 w-1/3">
-                    Action
-                  </th>{" "}
-                  {/* Căn giữa */}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {" "}
-                {/* Thêm divider giữa các hàng */}
+        {loading ? (
+          <></>
+        ) : (
+          <>
+            <div className="text-center text-l font-semibold">
+              <h2 className="text-center mb-6 text-3xl font-bold text-[#422A14]">
+                Danh sách Giáo lý viên tham gia khóa đào tạo
+              </h2>
+            </div>
+
+            {/* Danh sách catechists chưa gán */}
+            <div className="mt-4">
+              <h4 className="text-center text-xl font-semibold ">
+                Danh sách Giáo lý viên chưa gán
+              </h4>
+              <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
                 {catechists.length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan={3}
-                      className="px-6 py-3 text-center text-gray-500"
-                    >
-                      Không có Giáo lý viên nào
-                    </td>
-                  </tr>
+                  <>
+                    <p className="px-6 py-3 text-left text-gray-500">
+                      Hiện không có Giáo lý viên nào trong danh sách
+                    </p>
+                  </>
                 ) : (
-                  catechists.map((catechist) => (
-                    <tr
-                      key={catechist.id}
-                      className="bg-white hover:bg-gray-50"
-                    >
-                      <td className="px-6 py-3 font-medium text-gray-900  text-center">
-                        {catechist.fullName}
-                      </td>
-                      <td className="px-6 py-3 text-center">
-                        {" "}
-                        {/* Căn giữa */}
-                        {catechist.level?.hierarchyLevel || "N/A"}
-                      </td>
-                      <td className="px-6 py-3 text-center">
-                        {" "}
-                        {/* Căn giữa */}
-                        <button
-                          onClick={() =>
-                            handleAddCatechistToTraining(catechist.id)
-                          }
-                          disabled={
-                            !isValidLevel(catechist.level?.hierarchyLevel)
-                          }
-                          className={`px-4 py-1.5 rounded text-white font-medium text-sm min-w-[80px]
-                  ${
-                    isValidLevel(catechist.level?.hierarchyLevel)
-                      ? "bg-blue-600 hover:bg-blue-700"
-                      : "bg-gray-400 cursor-not-allowed"
-                  }`}
-                        >
-                          Thêm
-                        </button>
-                      </td>
-                    </tr>
-                  ))
+                  <>
+                    <DataGrid
+                      rows={catechists}
+                      columns={columns}
+                      getRowId={(row) => row.id}
+                      disableRowSelectionOnClick
+                      localeText={viVNGridTranslation}
+                      paginationModel={paginationModel}
+                      pageSizeOptions={[8, 10, 25, 50, 100, 250]}
+                      onPaginationModelChange={setPaginationModel}
+                    />
+                  </>
                 )}
-              </tbody>
-            </table>
-          </div>
-        </div>
+              </div>
+            </div>
 
-        {/* Danh sách catechists đã gán */}
-        <div className="mt-4">
-          <h3 className="text-center text-2xl font-semibold ">
-            Danh sách Giáo lý viên đã gán
-          </h3>
-          <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
-            <table className="w-full text-sm text-left">
-              <thead className="text-sm text-white uppercase bg-[#422A14] h-12">
-                <tr className="text-center">
-                  <th scope="col" className="px-6 py-3 w-1/3">
-                    Tên
-                  </th>
-                  <th scope="col" className="px-6 py-3 w-1/3">
-                    Cấp bậc
-                  </th>
-                  <th scope="col" className="px-6 py-3 w-1/3">
-                    Action
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
+            {/* Danh sách catechists đã gán */}
+            <div className="mt-4">
+              <h3 className="text-center text-xl font-semibold ">
+                Danh sách Giáo lý viên đã gán
+              </h3>
+              <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
                 {assignedCatechists.length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan={3}
-                      className="px-6 py-3 text-center text-gray-500"
-                    >
+                  <>
+                    <p className="px-6 py-3 text-left text-gray-500">
                       Không có Giáo lý viên nào đã gán
-                    </td>
-                  </tr>
+                    </p>
+                  </>
                 ) : (
-                  assignedCatechists.map((catechist) => (
-                    <tr
-                      key={catechist.id}
-                      className="bg-white hover:bg-gray-50"
-                    >
-                      <td className="px-6 py-3 font-medium text-gray-900">
-                        {catechist.fullName}
-                      </td>
-                      <td className="px-6 py-3 text-center">
-                        {catechist.level?.hierarchyLevel || "N/A"}
-                      </td>
-                      <td className="px-6 py-3 text-center">
-                        <button
-                          onClick={() =>
-                            handleRemoveCatechistFromTraining(catechist.id)
-                          }
-                          className="px-4 py-1.5 rounded text-white font-medium text-sm min-w-[80px]
-                 bg-red-600 hover:bg-red-700 active:bg-red-800"
-                        >
-                          Xóa
-                        </button>
-                      </td>
-                    </tr>
-                  ))
+                  <>
+                    <DataGrid
+                      rows={assignedCatechists}
+                      columns={columnsAssigned}
+                      getRowId={(row) => row.id}
+                      disableRowSelectionOnClick
+                      localeText={viVNGridTranslation}
+                      paginationModel={paginationModel2}
+                      pageSizeOptions={[8, 10, 25, 50, 100, 250]}
+                      onPaginationModelChange={setPaginationModel2}
+                    />
+                  </>
                 )}
-              </tbody>
-            </table>
-          </div>
-        </div>
+              </div>
+            </div>
 
-        <div className="text-end mt-4">
-          <Button variant="contained" color="success" onClick={handleConfirm}>
-            Xác nhận
-          </Button>
-          <button
-            type="button"
-            className="text-white bg-gray-700 hover:bg-gray-800 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center ml-5"
-            onClick={handleGoBack}
-          >
-            Quay lại
-          </button>
-        </div>
+            <div className="text-end mt-4  flex justify-end gap-x-2">
+              <Button
+                variant="contained"
+                color="success"
+                onClick={handleConfirm}
+              >
+                Xác nhận
+              </Button>
+              <Button
+                type="button"
+                color="primary"
+                className="btn btn-primary"
+                variant="outlined"
+                onClick={handleGoBack}
+              >
+                Quay lại
+              </Button>
+            </div>
+          </>
+        )}
       </div>
     </AdminTemplate>
   );

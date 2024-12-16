@@ -5,9 +5,15 @@ import catInTrainApi from "../../../api/CatechistInTraining";
 // import certificateOfCateApi from "../../../api/CertificateOfCatechist";
 import AdminTemplate from "../../../components/Templates/AdminTemplate/AdminTemplate";
 import { useNavigate } from "react-router-dom";
-import { catechistInTrainingStatusLabel } from "../../../enums/CatechistInTraining";
+import {
+  catechistInTrainingStatus,
+  catechistInTrainingStatusLabel,
+} from "../../../enums/CatechistInTraining";
 import { useLocation } from "react-router-dom";
 import sweetAlert from "../../../utils/sweetAlert";
+import { Button, MenuItem, Select } from "@mui/material";
+import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import viVNGridTranslation from "../../../locale/MUITable";
 
 interface Catechist {
   id: string;
@@ -243,7 +249,7 @@ const ListAllTrainCatechist: React.FC = () => {
     return (
       <div className="mb-6 p-6 border-4 border-[#AF8260] rounded-lg bg-white shadow-lg">
         <h2 className="text-center mb-6 text-3xl font-bold text-[#422A14]">
-          Danh sách giáo lý viên trong khóa đào tạo ({trainingData?.name})
+          Thông tin khóa đào tạo {trainingData?.name}
         </h2>
         <div className="flex flex-col md:flex-row justify-between gap-8 px-4">
           <div className="flex-1 space-y-4 pl-10">
@@ -301,94 +307,122 @@ const ListAllTrainCatechist: React.FC = () => {
     );
   };
 
+  const columns: GridColDef[] = [
+    {
+      field: "fullName",
+      headerName: "Tên giáo lý viên",
+      flex: 1,
+      minWidth: 200,
+      headerAlign: "center",
+      align: "center",
+    },
+    {
+      field: "status",
+      headerName: "Trạng thái",
+      flex: 1,
+      minWidth: 200,
+      headerAlign: "center",
+      align: "center",
+      renderCell: (params) => {
+        const catechist = params.row;
+
+        return (
+          <Select
+            fullWidth
+            value={catechist.status}
+            onChange={(e) =>
+              updateStatus(catechist.id, parseInt(e.target.value as string, 10))
+            }
+            size="small"
+            sx={{
+              backgroundColor: "white",
+              borderColor: "gray.300",
+              borderRadius: "8px",
+            }}
+            className={`
+              ${catechist.status == catechistInTrainingStatus.NotStarted ? "bg-black text-white" : ""}
+              ${catechist.status == catechistInTrainingStatus.Training ? "bg-primary text-white" : ""}
+              ${catechist.status == catechistInTrainingStatus.Completed ? "bg-success text-white" : ""}
+              ${catechist.status == catechistInTrainingStatus.Failed ? "bg-danger text-white" : ""}
+            `}
+          >
+            {Object.entries(catechistInTrainingStatusLabel).map(
+              ([key, label]) => {
+                const keyNum = parseInt(key, 10);
+                const isDisabled =
+                  // 1. Khi Training chưa bắt đầu (status = 0)
+                  (trainingStatus === 0 && keyNum === 2) ||
+                  (trainingStatus === 0 && (keyNum === 1 || keyNum === 2)) ||
+                  // 2. Khi Training đang đào tạo (status = 1)
+                  (trainingStatus === 1 &&
+                    (keyNum === 0 ||
+                      keyNum === 2 ||
+                      (catechist.status === 3 && keyNum === 1))) ||
+                  // 3. Khi Training kết thúc (status = 2)
+                  (trainingStatus === 2 &&
+                    (keyNum === 0 ||
+                      (catechist.status === 2 &&
+                        (keyNum === 1 || keyNum === 3)) ||
+                      (catechist.status === 3 &&
+                        (keyNum === 1 || keyNum === 2))));
+
+                return (
+                  <MenuItem
+                    key={key}
+                    value={keyNum}
+                    disabled={isDisabled}
+                    className={`
+              ${!isDisabled && keyNum == catechistInTrainingStatus.NotStarted ? "bg-black text-white" : ""}
+              ${!isDisabled && keyNum == catechistInTrainingStatus.Training ? "bg-primary text-white" : ""}
+              ${!isDisabled && keyNum == catechistInTrainingStatus.Completed ? "bg-success text-white" : ""}
+              ${!isDisabled && keyNum == catechistInTrainingStatus.Failed ? "bg-danger text-white" : ""}
+            `}
+                  >
+                    {label}
+                  </MenuItem>
+                );
+              }
+            )}
+          </Select>
+        );
+      },
+    },
+  ];
+
   return (
     <AdminTemplate>
       <div className="container mt-5">
         {renderTrainingInfo()}
         <div className="mt-4">
+          <h2 className="text-center mb-6 text-3xl font-bold text-[#422A14]">
+            Danh sách giáo lý viên tham gia khóa đào tạo
+          </h2>
           {catechists.length > 0 ? (
-            <table className="w-full text-sm text-left">
-              <thead className="text-sm text-white uppercase bg-[#422A14] h-12">
-                <tr className="text-center">
-                  <th scope="col" className="px-6 py-3 w-1/2">
-                    Tên giáo lý viên
-                  </th>
-                  <th scope="col" className="px-6 py-3 w-1/2">
-                    Trạng thái
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {catechists.map((catechist) => (
-                  <tr key={catechist.id} className="bg-white hover:bg-gray-50">
-                    <td className="px-6 py-3 font-medium text-gray-900 text-center">
-                      {catechist.fullName}
-                    </td>
-                    <td className="px-6 py-3 text-center">
-                      <select
-                        className="w-full p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900"
-                        value={catechist.status}
-                        onChange={(e) =>
-                          updateStatus(
-                            catechist.id,
-                            parseInt(e.target.value, 10)
-                          )
-                        }
-                      >
-                        {Object.entries(catechistInTrainingStatusLabel).map(
-                          ([key, label]) => {
-                            const keyNum = parseInt(key, 10);
-                            const isDisabled =
-                              // 1. Khi Training chưa bắt đầu (status = 0)
-                              (trainingStatus === 0 && keyNum === 2) ||
-                              (trainingStatus === 0 && (keyNum === 1 || keyNum === 2)) ||
-                              // 2. Khi Training đang đào tạo (status = 1)
-                              (trainingStatus === 1 &&
-                                (keyNum === 0 ||
-                                  keyNum === 2 ||
-                                  (catechist.status === 3 && keyNum === 1))) ||
-                              // 3. Khi Training kết thúc (status = 2)
-                              (trainingStatus === 2 &&
-                                // Disable status 0 cho tất cả các trường hợp
-                                (keyNum === 0 ||
-                                  // Nếu catechist đang ở trạng thái Hoàn thành (2)
-                                  (catechist.status === 2 &&
-                                    (keyNum === 1 || keyNum === 3)) ||
-                                  // Nếu catechist đang ở trạng thái Không đạt (3)
-                                  (catechist.status === 3 &&
-                                    (keyNum === 1 || keyNum === 2))));
-
-                            return (
-                              <option
-                                key={key}
-                                value={key}
-                                disabled={isDisabled}
-                              >
-                                {label}
-                              </option>
-                            );
-                          }
-                        )}
-                      </select>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <>
+              <DataGrid
+                rows={catechists}
+                columns={columns}
+                getRowId={(row) => row.id}
+                disableRowSelectionOnClick
+                localeText={viVNGridTranslation}
+              />
+            </>
           ) : (
             <p className="text-center text-gray-500">
-              Không có Catechist nào trong danh sách đào tạo.
+              Hiện không có giáo lý viên nào trong danh sách đào tạo
             </p>
           )}
         </div>
         <div className="text-end mt-4">
-          <button
+          <Button
             type="button"
-            className="text-white bg-gray-700 hover:bg-gray-800 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5"
+            color="primary"
+            className="btn btn-primary"
+            variant="outlined"
             onClick={handleGoBack}
           >
             Quay lại
-          </button>
+          </Button>
         </div>
       </div>
     </AdminTemplate>

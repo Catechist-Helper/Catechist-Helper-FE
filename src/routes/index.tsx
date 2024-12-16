@@ -57,32 +57,6 @@ const Loadable = (Component: any) => (props: any) => {
       count++;
       if (count == 20) {
         clearInterval(theInterval);
-
-        setInterval(() => {
-          const element3 = document.getElementsByClassName(
-            "MuiTablePagination-selectLabel"
-          );
-          if (element3 && element3.length >= 0) {
-            for (let i = 0; i <= element3.length; i++) {
-              if (element3[i]) {
-                element3[i].innerHTML = "Số hàng mỗi trang";
-              }
-            }
-          }
-
-          const element4 = document.getElementsByClassName(
-            "MuiTablePagination-displayedRows"
-          );
-          if (element4 && element4.length >= 0) {
-            for (let i = 0; i <= element4.length; i++) {
-              if (element4[i]) {
-                let text = element4[i].innerHTML;
-                text = text.replace(/\bof\b/g, "trong");
-                element4[i].innerHTML = text;
-              }
-            }
-          }
-        }, 200);
       }
     }, 100);
   }, []);

@@ -1,17 +1,18 @@
 import React, { useState, useEffect } from "react";
-import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import { DataGrid, GridColDef, GridRowSelectionModel } from "@mui/x-data-grid";
 import { Button, Paper } from "@mui/material";
 import trainApi from "../../../api/TrainingList";
 import levelApi from "../../../api/Level";
 import { AxiosResponse } from "axios";
 import { BasicResponse } from "../../../model/Response/BasicResponse";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import sweetAlert from "../../../utils/sweetAlert";
 import viVNGridTranslation from "../../../locale/MUITable";
 import {
   trainingListStatus,
   trainingListStatusLabel,
 } from "../../../enums/TrainingList";
+import useAppContext from "../../../hooks/useAppContext";
 
 const ListAllTrain: React.FC = () => {
   const [trains, setTrains] = useState<any[]>([]);
@@ -20,8 +21,10 @@ const ListAllTrain: React.FC = () => {
 
   const [catechists, setCatechists] = useState<{ [key: string]: any[] }>({});
   const [levelMap, setLevelMap] = useState<{ [key: string]: string }>({});
-  const navigate = useNavigate();
+  const [selectedIds, setSelectedIds] = useState<GridRowSelectionModel>([]);
 
+  const navigate = useNavigate();
+  const { enableLoading, disableLoading } = useAppContext();
   const fetchLevels = async () => {
     try {
       const res: AxiosResponse = await levelApi.getAllLevel();
@@ -40,6 +43,7 @@ const ListAllTrain: React.FC = () => {
 
   const fetchTrains = async () => {
     try {
+      enableLoading();
       const res: AxiosResponse = await trainApi.getAllTrain();
       const data: BasicResponse = res.data;
       if (
@@ -69,7 +73,10 @@ const ListAllTrain: React.FC = () => {
     } catch (err) {
       console.error("Không thể lấy danh sách đào tạo:", err);
     } finally {
-      setLoading(false);
+      setTimeout(() => {
+        setLoading(false);
+        disableLoading();
+      }, 900);
     }
   };
 
@@ -221,14 +228,17 @@ const ListAllTrain: React.FC = () => {
   ) => {
     const selectedTrain = trains.find((train) => train.id === trainId);
     if (selectedTrain) {
+      console.log("selectedTrain", selectedTrain);
       navigate("/admin/training-catechist", {
         state: {
           trainingInfo: {
             id: selectedTrain.id,
             name: selectedTrain.name,
+            previousLevelId: selectedTrain.previousLevel?.id,
             previousLevel:
               selectedTrain.previousLevel?.hierarchyLevel ||
               levelMap[selectedTrain.previousLevelId],
+            nextLevelId: selectedTrain.nextLevel?.id,
             nextLevel:
               selectedTrain.nextLevel?.hierarchyLevel ||
               levelMap[selectedTrain.nextLevelId],
@@ -247,32 +257,6 @@ const ListAllTrain: React.FC = () => {
       field: "name",
       headerName: "Tên",
       width: 200,
-      renderCell: (params) => {
-        return (
-          <Link
-            to={`/admin/training-list/${params.row.id}/catechists`}
-            className="py-2 px-2 text-dark hover:bg-blue-300 rounded-xl hover:text-white"
-            state={{
-              trainingInfo: {
-                id: params.row.id,
-                name: params.row.name,
-                previousLevel:
-                  params.row.previousLevel?.hierarchyLevel ||
-                  levelMap[params.row.previousLevelId],
-                nextLevel:
-                  params.row.nextLevel?.hierarchyLevel ||
-                  levelMap[params.row.nextLevelId],
-                startTime: params.row.startTime,
-                endTime: params.row.endTime,
-                description: params.row.description,
-                currentCatechistCount: catechists[params.row.id]?.length || 0,
-              },
-            }}
-          >
-            {params.row.name}
-          </Link>
-        );
-      },
     },
     { field: "description", headerName: "Mô tả", width: 200 },
     {
@@ -354,7 +338,17 @@ const ListAllTrain: React.FC = () => {
       width: 180,
       renderCell: (params) => {
         const status = params.row.trainingListStatus as trainingListStatus;
-        return trainingListStatusLabel[status] || "Không xác định";
+        return (
+          <span
+            className={`
+          ${params.row.trainingListStatus == trainingListStatus.NotStarted ? "rounded-xl py-1 px-2 bg-black text-white" : ""}
+          ${params.row.trainingListStatus == trainingListStatus.Training ? "rounded-xl py-1 px-2 bg-primary text-white" : ""}
+          ${params.row.trainingListStatus == trainingListStatus.Finished ? "rounded-xl py-1 px-2 bg-success text-white" : ""}
+          `}
+          >
+            {trainingListStatusLabel[status] || "Không xác định"}
+          </span>
+        );
       },
     },
     {
@@ -398,6 +392,45 @@ const ListAllTrain: React.FC = () => {
         DANH SÁCH ĐÀO TẠO
       </h1>
       <div className="flex justify-end mb-3 mt-3 px-3 gap-x-2">
+        {selectedIds.length === 1 ? (
+          <>
+            <Button
+              className="hover:border-purple-800 hover:bg-purple-800 hover:text-white"
+              color="secondary"
+              variant="outlined"
+              onClick={() => {
+                const row = trains.find(
+                  (item) => item.id === selectedIds[0].toString()
+                );
+                if (row) {
+                  navigate(`/admin/training-list/${row.id}/catechists`, {
+                    state: {
+                      trainingInfo: {
+                        id: row.id,
+                        name: row.name,
+                        previousLevel:
+                          row.previousLevel?.hierarchyLevel ||
+                          levelMap[row.previousLevelId],
+                        nextLevel:
+                          row.nextLevel?.hierarchyLevel ||
+                          levelMap[row.nextLevelId],
+                        startTime: row.startTime,
+                        endTime: row.endTime,
+                        description: row.description,
+                        currentCatechistCount: catechists[row.id]?.length || 0,
+                      },
+                    },
+                  });
+                }
+              }}
+            >
+              Xem chi tiết
+            </Button>
+          </>
+        ) : (
+          <></>
+        )}
+
         <Button
           className="btn btn-success"
           color="success"
@@ -417,7 +450,7 @@ const ListAllTrain: React.FC = () => {
         </Button>
       </div>
       <div className="px-2">
-        {trains.length > 0 && init ? (
+        {trains.length > 0 && init && !loading ? (
           <>
             <DataGrid
               rows={trains}
@@ -426,7 +459,12 @@ const ListAllTrain: React.FC = () => {
               paginationMode="client"
               localeText={viVNGridTranslation}
               getRowId={(row) => row.id}
-              disableRowSelectionOnClick
+              rowSelectionModel={selectedIds}
+              onRowSelectionModelChange={(newSelection) => {
+                setSelectedIds(newSelection);
+              }}
+              checkboxSelection
+              disableMultipleRowSelection
             />
           </>
         ) : (
