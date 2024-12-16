@@ -145,7 +145,16 @@ const RegistrationDetailDialog: React.FC<RegistrationDetailDialogProps> = ({
     >
       <DialogContent>
         {registration ? (
-          <Grid container spacing={15}>
+          <Grid
+            container
+            spacing={
+              registration.status === RegistrationStatus.Approved_Duyet_Don ||
+              registration.status === RegistrationStatus.Approved_Phong_Van ||
+              registration.status === RegistrationStatus.Rejected_Phong_Van
+                ? 15
+                : 3
+            }
+          >
             <Grid
               item
               xs={
@@ -250,7 +259,7 @@ const RegistrationDetailDialog: React.FC<RegistrationDetailDialogProps> = ({
                 <h3 className="text-[1.2rem] mb-3">
                   <strong>Cột mốc của ứng viên</strong>
                 </h3>
-                <ol className="ml-4 mt-2 relative text-gray-500 border-s border-gray-200 dark:border-gray-700 dark:text-gray-400">
+                <ol className="ml-4 mt-2 relative text-gray-500 border-s border-gray-200">
                   {registration.registrationProcesses
                     .sort((a: any, b: any) => {
                       return (
@@ -263,9 +272,9 @@ const RegistrationDetailDialog: React.FC<RegistrationDetailDialogProps> = ({
                         {process.status ==
                         RegistrationProcessStatus.Approved ? (
                           <>
-                            <span className="absolute flex items-center justify-center w-8 h-8 bg-green-200 rounded-full -start-4 ring-4 ring-white dark:ring-gray-900 dark:bg-green-900">
+                            <span className="absolute flex items-center justify-center w-8 h-8 bg-green-200 rounded-full -start-4 ring-4 ring-white">
                               <svg
-                                className="w-3.5 h-3.5 text-green-600 dark:text-green-600"
+                                className="w-3.5 h-3.5 text-green-600"
                                 aria-hidden="true"
                                 xmlns="http://www.w3.org/2000/svg"
                                 fill="none"
@@ -287,9 +296,9 @@ const RegistrationDetailDialog: React.FC<RegistrationDetailDialogProps> = ({
                         {process.status ==
                         RegistrationProcessStatus.Rejected ? (
                           <>
-                            <span className="absolute flex items-center justify-center w-8 h-8 bg-red-200 rounded-full -start-4 ring-4 ring-white dark:ring-gray-900 dark:bg-green-900">
+                            <span className="absolute flex items-center justify-center w-8 h-8 bg-red-200 rounded-full -start-4 ring-4 ring-white">
                               <svg
-                                className="w-3.5 h-3.5 text-red-500 dark:text-red-400"
+                                className="w-3.5 h-3.5 text-red-500"
                                 aria-hidden="true"
                                 xmlns="http://www.w3.org/2000/svg"
                                 fill="none"
@@ -310,9 +319,9 @@ const RegistrationDetailDialog: React.FC<RegistrationDetailDialogProps> = ({
                         )}
                         {process.status == RegistrationProcessStatus.Pending ? (
                           <>
-                            <span className="absolute flex items-center justify-center w-8 h-8 bg-yellow-200 rounded-full -start-4 ring-4 ring-white dark:ring-gray-900 dark:bg-green-900">
+                            <span className="absolute flex items-center justify-center w-8 h-8 bg-yellow-200 rounded-full -start-4 ring-4 ring-white">
                               <svg
-                                className="w-3.5 h-3.5 text-yellow-500 dark:text-yellow-400"
+                                className="w-3.5 h-3.5 text-yellow-500 "
                                 aria-hidden="true"
                                 xmlns="http://www.w3.org/2000/svg"
                                 fill="none"

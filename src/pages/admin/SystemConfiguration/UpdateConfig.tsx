@@ -109,7 +109,7 @@ const UpdateConfig: React.FC = () => {
           <div className="mb-5">
             <label
               htmlFor="key"
-              className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+              className="block mb-2 text-sm font-medium text-gray-900 "
             >
               Thông số
             </label>
@@ -117,7 +117,7 @@ const UpdateConfig: React.FC = () => {
               id="key"
               name="key"
               type="text"
-              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
               onChange={formik.handleChange}
               value={getSystemConfigEnumDescription(
                 formik.values.key as SystemConfigKey
@@ -128,7 +128,7 @@ const UpdateConfig: React.FC = () => {
           <div className="mb-5">
             <label
               htmlFor="value"
-              className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+              className="block mb-2 text-sm font-medium text-gray-900 "
             >
               Giá trị
             </label>
@@ -137,7 +137,7 @@ const UpdateConfig: React.FC = () => {
               <select
                 id="value"
                 name="value"
-                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
                 onChange={formik.handleChange}
                 value={formik.values.value}
               >
@@ -153,7 +153,7 @@ const UpdateConfig: React.FC = () => {
                 id="value"
                 name="value"
                 type="date"
-                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
                 onChange={formik.handleChange}
                 value={
                   formik.values.value.includes("/")
@@ -167,7 +167,7 @@ const UpdateConfig: React.FC = () => {
                 id="value"
                 name="value"
                 type="time"
-                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
                 onChange={formik.handleChange}
                 value={formik.values.value}
               />
@@ -175,7 +175,7 @@ const UpdateConfig: React.FC = () => {
               <select
                 id="value"
                 name="value"
-                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
                 onChange={formik.handleChange}
                 value={formik.values.value}
               >
@@ -194,7 +194,7 @@ const UpdateConfig: React.FC = () => {
                 name="value"
                 type="number"
                 min="0"
-                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
                 onChange={formik.handleChange}
                 value={formik.values.value}
               />
@@ -203,7 +203,7 @@ const UpdateConfig: React.FC = () => {
                 id="value"
                 name="value"
                 type="text"
-                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
                 onChange={formik.handleChange}
                 value={formik.values.value}
               />

@@ -17,7 +17,7 @@ export const CORE_INFORMATION = {
   MAIL_CONSTANT: "catechisthelper@gmail.com",
   PHONE_CONSTANT: "(+84)989560785",
   PHONE_CONSTANT_DISPLAY: "(+84) 989 560 785",
-  ADDRESS: "123 Đường Đức Tin, Thành phố Giáo Xứ, Việt Nam",
+  ADDRESS: "130 Lê Lợi, Phường Bến Nghé, Quận 1, TP. Hồ Chí Minh",
   PARISH_NAME: "Giáo Xứ Catechist Helper",
   SERVICE_HOURS: "Chủ Nhật: 8:00 - 12:00, Các ngày trong tuần: 18:00 - 20:00",
 };

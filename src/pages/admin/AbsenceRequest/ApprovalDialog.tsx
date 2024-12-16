@@ -23,6 +23,7 @@ import { AssignReplacementRequest } from "../../../model/Request/AbsenceRequest"
 import sweetAlert from "../../../utils/sweetAlert";
 import { CatechistInSlotTypeEnumNumber } from "../../../enums/CatechistInSlot";
 import { GetAbsenceItemResponse } from "../../../model/Response/AbsenceRequest";
+import useAppContext from "../../../hooks/useAppContext";
 
 interface ApprovalDialogProps {
   open: boolean;
@@ -65,7 +66,7 @@ const ApprovalDialog = ({
 
     fetchReplacementCatechists();
   }, [absence]);
-
+  const { enableLoading, disableLoading } = useAppContext();
   // Handle phê duyệt đơn nghỉ phép
   const handleApproval = async () => {
     try {
@@ -94,7 +95,7 @@ const ApprovalDialog = ({
 
           return;
         }
-
+        enableLoading();
         await absenceApi.processAbsence({
           requestId: absence.id,
           approverId: approverId,
@@ -110,7 +111,14 @@ const ApprovalDialog = ({
           replacementCatechistId: selectedReplacementId,
           type: CatechistInSlotTypeEnumNumber.Substitute,
         };
-        await absenceApi.assignReplacement(assignRequest);
+
+        console.log("aaa", {
+          requestId: absence.id,
+          replacementCatechistId: selectedReplacementId,
+          type: CatechistInSlotTypeEnumNumber.Substitute,
+        });
+        const res = await absenceApi.assignReplacement(assignRequest);
+        console.log("res", res);
       }
 
       // Đóng dialog và thực hiện các hành động cần thiết sau khi phê duyệt và chỉ định người thay thế
@@ -128,6 +136,8 @@ const ApprovalDialog = ({
     } catch (error) {
       console.error("Error processing absence:", error);
       sweetAlert.alertFailed("Có lỗi xảy ra khi phê duyệt", "", 1200, 25);
+    } finally {
+      disableLoading();
     }
   };
 

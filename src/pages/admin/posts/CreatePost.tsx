@@ -113,7 +113,7 @@ const CreatePost: React.FC = () => {
           <div className="mb-5">
             <label
               htmlFor="name"
-              className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+              className="block mb-2 text-sm font-medium text-gray-900 "
             >
               Tiêu đề
             </label>
@@ -122,14 +122,14 @@ const CreatePost: React.FC = () => {
               name="title"
               value={formik.values.title}
               onChange={formik.handleChange}
-              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
             />
           </div>
 
           <div className="mb-5">
             <label
               htmlFor="content"
-              className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+              className="block mb-2 text-sm font-medium text-gray-900 "
             >
               Nội dung
             </label>
@@ -149,7 +149,7 @@ const CreatePost: React.FC = () => {
               name="module"
               value={formik.values.module}
               onChange={formik.handleChange}
-              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
             >
               <option value="" disabled>
                 Chọn trạng thái
@@ -165,7 +165,7 @@ const CreatePost: React.FC = () => {
           <div className="mb-5">
             <label
               htmlFor="name"
-              className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+              className="block mb-2 text-sm font-medium text-gray-900 "
             >
               Danh mục bài viết
             </label>
@@ -173,7 +173,7 @@ const CreatePost: React.FC = () => {
               name="postCategoryId"
               value={formik.values.postCategoryId}
               onChange={formik.handleChange}
-              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
             >
               <option value="" disabled>
                 Chọn danh mục

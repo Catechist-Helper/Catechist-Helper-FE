@@ -136,7 +136,10 @@ export default function ClassComponent() {
         await fetchPastoralYears();
         if (location.state) {
           if (location.state.gradeId) {
-            const { majorId, gradeId } = location.state;
+            const { majorId, gradeId, defaultYear } = location.state;
+            if (defaultYear && defaultYear != "") {
+              setSelectedPastoralYear(defaultYear);
+            }
             setSelectedMajor(majorId);
             await fetchGrades(majorId, gradeId);
           } else if (location.state.classIds) {

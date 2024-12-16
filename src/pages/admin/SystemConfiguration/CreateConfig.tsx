@@ -46,7 +46,7 @@ const CreateConfig: React.FC = () => {
           <div className="mb-5">
             <label
               htmlFor="key"
-              className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+              className="block mb-2 text-sm font-medium text-gray-900 "
             >
               Key
             </label>
@@ -54,7 +54,7 @@ const CreateConfig: React.FC = () => {
               id="key"
               name="key"
               type="text"
-              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
               onChange={formik.handleChange}
               value={formik.values.key}
             />
@@ -62,7 +62,7 @@ const CreateConfig: React.FC = () => {
           <div className="mb-5">
             <label
               htmlFor="value"
-              className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+              className="block mb-2 text-sm font-medium text-gray-900 "
             >
               Value
             </label>
@@ -70,7 +70,7 @@ const CreateConfig: React.FC = () => {
               id="value"
               name="value"
               type="text"
-              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
               onChange={formik.handleChange}
               value={formik.values.value}
             />

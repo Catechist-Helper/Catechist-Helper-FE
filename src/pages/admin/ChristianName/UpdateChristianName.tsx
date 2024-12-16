@@ -77,7 +77,7 @@ const UpdateChristianName: React.FC = () => {
           <div className="mb-5">
             <label
               htmlFor="name"
-              className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+              className="block mb-2 text-sm font-medium text-gray-900 "
             >
               Tên
             </label>
@@ -121,7 +121,7 @@ const UpdateChristianName: React.FC = () => {
           <div className="mb-5">
             <label
               htmlFor="holyDay"
-              className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+              className="block mb-2 text-sm font-medium text-gray-900 "
             >
               Ngày thánh
             </label>

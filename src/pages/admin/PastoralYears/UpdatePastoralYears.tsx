@@ -75,7 +75,7 @@ const UpdatePastoralYear: React.FC = () => {
           <div className="mb-5">
             <label
               htmlFor="name"
-              className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+              className="block mb-2 text-sm font-medium text-gray-900 "
             >
               Niên khóa
             </label>
@@ -92,7 +92,7 @@ const UpdatePastoralYear: React.FC = () => {
           <div className="mb-5">
             <label
               htmlFor="note"
-              className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+              className="block mb-2 text-sm font-medium text-gray-900 "
             >
               Ghi chú
             </label>

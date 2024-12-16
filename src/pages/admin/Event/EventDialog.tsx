@@ -115,15 +115,15 @@ const EventDialog: React.FC<EventDialogProps> = ({
 
         sweetAlert.alertSuccess("Cập nhật sự kiện thành công!", "", 3000, 25);
       } else {
-        const newEvent = await eventApi.createEvent(dataToSend);
+        await eventApi.createEvent(dataToSend);
 
-        await budgetTransactionApi.createBudgetTransaction({
-          eventId: newEvent.data.data.id,
-          fromBudget: 0,
-          toBudget: values.current_budget,
-          note: "Ngân sách khởi tạo",
-          transactionImages: [],
-        });
+        // await budgetTransactionApi.createBudgetTransaction({
+        //   eventId: newEvent.data.data.id,
+        //   fromBudget: 0,
+        //   toBudget: values.current_budget,
+        //   note: "Ngân sách khởi tạo",
+        //   transactionImages: [],
+        // });
         sweetAlert.alertSuccess("Thêm sự kiện mới thành công!", "", 3000, 25);
       }
 
@@ -295,36 +295,40 @@ const EventDialog: React.FC<EventDialogProps> = ({
               />
 
               {/* Ngân sách */}
-              <TextField
-                fullWidth
-                label={
-                  <span>
-                    Ngân sách hiện tại <span style={{ color: "red" }}>*</span>
-                  </span>
-                }
-                name="current_budget"
-                // type="number"
-                value={formatCurrencyVND(values.current_budget)}
-                onChange={(e) => {
-                  const numericValue = Number(
-                    e.target.value.replace(/[^\d]/g, "")
-                  );
-                  setFieldValue("current_budget", numericValue); // Chỉ giữ lại số
-                }}
-                margin="normal"
-                error={touched.current_budget && !!errors.current_budget}
-                helperText={touched.current_budget && errors.current_budget}
-                InputProps={{
-                  startAdornment: <span style={{ marginRight: "5px" }}>₫</span>,
-                }}
-                disabled={
-                  values.eventStatus != EventStatus.Not_Started &&
-                  values.eventStatus != EventStatus.In_Progress
-                }
-              />
 
               {event ? (
                 <>
+                  {" "}
+                  <TextField
+                    fullWidth
+                    label={
+                      <span>
+                        Ngân sách hiện tại{" "}
+                        <span style={{ color: "red" }}>*</span>
+                      </span>
+                    }
+                    name="current_budget"
+                    // type="number"
+                    value={formatCurrencyVND(values.current_budget)}
+                    onChange={(e) => {
+                      const numericValue = Number(
+                        e.target.value.replace(/[^\d]/g, "")
+                      );
+                      setFieldValue("current_budget", numericValue); // Chỉ giữ lại số
+                    }}
+                    margin="normal"
+                    error={touched.current_budget && !!errors.current_budget}
+                    helperText={touched.current_budget && errors.current_budget}
+                    InputProps={{
+                      startAdornment: (
+                        <span style={{ marginRight: "5px" }}>₫</span>
+                      ),
+                    }}
+                    disabled={
+                      values.eventStatus != EventStatus.Not_Started &&
+                      values.eventStatus != EventStatus.In_Progress
+                    }
+                  />
                   <FormControl fullWidth margin="normal">
                     <InputLabel>
                       Trạng thái sự kiện <span style={{ color: "red" }}>*</span>

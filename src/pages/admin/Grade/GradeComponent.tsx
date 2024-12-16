@@ -245,20 +245,20 @@ export default function GradeComponent() {
         );
       },
     },
-    {
-      field: "viewClasses",
-      headerName: "Xem Lớp",
-      width: 120,
-      renderCell: (params) => (
-        <Button
-          variant="contained"
-          color="info"
-          onClick={() => handleViewClasses(params.row.major.id, params.row.id)}
-        >
-          Xem
-        </Button>
-      ),
-    },
+    // {
+    //   field: "viewClasses",
+    //   headerName: "Xem Lớp",
+    //   width: 120,
+    //   renderCell: (params) => (
+    //     <Button
+    //       variant="contained"
+    //       color="info"
+    //       onClick={() => handleViewClasses(params.row.major.id, params.row.id)}
+    //     >
+    //       Xem
+    //     </Button>
+    //   ),
+    // },
   ];
 
   // Handle thêm giáo lý viên cho khối
@@ -295,26 +295,37 @@ export default function GradeComponent() {
   };
 
   // Handle xem khối
-  const handleViewClasses = (majorId: string, gradeId: string) => {
-    if (!majorId || majorId == "" || !gradeId || gradeId == "") {
-      sweetAlert.alertFailed(
-        "Vui lòng chọn một khối để xem lớp!",
-        "",
-        1000,
-        22
-      );
-      return;
-    }
-    if (majorId) {
-      // Điều hướng tới trang Grade với majorId và pastoralYearId
-      navigate(`${PATH_ADMIN.class_management}`, {
-        state: {
-          majorId: majorId,
-          gradeId: gradeId,
-        },
-      });
-    }
-  };
+  // const handleViewClasses = async (majorId: string, gradeId: string) => {
+  //   if (!majorId || majorId == "" || !gradeId || gradeId == "") {
+  //     sweetAlert.alertFailed(
+  //       "Vui lòng chọn một khối để xem lớp!",
+  //       "",
+  //       1000,
+  //       22
+  //     );
+  //     return;
+  //   }
+  //   if (majorId) {
+  //     // Điều hướng tới trang Grade với majorId và pastoralYearId
+  //     const { data } = await pastoralYearsApi.getAllPastoralYears();
+  //     // Sắp xếp theo niên khóa gần nhất tới xa nhất
+  //     const sortedPastoralYears = data.data.items.sort((a: any, b: any) => {
+  //       const yearA = parseInt(a.name.split("-")[0]);
+  //       const yearB = parseInt(b.name.split("-")[0]);
+  //       return yearB - yearA;
+  //     });
+  //     navigate(`${PATH_ADMIN.class_management}`, {
+  //       state: {
+  //         majorId: majorId,
+  //         gradeId: gradeId,
+  //         defaultYear:
+  //           sortedPastoralYears && sortedPastoralYears[0]
+  //             ? sortedPastoralYears[0].id
+  //             : "",
+  //       },
+  //     });
+  //   }
+  // };
 
   // Handle selection change in DataGrid
   const handleSelectionChange = (newSelectionModel: GridRowSelectionModel) => {

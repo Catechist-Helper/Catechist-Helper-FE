@@ -50,7 +50,7 @@ const CreatePostCategory: React.FC = () => {
           <div className="mb-5">
             <label
               htmlFor="name"
-              className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+              className="block mb-2 text-sm font-medium text-gray-900 "
             >
               Tên
             </label>
@@ -58,7 +58,7 @@ const CreatePostCategory: React.FC = () => {
               id="name"
               name="name"
               type="text"
-              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
               onChange={formik.handleChange}
               value={formik.values.name}
             />
@@ -94,7 +94,7 @@ const CreatePostCategory: React.FC = () => {
           <div className="mb-5">
             <label
               htmlFor="holyDay"
-              className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+              className="block mb-2 text-sm font-medium text-gray-900 "
             >
               Ngày thánh
             </label>
@@ -102,7 +102,7 @@ const CreatePostCategory: React.FC = () => {
               id="holyDay"
               name="holyDay"
               type="datetime-local"
-              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
               onChange={formik.handleChange}
               value={formik.values.holyDay}
             />

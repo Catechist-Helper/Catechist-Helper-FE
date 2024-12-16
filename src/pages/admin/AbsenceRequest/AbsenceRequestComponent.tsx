@@ -254,7 +254,6 @@ const AbsencePage = () => {
           params.row.status == AbsenceRequestStatus.Approved &&
           params.row.catechistReplace
         ) {
-          console.log("catechistReplace", params.row.catechistReplace);
           return (
             <>
               {params.row.catechistReplace.fullName}{" "}

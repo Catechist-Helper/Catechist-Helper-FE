@@ -108,7 +108,6 @@ const ListAllTrain: React.FC = () => {
   };
 
   const handleDeleteTrainClick = async (id: string) => {
-    // Lấy thông tin khóa đào tạo cần xóa
     const trainingToDelete = trains.find((train) => train.id === id);
 
     if (!trainingToDelete) {
@@ -121,27 +120,29 @@ const ListAllTrain: React.FC = () => {
       return;
     }
 
-    // Kiểm tra ngày đào tạo
-    const trainingDate = new Date(trainingToDelete.startDate); // Giả sử có trường startDate
-    const currentDate = new Date();
-
-    if (trainingDate <= currentDate) {
+    // Kiểm tra status và số lượng người tham gia
+    const trainingCatechists = catechists[id] || [];
+    if (
+      trainingToDelete.trainingListStatus !== trainingListStatus.NotStarted &&
+      trainingCatechists.length > 0
+    ) {
       sweetAlert.alertWarning(
         "Không thể xóa!",
-        "Không thể xóa khóa đào tạo đã bắt đầu hoặc đã kết thúc.",
+        "Không thể xóa khóa đào tạo đã có Giáo lý viên tham gia.",
         2000,
         false
       );
       return;
     }
 
-    // Kiểm tra số lượng Catechist trong training
-    const trainingCatechists = catechists[id] || [];
+    // Kiểm tra ngày đào tạo
+    const trainingDate = new Date(trainingToDelete.startDate);
+    const currentDate = new Date();
 
-    if (trainingCatechists.length > 0) {
+    if (trainingDate <= currentDate) {
       sweetAlert.alertWarning(
         "Không thể xóa!",
-        "Không thể xóa khóa đào tạo đã có Giáo lý viên tham gia.",
+        "Không thể xóa khóa đào tạo đã bắt đầu hoặc đã kết thúc.",
         2000,
         false
       );

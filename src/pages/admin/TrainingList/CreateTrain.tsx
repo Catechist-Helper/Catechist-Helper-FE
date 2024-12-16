@@ -165,7 +165,7 @@ const CreateTrain: React.FC = () => {
           <div className="mb-5">
             <label
               htmlFor="name"
-              className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+              className="block mb-2 text-sm font-medium text-gray-900 "
             >
               Tên
             </label>
@@ -173,7 +173,7 @@ const CreateTrain: React.FC = () => {
               id="name"
               name="name"
               type="text"
-              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
               onChange={formik.handleChange}
               value={formik.values.name}
             />
@@ -181,7 +181,7 @@ const CreateTrain: React.FC = () => {
           <div className="mb-5">
             <label
               htmlFor="description"
-              className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+              className="block mb-2 text-sm font-medium text-gray-900 "
             >
               Mô tả
             </label>
@@ -189,46 +189,23 @@ const CreateTrain: React.FC = () => {
               id="description"
               name="description"
               type="text"
-              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
               onChange={formik.handleChange}
               value={formik.values.description}
             />
-          </div>
-          <div className="mb-5">
-            <label
-              htmlFor="certificateId"
-              className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-            >
-              Chứng chỉ
-            </label>
-            <select
-              id="certificateId"
-              name="certificateId"
-              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              onChange={formik.handleChange}
-              value={formik.values.certificateId}
-            >
-              <option value="">Chọn chứng chỉ</option>
-              {certificates.map((certificate: any) => (
-                <option key={certificate.id} value={certificate.id}>
-                  {certificate.name} - {levelMap[certificate.levelId]}{" "}
-                  {/* Hiển thị tên cấp */}
-                </option>
-              ))}
-            </select>
           </div>
 
           <div className="mb-5">
             <label
               htmlFor="previousLevelId"
-              className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+              className="block mb-2 text-sm font-medium text-gray-900 "
             >
               Bậc cấp trước
             </label>
             <select
               id="previousLevelId"
               name="previousLevelId"
-              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
               onChange={handlePreviousLevelChange}
               value={formik.values.previousLevelId}
             >
@@ -245,7 +222,7 @@ const CreateTrain: React.FC = () => {
           <div className="mb-5">
             <label
               htmlFor="nextLevelId"
-              className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+              className="block mb-2 text-sm font-medium text-gray-900 "
             >
               Bậc cấp tiếp theo
             </label>
@@ -253,7 +230,7 @@ const CreateTrain: React.FC = () => {
               id="nextLevelId"
               name="nextLevelId"
               type="text"
-              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
               value={
                 formik.values.previousLevelId
                   ? levels.find(
@@ -270,8 +247,32 @@ const CreateTrain: React.FC = () => {
               readOnly
             />
           </div>
+
           <div className="mb-5">
-            <h2 className="text-xl text-gray-900 dark:text-white font-bold mb-2">
+            <label
+              htmlFor="certificateId"
+              className="block mb-2 text-sm font-medium text-gray-900 "
+            >
+              Chứng chỉ
+            </label>
+            <select
+              id="certificateId"
+              name="certificateId"
+              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
+              onChange={formik.handleChange}
+              value={formik.values.certificateId}
+            >
+              <option value="">Chọn chứng chỉ</option>
+              {certificates.map((certificate: any) => (
+                <option key={certificate.id} value={certificate.id}>
+                  {certificate.name} - {levelMap[certificate.levelId]}{" "}
+                  {/* Hiển thị tên cấp */}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="mb-5">
+            <h2 className="text-xl text-gray-900  font-bold mb-2">
               Thời gian bắt đầu
             </h2>
             <div className="flex items-center space-x-4 rtl:space-x-reverse mb-3">
@@ -280,11 +281,11 @@ const CreateTrain: React.FC = () => {
                   id="startTime"
                   name="startTime"
                   type="datetime-local"
-                  className={`text-gray-900 dark:text-white text-base font-medium block w-full border ${
+                  className={`text-gray-900  text-base font-medium block w-full border ${
                     formik.errors.startTime
                       ? "border-red-500"
                       : "border-gray-300"
-                  } rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-blue-500 dark:focus:border-blue-500`}
+                  } rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5  `}
                   onChange={formik.handleChange}
                   value={formik.values.startTime}
                 />
@@ -298,7 +299,7 @@ const CreateTrain: React.FC = () => {
           </div>
 
           <div className="mb-5">
-            <h2 className="text-xl text-gray-900 dark:text-white font-bold mb-2">
+            <h2 className="text-xl text-gray-900  font-bold mb-2">
               Thời gian kết thúc
             </h2>
             <div className="flex items-center space-x-4 rtl:space-x-reverse mb-3">
@@ -307,9 +308,9 @@ const CreateTrain: React.FC = () => {
                   id="endTime"
                   name="endTime"
                   type="datetime-local"
-                  className={`text-gray-900 dark:text-white text-base font-medium block w-full border ${
+                  className={`text-gray-900  text-base font-medium block w-full border ${
                     formik.errors.endTime ? "border-red-500" : "border-gray-300"
-                  } rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-blue-500 dark:focus:border-blue-500`}
+                  } rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5  `}
                   onChange={formik.handleChange}
                   value={formik.values.endTime}
                 />

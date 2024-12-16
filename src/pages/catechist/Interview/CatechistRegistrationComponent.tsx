@@ -361,7 +361,6 @@ export default function CatechistRegistrationsTable() {
         (item) => item.accountId == userLogin.id
       )?.evaluation;
       if (note && note != "") {
-        console.log("hehe", note);
         setInterviewNote(note);
       }
     }
@@ -427,14 +426,13 @@ export default function CatechistRegistrationsTable() {
           recruiterAccountId: userLogin.id,
           evaluation: interviewNote,
         });
-        const res = await interviewApi.evaluateInterview(
+        await interviewApi.evaluateInterview(
           selectedRegistrationOfModal.interview.id,
           {
             recruiterAccountId: userLogin.id,
             evaluation: interviewNote,
           }
         );
-        console.log("resssssss", res);
 
         handleCloseApprovalModal();
         setSelectedRegistrations([]);

@@ -363,16 +363,7 @@ export default function EventsComponent() {
                 variant="contained"
                 color="primary"
                 onClick={() => {
-                  if (params.row.eventStatus == EventStatus.Not_Started) {
-                    sweetAlert.alertWarning(
-                      "Sự kiện này chưa bắt đầu",
-                      "",
-                      3000,
-                      25
-                    );
-                  } else {
-                    handleEventManagement(params.row.id, params.row.userRole);
-                  }
+                  handleEventManagement(params.row.id, params.row.userRole);
                 }}
               >
                 Quản lý sự kiện
