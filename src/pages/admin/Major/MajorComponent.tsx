@@ -14,6 +14,7 @@ import viVNGridTranslation from "../../../locale/MUITable";
 import sweetAlert from "../../../utils/sweetAlert";
 import { useNavigate } from "react-router-dom"; // Import useNavigate từ react-router-dom
 import { PATH_ADMIN } from "../../../routes/paths";
+import AddLevelDialog from "./AddLevelDialog";
 
 export default function MajorComponent() {
   const navigate = useNavigate();
@@ -291,6 +292,9 @@ export default function MajorComponent() {
     }
   };
 
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedRow, setSelectedRow] = useState<any>(null);
+
   return (
     <Paper
       sx={{
@@ -308,17 +312,34 @@ export default function MajorComponent() {
           <div className="flex items-center"></div>
           <div className="flex gap-x-[5px]">
             {selectedRows.length == 1 ? (
-              <Button
-                onClick={() => {
-                  handleDeleteMajor();
-                }}
-                variant="outlined"
-                color="error"
-                className="btn btn-danger"
-                style={{ marginBottom: "16px" }}
-              >
-                Xóa Ngành
-              </Button>
+              <>
+                <Button
+                  onClick={() => {
+                    const selected = rows.find(
+                      (row) => row.id === selectedRows[0]?.toString()
+                    );
+                    setSelectedRow(selected);
+                    setIsDialogOpen(true);
+                  }}
+                  variant="outlined"
+                  color="success"
+                  className="btn btn-success"
+                  style={{ marginBottom: "16px" }}
+                >
+                  Thêm cấp bậc
+                </Button>
+                <Button
+                  onClick={() => {
+                    handleDeleteMajor();
+                  }}
+                  variant="outlined"
+                  color="error"
+                  className="btn btn-danger"
+                  style={{ marginBottom: "16px" }}
+                >
+                  Xóa Ngành
+                </Button>
+              </>
             ) : (
               <></>
             )}
@@ -428,6 +449,15 @@ export default function MajorComponent() {
           </div>
         </div>
       </Dialog>
+
+      {selectedRow && (
+        <AddLevelDialog
+          open={isDialogOpen}
+          onClose={() => setIsDialogOpen(false)}
+          selectedRow={selectedRow}
+          refreshData={handleRefresh}
+        />
+      )}
     </Paper>
   );
 }

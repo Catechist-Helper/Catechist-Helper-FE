@@ -6,6 +6,9 @@ import sweetAlert from "../../../utils/sweetAlert";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { Button, Paper } from "@mui/material";
 import viVNGridTranslation from "../../../locale/MUITable";
+import { PATH_ADMIN } from "../../../routes/paths";
+import ImageDialog from "../../../components/Molecules/ImageDialog";
+import { CertificateResponse } from "../../../model/Response/Catechist";
 
 const ListAllLevel: React.FC = () => {
   const [levels, setLevels] = useState([]);
@@ -26,6 +29,20 @@ const ListAllLevel: React.FC = () => {
             (a: any, b: any) => a.hierarchyLevel - b.hierarchyLevel
           )
         );
+
+        const updatedRows: any = await Promise.all(
+          res.data.items.map(async (item: any) => {
+            let certificates: any = null;
+            const res = await levelApi.certificatesByLevelId(item.id);
+            certificates = res.data.data.items;
+            return {
+              ...item,
+              certificates: certificates,
+            };
+          })
+        );
+
+        setLevels(updatedRows);
       } else {
         console.error("No levels found.");
       }
@@ -70,10 +87,80 @@ const ListAllLevel: React.FC = () => {
     }
   };
 
+  const [dialogCertificateImageOpen, setDialogCertificateImageOpen] =
+    useState(false);
+  const [dialogData, setDialogData] = useState({
+    images: [],
+    title: "",
+  });
+
+  const handleOpenDialogCertificateImage = (
+    certificates: CertificateResponse[],
+    levelName: string
+  ) => {
+    const images: any = certificates
+      .filter((cert) => cert.image)
+      .map((cert) => ({
+        url: cert.image,
+      }));
+
+    setDialogData({
+      images,
+      title: `Các chứng chỉ của cấp bậc ${levelName}`,
+    });
+    setDialogCertificateImageOpen(true);
+  };
+
+  const handleCloseDialogCertificateImage = () =>
+    setDialogCertificateImageOpen(false);
+
+  console.log(levels);
+
   const columns: GridColDef[] = [
     { field: "name", headerName: "Tên", width: 200 },
     { field: "description", headerName: "Mô tả", width: 300 },
     { field: "hierarchyLevel", headerName: "Cấp độ giáo lý", width: 150 },
+    {
+      field: "certificates",
+      headerName: "Chứng chỉ",
+      width: 200,
+      renderCell: (params) => {
+        return (
+          <>
+            {params.row.certificates && params.row.certificates.length > 0 ? (
+              <>
+                <span>{params.row.certificates.length}</span>
+                <Button
+                  color="secondary"
+                  onClick={() => {
+                    handleOpenDialogCertificateImage(
+                      params.row.certificates,
+                      params.row.name
+                    );
+                  }}
+                >
+                  Xem
+                </Button>
+              </>
+            ) : (
+              <>0</>
+            )}
+            <Button
+              color="primary"
+              onClick={() => {
+                navigate(`${PATH_ADMIN.create_certificates}`, {
+                  state: {
+                    levelId: params.row.id,
+                  },
+                });
+              }}
+            >
+              Thêm
+            </Button>
+          </>
+        );
+      },
+    },
     {
       field: "actions",
       headerName: "Hành động",
@@ -139,6 +226,19 @@ const ListAllLevel: React.FC = () => {
           }}
         />
       </div>
+      {dialogCertificateImageOpen ? (
+        <>
+          <ImageDialog
+            images={dialogData.images}
+            title={dialogData.title}
+            open={dialogCertificateImageOpen}
+            onClose={handleCloseDialogCertificateImage}
+            imageTitle="Tên chứng chỉ"
+          />
+        </>
+      ) : (
+        <></>
+      )}
     </Paper>
   );
 };

@@ -4,9 +4,8 @@ import { message } from "antd";
 import certificatesApi from "../../../api/Certificate";
 import levelApi from "../../../api/Level";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { Link, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import AdminTemplate from "../../../components/Templates/AdminTemplate/AdminTemplate";
-import { PATH_ADMIN } from "../../../routes/paths";
 import { AxiosError } from "axios";
 import { AxiosResponse } from "axios";
 import { BasicResponse } from "../../../model/Response/BasicResponse";
@@ -35,6 +34,7 @@ const CreateCertificate: React.FC = () => {
     levelId: "",
   });
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const location = useLocation();
 
   // Hàm tạo hình ảnh chứng chỉ và lưu vào `image` trong `certificateData`
   const generateCertificateImage = () => {
@@ -117,6 +117,15 @@ const CreateCertificate: React.FC = () => {
       }
     }
   };
+
+  useEffect(() => {
+    if (location.state) {
+      const { levelId } = location.state;
+      if (levelId && levelId != "") {
+        formik.setFieldValue("levelId", levelId);
+      }
+    }
+  }, [location.state]);
 
   useEffect(() => {
     generateCertificateImage();
@@ -210,7 +219,7 @@ const CreateCertificate: React.FC = () => {
         );
 
         resetForm();
-        navigate(PATH_ADMIN.rooms);
+        navigate(-1);
       } catch (error) {
         const axiosError = error as AxiosError<{ errors: any }>;
         if (axiosError.response?.data?.errors) {
@@ -338,12 +347,15 @@ const CreateCertificate: React.FC = () => {
               >
                 {isSubmitting ? "Đang tạo..." : "Tạo chứng chỉ"}
               </button>
-              <Link
-                to={PATH_ADMIN.training_lists}
+              <button
+                onClick={() => {
+                  navigate(-1);
+                }}
+                type="button"
                 className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 ml-5"
               >
                 Quay lại
-              </Link>
+              </button>
             </div>
           </form>
 
