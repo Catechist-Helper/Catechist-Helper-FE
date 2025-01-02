@@ -198,21 +198,6 @@ const EventProcessManagement: React.FC = () => {
   };
 
   const columns: GridColDef[] = [
-    {
-      field: "no",
-      headerName: "STT",
-      width: 10,
-      renderCell: (params) => {
-        {
-          const rowIndex = params.api.getRowIndexRelativeToVisibleRows(
-            params.row.id
-          );
-          return rowIndex != null && rowIndex != undefined && rowIndex >= 0
-            ? rowIndex + 1
-            : 0;
-        }
-      },
-    },
     { field: "name", headerName: "Tên hoạt động", width: 180 },
     {
       field: "description",
