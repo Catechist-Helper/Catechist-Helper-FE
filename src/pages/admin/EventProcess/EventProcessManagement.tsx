@@ -6,6 +6,8 @@ import {
   CircularProgress,
   Box,
   Paper,
+  MenuItem,
+  Select as MuiSelect,
 } from "@mui/material";
 import { DataGrid, GridColDef, GridRowsProp } from "@mui/x-data-grid";
 import eventApi from "../../../api/Event";
@@ -20,6 +22,10 @@ import {
   EventProcessStringStatus,
 } from "../../../enums/Event";
 import EventProcessDialog from "../../catechist/EventProcess/EventProcessDialog";
+import sweetAlert from "../../../utils/sweetAlert";
+import processApi from "../../../api/EventProcess";
+import Swal from "sweetalert2";
+import useAppContext from "../../../hooks/useAppContext";
 
 const EventProcessManagement: React.FC = () => {
   const location = useLocation();
@@ -35,20 +41,61 @@ const EventProcessManagement: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [summaryFees, setSummaryFees] = useState<number>(0);
   const [actualSummaryFees, setActualSummaryFees] = useState<number>(0);
+  const [currentStatusFilter, setCurrentStatusFilter] = useState<string>("");
 
-  const fetchEventProcesses = async () => {
+  const fetchEventProcesses = async (init?: boolean) => {
     try {
       const response = await eventApi.getEventProcesses(eventId);
-      setEventProcesses(
-        response.data.data.items.sort(
-          (a: any, b: any) =>
-            new Date(a.startTime).getTime() - new Date(b.startTime).getTime()
-        )
-      );
+      if (init) {
+        if (
+          response.data.data.items.findIndex(
+            (item) => item.status == EventProcessStatus.Wait_Approval
+          ) >= 0
+        ) {
+          setCurrentStatusFilter("Chờ phê duyệt");
+          sweetAlert.alertInfo(
+            "Hiện tại có hoạt động cần được phê duyệt",
+            "",
+            7000,
+            30
+          );
+        } else {
+          setCurrentStatusFilter("Đã phê duyệt");
+        }
+        return;
+      } else {
+        setEventProcesses(
+          response.data.data.items
+            .filter((item) => {
+              if (currentStatusFilter == "Chờ phê duyệt") {
+                return item.status == EventProcessStatus.Wait_Approval;
+              }
+              if (currentStatusFilter == "Đã phê duyệt") {
+                return (
+                  item.status != EventProcessStatus.Wait_Approval &&
+                  item.status != EventProcessStatus.Not_Approval
+                );
+              }
+              if (currentStatusFilter == "Không được duyệt") {
+                return item.status == EventProcessStatus.Not_Approval;
+              }
+              return true;
+            })
+            .sort(
+              (a: any, b: any) =>
+                new Date(a.startTime).getTime() -
+                new Date(b.startTime).getTime()
+            )
+        );
+      }
       let sumFees = 0;
       let actualSumFees = 0;
       response.data.data.items.forEach((item) => {
-        if (item.status != EventProcessStatus.Cancelled) {
+        if (
+          item.status != EventProcessStatus.Cancelled &&
+          item.status != EventProcessStatus.Wait_Approval &&
+          item.status != EventProcessStatus.Not_Approval
+        ) {
           if (item.fee) {
             sumFees += item.fee;
           }
@@ -57,6 +104,7 @@ const EventProcessManagement: React.FC = () => {
           }
         }
       });
+
       setSummaryFees(sumFees);
       setActualSummaryFees(actualSumFees);
     } catch (error) {
@@ -65,6 +113,12 @@ const EventProcessManagement: React.FC = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (currentStatusFilter != "") {
+      fetchEventProcesses();
+    }
+  }, [currentStatusFilter]);
 
   const fetchSelectedEvent = async () => {
     try {
@@ -79,7 +133,7 @@ const EventProcessManagement: React.FC = () => {
 
   useEffect(() => {
     fetchSelectedEvent();
-    fetchEventProcesses();
+    fetchEventProcesses(true);
   }, [eventId]);
 
   const [openDialog, setOpenDialog] = useState<boolean>(false);
@@ -94,8 +148,32 @@ const EventProcessManagement: React.FC = () => {
     setSelectedProcess(null);
   };
   const columns: GridColDef[] = [
+    {
+      field: "no",
+      headerName: "STT",
+      width: 10,
+      renderCell: (params) => {
+        {
+          const rowIndex = params.api.getRowIndexRelativeToVisibleRows(
+            params.row.id
+          );
+          return rowIndex != null && rowIndex != undefined && rowIndex >= 0
+            ? rowIndex + 1
+            : 0;
+        }
+      },
+    },
     { field: "name", headerName: "Tên hoạt động", width: 180 },
-    { field: "description", headerName: "Mô tả", width: 200 },
+    {
+      field: "description",
+      headerName: "Mô tả",
+      width: 180,
+      renderCell: (params) => (
+        <div className="w-full h-full">
+          <div dangerouslySetInnerHTML={{ __html: params.value }} />
+        </div>
+      ),
+    },
     {
       field: "startTime",
       headerName: "Thời gian bắt đầu",
@@ -128,18 +206,30 @@ const EventProcessManagement: React.FC = () => {
     {
       field: "status",
       headerName: "Trạng thái",
-      width: 130,
+      width: 150,
       renderCell: (params) => {
         switch (params.value) {
-          case EventProcessStatus.Not_Started:
+          case EventProcessStatus.Wait_Approval:
             return (
-              <span className="rounded-xl py-1 px-2 bg-warning text-black">
-                {EventProcessStringStatus.Not_Started}
+              <span className="rounded-xl py-1 px-2 bg-black text-white">
+                {EventProcessStringStatus.Wait_Approval}
+              </span>
+            );
+          case EventProcessStatus.Approval:
+            return (
+              <span className="rounded-xl py-1 px-2 bg-primary text-white">
+                {EventProcessStringStatus.Approval}
+              </span>
+            );
+          case EventProcessStatus.Not_Approval:
+            return (
+              <span className="rounded-xl py-1 px-2 bg-danger text-white">
+                {EventProcessStringStatus.Not_Approval}
               </span>
             );
           case EventProcessStatus.In_Progress:
             return (
-              <span className="rounded-xl py-1 px-2 bg-primary text-white">
+              <span className="rounded-xl py-1 px-2 bg-warning text-black">
                 {EventProcessStringStatus.In_Progress}
               </span>
             );
@@ -163,7 +253,7 @@ const EventProcessManagement: React.FC = () => {
     {
       field: "actions",
       headerName: "Hành động",
-      width: 200,
+      width: 300,
       renderCell: (params: any) => (
         <Box>
           <Button
@@ -174,10 +264,111 @@ const EventProcessManagement: React.FC = () => {
           >
             Xem
           </Button>
+          {params.row.status == EventProcessStatus.Wait_Approval ? (
+            <>
+              <Button
+                variant="outlined"
+                color="success"
+                onClick={() => {
+                  handleApprove(params.row.id, params.row.name, true);
+                }}
+                style={{ marginRight: 10 }}
+              >
+                Duyệt
+              </Button>
+              <Button
+                variant="outlined"
+                color="error"
+                onClick={() => {
+                  handleApprove(params.row.id, params.row.name, false);
+                }}
+                style={{ marginRight: 10 }}
+              >
+                Hủy
+              </Button>
+            </>
+          ) : (
+            <></>
+          )}
         </Box>
       ),
     },
   ];
+  const { enableLoading, disableLoading } = useAppContext();
+  const handleApprove = async (
+    id: string,
+    name: string,
+    isApproved: boolean
+  ) => {
+    const confirm = await sweetAlert.confirm(
+      "",
+      `<p style="font-size:1.8rem">Xác nhận ${isApproved ? "phê duyệt" : "hủy bỏ"} hoạt động <strong>${name}?</strong></p>`,
+      undefined,
+      undefined,
+      isApproved ? "success" : "error"
+    );
+    if (confirm) {
+      Swal.fire({
+        title: isApproved ? "Nhập ghi chú phê duyệt" : "Nhập ghi chú hủy bỏ",
+        input: "text",
+        inputAttributes: {
+          autocapitalize: "off",
+        },
+        showCancelButton: true,
+        confirmButtonText: "Xác nhận",
+        cancelButtonText: "Hủy bỏ",
+        showLoaderOnConfirm: true,
+        preConfirm: async (value) => {
+          return value;
+        },
+        allowOutsideClick: false,
+      }).then((result) => {
+        if (result.isConfirmed) {
+          const action = async () => {
+            try {
+              enableLoading();
+              await processApi.approveProcess(id, {
+                comment: result.value,
+                status: isApproved
+                  ? EventProcessStatus.Approval
+                  : EventProcessStatus.Not_Approval,
+              });
+              if (isApproved) {
+                sweetAlert.alertSuccess("Phê duyệt thành công");
+              } else {
+                sweetAlert.alertSuccess("Hủy bỏ thành công");
+              }
+              fetchEventProcesses();
+              fetchSelectedEvent();
+            } catch (error) {
+              console.error("Lỗi:", error);
+              if (isApproved) {
+                sweetAlert.alertFailed("Có lôi khi phê duyệt");
+              } else {
+                sweetAlert.alertFailed("Có lôi khi hủy bỏ");
+              }
+            } finally {
+              disableLoading();
+            }
+          };
+          action();
+        } else {
+          handleApprove(id, name, isApproved);
+        }
+      });
+    }
+  };
+
+  if (currentStatusFilter != "Đã phê duyệt") {
+    columns.splice(6, 1);
+  }
+  if (currentStatusFilter != "Chờ phê duyệt") {
+    columns.push({
+      field: "comment",
+      headerName: "Ghi chú phê duyệt",
+      width: 180,
+    });
+  }
 
   const rows: GridRowsProp = eventProcesses;
 
@@ -320,20 +511,60 @@ const EventProcessManagement: React.FC = () => {
         <></>
       )}
 
-      <div className="flex gap-x-2 mt-3 px-3 justify-end">
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={fetchEventProcesses}
-          style={{ marginBottom: "20px" }}
-        >
-          Tải lại
-        </Button>
+      <div className="w-full h-full mt-3 px-3 flex justify-between">
+        <div className="min-w-[10px]">
+          <div>
+            <span className="mr-3 font-bold">Trạng thái</span>
+            <MuiSelect
+              labelId="result-label"
+              value={currentStatusFilter}
+              onChange={(e) => setCurrentStatusFilter(e.target.value)}
+              className={`
+                       h-[40px] w-[200px]
+                      ${currentStatusFilter == "Chờ phê duyệt" ? "bg-black text-white" : ""}
+                      ${currentStatusFilter == "Đã phê duyệt" ? "bg-primary text-white" : ""}
+                      ${currentStatusFilter == "Không được duyệt" ? "bg-danger text-white" : ""}
+                      `}
+            >
+              <MenuItem
+                value="Chờ phê duyệt"
+                className="bg-black text-white py-2"
+              >
+                Chờ phê duyệt
+              </MenuItem>
+              <MenuItem
+                value="Đã phê duyệt"
+                className="bg-primary text-white py-2"
+              >
+                Đã phê duyệt
+              </MenuItem>
+              <MenuItem
+                value="Không được duyệt"
+                className="bg-danger text-white py-2"
+              >
+                Không được duyệt
+              </MenuItem>
+            </MuiSelect>
+          </div>
+        </div>
+        <div className="">
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => {
+              fetchEventProcesses();
+              fetchSelectedEvent();
+            }}
+            style={{ marginBottom: "20px" }}
+          >
+            Tải lại
+          </Button>
+        </div>
       </div>
 
       <div className="w-full mt-1">
         {eventProcesses.length === 0 ? (
-          <Typography>Không có quá trình nào cho sự kiện này.</Typography>
+          <Typography>Không có hoạt động nào cho sự kiện này.</Typography>
         ) : (
           <div className="px-3 w-full">
             <DataGrid
