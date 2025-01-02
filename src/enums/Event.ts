@@ -13,15 +13,19 @@ export enum EventStatusString {
 }
 
 export enum EventProcessStatus {
-    Not_Started,
+    Wait_Approval,
+    Approval,
     In_Progress,
     Completed,
+    Not_Approval,
     Cancelled
 }
 
 export enum EventProcessStringStatus {
-    Not_Started = "Chưa bắt đầu",
+    Wait_Approval = "Chờ phê duyệt",
+    Approval = "Đã phê duyệt",
     In_Progress = "Đang làm",
     Completed = "Hoàn thành",
-    Cancelled = "Hủy bỏ"
+    Not_Approval = "Không duyệt",
+    Cancelled = "Hủy bỏ",
 }

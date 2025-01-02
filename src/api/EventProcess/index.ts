@@ -24,7 +24,28 @@ const getProcessById = (processId: string) => {
 
 // PUT: Cập nhật thông tin một process
 const updateProcess = (processId: string, data: UpdateProcessRequest) => {
-  return request.put<BasicResponse<ProcessResponseItem>>(`${ROOT_EVENT_PROCESS}/${processId}`, data);
+  const form = new FormData();
+  form.append("Name", data.name);
+  form.append("Description", data.description);
+  form.append("StartTime", data.startTime);
+  form.append("EndTime", data.endTime);
+  form.append("Fee", data.fee.toString());
+  if(data.actualFee){form.append("ActualFee", data.actualFee.toString());}
+  if(data.note){form.append("Note", data.note);}
+  form.append("Status", data.status.toString());
+  form.append("EventId", data.eventId);
+  if(data.receiptImages){
+    data.receiptImages.forEach((image) => {
+      form.append(`ReceiptImages`, image);
+    });
+  }
+
+  return request.put<BasicResponse<ProcessResponseItem>>(`${ROOT_EVENT_PROCESS}/${processId}`,
+    form, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
 };
 
 // DELETE: Xóa một process của event
@@ -43,12 +64,20 @@ const getMembersOfProcess = (id: string, processId: string, page?: number, size?
   });
 };
 
+const approveProcess = (processId: string, data: {
+  comment?: string,
+  status: number
+}) => {
+  return request.put<BasicResponse<ProcessResponseItem>>(`${ROOT_EVENT_PROCESS}/${processId}/approve`, data);
+};
+
 const processApi = {
   createProcess,
   getProcessById,
   updateProcess,
   deleteProcess,
-  getMembersOfProcess
+  getMembersOfProcess,
+  approveProcess
 };
 
 export default processApi;

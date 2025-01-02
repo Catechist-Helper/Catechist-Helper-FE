@@ -16,7 +16,6 @@ import {
   UpdateProcessRequest,
 } from "../../../model/Request/EventProcess"; // Import đúng model request
 import {
-  EventStatus,
   EventProcessStringStatus,
   EventProcessStatus,
 } from "../../../enums/Event";
@@ -27,6 +26,8 @@ import MemberOfProcessDialog, {
 import { formatCurrencyVND } from "../../../utils/formatPrice";
 import { EventItemResponse } from "../../../model/Response/Event";
 import { formatDate } from "../../../utils/formatDate";
+import CkEditorComponent from "../../../components/ckeditor5/CkEditor";
+import useAppContext from "../../../hooks/useAppContext";
 
 interface EventProcessDialogProps {
   open: boolean;
@@ -53,10 +54,42 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
   const [actualFee, setActualFee] = useState<number>(0);
   const [note, setNote] = useState<string>("");
   const [status, setStatus] = useState<number>(0);
-  const [durationDays, setDurationDays] = useState<number>(0);
-  const [durationHours, setDurationHours] = useState<number>(0);
-  const [durationMinutes, setDurationMinutes] = useState<number>(0);
   const [viewMode, setViewMode] = useState<boolean>(false);
+
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [formData, setFormData] = useState({
+    images: [] as File[],
+  });
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const files = Array.from(e.target.files);
+
+      // Thay vì ghi đè, thêm ảnh mới vào mảng hiện tại
+      setFormData((prevData) => ({
+        ...prevData,
+        images: [...prevData.images, ...files], // Thêm các file mới vào mảng ảnh
+      }));
+
+      // Cập nhật hình ảnh preview
+      const imagePreviewsArray = files.map((file) => URL.createObjectURL(file));
+      setImagePreviews((prevPreviews) => [
+        ...prevPreviews,
+        ...imagePreviewsArray,
+      ]); // Thêm các ảnh mới vào preview
+    }
+  };
+
+  const removeImage = (index: number) => {
+    setFormData((prevData) => {
+      const newImages = prevData.images.filter((_, i) => i !== index); // Lọc bỏ ảnh tại index
+      return { ...prevData, images: newImages };
+    });
+
+    setImagePreviews((prevPreviews) =>
+      prevPreviews.filter((_, i) => i !== index)
+    ); // Cập nhật lại previews
+  };
 
   const childRef = useRef<MemberOfProcessDialogHandle>(null);
 
@@ -70,9 +103,6 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
     setNote("");
     setStatus(0);
     setViewMode(false);
-    setDurationDays(0);
-    setDurationHours(0);
-    setDurationMinutes(0);
   };
 
   useEffect(() => {
@@ -87,25 +117,10 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
       setNote(processData.note);
       setStatus(processData.status);
       setViewMode(viewModeDialog ? true : false);
-      const duration =
-        new Date(processData.endTime).getTime() -
-        new Date(processData.startTime).getTime();
-      let days = Math.floor(duration / (1000 * 60 * 60 * 24)); // Số ngày
-      let hours = Math.floor(
-        (duration % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
-      ); // Số giờ
-      let minutes = Math.floor((duration % (1000 * 60 * 60)) / (1000 * 60)); // Số phút
-      setDurationDays(days);
-      setDurationHours(hours);
-      setDurationMinutes(minutes);
     }
   }, [processData]);
 
   useEffect(() => {
-    setDurationDays(0);
-    setDurationHours(0);
-    setDurationMinutes(0);
-
     if (startTime && endTime && startTime != "" && endTime != "") {
       // Chuyển đổi startDate và endDate sang đối tượng Date
       const start = new Date(startTime).getTime();
@@ -121,20 +136,6 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
           5000,
           35
         );
-      } else {
-        // Tính toán số ngày, giờ, phút từ chênh lệch
-        const days = Math.floor(diffInMilliseconds / (1000 * 60 * 60 * 24));
-        const hours = Math.floor(
-          (diffInMilliseconds % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
-        );
-        const minutes = Math.floor(
-          (diffInMilliseconds % (1000 * 60 * 60)) / (1000 * 60)
-        );
-
-        // Lưu vào các state
-        setDurationDays(days);
-        setDurationHours(hours);
-        setDurationMinutes(minutes);
       }
     }
   }, [startTime, endTime]);
@@ -217,9 +218,18 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
       eventId,
       actualFee,
       note,
+      receiptImages:
+        (processData.status == EventProcessStatus.In_Progress ||
+          processData.status == EventProcessStatus.Approval) &&
+        (status == EventProcessStatus.Completed ||
+          status == EventProcessStatus.Cancelled)
+          ? formData.images
+          : undefined,
     };
 
+    const { enableLoading, disableLoading } = useAppContext();
     try {
+      enableLoading();
       let createdProcessId = "";
       if (processData) {
         // Update process
@@ -230,7 +240,7 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
       } else {
         // Create new process
         data.actualFee = data.fee;
-        data.status = EventStatus.Not_Started;
+        data.status = EventProcessStatus.Wait_Approval;
         const createdDataRes = await processApi.createProcess(data);
         sweetAlert.alertSuccess("Tạo hoạt động thanh công", "", 3000, 25);
 
@@ -242,6 +252,8 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
     } catch (error) {
       console.error("Error creating/updating process:", error);
       sweetAlert.alertFailed("Có lỗi xảy ra", "", 3000, 20);
+    } finally {
+      disableLoading();
     }
   };
 
@@ -273,27 +285,29 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
               disabled={
                 viewMode ||
                 (processData &&
-                  processData.status != EventProcessStatus.Not_Started)
+                  processData.status != EventProcessStatus.Wait_Approval)
               }
             />
           </Grid>
           <Grid item xs={12}>
-            <TextField
-              label={
-                <span>
-                  Mô tả <span style={{ color: "red" }}>*</span>
-                </span>
-              }
-              fullWidth
-              multiline
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              disabled={
-                viewMode ||
-                (processData &&
-                  processData.status != EventProcessStatus.Not_Started)
-              }
-            />
+            <p className="text-gray-500 ml-2 mt-1">
+              Mô tả hoạt động <span style={{ color: "red" }}>*</span>
+            </p>
+            {viewMode ||
+            (processData &&
+              processData.status != EventProcessStatus.Wait_Approval) ? (
+              <div className="text-gray-500 ml-2 mt-1">
+                <div dangerouslySetInnerHTML={{ __html: description }} />
+              </div>
+            ) : (
+              <>
+                <CkEditorComponent
+                  data={description}
+                  onChange={(data) => setDescription(data)}
+                  placeholder="Nhập mô tả hoạt động tại đây..."
+                />
+              </>
+            )}
           </Grid>
           <Grid item xs={12} sm={6}>
             {event && event.startTime ? (
@@ -373,7 +387,7 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
               disabled={viewMode}
             />
           </Grid>
-          <Grid item xs={12} sm={4}>
+          {/* <Grid item xs={12} sm={4}>
             <TextField
               label="Ngày"
               type="number"
@@ -382,8 +396,8 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
               onChange={(e) => setDurationDays(Number(e.target.value))}
               disabled
             />
-          </Grid>
-          <Grid item xs={12} sm={4}>
+          </Grid> */}
+          {/* <Grid item xs={12} sm={4}>
             <TextField
               label="Giờ"
               type="number"
@@ -402,7 +416,7 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
               onChange={(e) => setDurationMinutes(Number(e.target.value))}
               disabled
             />
-          </Grid>
+          </Grid> */}
           <Grid item xs={12} sm={6}>
             <TextField
               label={
@@ -428,11 +442,11 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
               disabled={
                 viewMode ||
                 (processData &&
-                  processData.status != EventProcessStatus.Not_Started)
+                  processData.status != EventProcessStatus.Wait_Approval)
               }
             />
           </Grid>
-          {processData ? (
+          {processData && status != EventProcessStatus.Wait_Approval ? (
             <>
               <Grid item xs={12} sm={6}>
                 <TextField
@@ -456,7 +470,9 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
                       <InputAdornment position="start">₫</InputAdornment>
                     ),
                   }}
-                  disabled={viewMode}
+                  disabled={
+                    viewMode || status == EventProcessStatus.Wait_Approval
+                  }
                 />
               </Grid>
             </>
@@ -498,52 +514,67 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
                   aria-label="Trạng thái"
                   className="border-1 border-gray-300 rounded w-[100%] mt-0"
                   options={
-                    processData.status == EventStatus.Not_Started
+                    processData.status == EventProcessStatus.Wait_Approval
                       ? [
                           {
-                            value: EventStatus.Not_Started,
-                            label: EventProcessStringStatus.Not_Started,
-                          },
-                          {
-                            value: EventStatus.In_Progress,
-                            label: EventProcessStringStatus.In_Progress,
-                          },
-                          {
-                            value: EventStatus.Cancelled,
-                            label: EventProcessStringStatus.Cancelled,
+                            value: EventProcessStatus.Wait_Approval,
+                            label: EventProcessStringStatus.Wait_Approval,
                           },
                         ]
-                      : [
-                          {
-                            value: EventStatus.In_Progress,
-                            label: EventProcessStringStatus.In_Progress,
-                          },
-                          {
-                            value: EventStatus.Completed,
-                            label: EventProcessStringStatus.Completed,
-                          },
-                          {
-                            value: EventStatus.Cancelled,
-                            label: EventProcessStringStatus.Cancelled,
-                          },
-                        ]
+                      : processData.status == EventProcessStatus.Approval
+                        ? [
+                            {
+                              value: EventProcessStatus.Approval,
+                              label: EventProcessStringStatus.Approval,
+                            },
+                            {
+                              value: EventProcessStatus.In_Progress,
+                              label: EventProcessStringStatus.In_Progress,
+                            },
+                            {
+                              value: EventProcessStatus.Cancelled,
+                              label: EventProcessStringStatus.Cancelled,
+                            },
+                          ]
+                        : [
+                            {
+                              value: EventProcessStatus.In_Progress,
+                              label: EventProcessStringStatus.In_Progress,
+                            },
+                            {
+                              value: EventProcessStatus.Completed,
+                              label: EventProcessStringStatus.Completed,
+                            },
+                            {
+                              value: EventProcessStatus.Cancelled,
+                              label: EventProcessStringStatus.Cancelled,
+                            },
+                          ]
                   }
                   isMulti={false}
                   value={[
                     {
-                      value: EventStatus.Not_Started,
-                      label: EventProcessStringStatus.Not_Started,
+                      value: EventProcessStatus.Wait_Approval,
+                      label: EventProcessStringStatus.Wait_Approval,
                     },
                     {
-                      value: EventStatus.In_Progress,
+                      value: EventProcessStatus.Not_Approval,
+                      label: EventProcessStringStatus.Not_Approval,
+                    },
+                    {
+                      value: EventProcessStatus.Approval,
+                      label: EventProcessStringStatus.Approval,
+                    },
+                    {
+                      value: EventProcessStatus.In_Progress,
                       label: EventProcessStringStatus.In_Progress,
                     },
                     {
-                      value: EventStatus.Completed,
+                      value: EventProcessStatus.Completed,
                       label: EventProcessStringStatus.Completed,
                     },
                     {
-                      value: EventStatus.Cancelled,
+                      value: EventProcessStatus.Cancelled,
                       label: EventProcessStringStatus.Cancelled,
                     },
                   ].find((item) => item.value == status)}
@@ -551,7 +582,9 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
                     setStatus(newValue.value);
                   }}
                   placeholder="Chọn trạng thái..."
-                  isDisabled={viewMode}
+                  isDisabled={
+                    viewMode || status == EventProcessStatus.Wait_Approval
+                  }
                   styles={{
                     control: (base) => ({
                       ...base,
@@ -580,23 +613,33 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
                       ...base,
                       padding: "10px 5px",
                       color: `${
-                        status == EventProcessStatus.Not_Started
+                        status == EventProcessStatus.In_Progress
                           ? "rgba(0, 0, 0, 0.87)"
                           : `white`
                       }`,
                       background: `${
-                        status == EventProcessStatus.Not_Started
-                          ? "white"
+                        status == EventProcessStatus.Wait_Approval
+                          ? "black"
                           : `${
                               status == EventProcessStatus.In_Progress
-                                ? "rgba(0, 0, 0, 0.87)"
+                                ? "yellow"
                                 : `${
                                     status == EventProcessStatus.Completed
                                       ? "green"
                                       : `${
-                                          status == EventProcessStatus.Cancelled
-                                            ? "red"
-                                            : ""
+                                          status == EventProcessStatus.Approval
+                                            ? "blue"
+                                            : `${
+                                                status ==
+                                                EventProcessStatus.Not_Approval
+                                                  ? "red"
+                                                  : `${
+                                                      status ==
+                                                      EventProcessStatus.Cancelled
+                                                        ? "red"
+                                                        : ""
+                                                    }`
+                                              }`
                                         }`
                                   }`
                             }`
@@ -616,6 +659,80 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
                   }}
                 />
               </Grid>
+              {(processData.status == EventProcessStatus.In_Progress ||
+                processData.status == EventProcessStatus.Approval) &&
+              (status == EventProcessStatus.Completed ||
+                status == EventProcessStatus.Cancelled) ? (
+                <div className="px-4 mt-3 mb-2">
+                  <label
+                    className="block mb-1 text-sm font-medium"
+                    htmlFor="images"
+                  >
+                    Ảnh chứng minh
+                  </label>
+                  <input
+                    type="file"
+                    name="images"
+                    multiple
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none"
+                  />
+                  <div className="mt-1 text-sm text-gray-500">
+                    {"Tải lên các ảnh chứng minh (nếu có)"}
+                  </div>
+                  {imagePreviews.length > 0 && (
+                    <div className="mt-4">
+                      <h3 className="text-sm font-medium">
+                        Xem trước ảnh đã chọn:
+                      </h3>
+                      <div className="grid grid-cols-2 gap-2 mt-2">
+                        {imagePreviews.map((preview, index) => (
+                          <div key={index} className="relative">
+                            <img
+                              src={preview}
+                              alt={`Preview ${index + 1}`}
+                              className="w-full h-auto rounded-lg border border-gray-300"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => removeImage(index)} // Gọi hàm xóa ảnh
+                              className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1"
+                            >
+                              &times; {/* Biểu tượng xóa */}
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <></>
+              )}
+              {(processData.status == EventProcessStatus.Completed ||
+                processData.status == EventProcessStatus.Cancelled) &&
+              processData.receiptImages &&
+              processData.receiptImages.length > 0 ? (
+                <div className="px-4 mt-3 mb-2">
+                  <p className="mb-2">
+                    Ảnh chứng minh:{" "}
+                    <strong> {processData.receiptImages.length} ảnh</strong>
+                  </p>
+                  {processData.receiptImages.map((preview: any, index: any) => (
+                    <div key={index} className="relative">
+                      <img
+                        src={preview.imageUrl ?? ""}
+                        alt={`Preview ${index + 1}`}
+                        className="w-full h-auto rounded-lg border border-gray-300"
+                      />
+                      <hr className="my-4" />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <></>
+              )}
             </>
           ) : (
             <></>
@@ -644,7 +761,8 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
         {viewMode &&
         processData &&
         processData.status != EventProcessStatus.Completed &&
-        processData.status != EventProcessStatus.Cancelled ? (
+        processData.status != EventProcessStatus.Cancelled &&
+        processData.status != EventProcessStatus.Not_Approval ? (
           <>
             <Button
               variant="outlined"

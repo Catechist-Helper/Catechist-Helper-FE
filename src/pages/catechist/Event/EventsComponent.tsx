@@ -361,9 +361,15 @@ export default function EventsComponent() {
             {userRole === RoleEventName.TRUONG_BTC && (
               <Button
                 variant="contained"
-                color="primary"
                 onClick={() => {
-                  handleEventManagement(params.row.id, params.row.userRole);
+                  if (params.row.eventStatus == EventStatus.Not_Started) {
+                    sweetAlert.alertInfo("Sự kiện này chưa bắt đầu");
+                  } else {
+                    handleEventManagement(params.row.id, params.row.userRole);
+                  }
+                }}
+                sx={{
+                  background: `${params.row.eventStatus == EventStatus.Not_Started ? "gray" : "#1976d2"}`,
                 }}
               >
                 Quản lý sự kiện
@@ -372,10 +378,16 @@ export default function EventsComponent() {
             {userRole !== RoleEventName.TRUONG_BTC && (
               <Button
                 variant="contained"
-                color="primary"
-                onClick={() =>
-                  handleEventManagement(params.row.id, params.row.userRole)
-                }
+                sx={{
+                  background: `${params.row.eventStatus == EventStatus.Not_Started ? "gray" : "#1976d2"}`,
+                }}
+                onClick={() => {
+                  if (params.row.eventStatus == EventStatus.Not_Started) {
+                    sweetAlert.alertInfo("Sự kiện này chưa bắt đầu");
+                  } else {
+                    handleEventManagement(params.row.id, params.row.userRole);
+                  }
+                }}
               >
                 Xem sự kiện
               </Button>
