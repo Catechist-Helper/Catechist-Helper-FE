@@ -42,31 +42,7 @@ const UpdateTrain: React.FC = () => {
       endTime: "",
       trainingListStatus: trainingListStatus.Training,
     },
-    validate: (values) => {
-      const errors: any = {};
-      const now = new Date(); // Lấy ngày hiện tại
-      now.setHours(0, 0, 0, 0); // Reset giờ phút giây về 00:00:00 để so sánh theo ngày
-
-      const startDate = new Date(values.startTime);
-      const endDate = new Date(values.endTime);
-
-      // Chuyển startDate về đầu ngày để so sánh
-      const startDateOnly = new Date(startDate);
-      startDateOnly.setHours(0, 0, 0, 0);
-
-      // Kiểm tra ngày bắt đầu không được nhỏ hơn ngày hiện tại
-      if (startDateOnly < now) {
-        errors.startTime = "Không thể chỉnh sửa ngày bắt đầu về quá khứ.";
-      }
-
-      // Kiểm tra ngày kết thúc phải lớn hơn ngày bắt đầu
-      if (endDate <= startDate) {
-        errors.endTime = "Thời gian kết thúc phải lớn hơn thời gian bắt đầu.";
-      }
-
-      return errors;
-    },
-
+    
     onSubmit: async (values) => {
       setIsSubmitting(true);
       try {
