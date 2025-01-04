@@ -16,7 +16,7 @@ import { useState, useEffect } from "react";
 import eventApi from "../../../api/Event";
 import eventCategoryApi from "../../../api/EventCategory";
 import {
-  BudgetTransactionResponseItem,
+  // BudgetTransactionResponseItem,
   EventItemResponse,
   ParticipantResponseItem,
 } from "../../../model/Response/Event";
@@ -29,7 +29,7 @@ import { formatPrice } from "../../../utils/formatPrice";
 import OrganizersDialog from "./OrganizersDialog";
 import AddParticipantsDialog from "./AddParticipantsDialog";
 import ParticipantsDialog from "./ParticipantsDialog";
-import BudgetDialog from "./BudgetDialog";
+// import BudgetDialog from "./BudgetDialog";
 import { PATH_ADMIN } from "../../../routes/paths";
 import { useNavigate } from "react-router-dom";
 import { EventStatus, EventStatusString } from "../../../enums/Event";
@@ -87,27 +87,40 @@ export default function EventsComponent() {
       width: 150,
       renderCell: (params) => formatDate.DD_MM_YYYY(params.row.endTime),
     },
+    // {
+    //   field: "current_budget",
+    //   headerName: "Ngân sách hiện tại",
+    //   width: 180,
+    //   renderCell: (params) => {
+    //     return (
+    //       <div style={{ display: "flex", alignItems: "center" }}>
+    //         <Button
+    //           variant="contained"
+    //           color={"primary"}
+    //           style={{ marginRight: "10px" }}
+    //           onClick={() =>
+    //             handleBudgetTransactions(params.row.id, params.row.name)
+    //           }
+    //         >
+    //           Xem
+    //         </Button>{" "}
+    //         <span> ₫ {formatPrice(params.value)}</span>
+    //       </div>
+    //     );
+    //   },
+    // },
+
     {
-      field: "current_budget",
-      headerName: "Ngân sách hiện tại",
-      width: 180,
-      renderCell: (params) => {
-        return (
-          <div style={{ display: "flex", alignItems: "center" }}>
-            <Button
-              variant="contained"
-              color={"primary"}
-              style={{ marginRight: "10px" }}
-              onClick={() =>
-                handleBudgetTransactions(params.row.id, params.row.name)
-              }
-            >
-              Xem
-            </Button>{" "}
-            <span> ₫ {formatPrice(params.value)}</span>
-          </div>
-        );
-      },
+      field: "totalCost",
+      headerName: "Tổng chi phí hiện tại",
+      width: 150,
+      align: "right",
+      headerAlign: "right",
+      renderCell: (params) => (
+        <span>
+          <span> ₫ {formatPrice(params.value)}</span>
+        </span>
+      ),
     },
     {
       field: "eventCategory",
@@ -148,6 +161,22 @@ export default function EventsComponent() {
           default:
             return <></>;
         }
+      },
+    },
+    {
+      field: "processes",
+      headerName: "Hoạt động",
+      width: 100,
+      renderCell: (params) => {
+        return (
+          <Button
+            variant="contained"
+            color={"secondary"}
+            onClick={() => handleViewProcesses(params.row.id)}
+          >
+            Xem
+          </Button>
+        );
       },
     },
     {
@@ -204,7 +233,7 @@ export default function EventsComponent() {
     {
       field: "participants",
       headerName: "Số người tham gia",
-      width: 300,
+      width: 155,
       renderCell: (params) => {
         const participantsCount = params.row.participantsCount || 0;
         return (
@@ -224,12 +253,12 @@ export default function EventsComponent() {
               <>
                 <Button
                   color="secondary"
-                  style={{ marginLeft: "10px" }}
+                  style={{ marginLeft: "5px" }}
                   onClick={() =>
                     openAddParticipantsDialog(params.row.id, params.row.name)
                   }
                 >
-                  Thêm danh sách
+                  Thêm
                 </Button>
               </>
             ) : (
@@ -359,46 +388,46 @@ export default function EventsComponent() {
     }
   };
 
-  const [openBudgetDialog, setOpenBudgetDialog] = useState(false);
-  const [budgetTransactions, setBudgetTransactions] = useState<
-    BudgetTransactionResponseItem[]
-  >([]);
-  const [selectedEventNameForBudget, setSelectedEventNameForBudget] =
-    useState<string>("");
+  // const [openBudgetDialog, setOpenBudgetDialog] = useState(false);
+  // const [budgetTransactions, setBudgetTransactions] = useState<
+  //   BudgetTransactionResponseItem[]
+  // >([]);
+  // const [selectedEventNameForBudget, setSelectedEventNameForBudget] =
+  //   useState<string>("");
 
-  const handleBudgetTransactions = async (
-    eventId: string,
-    eventName: string
-  ) => {
-    try {
-      setLoading(true);
-      setSelectedEventNameForBudget(eventName);
-      const firstRes = await eventApi.getEventBudgetTransactions(eventId);
-      const { data } = await eventApi.getEventBudgetTransactions(
-        eventId,
-        1,
-        firstRes.data.data.total
-      ); // Gọi API với phân trang
-      const sortedTransactions = data.data.items.sort(
-        (a, b) =>
-          new Date(b.transactionAt).getTime() -
-          new Date(a.transactionAt).getTime()
-      ); // Sắp xếp theo `transactionAt`
+  // const handleBudgetTransactions = async (
+  //   eventId: string,
+  //   eventName: string
+  // ) => {
+  //   try {
+  //     setLoading(true);
+  //     setSelectedEventNameForBudget(eventName);
+  //     const firstRes = await eventApi.getEventBudgetTransactions(eventId);
+  //     const { data } = await eventApi.getEventBudgetTransactions(
+  //       eventId,
+  //       1,
+  //       firstRes.data.data.total
+  //     ); // Gọi API với phân trang
+  //     const sortedTransactions = data.data.items.sort(
+  //       (a, b) =>
+  //         new Date(b.transactionAt).getTime() -
+  //         new Date(a.transactionAt).getTime()
+  //     ); // Sắp xếp theo `transactionAt`
 
-      setBudgetTransactions(sortedTransactions);
-      setOpenBudgetDialog(true); // Mở dialog
-    } catch (error) {
-      console.error("Lỗi khi tải danh sách giao dịch ngân sách:", error);
-      sweetAlert.alertFailed(
-        "Không thể tải danh sách ngân sách!",
-        "",
-        1000,
-        22
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
+  //     setBudgetTransactions(sortedTransactions);
+  //     setOpenBudgetDialog(true); // Mở dialog
+  //   } catch (error) {
+  //     console.error("Lỗi khi tải danh sách giao dịch ngân sách:", error);
+  //     sweetAlert.alertFailed(
+  //       "Không thể tải danh sách ngân sách!",
+  //       "",
+  //       1000,
+  //       22
+  //     );
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   // Fetch Event Categories
   const fetchEventCategories = async () => {
@@ -424,14 +453,14 @@ export default function EventsComponent() {
     setOpenDialog(true);
   };
 
-  const handleViewProcesses = () => {
-    if (selectedIds.length !== 1) {
+  const handleViewProcesses = (eventId?: string) => {
+    if (selectedIds.length !== 1 && !eventId) {
       sweetAlert.alertWarning("Vui lòng chọn 1 sự kiện để xem!", "", 1000, 22);
       return;
     }
 
     navigate(PATH_ADMIN.admin_event_process, {
-      state: { eventId: selectedIds[0] },
+      state: { eventId: eventId ? eventId : selectedIds[0] },
     });
   };
 
@@ -582,14 +611,15 @@ export default function EventsComponent() {
               >
                 Xóa
               </Button>
-              <Button
+              {/* <Button
                 variant="outlined"
                 color="primary"
                 className="btn btn-primary"
-                onClick={handleViewProcesses}
+                onClick={() => {
+                }}
               >
                 Xem hoạt động
-              </Button>
+              </Button> */}
             </>
           ) : (
             <></>
@@ -670,14 +700,14 @@ export default function EventsComponent() {
           eventName={selectedEventNameForParticipants}
         />
       )}
-      {openBudgetDialog && (
+      {/* {openBudgetDialog && (
         <BudgetDialog
           open={openBudgetDialog}
           onClose={() => setOpenBudgetDialog(false)}
           transactions={budgetTransactions}
           eventName={selectedEventNameForBudget}
         />
-      )}
+      )} */}
     </Paper>
   );
 }

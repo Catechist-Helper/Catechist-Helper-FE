@@ -11,7 +11,7 @@ export interface EventItemResponse {
   current_budget: number;
   eventStatus: number;
   eventCategoryId: string;
-  eventCategory?: any;
+  eventCategory?: any;totalCost:number;
 }
 
 export interface EventResponse {

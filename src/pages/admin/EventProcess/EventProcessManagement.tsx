@@ -20,6 +20,8 @@ import { formatPrice } from "../../../utils/formatPrice";
 import {
   EventProcessStatus,
   EventProcessStringStatus,
+  EventStatus,
+  EventStatusString,
 } from "../../../enums/Event";
 import EventProcessDialog from "../../catechist/EventProcess/EventProcessDialog";
 import sweetAlert from "../../../utils/sweetAlert";
@@ -39,8 +41,8 @@ const EventProcessManagement: React.FC = () => {
     []
   );
   const [loading, setLoading] = useState<boolean>(true);
-  const [summaryFees, setSummaryFees] = useState<number>(0);
-  const [actualSummaryFees, setActualSummaryFees] = useState<number>(0);
+  // const [summaryFees, setSummaryFees] = useState<number>(0);
+  // const [actualSummaryFees, setActualSummaryFees] = useState<number>(0);
   const [currentStatusFilter, setCurrentStatusFilter] = useState<string>("");
 
   const fetchEventProcesses = async (init?: boolean) => {
@@ -105,8 +107,8 @@ const EventProcessManagement: React.FC = () => {
         }
       });
 
-      setSummaryFees(sumFees);
-      setActualSummaryFees(actualSumFees);
+      // setSummaryFees(sumFees);
+      // setActualSummaryFees(actualSumFees);
     } catch (error) {
       console.error("Lỗi khi lấy dữ liệu quá trình sự kiện:", error);
     } finally {
@@ -149,16 +151,16 @@ const EventProcessManagement: React.FC = () => {
   };
   const columns: GridColDef[] = [
     { field: "name", headerName: "Tên hoạt động", width: 180 },
-    {
-      field: "description",
-      headerName: "Mô tả",
-      width: 180,
-      renderCell: (params) => (
-        <div className="w-full h-full">
-          <div dangerouslySetInnerHTML={{ __html: params.value }} />
-        </div>
-      ),
-    },
+    // {
+    //   field: "description",
+    //   headerName: "Mô tả",
+    //   width: 180,
+    //   renderCell: (params) => (
+    //     <div className="w-full h-full">
+    //       <div dangerouslySetInnerHTML={{ __html: params.value }} />f
+    //     </div>
+    //   ),
+    // },
     {
       field: "startTime",
       headerName: "Thời gian bắt đầu",
@@ -174,14 +176,18 @@ const EventProcessManagement: React.FC = () => {
     {
       field: "fee",
       headerName: "Chi phí dự tính",
-      width: 140,
-      renderCell: (params) => formatPrice(params.value),
+      width: 130,
+      align: "right",
+      headerAlign: "right",
+      renderCell: (params) => <span>₫ {formatPrice(params.value)}</span>,
     },
     {
       field: "actualFee",
       headerName: "Chi phí thực tế",
-      width: 140,
-      renderCell: (params) => formatPrice(params.value),
+      width: 130,
+      align: "right",
+      headerAlign: "right",
+      renderCell: (params) => <span>₫ {formatPrice(params.value)}</span>,
     },
     {
       field: "note",
@@ -370,6 +376,37 @@ const EventProcessManagement: React.FC = () => {
     );
   }
 
+  const renderEventStatus = (value: number) => {
+    switch (value) {
+      case EventStatus.Not_Started:
+        return (
+          <span className="rounded-xl px-2 py-1 bg-black text-white">
+            {EventStatusString.Not_Started}
+          </span>
+        );
+      case EventStatus.In_Progress:
+        return (
+          <span className="rounded-xl px-2 py-1 bg-warning text-black">
+            {EventStatusString.In_Progress}
+          </span>
+        );
+      case EventStatus.Completed:
+        return (
+          <span className="rounded-xl px-2 py-1 bg-success text-white">
+            {EventStatusString.Completed}
+          </span>
+        );
+      case EventStatus.Cancelled:
+        return (
+          <span className="rounded-xl px-2 py-1 bg-danger text-white">
+            {EventStatusString.Cancelled}
+          </span>
+        );
+      default:
+        return <></>;
+    }
+  };
+
   return (
     <Paper
       sx={{
@@ -380,7 +417,7 @@ const EventProcessManagement: React.FC = () => {
       }}
     >
       {selectedEvent ? (
-        <>
+        <div className="w-full h-full px-3">
           <Typography variant="h5" gutterBottom>
             <Button
               onClick={() => {
@@ -401,22 +438,28 @@ const EventProcessManagement: React.FC = () => {
               <strong>Mô tả sự kiện:</strong> {selectedEvent.description}
             </div>
             <div className="mt-2 w-[34%]">
-              <strong>Thời gian bắt đầu:</strong>{" "}
+              <strong>Thời gian bắt đầu sự kiện:</strong>{" "}
               {formatDate.DD_MM_YYYY(selectedEvent.startTime)}
             </div>
             <div className="mt-2 w-[34%]">
-              <strong>Thời gian kết thúc:</strong>{" "}
+              <strong>Thời gian kết thúc sự kiện:</strong>{" "}
               {formatDate.DD_MM_YYYY(selectedEvent.endTime)}
             </div>
-            <div className="mt-2 w-[100%]">
-              <div className="w-[34%]">
-                <strong>
-                  <div className="flex justify-between w-[70%]">
-                    <p>Ngân sách hiện tại:</p>
-                    <p> ₫ {formatPrice(selectedEvent.current_budget)}</p>
-                  </div>
-                </strong>
-              </div>
+            <div className="mt-2 w-[34%]">
+              <strong>Tổng chi phí hiện tại:</strong>{" "}
+              <span> ₫ {formatPrice(selectedEvent.totalCost)}</span>
+            </div>
+            <div className="mt-2 w-[34%]">
+              <strong>Trạng thái sự kiện:</strong>{" "}
+              {renderEventStatus(selectedEvent.eventStatus)}
+            </div>
+            {/* <div className="mt-2 w-[34%]">
+              <strong>
+                <div className="flex justify-between w-[70%]">
+                  <p>Ngân sách hiện tại:</p>
+                  <p> ₫ {formatPrice(selectedEvent.current_budget)}</p>
+                </div>
+              </strong>
             </div>
             <div className="mt-2 w-[34%]">
               <strong>
@@ -489,17 +532,17 @@ const EventProcessManagement: React.FC = () => {
                   </p>
                 </div>
               </strong>
-            </div>
+            </div> */}
           </div>
-        </>
+        </div>
       ) : (
         <></>
       )}
 
-      <div className="w-full h-full mt-3 px-3 flex justify-between">
+      <div className="w-full h-full mt-4 px-3 flex justify-between">
         <div className="min-w-[10px]">
           <div>
-            <span className="mr-3 font-bold">Trạng thái</span>
+            <span className="mr-3 font-bold">Trạng thái phê duyệt</span>
             <MuiSelect
               labelId="result-label"
               value={currentStatusFilter}
@@ -549,7 +592,7 @@ const EventProcessManagement: React.FC = () => {
 
       <div className="w-full mt-1">
         {eventProcesses.length === 0 ? (
-          <Typography>Không có hoạt động nào cho sự kiện này.</Typography>
+          <Typography>Không có hoạt động nào.</Typography>
         ) : (
           <div className="px-3 w-full">
             <DataGrid

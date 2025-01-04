@@ -368,7 +368,7 @@ const CatechistClassComponent = () => {
         onClose={() => setOpenSlotsDialog(false)}
       >
         <div style={{ padding: "20px" }}>
-          <h3>
+          <h3 className="text-[1.2rem] mb-2">
             Thông tin các tiết học của{" "}
             {selectedClassView ? (
               <>
@@ -382,42 +382,57 @@ const CatechistClassComponent = () => {
             rows={slots}
             columns={[
               {
-                field: "roomName",
-                headerName: "Phòng học",
-                width: 180,
-                renderCell: (params) => (
-                  <div className="flex">
-                    <img
-                      src={params.row.room.image ?? ""}
-                      alt=""
-                      width={50}
-                      height={50}
-                      className="my-1 border-1 border-gray-400"
-                      style={{ borderRadius: "2px" }}
-                    />
-                    <p className="ml-2">{params.row.room.name}</p>
-                  </div>
-                ),
-              },
-              {
                 field: "date",
                 headerName: "Ngày học",
-                width: 130,
-                renderCell: (params) => formatDate.DD_MM_YYYY(params.row.date),
+                width: 150,
+                renderCell: (params) => {
+                  return (
+                    <div>
+                      <span
+                        className={`rounded-xl px-2 py-1
+                      ${new Date().getTime() - new Date(params.row.date).getTime() >= 0 ? "bg-yellow-300" : ""}`}
+                      >
+                        {formatDate.DD_MM_YYYY(params.row.date)}
+                      </span>
+                    </div>
+                  );
+                },
               },
               {
                 field: "time",
                 headerName: "Giờ học",
-                width: 130,
+                width: 150,
                 renderCell: (params) =>
                   formatDate.HH_mm(params.row.startTime) +
                   " - " +
                   formatDate.HH_mm(params.row.endTime),
               },
               {
+                field: "roomName",
+                headerName: "Phòng học",
+                width: 200,
+                renderCell: (params) => {
+                  return params.row.room && params.row.room.name ? (
+                    <div className="flex">
+                      <img
+                        src={params.row.room.image ?? ""}
+                        alt=""
+                        width={50}
+                        height={50}
+                        className="my-1 border-1 border-gray-400"
+                        style={{ borderRadius: "2px" }}
+                      />
+                      <p className="ml-2">{params.row.room.name}</p>
+                    </div>
+                  ) : (
+                    <p className="ml-1">Chưa có</p>
+                  );
+                },
+              },
+              {
                 field: "catechists",
                 headerName: "Giáo lý viên",
-                width: 500,
+                width: 300,
 
                 renderCell: (params) => {
                   const priority: Record<CatechistInSlotTypeEnum, number> = {
@@ -447,14 +462,14 @@ const CatechistClassComponent = () => {
                             : ""
                         )
                         .join(", ")
-                    : "";
+                    : "Chưa có giáo lý viên";
                 },
               },
 
               {
                 field: "action",
                 headerName: "Hành động",
-                width: 500,
+                width: 280,
                 renderCell: (params: any) => {
                   const absence = absenceList.find(
                     (item) =>
@@ -519,13 +534,29 @@ const CatechistClassComponent = () => {
               //   width: 200,
               // },
             ]}
-            paginationMode="server"
+            paginationMode="client"
             rowCount={slots.length}
             sx={{
-              border: 0,
+              height: 600,
+              overflowX: "auto",
+              "& .MuiDataGrid-root": {
+                overflowX: "auto",
+              },
             }}
+            disableRowSelectionOnClick
             localeText={viVNGridTranslation}
           />
+          <div className="flex justify-end mt-3">
+            <Button
+              variant="outlined"
+              color="primary"
+              onClick={() => {
+                setOpenSlotsDialog(false);
+              }}
+            >
+              Đóng
+            </Button>
+          </div>
         </div>
         {openLeaveDialog ? (
           <>

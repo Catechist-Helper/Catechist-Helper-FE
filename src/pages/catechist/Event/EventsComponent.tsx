@@ -14,7 +14,7 @@ import {
 import { useState, useEffect } from "react";
 import eventApi from "../../../api/Event";
 import {
-  BudgetTransactionResponseItem,
+  // BudgetTransactionResponseItem,
   EventItemResponse,
   ParticipantResponseItem,
 } from "../../../model/Response/Event";
@@ -26,7 +26,7 @@ import { formatDate } from "../../../utils/formatDate";
 import { useNavigate } from "react-router-dom";
 import { PATH_CATECHIST } from "../../../routes/paths";
 import { formatPrice } from "../../../utils/formatPrice";
-import BudgetDialog from "../../admin/Event/BudgetDialog";
+// import BudgetDialog from "../../admin/Event/BudgetDialog";
 import { EventCategoryItemResponse } from "../../../model/Response/EventCategory";
 import eventCategoryApi from "../../../api/EventCategory";
 import OrganizersDialog from "../../admin/Event/OrganizersDialog";
@@ -176,46 +176,46 @@ export default function EventsComponent() {
         return RoleEventName.MEMBER_BTC; // Default to member if no match
     }
   };
-  const [openBudgetDialog, setOpenBudgetDialog] = useState(false);
-  const [budgetTransactions, setBudgetTransactions] = useState<
-    BudgetTransactionResponseItem[]
-  >([]);
-  const [selectedEventNameForBudget, setSelectedEventNameForBudget] =
-    useState<string>("");
-  const handleBudgetTransactions = async (
-    eventId: string,
-    eventName: string
-  ) => {
-    try {
-      setLoading(true);
-      setSelectedEventNameForBudget(eventName);
+  // const [openBudgetDialog, setOpenBudgetDialog] = useState(false);
+  // const [budgetTransactions, setBudgetTransactions] = useState<
+  //   BudgetTransactionResponseItem[]
+  // >([]);
+  // const [selectedEventNameForBudget, setSelectedEventNameForBudget] =
+  //   useState<string>("");
+  // const handleBudgetTransactions = async (
+  //   eventId: string,
+  //   eventName: string
+  // ) => {
+  //   try {
+  //     setLoading(true);
+  //     setSelectedEventNameForBudget(eventName);
 
-      const firstRes = await eventApi.getEventBudgetTransactions(eventId);
-      const { data } = await eventApi.getEventBudgetTransactions(
-        eventId,
-        1,
-        firstRes.data.data.total
-      );
-      const sortedTransactions = data.data.items.sort(
-        (a, b) =>
-          new Date(b.transactionAt).getTime() -
-          new Date(a.transactionAt).getTime()
-      );
+  //     const firstRes = await eventApi.getEventBudgetTransactions(eventId);
+  //     const { data } = await eventApi.getEventBudgetTransactions(
+  //       eventId,
+  //       1,
+  //       firstRes.data.data.total
+  //     );
+  //     const sortedTransactions = data.data.items.sort(
+  //       (a, b) =>
+  //         new Date(b.transactionAt).getTime() -
+  //         new Date(a.transactionAt).getTime()
+  //     );
 
-      setBudgetTransactions(sortedTransactions);
-      setOpenBudgetDialog(true); // Mở dialog
-    } catch (error) {
-      console.error("Lỗi khi tải danh sách giao dịch ngân sách:", error);
-      sweetAlert.alertFailed(
-        "Không thể tải danh sách ngân sách!",
-        "",
-        1000,
-        22
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
+  //     setBudgetTransactions(sortedTransactions);
+  //     setOpenBudgetDialog(true); // Mở dialog
+  //   } catch (error) {
+  //     console.error("Lỗi khi tải danh sách giao dịch ngân sách:", error);
+  //     sweetAlert.alertFailed(
+  //       "Không thể tải danh sách ngân sách!",
+  //       "",
+  //       1000,
+  //       22
+  //     );
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null); // ID của sự kiện được chọn
   const [openOrganizersDialog, setOpenOrganizersDialog] =
@@ -283,31 +283,43 @@ export default function EventsComponent() {
       width: 150,
       renderCell: (params) => formatDate.DD_MM_YYYY(params.row.endTime),
     },
+    // {
+    //   field: "current_budget",
+    //   headerName: "Ngân sách hiện tại",
+    //   width: 200,
+    //   renderCell: (params) => {
+    //     return (
+    //       <div style={{ display: "flex", alignItems: "center" }}>
+    //         {params.row.userRole == RoleEventName.TRUONG_BTC ? (
+    //           <Button
+    //             variant="contained"
+    //             color={"primary"}
+    //             style={{ marginRight: "10px" }}
+    //             onClick={() =>
+    //               handleBudgetTransactions(params.row.id, params.row.name)
+    //             }
+    //           >
+    //             Xem
+    //           </Button>
+    //         ) : (
+    //           <></>
+    //         )}{" "}
+    //         <span> ₫ {formatPrice(params.value)}</span>
+    //       </div>
+    //     );
+    //   },
+    // },
     {
-      field: "current_budget",
-      headerName: "Ngân sách hiện tại",
-      width: 200,
-      renderCell: (params) => {
-        return (
-          <div style={{ display: "flex", alignItems: "center" }}>
-            {params.row.userRole == RoleEventName.TRUONG_BTC ? (
-              <Button
-                variant="contained"
-                color={"primary"}
-                style={{ marginRight: "10px" }}
-                onClick={() =>
-                  handleBudgetTransactions(params.row.id, params.row.name)
-                }
-              >
-                Xem
-              </Button>
-            ) : (
-              <></>
-            )}{" "}
-            <span> ₫ {formatPrice(params.value)}</span>
-          </div>
-        );
-      },
+      field: "totalCost",
+      headerName: "Tổng chi phí hiện tại",
+      width: 150,
+      align: "right",
+      headerAlign: "right",
+      renderCell: (params) => (
+        <span>
+          <span> ₫ {formatPrice(params.value)}</span>
+        </span>
+      ),
     },
     {
       field: "eventCategory",
@@ -348,6 +360,14 @@ export default function EventsComponent() {
           default:
             return <></>;
         }
+      },
+    },
+    {
+      field: "userRole",
+      headerName: "Vai trò trong sự kiện",
+      width: 180,
+      renderCell: (params) => {
+        return <span>{params.row.userRole}</span>;
       },
     },
     {
@@ -394,14 +414,6 @@ export default function EventsComponent() {
             )}
           </div>
         );
-      },
-    },
-    {
-      field: "userRole",
-      headerName: "Vai trò trong sự kiện",
-      width: 180,
-      renderCell: (params) => {
-        return <span>{params.row.userRole}</span>;
       },
     },
 
@@ -532,14 +544,14 @@ export default function EventsComponent() {
             }}
           />
         </div>
-        {openBudgetDialog && (
+        {/* {openBudgetDialog && (
           <BudgetDialog
             open={openBudgetDialog}
             onClose={() => setOpenBudgetDialog(false)}
             transactions={budgetTransactions}
             eventName={selectedEventNameForBudget}
           />
-        )}
+        )} */}
         {openOrganizersDialog && selectedEventId && (
           <OrganizersDialog
             catechistMode={true}

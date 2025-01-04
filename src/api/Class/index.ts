@@ -75,6 +75,15 @@ const deleteClass = (classId:string) => {
   return request.delete<BasicResponse<boolean>>(`${ROOT_CLASS}/${classId}`);
 };
 
+const updateSlotOfClass = (slotId: string, data: {
+  catechistInSlots?: CatechistInSlotRequest[],
+  startTime?: string,
+  endTime?: string,
+  roomId?: string
+}) => {
+  return request.patch<BasicResponse<boolean>>(`slots/${slotId}`, data);
+};
+
 const classApi = {
   getAllClasses,
   getCatechistsOfClass,
@@ -83,7 +92,8 @@ const classApi = {
   updateCatechitsOfClass,
   createClass,
   updateClass,
-  deleteClass
+  deleteClass,
+  updateSlotOfClass
 };
 
 export default classApi;
