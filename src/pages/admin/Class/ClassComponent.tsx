@@ -103,12 +103,12 @@ export default function ClassComponent() {
 
   const [slotUpdateAssignedCatechists, setSlotUpdateAssignedCatechists] =
     useState<any[]>([]); // Assigned catechists
-  const [slotUpdatemainCatechistId, setSlotUpdateMainCatechistId] = useState<
+  const [slotUpdateMainCatechistId, setSlotUpdateMainCatechistId] = useState<
     string | null
   >(null); // ID of main catechist
 
   // States for catechists in Grade
-  const [slotUpdatecatechists, setSlotUpdateCatechists] = useState<any[]>([]);
+  const [slotUpdateCatechists, setSlotUpdateCatechists] = useState<any[]>([]);
 
   const [paginationModelCatechists, setPaginationModelCatechists] =
     useState<GridPaginationModel>({
@@ -469,7 +469,26 @@ export default function ClassComponent() {
     }
   }, [selectedPastoralYear, selectedMajor, selectedGrade, paginationModel]);
 
-  const handleAddCatechist = (selectedIds: string[]) => {
+  const handleAddCatechist = (
+    selectedIds: string[],
+    updateSlotMode?: boolean
+  ) => {
+    if (updateSlotMode) {
+      const selectedUpdateCatechists = slotUpdateCatechists.filter(
+        (catechist) => selectedIds.includes(catechist.id)
+      );
+      setSlotUpdateAssignedCatechists([
+        ...slotUpdateAssignedCatechists,
+        ...selectedUpdateCatechists,
+      ]);
+      setSlotUpdateCatechists(
+        slotUpdateCatechists.filter(
+          (catechist) => !selectedIds.includes(catechist.id)
+        )
+      );
+      return;
+    }
+
     const selectedCatechists = catechists.filter((catechist) =>
       selectedIds.includes(catechist.id)
     );
@@ -479,7 +498,29 @@ export default function ClassComponent() {
     ); // Remove from unassigned list
   };
 
-  const handleRemoveCatechist = (selectedIds: string[]) => {
+  const handleRemoveCatechist = (
+    selectedIds: string[],
+    updateSlotMode?: boolean
+  ) => {
+    if (updateSlotMode) {
+      const removedUpdateCatechists = slotUpdateAssignedCatechists.filter(
+        (catechist) => !selectedIds.includes(catechist.id)
+      );
+      setSlotUpdateAssignedCatechists(removedUpdateCatechists);
+      setSlotUpdateCatechists([
+        ...slotUpdateCatechists,
+        ...slotUpdateAssignedCatechists.filter((catechist) =>
+          selectedIds.includes(catechist.id)
+        ),
+      ]);
+      if (
+        selectedIds.findIndex((item) => item == slotUpdateMainCatechistId) >= 0
+      ) {
+        setSlotUpdateMainCatechistId("");
+      }
+      return;
+    }
+
     const removedCatechists = assignedCatechists.filter(
       (catechist) => !selectedIds.includes(catechist.id)
     );
@@ -490,6 +531,9 @@ export default function ClassComponent() {
         selectedIds.includes(catechist.id)
       ),
     ]); // Add back to unassigned list
+    if (selectedIds.findIndex((item) => item == mainCatechistId)) {
+      setMainCatechistId("");
+    }
   };
 
   const handleOpenSlotDialog = async (
@@ -553,14 +597,9 @@ export default function ClassComponent() {
       setValueUpdateSlotTimeEnd(formatDate.HH_mm(chosenSlotToUpdate.endTime));
 
       fetchRoomsUpdateSlot(chosenSlotToUpdate.id);
+      fetchSlotUpdateCatechists(selectedClassView.gradeId);
     }
   }, [chosenSlotToUpdate]);
-
-  useEffect(() => {
-    if (selectedClass) {
-      fetchSlotUpdateCatechists(selectedClass.gradeId);
-    }
-  }, [selectedClass]);
 
   const fetchRooms = async () => {
     try {
@@ -643,7 +682,8 @@ export default function ClassComponent() {
 
       const response =
         await catechistInClassApi.getAbsenceReplacementAvailableCatechists(
-          selectedClass ? selectedClass.id : ""
+          selectedClassView ? selectedClassView.id : "",
+          undefined
         );
 
       let fetchItems: any[] = [];
@@ -698,6 +738,11 @@ export default function ClassComponent() {
       return;
     }
 
+    if (mainCatechistId == "") {
+      sweetAlert.alertWarning("Cần có 1 giáo lý viên chính trong tiết học");
+      return;
+    }
+
     if (updateSlotMode) {
       try {
         enableLoading();
@@ -712,9 +757,6 @@ export default function ClassComponent() {
           isMain: catechist.id === mainCatechistId,
         }));
 
-        console.log(selectedClass ? selectedClass.id : "", {
-          catechists: updateCates,
-        });
         const updateRes = await classApi.updateCatechitsOfClass(
           selectedClass ? selectedClass.id : "",
           {
@@ -915,6 +957,69 @@ export default function ClassComponent() {
     },
   ];
 
+  const columnsUpdateSlot1: GridColDef[] = [
+    {
+      field: "imageUrl",
+      headerName: "Ảnh",
+      width: 100,
+      renderCell: (params) => (
+        <img
+          src={
+            params.row.catechist.imageUrl || "https://via.placeholder.com/150"
+          }
+          alt="Catechist"
+          width="50"
+          height="50"
+        />
+      ),
+    },
+    {
+      field: "fullName",
+      headerName: "Tên giáo lý viên",
+      width: 180,
+      renderCell: (params) => params.row.catechist.fullName,
+    },
+    {
+      field: "code",
+      headerName: "Mã giáo lý viên",
+      width: 130,
+      renderCell: (params) => params.row.catechist.code,
+    },
+    {
+      field: "gender",
+      headerName: "Giới tính",
+      width: 90,
+      renderCell: (params) => params.row.catechist.gender,
+    },
+    {
+      field: "christianName",
+      headerName: "Tên thánh",
+      width: 150,
+      renderCell: (params) => params.row.catechist.christianName || "N/A", // Chỉnh sửa hiển thị tên thánh
+    },
+    {
+      field: "level",
+      headerName: "Cấp bậc",
+      width: 150,
+      renderCell: (params) =>
+        params.row.catechist.level ? params.row.catechist.level.name : "N/A",
+    },
+    {
+      field: "assign",
+      headerName: "Thêm",
+      width: 100,
+      renderCell: (params) => (
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => handleAddCatechist([params.row.catechist.id], true)}
+        >
+          Thêm
+        </Button>
+      ),
+    },
+  ];
+
   const columns2: GridColDef[] = [
     {
       field: "imageUrl",
@@ -992,7 +1097,88 @@ export default function ClassComponent() {
     },
   ];
 
-  const handleMainCatechistChange = (id: string) => {
+  const columnsUpdateSlot2: GridColDef[] = [
+    {
+      field: "imageUrl",
+      headerName: "Ảnh",
+      width: 100,
+      renderCell: (params) => (
+        <img
+          src={
+            params.row.catechist.imageUrl || "https://via.placeholder.com/150"
+          }
+          alt="Catechist"
+          width="50"
+          height="50"
+        />
+      ),
+    },
+    {
+      field: "fullName",
+      headerName: "Tên giáo lý viên",
+      width: 180,
+      renderCell: (params) => params.row.catechist.fullName,
+    },
+    {
+      field: "code",
+      headerName: "Mã giáo lý viên",
+      width: 130,
+      renderCell: (params) => params.row.catechist.code,
+    },
+    {
+      field: "gender",
+      headerName: "Giới tính",
+      width: 90,
+      renderCell: (params) => params.row.catechist.gender,
+    },
+    {
+      field: "christianName",
+      headerName: "Tên thánh",
+      width: 150,
+      renderCell: (params) => params.row.catechist.christianName || "N/A", // Chỉnh sửa hiển thị tên thánh
+    },
+    {
+      field: "level",
+      headerName: "Cấp bậc",
+      width: 150,
+      renderCell: (params) =>
+        params.row.catechist.level ? params.row.catechist.level.name : "N/A",
+    },
+    {
+      field: "remove",
+      headerName: "Xóa",
+      width: 100,
+      renderCell: (params) => (
+        <Button
+          variant="contained"
+          color="error"
+          onClick={() => handleRemoveCatechist([params.row.id], true)}
+        >
+          Xóa
+        </Button>
+      ),
+    },
+    {
+      field: "main",
+      headerName: "Giáo lý viên chính",
+      width: 150,
+      renderCell: (params) => (
+        <input
+          type="checkbox"
+          checked={slotUpdateMainCatechistId === params.row.id}
+          onChange={() => {
+            handleMainCatechistChange(params.row.id, true);
+          }}
+        />
+      ),
+    },
+  ];
+
+  const handleMainCatechistChange = (id: string, updateSlotMode?: boolean) => {
+    if (updateSlotMode) {
+      setSlotUpdateMainCatechistId(id);
+      return;
+    }
     setMainCatechistId(id); // Update main catechist ID
   };
 
@@ -1317,7 +1503,7 @@ export default function ClassComponent() {
           onRowSelectionModelChange={handleSelectionChange}
           rowSelectionModel={selectedRows}
           sx={{
-            height: 480,
+            height: 530,
             overflowX: "auto",
             "& .MuiDataGrid-root": {
               overflowX: "auto",
@@ -1453,7 +1639,7 @@ export default function ClassComponent() {
           <DataGrid
             rows={catechists}
             columns={columns1}
-            paginationMode="server"
+            paginationMode="client"
             rowCount={catechists.length}
             loading={loading}
             paginationModel={paginationModelCatechists}
@@ -1492,7 +1678,7 @@ export default function ClassComponent() {
           <DataGrid
             rows={assignedCatechists}
             columns={columns2}
-            paginationMode="server"
+            paginationMode="client"
             rowCount={assignedCatechists.length}
             loading={loading}
             paginationModel={paginationModelCatechists} // Use separate pagination model for assigned catechists
@@ -1703,6 +1889,64 @@ export default function ClassComponent() {
                             onClick={() => {
                               setChosenSlotToUpdate(params.row);
                               setDialogUpdateSlotCatechist(true);
+                              const action = async () => {
+                                try {
+                                  const { data } =
+                                    await gradeApi.getCatechistsOfGrade(
+                                      selectedClassView.gradeId,
+                                      false,
+                                      1,
+                                      1000,
+                                      selectedPastoralYear
+                                    );
+
+                                  let fetchItems: any[] = []; // Đảm bảo mảng là extensible
+
+                                  const processItems = async () => {
+                                    const promises = [...data.data.items].map(
+                                      async (item) => {
+                                        const cateSlotExist =
+                                          params.row.catechistInSlots.find(
+                                            (item2: any) =>
+                                              item2.catechist.id ==
+                                              item.catechist.id
+                                          );
+
+                                        if (cateSlotExist != undefined) {
+                                          fetchItems = fetchItems.concat({
+                                            ...item,
+                                            id: item.catechist.id,
+                                          });
+                                          if (
+                                            cateSlotExist.type ==
+                                            CatechistInSlotTypeEnum.Main
+                                          ) {
+                                            setSlotUpdateMainCatechistId(
+                                              cateSlotExist.catechist.id
+                                            );
+                                          }
+                                        }
+                                      }
+                                    );
+
+                                    // Chờ cho tất cả các promise hoàn thành
+                                    await Promise.all(promises);
+                                  };
+
+                                  // Gọi hàm xử lý
+                                  processItems().then(() => {
+                                    setSlotUpdateAssignedCatechists(fetchItems);
+                                  });
+
+                                  // setCatechists(fetchItems);
+                                } catch (error) {
+                                  console.error(
+                                    "Error loading catechists:",
+                                    error
+                                  );
+                                }
+                              };
+                              action();
                             }}
                           ></i>
                         </>
@@ -2154,12 +2398,12 @@ export default function ClassComponent() {
             <></>
           )}
 
-          {/* <h4 className="mt-3 mb-1">
+          <h4 className="mt-3 mb-1">
             <strong>Chọn giáo lý viên</strong>
             <span
               className={`${
                 selectedClass && selectedClass.numberOfCatechist
-                  ? `${selectedClass && assignedCatechists.length < selectedClass?.numberOfCatechist ? "text-danger" : "text-success"}`
+                  ? `${selectedClass && slotUpdateCatechists.length < selectedClass?.numberOfCatechist ? "text-danger" : "text-success"}`
                   : ""
               }`}
             >
@@ -2169,16 +2413,16 @@ export default function ClassComponent() {
                 {") "}
               </strong>
             </span>
-          </h4> */}
+          </h4>
           {/* Bảng cho giáo lý viên chưa được gán */}
-          {/* <h5 className="mt-2 mb-1">
+          <h5 className="mt-2 mb-1">
             <strong>Danh sách giáo lý viên có thể gán:</strong>
           </h5>
           <DataGrid
-            rows={slotUpdatecatechists}
-            columns={columns1}
-            paginationMode="server"
-            rowCount={slotUpdatecatechists.length}
+            rows={slotUpdateCatechists}
+            columns={columnsUpdateSlot1}
+            paginationMode="client"
+            rowCount={slotUpdateCatechists.length}
             loading={loading}
             paginationModel={paginationModelCatechists}
             onPaginationModelChange={(newModel) =>
@@ -2195,29 +2439,29 @@ export default function ClassComponent() {
             }}
             localeText={viVNGridTranslation}
             disableRowSelectionOnClick
-          /> */}
+          />
 
           {/* Bảng cho giáo lý viên đã được gán */}
-          {/* <h5 className="mt-2 mb-1">
+          <h5 className="mt-2 mb-1">
             {" "}
             <strong>
               Danh sách giáo lý viên đã gán.{" "}
               <span
                 className={`${
                   selectedClass && selectedClass.numberOfCatechist
-                    ? `${selectedClass && assignedCatechists.length < selectedClass?.numberOfCatechist ? "text-danger" : "text-success"}`
+                    ? `${selectedClass && slotUpdateAssignedCatechists.length < selectedClass?.numberOfCatechist ? "text-danger" : "text-success"}`
                     : ""
                 }`}
               >
-                Số lượng hiện tại: {assignedCatechists.length}
+                Số lượng hiện tại: {slotUpdateAssignedCatechists.length}
               </span>
             </strong>
           </h5>
           <DataGrid
-            rows={assignedCatechists}
-            columns={columns2}
-            paginationMode="server"
-            rowCount={assignedCatechists.length}
+            rows={slotUpdateAssignedCatechists}
+            columns={columnsUpdateSlot2}
+            paginationMode="client"
+            rowCount={slotUpdateAssignedCatechists.length}
             loading={loading}
             paginationModel={paginationModelCatechists} // Use separate pagination model for assigned catechists
             onPaginationModelChange={(newModel) =>
@@ -2234,7 +2478,7 @@ export default function ClassComponent() {
             }}
             localeText={viVNGridTranslation}
             disableRowSelectionOnClick
-          /> */}
+          />
 
           <div className="flex justify-end mt-3 gap-x-2">
             <Button
@@ -2243,11 +2487,59 @@ export default function ClassComponent() {
               onClick={() => {
                 setDialogUpdateSlotCatechist(false);
                 setChosenSlotToUpdate(null);
+                setSlotUpdateMainCatechistId("");
               }}
             >
               Hủy bỏ
             </Button>
-            <Button variant="contained" color={"primary"} onClick={() => {}}>
+            <Button
+              variant="contained"
+              color={"primary"}
+              onClick={() => {
+                const action = async () => {
+                  if (slotUpdateAssignedCatechists.length <= 0) {
+                    sweetAlert.alertWarning(
+                      "Vui lòng chọn ít nhất 1 giáo lý viên để gán"
+                    );
+                    return;
+                  } else if (slotUpdateMainCatechistId == "") {
+                    sweetAlert.alertWarning(
+                      "Cần có 1 giáo lý viên chính trong tiết học"
+                    );
+                    return;
+                  }
+                  try {
+                    enableLoading();
+                    const updateCates = slotUpdateAssignedCatechists.map(
+                      (catechist: any) => ({
+                        catechistId: catechist.id,
+                        isMain: catechist.id === mainCatechistId,
+                      })
+                    );
+
+                    await classApi.updateSlotOfClass(chosenSlotToUpdate.id, {
+                      catechistInSlots: updateCates,
+                    });
+
+                    setTimeout(() => {
+                      setDialogUpdateSlotCatechist(false);
+                      setChosenSlotToUpdate(null);
+                      setSlotUpdateMainCatechistId("");
+                      handleViewSlots(selectedClass ? selectedClass.id : "");
+                      sweetAlert.alertSuccess("Cập nhật thành công");
+                    }, 200);
+                  } catch (error) {
+                    console.error("Lỗi khi tải", error);
+                    sweetAlert.alertFailed("Có lỗi khi cập nhật");
+                  } finally {
+                    setTimeout(() => {
+                      disableLoading();
+                    }, 200);
+                  }
+                };
+                action();
+              }}
+            >
               Xác nhận
             </Button>
           </div>
