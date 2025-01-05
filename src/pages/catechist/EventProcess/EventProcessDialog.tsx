@@ -219,6 +219,7 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
       actualFee,
       note,
       receiptImages:
+        processData &&
         (processData.status == EventProcessStatus.In_Progress ||
           processData.status == EventProcessStatus.Approval) &&
         (status == EventProcessStatus.Completed ||
