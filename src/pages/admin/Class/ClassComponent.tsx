@@ -854,11 +854,11 @@ export default function ClassComponent() {
           }
         );
 
-        fetchClasses();
         setTimeout(() => {
           sweetAlert.alertSuccess("Cập nhật tiết học thành công!");
           setOpenSlotDialog(false);
           handleViewSlots(selectedClass ? selectedClass.id : "");
+          fetchClasses();
         }, 3000);
       } catch (error: any) {
         disableLoading();
@@ -878,7 +878,7 @@ export default function ClassComponent() {
       } finally {
         setTimeout(() => {
           disableLoading();
-        }, 3000);
+        }, 3800);
       }
 
       return;
@@ -1326,15 +1326,28 @@ export default function ClassComponent() {
       fetchClasses();
     } catch (error: any) {
       console.error("Error loading slots:", error);
-      if (error && error.message) {
-        if (error.message.includes("Không thể xóa vì đã có slot")) {
-          sweetAlert.alertFailed(
-            "Có lỗi khi xóa lớp",
-            "Không thể xóa lớp này vì có dữ liệu bên trong lớp",
-            5000,
-            25
-          );
-        }
+      if (
+        error &&
+        error.message &&
+        error.message.includes("Không thể xóa vì đã có slot")
+      ) {
+        sweetAlert.alertFailed(
+          "Có lỗi khi xóa lớp",
+          "Không thể xóa lớp này vì đã bắt đầu lớp học",
+          5000,
+          25
+        );
+      } else if (
+        error &&
+        error.message &&
+        error.message.includes("Không thể xóa vì đã bắt đầu lớp học")
+      ) {
+        sweetAlert.alertFailed(
+          "Có lỗi khi xóa lớp",
+          "Không thể xóa lớp này vì đã bắt đầu lớp học",
+          5000,
+          25
+        );
       } else {
         sweetAlert.alertFailed("Có lỗi khi xóa lớp", "", 2500, 22);
       }
@@ -1689,9 +1702,7 @@ export default function ClassComponent() {
             <>
               <FormControl fullWidth>
                 <InputLabel>
-                  {updateSlotMode
-                    ? "Chọn phòng học mới (nếu muốn cập nhật)"
-                    : "Chọn phòng học "}
+                  {updateSlotMode ? "Chọn phòng học " : "Chọn phòng học "}
                   {!updateSlotMode ? (
                     <span style={{ color: "red" }}>*</span>
                   ) : (
@@ -1705,9 +1716,7 @@ export default function ClassComponent() {
                   }}
                   label={
                     <span>
-                      {updateSlotMode
-                        ? "Chọn phòng học mới (nếu muốn cập nhật)"
-                        : "Chọn phòng học "}
+                      {updateSlotMode ? "Chọn phòng học " : "Chọn phòng học "}
                       {!updateSlotMode ? (
                         <span style={{ color: "red" }}>*</span>
                       ) : (
