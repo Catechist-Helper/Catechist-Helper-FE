@@ -298,37 +298,46 @@ const EventDialog: React.FC<EventDialogProps> = ({
 
               {event ? (
                 <>
-                  {" "}
-                  <TextField
-                    fullWidth
-                    label={
-                      <span>
-                        Ngân sách hiện tại{" "}
-                        <span style={{ color: "red" }}>*</span>
-                      </span>
-                    }
-                    name="current_budget"
-                    // type="number"
-                    value={formatCurrencyVND(values.current_budget)}
-                    onChange={(e) => {
-                      const numericValue = Number(
-                        e.target.value.replace(/[^\d]/g, "")
-                      );
-                      setFieldValue("current_budget", numericValue); // Chỉ giữ lại số
-                    }}
-                    margin="normal"
-                    error={touched.current_budget && !!errors.current_budget}
-                    helperText={touched.current_budget && errors.current_budget}
-                    InputProps={{
-                      startAdornment: (
-                        <span style={{ marginRight: "5px" }}>₫</span>
-                      ),
-                    }}
-                    disabled={
-                      values.eventStatus != EventStatus.Not_Started &&
-                      values.eventStatus != EventStatus.In_Progress
-                    }
-                  />
+                  {false ? (
+                    <>
+                      <TextField
+                        fullWidth
+                        label={
+                          <span>
+                            Ngân sách hiện tại{" "}
+                            <span style={{ color: "red" }}>*</span>
+                          </span>
+                        }
+                        name="current_budget"
+                        // type="number"
+                        value={formatCurrencyVND(values.current_budget)}
+                        onChange={(e) => {
+                          const numericValue = Number(
+                            e.target.value.replace(/[^\d]/g, "")
+                          );
+                          setFieldValue("current_budget", numericValue); // Chỉ giữ lại số
+                        }}
+                        margin="normal"
+                        error={
+                          touched.current_budget && !!errors.current_budget
+                        }
+                        helperText={
+                          touched.current_budget && errors.current_budget
+                        }
+                        InputProps={{
+                          startAdornment: (
+                            <span style={{ marginRight: "5px" }}>₫</span>
+                          ),
+                        }}
+                        disabled={
+                          values.eventStatus != EventStatus.Not_Started &&
+                          values.eventStatus != EventStatus.In_Progress
+                        }
+                      />
+                    </>
+                  ) : (
+                    <></>
+                  )}
                   <FormControl fullWidth margin="normal">
                     <InputLabel>
                       Trạng thái sự kiện <span style={{ color: "red" }}>*</span>
@@ -347,29 +356,32 @@ const EventDialog: React.FC<EventDialogProps> = ({
                               <span style={{ color: "red" }}>*</span>
                             </span>
                           }
+                          sx={{
+                            marginTop: 0.9,
+                          }}
                           className={`
                 ${values.eventStatus == EventStatus.Not_Started ? " text-black" : ""}
-                ${values.eventStatus == EventStatus.In_Progress ? " text-yellow-600" : ""}
-                ${values.eventStatus == EventStatus.Completed ? " text-success" : ""}
-              ${values.eventStatus == EventStatus.Cancelled ? " text-danger" : ""}`}
+                ${values.eventStatus == EventStatus.In_Progress ? " text-black bg-warning" : ""}
+                ${values.eventStatus == EventStatus.Completed ? "text-white bg-success" : ""}
+              ${values.eventStatus == EventStatus.Cancelled ? "text-white bg-danger" : ""}`}
                         >
                           <MenuItem
                             value={EventStatus.Not_Started}
-                            className="bg-success text-white bg-black py-3"
+                            className="text-white bg-black py-3"
                           >
                             {EventStatusString.Not_Started}
                           </MenuItem>
 
                           <MenuItem
                             value={EventStatus.In_Progress}
-                            className="bg-success text-black bg-warning py-3"
+                            className="text-black bg-warning py-3"
                           >
                             {EventStatusString.In_Progress}
                           </MenuItem>
 
                           <MenuItem
                             value={EventStatus.Cancelled}
-                            className="bg-success text-white bg-danger py-3"
+                            className="text-white bg-danger py-3"
                           >
                             {EventStatusString.Cancelled}
                           </MenuItem>
@@ -392,29 +404,32 @@ const EventDialog: React.FC<EventDialogProps> = ({
                               <span style={{ color: "red" }}>*</span>
                             </span>
                           }
+                          sx={{
+                            marginTop: 0.9,
+                          }}
                           className={`
                 ${values.eventStatus == EventStatus.Not_Started ? " text-black" : ""}
-                ${values.eventStatus == EventStatus.In_Progress ? " text-yellow-600" : ""}
-                ${values.eventStatus == EventStatus.Completed ? " text-success" : ""}
-              ${values.eventStatus == EventStatus.Cancelled ? " text-danger" : ""}`}
+                ${values.eventStatus == EventStatus.In_Progress ? " text-black bg-warning" : ""}
+                ${values.eventStatus == EventStatus.Completed ? "text-white bg-success" : ""}
+              ${values.eventStatus == EventStatus.Cancelled ? "text-white bg-danger" : ""}`}
                         >
                           <MenuItem
                             value={EventStatus.In_Progress}
-                            className="bg-success text-black bg-warning py-3"
+                            className=" text-black bg-warning py-3"
                           >
                             {EventStatusString.In_Progress}
                           </MenuItem>
 
                           <MenuItem
                             value={EventStatus.Completed}
-                            className="bg-success text-white bg-success py-3"
+                            className=" text-white bg-success py-3"
                           >
                             {EventStatusString.Completed}
                           </MenuItem>
 
                           <MenuItem
                             value={EventStatus.Cancelled}
-                            className="bg-success text-white bg-danger py-3"
+                            className=" text-white bg-danger py-3"
                           >
                             {EventStatusString.Cancelled}
                           </MenuItem>

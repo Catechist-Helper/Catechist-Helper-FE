@@ -9,7 +9,12 @@ import {
   MenuItem,
   Select as MuiSelect,
 } from "@mui/material";
-import { DataGrid, GridColDef, GridRowsProp } from "@mui/x-data-grid";
+import {
+  DataGrid,
+  GridColDef,
+  GridRowSelectionModel,
+  GridRowsProp,
+} from "@mui/x-data-grid";
 import eventApi from "../../../api/Event";
 import { formatDate } from "../../../utils/formatDate";
 import {
@@ -33,7 +38,7 @@ const EventProcessManagement: React.FC = () => {
   const location = useLocation();
   const eventId = location.state?.eventId as string;
   const navigate = useNavigate();
-
+  const [selectedIds, setSelectedIds] = useState<GridRowSelectionModel>([]);
   const [selectedEvent, setSelectedEvent] = useState<EventItemResponse | null>(
     null
   );
@@ -190,13 +195,10 @@ const EventProcessManagement: React.FC = () => {
       renderCell: (params) => <span>₫ {formatPrice(params.value)}</span>,
     },
     {
-      field: "note",
-      headerName: "Ghi chú",
-      width: 180,
-    },
-    {
       field: "status",
       headerName: "Trạng thái",
+      headerAlign: "center",
+      align: "center",
       width: 150,
       renderCell: (params) => {
         switch (params.value) {
@@ -242,9 +244,14 @@ const EventProcessManagement: React.FC = () => {
       },
     },
     {
+      field: "note",
+      headerName: "Ghi chú",
+      width: 180,
+    },
+    {
       field: "actions",
       headerName: "Hành động",
-      width: 300,
+      width: currentStatusFilter != "Không được duyệt" ? 250 : 100,
       renderCell: (params: any) => (
         <Box>
           <Button
@@ -289,8 +296,51 @@ const EventProcessManagement: React.FC = () => {
   const handleApprove = async (
     id: string,
     name: string,
-    isApproved: boolean
+    isApproved: boolean,
+    multiple?: boolean
   ) => {
+    if (multiple) {
+      const confirm = await sweetAlert.confirm(
+        `Xác nhận phê duyệt </br> ${selectedIds.length} hoạt động`,
+        "",
+        "Xác nhận",
+        "Hủy bỏ",
+        "success"
+      );
+      if (!confirm) {
+        return;
+      }
+      try {
+        enableLoading();
+        const thePromises = selectedIds.map(async (id) => {
+          await processApi.approveProcess(id.toString(), {
+            comment: "",
+            status: isApproved
+              ? EventProcessStatus.Approval
+              : EventProcessStatus.Not_Approval,
+          });
+        });
+
+        await Promise.all(thePromises);
+        if (isApproved) {
+          sweetAlert.alertSuccess("Phê duyệt thành công");
+        } else {
+          sweetAlert.alertSuccess("Hủy bỏ thành công");
+        }
+        fetchEventProcesses();
+        fetchSelectedEvent();
+      } catch (error: any) {
+        console.error("Lỗi:", error);
+        if (isApproved) {
+          sweetAlert.alertFailed("Có lôi khi phê duyệt");
+        } else {
+          sweetAlert.alertFailed("Có lôi khi hủy bỏ");
+        }
+      } finally {
+        disableLoading();
+      }
+      return;
+    }
     const confirm = await sweetAlert.confirm(
       "",
       `<p style="font-size:1.8rem">Xác nhận ${isApproved ? "phê duyệt" : "hủy bỏ"} hoạt động <strong>${name}?</strong></p>`,
@@ -299,6 +349,35 @@ const EventProcessManagement: React.FC = () => {
       isApproved ? "success" : "error"
     );
     if (confirm) {
+      if (isApproved) {
+        try {
+          enableLoading();
+          await processApi.approveProcess(id, {
+            comment: "",
+            status: isApproved
+              ? EventProcessStatus.Approval
+              : EventProcessStatus.Not_Approval,
+          });
+          if (isApproved) {
+            sweetAlert.alertSuccess("Phê duyệt thành công");
+          } else {
+            sweetAlert.alertSuccess("Hủy bỏ thành công");
+          }
+          fetchEventProcesses();
+          fetchSelectedEvent();
+        } catch (error) {
+          console.error("Lỗi:", error);
+          if (isApproved) {
+            sweetAlert.alertFailed("Có lôi khi phê duyệt");
+          } else {
+            sweetAlert.alertFailed("Có lôi khi hủy bỏ");
+          }
+        } finally {
+          disableLoading();
+        }
+        return;
+      }
+
       Swal.fire({
         title: isApproved ? "Nhập ghi chú phê duyệt" : "Nhập ghi chú hủy bỏ",
         input: "text",
@@ -353,7 +432,7 @@ const EventProcessManagement: React.FC = () => {
   if (currentStatusFilter != "Đã phê duyệt") {
     columns.splice(6, 1);
   }
-  if (currentStatusFilter != "Chờ phê duyệt") {
+  if (currentStatusFilter == "Không được duyệt") {
     columns.push({
       field: "comment",
       headerName: "Ghi chú phê duyệt",
@@ -576,6 +655,23 @@ const EventProcessManagement: React.FC = () => {
           </div>
         </div>
         <div className="">
+          {selectedIds.length >= 1 && currentStatusFilter == "Chờ phê duyệt" ? (
+            <>
+              <Button
+                variant="contained"
+                color="success"
+                sx={{ marginRight: "5px" }}
+                onClick={() => {
+                  handleApprove("", "", true, true);
+                }}
+                style={{ marginBottom: "20px" }}
+              >
+                Duyệt
+              </Button>
+            </>
+          ) : (
+            <></>
+          )}
           <Button
             variant="contained"
             color="primary"
@@ -591,25 +687,28 @@ const EventProcessManagement: React.FC = () => {
       </div>
 
       <div className="w-full mt-1">
-        {eventProcesses.length === 0 ? (
+        {/* {eventProcesses.length === 0 ? (
           <Typography>Không có hoạt động nào.</Typography>
-        ) : (
-          <div className="px-3 w-full">
-            <DataGrid
-              rows={rows}
-              columns={columns}
-              disableRowSelectionOnClick
-              paginationMode="client"
-              sx={{
-                height: 400,
+        ) : ( */}
+        <div className="px-3 w-full">
+          <DataGrid
+            rows={rows}
+            columns={columns}
+            disableRowSelectionOnClick={currentStatusFilter != "Chờ phê duyệt"}
+            paginationMode="client"
+            sx={{
+              height: 400,
+              overflowX: "auto",
+              "& .MuiDataGrid-root": {
                 overflowX: "auto",
-                "& .MuiDataGrid-root": {
-                  overflowX: "auto",
-                },
-              }}
-            />
-          </div>
-        )}
+              },
+            }}
+            checkboxSelection={currentStatusFilter == "Chờ phê duyệt"}
+            rowSelectionModel={selectedIds}
+            onRowSelectionModelChange={setSelectedIds}
+          />
+        </div>
+        {/* )} */}
       </div>
       {openDialog ? (
         <>

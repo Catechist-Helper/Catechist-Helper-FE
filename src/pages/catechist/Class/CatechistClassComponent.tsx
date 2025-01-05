@@ -202,24 +202,26 @@ const CatechistClassComponent = () => {
     },
     {
       field: "slotCount",
-      headerName: "Tiết học",
-      width: 180,
-      renderCell: (params: any) => {
+      headerName: "Số tiết học",
+      width: 100,
+      renderCell: (params) => {
         return (
           <p>
             {params.row.slotCount <= 0 ? (
-              <>Chưa có</>
+              <></>
             ) : (
-              <Button
-                variant="contained"
-                color="info"
-                onClick={() => {
-                  setSelectedClassView(params.row);
-                  handleViewSlots(params.row.id);
-                }}
-              >
-                Xem tiết học
-              </Button>
+              <>
+                {params.row.slotCount ? params.row.slotCount : ""}
+                <Button
+                  color="success"
+                  onClick={() => {
+                    setSelectedClassView(params.row);
+                    handleViewSlots(params.row.id);
+                  }}
+                >
+                  Xem
+                </Button>
+              </>
             )}
           </p>
         );

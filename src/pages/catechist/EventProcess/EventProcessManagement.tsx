@@ -240,13 +240,10 @@ const EventProcessManagement: React.FC = () => {
       renderCell: (params) => <span>₫ {formatPrice(params.value)}</span>,
     },
     {
-      field: "note",
-      headerName: "Ghi chú",
-      width: 180,
-    },
-    {
       field: "status",
       headerName: "Trạng thái",
+      headerAlign: "center",
+      align: "center",
       width: 150,
       renderCell: (params) => {
         switch (params.value) {
@@ -292,9 +289,14 @@ const EventProcessManagement: React.FC = () => {
       },
     },
     {
+      field: "note",
+      headerName: "Ghi chú",
+      width: 180,
+    },
+    {
       field: "actions",
       headerName: "Hành động",
-      width: 300,
+      width: currentStatusFilter != "Không được duyệt" ? 250 : 100,
       renderCell: (params: any) => (
         <Box>
           <Button
@@ -345,9 +347,9 @@ const EventProcessManagement: React.FC = () => {
   ];
 
   if (currentStatusFilter != "Đã phê duyệt") {
-    columns.splice(6, 1);
+    columns.splice(4, 1);
   }
-  if (currentStatusFilter != "Chờ phê duyệt") {
+  if (currentStatusFilter == "Không được duyệt") {
     columns.push({
       field: "comment",
       headerName: "Ghi chú phê duyệt",
@@ -598,25 +600,25 @@ const EventProcessManagement: React.FC = () => {
         </div>
       </div>
 
-      {eventProcesses.length === 0 ? (
+      {/* {eventProcesses.length === 0 ? (
         <Typography>Không có hoạt động nào.</Typography>
-      ) : (
-        <div className="w-full px-3">
-          <DataGrid
-            rows={rows}
-            columns={columns}
-            disableRowSelectionOnClick
-            paginationMode="client"
-            sx={{
-              height: 430,
+      ) : ( */}
+      <div className="w-full px-3">
+        <DataGrid
+          rows={rows}
+          columns={columns}
+          disableRowSelectionOnClick
+          paginationMode="client"
+          sx={{
+            height: 430,
+            overflowX: "auto",
+            "& .MuiDataGrid-root": {
               overflowX: "auto",
-              "& .MuiDataGrid-root": {
-                overflowX: "auto",
-              },
-            }}
-          />
-        </div>
-      )}
+            },
+          }}
+        />
+      </div>
+      {/* )} */}
       {/* Event Process Dialog */}
       {openDialog ? (
         <>

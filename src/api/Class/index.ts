@@ -43,8 +43,8 @@ const getSlotsOfClass = (classId: string, page?: number, size?: number) => {
   return request.get<BasicResponse<GetSlotResponse>>(`${ROOT_CLASS}/${classId}/slots`, { params });
 };
 
-const updateRoomOfClass = (classId: string, roomId: string) => {
-  return request.patch<BasicResponse<boolean>>(`${ROOT_CLASS}/${classId}/room`, { roomId: roomId });
+const updateRoomOfClass = (classId: string, data:{roomId?: string, isDeletedAllRoom?:boolean}) => {
+  return request.patch<BasicResponse<boolean>>(`${ROOT_CLASS}/${classId}/room`, data);
 };
 
 const updateCatechitsOfClass = (classId: string, data: CreateSlotRequest) => {
@@ -79,7 +79,8 @@ const updateSlotOfClass = (slotId: string, data: {
   catechistInSlots?: CatechistInSlotRequest[],
   startTime?: string,
   endTime?: string,
-  roomId?: string
+  roomId?: string,
+  isDeletedRoom?: boolean
 }) => {
   return request.patch<BasicResponse<boolean>>(`slots/${slotId}`, data);
 };

@@ -19,6 +19,9 @@ import {
   FormControl,
   InputLabel,
   Modal,
+  RadioGroup,
+  FormControlLabel,
+  Radio,
 } from "@mui/material";
 import classApi from "../../../api/Class"; // Import API Class
 import majorApi from "../../../api/Major"; // Import API Major
@@ -131,6 +134,9 @@ export default function ClassComponent() {
     useState<string>("");
   const [dialogUpdateSlotRoom, setDialogUpdateSlotRoom] =
     useState<boolean>(false);
+  const [isDeletedCurrentRoom, setIsDeletedCurrentRoom] =
+    useState<boolean>(false);
+  const [isDeletedAllRoom, setIsDeletedAllRoom] = useState<boolean>(false);
   const [dialogUpdateSlotCatechist, setDialogUpdateSlotCatechist] =
     useState<boolean>(false);
   const [selectedClassView, setSelectedClassView] = useState<any>(null); // Loading state for slots
@@ -202,28 +208,37 @@ export default function ClassComponent() {
   }, [selectedMajor]);
 
   const columns: GridColDef[] = [
-    { field: "name", headerName: "Tên lớp", width: 200 },
+    { field: "name", headerName: "Tên lớp", width: 145 },
     {
       field: "numberOfCatechist",
       headerName: "Số lượng giáo lý viên",
-      width: 180,
+      width: 160,
+      renderCell: (params) => {
+        return (
+          <span
+            className={`${params.row.catechistCount && params.row.catechistCount >= params.row.numberOfCatechist ? "" : "text-danger"}`}
+          >
+            {`Hiện tại: ${params.row.catechistCount ? params.row.catechistCount : "0"} - Cần: ${params.row.numberOfCatechist}`}
+          </span>
+        );
+      },
     },
     {
       field: "major",
       headerName: "Ngành",
-      width: 150,
+      width: 100,
       renderCell: (params) => params.row.majorName,
     },
     {
       field: "grade",
       headerName: "Khối",
-      width: 150,
+      width: 140,
       renderCell: (params) => params.row.gradeName,
     },
     {
       field: "startDate",
       headerName: "Ngày bắt đầu",
-      width: 140,
+      width: 118,
       renderCell: (params: any) => {
         return formatDate.DD_MM_YYYY(params.value);
       },
@@ -231,7 +246,7 @@ export default function ClassComponent() {
     {
       field: "endDate",
       headerName: "Ngày kết thúc",
-      width: 140,
+      width: 118,
       renderCell: (params: any) => {
         return formatDate.DD_MM_YYYY(params.value);
       },
@@ -239,7 +254,7 @@ export default function ClassComponent() {
     {
       field: "classStatus",
       headerName: "Trạng thái",
-      width: 180,
+      width: 140,
       renderCell: (params) => {
         switch (params.value) {
           case ClassStatusEnum.Active:
@@ -261,28 +276,37 @@ export default function ClassComponent() {
     },
     {
       field: "slotCount",
-      headerName: "Tiết học",
-      width: 90,
+      headerName: "Số tiết học",
+      width: 360,
       renderCell: (params) => {
         return (
           <p>
             {params.row.slotCount <= 0 ? (
               <Button
                 color="success"
+                variant="contained"
                 onClick={() => handleOpenSlotDialog(params.row)}
               >
                 Tạo
               </Button>
             ) : (
-              <Button
-                color="success"
-                onClick={() => {
-                  setSelectedClassView(params.row);
-                  handleViewSlots(params.row.id);
-                }}
-              >
-                Xem
-              </Button>
+              <>
+                <Button
+                  color="success"
+                  variant="contained"
+                  onClick={() => {
+                    setSelectedClassView(params.row);
+                    handleViewSlots(params.row.id);
+                  }}
+                  sx={{ marginRight: "10px" }}
+                >
+                  Xem
+                </Button>
+                {params.row.slotCount ? params.row.slotCount : ""}{" "}
+                {params.row.slotMessage
+                  ? "(" + params.row.slotMessage + ")"
+                  : ""}
+              </>
             )}
           </p>
         );
@@ -375,12 +399,24 @@ export default function ClassComponent() {
       const updatedRows = await Promise.all(
         filterDataByClassIds.map(async (classItem: any) => {
           const slotCount = await fetchSlotCountOfClass(classItem.id);
+          const catechistCount = await fetchCatechistCountOfClass(classItem.id);
           return {
             ...classItem,
-            slotCount,
+            slotCount: slotCount ? slotCount.slotCount : "N/A",
+            slotMessage: slotCount ? slotCount.message : "N/A",
+            catechistCount: catechistCount ? catechistCount.catechistCount : 0,
           };
         })
       );
+
+      if (selectedClassView) {
+        let newUpdateSelectedView = updatedRows.find(
+          (item) => item.id == selectedClassView.id
+        );
+        if (newUpdateSelectedView != undefined) {
+          setSelectedClassView(newUpdateSelectedView);
+        }
+      }
 
       setRows(updatedRows);
       setRowCount(updatedRows.length);
@@ -403,10 +439,49 @@ export default function ClassComponent() {
   const fetchSlotCountOfClass = async (classId: string) => {
     try {
       const { data } = await classApi.getSlotsOfClass(classId, 1, 100);
-      return data.data.total;
+      let suffix = "";
+      if (
+        data.data.items.filter(
+          (item) => !item.catechistInSlots || item.catechistInSlots.length <= 0
+        ).length == data.data.items.length
+      ) {
+        suffix = "Chưa có giáo lý viên";
+      }
+      if (
+        data.data.items.filter((item) => !item.room || !item.room.id).length ==
+        data.data.items.length
+      ) {
+        if (suffix.trim() != "") {
+          suffix += " - Chưa có phòng";
+        } else {
+          suffix = "Chưa có phòng";
+        }
+      }
+      return {
+        slotCount: data.data.total,
+        message: suffix,
+      };
     } catch (error) {
       console.error("Error loading grades:", error);
-      return "N/A";
+      return {
+        slotCount: "N/A",
+        message: "",
+      };
+    }
+  };
+
+  const fetchCatechistCountOfClass = async (classId: string) => {
+    try {
+      const { data } = await classApi.getCatechistsOfClass(classId, 1, 100);
+      console.log("fetchCatechistCountOfClass", data.data.items);
+      return {
+        catechistCount: data.data.total,
+      };
+    } catch (error) {
+      console.error("Error loading grades:", error);
+      return {
+        catechistCount: 0,
+      };
     }
   };
 
@@ -585,11 +660,13 @@ export default function ClassComponent() {
     if (!openSlotDialog) {
       setSelectedRoom(null);
       setAssignedCatechists([]);
+      setIsDeletedAllRoom(false);
     }
   }, [openSlotDialog]);
 
   useEffect(() => {
     if (chosenSlotToUpdate) {
+      setIsDeletedCurrentRoom(false);
       setSelectedClass(selectedClassView);
       setValueUpdateSlotTimeStart(
         formatDate.HH_mm(chosenSlotToUpdate.startTime)
@@ -597,7 +674,6 @@ export default function ClassComponent() {
       setValueUpdateSlotTimeEnd(formatDate.HH_mm(chosenSlotToUpdate.endTime));
 
       fetchRoomsUpdateSlot(chosenSlotToUpdate.id);
-      fetchSlotUpdateCatechists(selectedClassView.gradeId);
     }
   }, [chosenSlotToUpdate]);
 
@@ -693,7 +769,11 @@ export default function ClassComponent() {
           if (
             response.data.data.items.findIndex(
               (item2) => item2.id == item.catechist.id
-            ) >= 0
+            ) >= 0 &&
+            (!chosenSlotToUpdate.catechistInSlots ||
+              chosenSlotToUpdate.catechistInSlots.findIndex(
+                (item2: any) => item2.catechist.id == item.catechist.id
+              ) < 0)
           ) {
             // Dùng concat thay vì push để tránh lỗi
             fetchItems = fetchItems.concat({ ...item, id: item.catechist.id });
@@ -716,7 +796,11 @@ export default function ClassComponent() {
   };
 
   const handleConfirm = async () => {
-    if ((!selectedRoom || selectedRoom == "") && !updateSlotMode) {
+    if (
+      (!selectedRoom || selectedRoom == "") &&
+      !updateSlotMode &&
+      !isDeletedAllRoom
+    ) {
       sweetAlert.alertWarning("Vui lòng chọn phòng học", "", 3000, 22);
       return;
     }
@@ -746,10 +830,16 @@ export default function ClassComponent() {
     if (updateSlotMode) {
       try {
         enableLoading();
-        if (selectedRoom) {
-          classApi.updateRoomOfClass(
+        if (selectedRoom && !isDeletedAllRoom) {
+          await classApi.updateRoomOfClass(
             selectedClass ? selectedClass.id : "",
-            selectedRoom
+            { roomId: selectedRoom }
+          );
+        }
+        if (isDeletedAllRoom) {
+          await classApi.updateRoomOfClass(
+            selectedClass ? selectedClass.id : "",
+            { isDeletedAllRoom: true }
           );
         }
         const updateCates = assignedCatechists.map((catechist: any) => ({
@@ -757,19 +847,18 @@ export default function ClassComponent() {
           isMain: catechist.id === mainCatechistId,
         }));
 
-        const updateRes = await classApi.updateCatechitsOfClass(
+        await classApi.updateCatechitsOfClass(
           selectedClass ? selectedClass.id : "",
           {
             catechists: updateCates,
           }
         );
 
+        fetchClasses();
         setTimeout(() => {
-          if (updateRes.data.statusCode.toString().startsWith("2")) {
-            sweetAlert.alertSuccess("Cập nhật tiết học thành công!");
-            setOpenSlotDialog(false);
-            handleViewSlots(selectedClass ? selectedClass.id : "");
-          }
+          sweetAlert.alertSuccess("Cập nhật tiết học thành công!");
+          setOpenSlotDialog(false);
+          handleViewSlots(selectedClass ? selectedClass.id : "");
         }, 3000);
       } catch (error: any) {
         disableLoading();
@@ -1559,24 +1648,47 @@ export default function ClassComponent() {
               {selectedClass?.name}
             </strong>
           </h3>
-          <FormControl fullWidth>
-            <InputLabel>
-              {updateSlotMode
-                ? "Chọn phòng học mới (nếu muốn cập nhật)"
-                : "Chọn phòng học "}
-              {!updateSlotMode ? (
-                <span style={{ color: "red" }}>*</span>
-              ) : (
-                <></>
-              )}
-            </InputLabel>
-            <Select
-              value={selectedRoom}
-              onChange={(e) => {
-                setSelectedRoom(e.target.value);
-              }}
-              label={
-                <span>
+          {selectedClassView &&
+          selectedClassView.slotMessage &&
+          selectedClassView.slotMessage
+            .toLowerCase()
+            .includes("chưa có phòng") ? (
+            <></>
+          ) : (
+            <>
+              <h4 className="mt-3 mb-1">
+                <strong>Lựa chọn cập nhật phòng học</strong>
+              </h4>
+              <RadioGroup
+                aria-labelledby="demo-radio-buttons-group-label"
+                name="isTeachingBefore"
+                value={isDeletedAllRoom}
+                onChange={(e) => {
+                  if (e.target.value == "true") {
+                    setIsDeletedAllRoom(true);
+                  } else {
+                    setIsDeletedAllRoom(false);
+                  }
+                }}
+                sx={{ marginBottom: "10px" }}
+              >
+                <FormControlLabel
+                  value={false}
+                  control={<Radio />}
+                  label="Thay đổi sang phòng học mới"
+                />
+                <FormControlLabel
+                  value={true}
+                  control={<Radio />}
+                  label="Chỉ xóa phòng học hiện tại"
+                />
+              </RadioGroup>
+            </>
+          )}
+          {!isDeletedAllRoom ? (
+            <>
+              <FormControl fullWidth>
+                <InputLabel>
                   {updateSlotMode
                     ? "Chọn phòng học mới (nếu muốn cập nhật)"
                     : "Chọn phòng học "}
@@ -1585,36 +1697,56 @@ export default function ClassComponent() {
                   ) : (
                     <></>
                   )}
-                </span>
-              }
-            >
-              {rooms.map((room) => (
-                <MenuItem
-                  key={room.id}
-                  value={room.id}
-                  style={{ borderBottom: "1px solid gray" }}
-                  className="mx-2"
+                </InputLabel>
+                <Select
+                  value={selectedRoom}
+                  onChange={(e) => {
+                    setSelectedRoom(e.target.value);
+                  }}
+                  label={
+                    <span>
+                      {updateSlotMode
+                        ? "Chọn phòng học mới (nếu muốn cập nhật)"
+                        : "Chọn phòng học "}
+                      {!updateSlotMode ? (
+                        <span style={{ color: "red" }}>*</span>
+                      ) : (
+                        <></>
+                      )}
+                    </span>
+                  }
                 >
-                  <div className="flex items-center">
-                    {room.image && room.image != "" ? (
-                      <img
-                        src={room.image ?? ""}
-                        alt={room.image ?? ""}
-                        width={120}
-                        height={120}
-                        className="mr-3 rounded-sm"
-                      />
-                    ) : (
-                      ""
-                    )}
-                    <p>
-                      <strong>Tên phòng: </strong> {room.name}
-                    </p>
-                  </div>
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+                  {rooms.map((room) => (
+                    <MenuItem
+                      key={room.id}
+                      value={room.id}
+                      style={{ borderBottom: "1px solid gray" }}
+                      className="mx-2"
+                    >
+                      <div className="flex items-center">
+                        {room.image && room.image != "" ? (
+                          <img
+                            src={room.image ?? ""}
+                            alt={room.image ?? ""}
+                            width={120}
+                            height={120}
+                            className="mr-3 rounded-sm"
+                          />
+                        ) : (
+                          ""
+                        )}
+                        <p>
+                          <strong>Tên phòng: </strong> {room.name}
+                        </p>
+                      </div>
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </>
+          ) : (
+            <></>
+          )}
 
           <h4 className="mt-3 mb-1">
             <strong>Chọn giáo lý viên</strong>
@@ -1833,6 +1965,16 @@ export default function ClassComponent() {
                         0 ? (
                           <>
                             <i
+                              style={{
+                                display:
+                                  selectedClassView &&
+                                  selectedClassView.slotMessage &&
+                                  selectedClassView.slotMessage
+                                    .toLowerCase()
+                                    .includes("chưa có phòng")
+                                    ? "none"
+                                    : "",
+                              }}
                               className="mr-3 fa-solid fa-pen-to-square text-primary cursor-pointer"
                               onClick={() => {
                                 setChosenSlotToUpdate(params.row);
@@ -1861,6 +2003,16 @@ export default function ClassComponent() {
                       0 ? (
                         <>
                           <i
+                            style={{
+                              display:
+                                selectedClassView &&
+                                selectedClassView.slotMessage &&
+                                selectedClassView.slotMessage
+                                  .toLowerCase()
+                                  .includes("chưa có phòng")
+                                  ? "none"
+                                  : "",
+                            }}
                             className="mr-3 fa-solid fa-pen-to-square text-primary cursor-pointer"
                             onClick={() => {
                               setChosenSlotToUpdate(params.row);
@@ -1896,11 +2048,24 @@ export default function ClassComponent() {
                         <>
                           <i
                             className="mr-2 fa-solid fa-pen-to-square text-primary cursor-pointer"
+                            style={{
+                              display:
+                                selectedClassView &&
+                                selectedClassView.catechistCount &&
+                                selectedClassView.catechistCount <= 0
+                                  ? "none"
+                                  : "",
+                            }}
                             onClick={() => {
                               setChosenSlotToUpdate(params.row);
                               setDialogUpdateSlotCatechist(true);
                               const action = async () => {
                                 try {
+                                  enableLoading();
+                                  await fetchSlotUpdateCatechists(
+                                    selectedClassView.gradeId
+                                  );
+
                                   const { data } =
                                     await gradeApi.getCatechistsOfGrade(
                                       selectedClassView.gradeId,
@@ -1954,6 +2119,8 @@ export default function ClassComponent() {
                                     "Error loading catechists:",
                                     error
                                   );
+                                } finally {
+                                  disableLoading();
                                 }
                               };
                               action();
@@ -1992,7 +2159,22 @@ export default function ClassComponent() {
                         <>
                           <i
                             className="mr-2 fa-solid fa-pen-to-square text-primary cursor-pointer"
+                            style={{
+                              display:
+                                selectedClassView &&
+                                ((selectedClassView.catechistCount &&
+                                  selectedClassView.catechistCount <= 0) ||
+                                  !selectedClassView.catechistCount)
+                                  ? "none"
+                                  : "",
+                            }}
                             onClick={() => {
+                              const action = async () => {
+                                fetchSlotUpdateCatechists(
+                                  selectedClassView.gradeId
+                                );
+                              };
+                              action();
                               setChosenSlotToUpdate(params.row);
                               setDialogUpdateSlotCatechist(true);
                             }}
@@ -2273,53 +2455,91 @@ export default function ClassComponent() {
             )}
           </div>
 
-          <FormControl
-            fullWidth
-            sx={{ marginTop: "15px", marginBottom: "15px" }}
-          >
-            <InputLabel>
-              <span>
-                Chọn phòng học <span style={{ color: "red" }}>*</span>
-              </span>
-            </InputLabel>
-            <Select
-              value={selectedRoomUpdateSlot}
-              onChange={(e) => {
-                setSelectedRoomUpdateSlot(e.target.value);
-              }}
-              label={
-                <span>
-                  Chọn phòng học <span style={{ color: "red" }}>*</span>
-                </span>
-              }
-            >
-              {optionRoomsUpdateSlot.map((room) => (
-                <MenuItem
-                  key={room.id}
-                  value={room.id}
-                  style={{ borderBottom: "1px solid gray" }}
-                  className="mx-2"
+          <p className="mt-1 mb-1">
+            <strong>Lựa chọn cập nhật phòng học</strong>
+          </p>
+          {chosenSlotToUpdate && chosenSlotToUpdate.room ? (
+            <>
+              <RadioGroup
+                aria-labelledby="demo-radio-buttons-group-label"
+                name="isTeachingBefore"
+                value={isDeletedCurrentRoom}
+                onChange={(e) => {
+                  if (e.target.value == "true") {
+                    setIsDeletedCurrentRoom(true);
+                  } else {
+                    setIsDeletedCurrentRoom(false);
+                  }
+                }}
+              >
+                <FormControlLabel
+                  value={false}
+                  control={<Radio />}
+                  label="Thay đổi sang phòng học mới"
+                />
+                <FormControlLabel
+                  value={true}
+                  control={<Radio />}
+                  label="Chỉ xóa phòng học hiện tại"
+                />
+              </RadioGroup>
+            </>
+          ) : (
+            <></>
+          )}
+          {!isDeletedCurrentRoom ? (
+            <>
+              <FormControl
+                fullWidth
+                sx={{ marginTop: "15px", marginBottom: "15px" }}
+              >
+                <InputLabel>
+                  <span>
+                    Chọn phòng học <span style={{ color: "red" }}>*</span>
+                  </span>
+                </InputLabel>
+                <Select
+                  value={selectedRoomUpdateSlot}
+                  onChange={(e) => {
+                    setSelectedRoomUpdateSlot(e.target.value);
+                  }}
+                  label={
+                    <span>
+                      Chọn phòng học <span style={{ color: "red" }}>*</span>
+                    </span>
+                  }
                 >
-                  <div className="flex items-center">
-                    {room.image && room.image != "" ? (
-                      <img
-                        src={room.image ?? ""}
-                        alt={room.image ?? ""}
-                        width={120}
-                        height={120}
-                        className="mr-3 rounded-sm"
-                      />
-                    ) : (
-                      ""
-                    )}
-                    <p>
-                      <strong>Tên phòng: </strong> {room.name}
-                    </p>
-                  </div>
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+                  {optionRoomsUpdateSlot.map((room) => (
+                    <MenuItem
+                      key={room.id}
+                      value={room.id}
+                      style={{ borderBottom: "1px solid gray" }}
+                      className="mx-2"
+                    >
+                      <div className="flex items-center">
+                        {room.image && room.image != "" ? (
+                          <img
+                            src={room.image ?? ""}
+                            alt={room.image ?? ""}
+                            width={120}
+                            height={120}
+                            className="mr-3 rounded-sm"
+                          />
+                        ) : (
+                          ""
+                        )}
+                        <p>
+                          <strong>Tên phòng: </strong> {room.name}
+                        </p>
+                      </div>
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </>
+          ) : (
+            <></>
+          )}
 
           <div className="flex justify-end mt-3 gap-x-2">
             <Button
@@ -2338,18 +2558,26 @@ export default function ClassComponent() {
               color={"primary"}
               onClick={() => {
                 const action = async () => {
-                  if (!selectedRoomUpdateSlot || selectedRoomUpdateSlot == "") {
-                    sweetAlert.alertWarning(
-                      "Vui lòng chọn 1 phòng học để cập nhật"
-                    );
-                    return;
-                  }
-
                   try {
                     enableLoading();
-                    await classApi.updateSlotOfClass(chosenSlotToUpdate.id, {
-                      roomId: selectedRoomUpdateSlot,
-                    });
+                    if (isDeletedCurrentRoom) {
+                      await classApi.updateSlotOfClass(chosenSlotToUpdate.id, {
+                        isDeletedRoom: isDeletedCurrentRoom,
+                      });
+                    } else {
+                      if (
+                        !selectedRoomUpdateSlot ||
+                        selectedRoomUpdateSlot == ""
+                      ) {
+                        sweetAlert.alertWarning(
+                          "Vui lòng chọn 1 phòng học để cập nhật"
+                        );
+                        return;
+                      }
+                      await classApi.updateSlotOfClass(chosenSlotToUpdate.id, {
+                        roomId: selectedRoomUpdateSlot,
+                      });
+                    }
 
                     setTimeout(() => {
                       setDialogUpdateSlotRoom(false);
@@ -2382,38 +2610,54 @@ export default function ClassComponent() {
             <strong>Cập nhật giáo lý viên</strong>
           </h3>
 
-          {selectedClass ? (
-            <>
-              <p className="my-2">
-                <strong>Lớp học:</strong> {selectedClass.name}
-              </p>
-            </>
-          ) : (
-            <></>
-          )}
-          {chosenSlotToUpdate ? (
-            <div className="flex gap-x-32">
-              <p className="my-2">
-                <strong>Ngày học:</strong>{" "}
-                {formatDate.DD_MM_YYYY(chosenSlotToUpdate.date)}
-              </p>
+          <div className="flex justify-between flex-wrap">
+            {selectedClass ? (
+              <>
+                <div className="w-[45%] my-2">
+                  <strong>Lớp học:</strong> {selectedClass.name}
+                </div>
+              </>
+            ) : (
+              <></>
+            )}
+            {chosenSlotToUpdate ? (
+              <>
+                <div className="w-[50%] my-2">
+                  <strong>Ngày học:</strong>{" "}
+                  {formatDate.DD_MM_YYYY(chosenSlotToUpdate.date)}
+                </div>
 
-              <p className="my-2">
-                <strong>Giờ học:</strong>{" "}
-                {formatDate.HH_mm(chosenSlotToUpdate.startTime)} -{" "}
-                {formatDate.HH_mm(chosenSlotToUpdate.endTime)}
-              </p>
-            </div>
-          ) : (
-            <></>
-          )}
+                <div className="w-[45%] my-2">
+                  <strong>Giờ học:</strong>{" "}
+                  {formatDate.HH_mm(chosenSlotToUpdate.startTime)} -{" "}
+                  {formatDate.HH_mm(chosenSlotToUpdate.endTime)}
+                </div>
+
+                {chosenSlotToUpdate.room ? (
+                  <>
+                    <div className="w-[50%] my-2">
+                      <strong>Phòng học:</strong> {chosenSlotToUpdate.room.name}
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="w-[50%] my-2">
+                      <strong>Phòng học:</strong> Chưa có
+                    </div>
+                  </>
+                )}
+              </>
+            ) : (
+              <></>
+            )}
+          </div>
 
           <h4 className="mt-3 mb-1">
             <strong>Chọn giáo lý viên</strong>
             <span
               className={`${
                 selectedClass && selectedClass.numberOfCatechist
-                  ? `${selectedClass && slotUpdateCatechists.length < selectedClass?.numberOfCatechist ? "text-danger" : "text-success"}`
+                  ? `${selectedClass && slotUpdateAssignedCatechists.length < selectedClass?.numberOfCatechist ? "text-danger" : "text-success"}`
                   : ""
               }`}
             >
@@ -2526,10 +2770,6 @@ export default function ClassComponent() {
                         isMain: catechist.id === slotUpdateMainCatechistId,
                       })
                     );
-
-                    console.log(chosenSlotToUpdate.id, {
-                      catechistInSlots: updateCates,
-                    });
 
                     await classApi.updateSlotOfClass(chosenSlotToUpdate.id, {
                       catechistInSlots: updateCates,

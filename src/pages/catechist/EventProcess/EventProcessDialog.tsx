@@ -274,6 +274,18 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
                   Tên hoạt động <span style={{ color: "red" }}>*</span>
                 </span>
               }
+              sx={{
+                "& .MuiInputBase-input.Mui-disabled": {
+                  fontWeight: "550",
+                  color: "rgba(0, 0, 0)",
+                  WebkitTextFillColor: "rgba(0, 0, 0)",
+                  opacity: 1,
+                },
+                "& .MuiInputLabel-root.Mui-disabled": {
+                  fontWeight: "550",
+                  color: "rgba(0, 0, 0, 0.6)",
+                },
+              }}
               className="mt-2"
               fullWidth
               value={name}
@@ -292,7 +304,7 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
             {viewMode ||
             (processData &&
               processData.status != EventProcessStatus.Wait_Approval) ? (
-              <div className="text-gray-500 ml-2 mt-1">
+              <div className="ml-2 mt-1 font-bold">
                 <div dangerouslySetInnerHTML={{ __html: description }} />
               </div>
             ) : (
@@ -315,6 +327,18 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
               <></>
             )}
             <TextField
+              sx={{
+                "& .MuiInputBase-input.Mui-disabled": {
+                  fontWeight: "550",
+                  color: "rgba(0, 0, 0)",
+                  WebkitTextFillColor: "rgba(0, 0, 0)",
+                  opacity: 1,
+                },
+                "& .MuiInputLabel-root.Mui-disabled": {
+                  fontWeight: "550",
+                  color: "rgba(0, 0, 0, 0.6)",
+                },
+              }}
               label={
                 <span>
                   Thời gian bắt đầu <span style={{ color: "red" }}>*</span>
@@ -354,6 +378,18 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
               <></>
             )}
             <TextField
+              sx={{
+                "& .MuiInputBase-input.Mui-disabled": {
+                  fontWeight: "550",
+                  color: "rgba(0, 0, 0)",
+                  WebkitTextFillColor: "rgba(0, 0, 0)",
+                  opacity: 1,
+                },
+                "& .MuiInputLabel-root.Mui-disabled": {
+                  fontWeight: "550",
+                  color: "rgba(0, 0, 0, 0.6)",
+                },
+              }}
               label={
                 <span>
                   Thời gian kết thúc <span style={{ color: "red" }}>*</span>
@@ -415,6 +451,18 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
           </Grid> */}
           <Grid item xs={12} sm={6}>
             <TextField
+              sx={{
+                "& .MuiInputBase-input.Mui-disabled": {
+                  fontWeight: "550",
+                  color: "rgba(0, 0, 0)",
+                  WebkitTextFillColor: "rgba(0, 0, 0)",
+                  opacity: 1,
+                },
+                "& .MuiInputLabel-root.Mui-disabled": {
+                  fontWeight: "550",
+                  color: "rgba(0, 0, 0, 0.6)",
+                },
+              }}
               label={
                 <span>
                   Chi phí dự tính <span style={{ color: "red" }}>*</span>
@@ -446,6 +494,18 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
             <>
               <Grid item xs={12} sm={6}>
                 <TextField
+                  sx={{
+                    "& .MuiInputBase-input.Mui-disabled": {
+                      fontWeight: "550",
+                      color: "rgba(0, 0, 0)",
+                      WebkitTextFillColor: "rgba(0, 0, 0)",
+                      opacity: 1,
+                    },
+                    "& .MuiInputLabel-root.Mui-disabled": {
+                      fontWeight: "550",
+                      color: "rgba(0, 0, 0, 0.6)",
+                    },
+                  }}
                   label={
                     <span>
                       Chi phí thực tế <span style={{ color: "red" }}>*</span>
@@ -480,21 +540,23 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
               Ghi chú
             </label>
             <TextField
-              type="text"
-              fullWidth
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              disabled={viewMode}
               sx={{
                 "& .MuiInputBase-input.Mui-disabled": {
+                  fontWeight: "550",
                   color: "rgba(0, 0, 0)",
                   WebkitTextFillColor: "rgba(0, 0, 0)",
                   opacity: 1,
                 },
                 "& .MuiInputLabel-root.Mui-disabled": {
+                  fontWeight: "550",
                   color: "rgba(0, 0, 0, 0.6)",
                 },
               }}
+              type="text"
+              fullWidth
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              disabled={viewMode}
             />
           </Grid>
           {processData ? (
