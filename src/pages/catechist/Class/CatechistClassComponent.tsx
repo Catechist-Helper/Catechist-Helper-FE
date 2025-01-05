@@ -390,7 +390,17 @@ const CatechistClassComponent = () => {
                     <div>
                       <span
                         className={`rounded-xl px-2 py-1
-                      ${new Date().getTime() - new Date(params.row.date).getTime() >= 0 ? "bg-yellow-300" : ""}`}
+                      ${
+                        formatDate.DD_MM_YYYY(
+                          formatDate.getISODateInVietnamTimeZone()
+                        ) == formatDate.DD_MM_YYYY(params.row.date)
+                          ? "bg-blue-300"
+                          : new Date().getTime() -
+                                new Date(params.row.date).getTime() >=
+                              0
+                            ? "bg-yellow-300"
+                            : ""
+                      }`}
                       >
                         {formatDate.DD_MM_YYYY(params.row.date)}
                       </span>

@@ -1775,7 +1775,17 @@ export default function ClassComponent() {
                     <div>
                       <span
                         className={`rounded-xl px-2 py-1
-                      ${new Date().getTime() - new Date(params.row.date).getTime() >= 0 ? "bg-yellow-300" : ""}`}
+                      ${
+                        formatDate.DD_MM_YYYY(
+                          formatDate.getISODateInVietnamTimeZone()
+                        ) == formatDate.DD_MM_YYYY(params.row.date)
+                          ? "bg-blue-300"
+                          : new Date().getTime() -
+                                new Date(params.row.date).getTime() >=
+                              0
+                            ? "bg-yellow-300"
+                            : ""
+                      }`}
                       >
                         {formatDate.DD_MM_YYYY(params.row.date)}
                       </span>
@@ -2513,9 +2523,13 @@ export default function ClassComponent() {
                     const updateCates = slotUpdateAssignedCatechists.map(
                       (catechist: any) => ({
                         catechistId: catechist.id,
-                        isMain: catechist.id === mainCatechistId,
+                        isMain: catechist.id === slotUpdateMainCatechistId,
                       })
                     );
+
+                    console.log(chosenSlotToUpdate.id, {
+                      catechistInSlots: updateCates,
+                    });
 
                     await classApi.updateSlotOfClass(chosenSlotToUpdate.id, {
                       catechistInSlots: updateCates,
