@@ -27,7 +27,6 @@ import { formatCurrencyVND } from "../../../utils/formatPrice";
 import { EventItemResponse } from "../../../model/Response/Event";
 import { formatDate } from "../../../utils/formatDate";
 import CkEditorComponent from "../../../components/ckeditor5/CkEditor";
-import useAppContext from "../../../hooks/useAppContext";
 
 interface EventProcessDialogProps {
   open: boolean;
@@ -228,9 +227,7 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
           : undefined,
     };
 
-    const { enableLoading, disableLoading } = useAppContext();
     try {
-      enableLoading();
       let createdProcessId = "";
       if (processData) {
         // Update process
@@ -253,8 +250,6 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
     } catch (error) {
       console.error("Error creating/updating process:", error);
       sweetAlert.alertFailed("Có lỗi xảy ra", "", 3000, 20);
-    } finally {
-      disableLoading();
     }
   };
 
