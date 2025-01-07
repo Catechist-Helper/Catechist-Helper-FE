@@ -527,12 +527,12 @@ export default function EventsComponent() {
       return;
     }
 
-    if (event.eventStatus == EventStatus.Completed) {
+    if (event.eventStatus == EventStatus.In_Progress) {
       sweetAlert.alertFailed("Không thể xóa vì sự kiện này đã bắt đầu");
       return;
     }
 
-    if (event.eventStatus == EventStatus.In_Progress) {
+    if (event.eventStatus == EventStatus.Completed) {
       sweetAlert.alertFailed("Không thể xóa vì sự kiện này đã hoàn thành");
       return;
     }
