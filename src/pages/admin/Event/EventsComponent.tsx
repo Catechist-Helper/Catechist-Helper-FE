@@ -60,7 +60,6 @@ export default function EventsComponent() {
   const navigate = useNavigate();
 
   const openAddParticipantsDialog = (eventId: string, eventName: string) => {
-    console.log(eventId, eventName);
     setSelectedEventId(eventId);
     setSelectedEventName(eventName);
     setOpenAddDialog(true);

@@ -208,7 +208,7 @@ export default function ClassComponent() {
   }, [selectedMajor]);
 
   const columns: GridColDef[] = [
-    { field: "name", headerName: "Tên lớp", width: 145 },
+    { field: "name", headerName: "Tên lớp", width: 150 },
     {
       field: "numberOfCatechist",
       headerName: "Số lượng giáo lý viên",
@@ -226,19 +226,24 @@ export default function ClassComponent() {
     {
       field: "major",
       headerName: "Ngành",
-      width: 100,
+      width: 110,
       renderCell: (params) => params.row.majorName,
     },
     {
       field: "grade",
       headerName: "Khối",
-      width: 140,
-      renderCell: (params) => params.row.gradeName,
+      width: 110,
+      renderCell: (params) =>
+        params.row.gradeName
+          ? params.row.gradeName.includes("Khối")
+            ? params.row.gradeName.split("Khối")[1]
+            : params.row.gradeName
+          : "",
     },
     {
       field: "startDate",
       headerName: "Ngày bắt đầu",
-      width: 118,
+      width: 120,
       renderCell: (params: any) => {
         return formatDate.DD_MM_YYYY(params.value);
       },
@@ -246,7 +251,7 @@ export default function ClassComponent() {
     {
       field: "endDate",
       headerName: "Ngày kết thúc",
-      width: 118,
+      width: 120,
       renderCell: (params: any) => {
         return formatDate.DD_MM_YYYY(params.value);
       },
@@ -254,7 +259,7 @@ export default function ClassComponent() {
     {
       field: "classStatus",
       headerName: "Trạng thái",
-      width: 140,
+      width: 145,
       renderCell: (params) => {
         switch (params.value) {
           case ClassStatusEnum.Active:
@@ -277,7 +282,7 @@ export default function ClassComponent() {
     {
       field: "slotCount",
       headerName: "Số tiết học",
-      width: 360,
+      width: 365,
       renderCell: (params) => {
         return (
           <p>
@@ -1311,9 +1316,22 @@ export default function ClassComponent() {
         (item) => item.id == selectedRows[0].toString()
       );
 
+      const pastoralYear = pastoralYears.find(
+        (item) => item.id == selectedPastoralYear
+      );
+
       const confirm = await sweetAlert.confirm(
-        `Xác nhận sẽ xóa lớp ${deletedClass.name}`,
-        "",
+        `Xác nhận sẽ xóa \n${deletedClass.name}?`,
+        `Ngành: ${deletedClass.majorName}
+        </br> Khối: ${
+          deletedClass.gradeName
+            ? deletedClass.gradeName.includes("Khối")
+              ? deletedClass.gradeName.split("Khối")[1]
+              : deletedClass.gradeName
+            : ""
+        }
+        </br> ${pastoralYear && pastoralYear.name ? `Niên khóa: ${pastoralYear.name}` : ``}
+        </br> </br>Lưu ý: Khi xóa lớp sẽ xóa hết tất cả dữ liệu tiết học và giáo lý viên bên trong lớp`,
         undefined,
         undefined,
         "question"

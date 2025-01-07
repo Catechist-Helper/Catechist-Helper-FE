@@ -95,22 +95,22 @@ const EventProcessManagement: React.FC = () => {
             )
         );
       }
-      let sumFees = 0;
-      let actualSumFees = 0;
-      response.data.data.items.forEach((item) => {
-        if (
-          item.status != EventProcessStatus.Cancelled &&
-          item.status != EventProcessStatus.Wait_Approval &&
-          item.status != EventProcessStatus.Not_Approval
-        ) {
-          if (item.fee) {
-            sumFees += item.fee;
-          }
-          if (item.actualFee) {
-            actualSumFees += item.actualFee;
-          }
-        }
-      });
+      // let sumFees = 0;
+      // let actualSumFees = 0;
+      // response.data.data.items.forEach((item) => {
+      //   if (
+      //     item.status != EventProcessStatus.Cancelled &&
+      //     item.status != EventProcessStatus.Wait_Approval &&
+      //     item.status != EventProcessStatus.Not_Approval
+      //   ) {
+      //     if (item.fee) {
+      //       sumFees += item.fee;
+      //     }
+      //     if (item.actualFee) {
+      //       actualSumFees += item.actualFee;
+      //     }
+      //   }
+      // });
 
       // setSummaryFees(sumFees);
       // setActualSummaryFees(actualSumFees);
@@ -130,6 +130,7 @@ const EventProcessManagement: React.FC = () => {
   const fetchSelectedEvent = async () => {
     try {
       const response = await eventApi.getEventById(eventId);
+      console.log("response.data.data", response.data.data);
       setSelectedEvent(response.data.data);
     } catch (error) {
       console.error("Lỗi khi lấy dữ liệu:", error);
@@ -513,8 +514,12 @@ const EventProcessManagement: React.FC = () => {
             <strong>{selectedEvent ? selectedEvent.name : ""}</strong>
           </Typography>
           <div className="w-full flex flex-wrap">
-            <div className="mt-2 w-[100%]">
+            <div className="mt-2 w-[34%]">
               <strong>Mô tả sự kiện:</strong> {selectedEvent.description}
+            </div>
+            <div className="mt-2 w-[34%]">
+              <strong>Trạng thái sự kiện:</strong>{" "}
+              {renderEventStatus(selectedEvent.eventStatus)}
             </div>
             <div className="mt-2 w-[34%]">
               <strong>Thời gian bắt đầu sự kiện:</strong>{" "}
@@ -524,13 +529,51 @@ const EventProcessManagement: React.FC = () => {
               <strong>Thời gian kết thúc sự kiện:</strong>{" "}
               {formatDate.DD_MM_YYYY(selectedEvent.endTime)}
             </div>
-            <div className="mt-2 w-[34%]">
-              <strong>Tổng chi phí hiện tại:</strong>{" "}
-              <span> ₫ {formatPrice(selectedEvent.totalCost)}</span>
+            <div className="mt-2 w-[100%]">
+              <div className="w-[25%] flex justify-between">
+                <div>
+                  <strong>Tổng chi phí dự tính:</strong>{" "}
+                </div>
+                <div>
+                  <strong>
+                    <span> ₫ {formatPrice(selectedEvent.totalCost)}</span>
+                  </strong>
+                </div>
+              </div>
             </div>
-            <div className="mt-2 w-[34%]">
-              <strong>Trạng thái sự kiện:</strong>{" "}
-              {renderEventStatus(selectedEvent.eventStatus)}
+
+            <div className="mt-2 w-[100%]">
+              <div className="w-[25%] flex justify-between">
+                <div>
+                  <strong>Tổng chi phí thực tế:</strong>{" "}
+                </div>
+                <div>
+                  <strong>
+                    <span> ₫ {formatPrice(selectedEvent.totalActualCost)}</span>
+                  </strong>
+                </div>
+              </div>
+            </div>
+            <div className="mt-2 w-[100%]">
+              <div className="w-[25%] flex justify-between">
+                <div>
+                  <strong> Tình trạng chi phí:</strong>
+                </div>
+                <div>
+                  <strong>
+                    <span
+                      className={`${selectedEvent.surplusCost >= 0 ? "text-success" : "text-danger"}`}
+                    >
+                      {selectedEvent.surplusCost >= 0 ? "" : "-"} ₫{" "}
+                      {formatPrice(
+                        selectedEvent.surplusCost >= 0
+                          ? selectedEvent.surplusCost
+                          : -selectedEvent.surplusCost
+                      )}
+                    </span>
+                  </strong>
+                </div>
+              </div>
             </div>
             {/* <div className="mt-2 w-[34%]">
               <strong>
