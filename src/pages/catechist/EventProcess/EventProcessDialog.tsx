@@ -35,6 +35,7 @@ interface EventProcessDialogProps {
   processData?: any; // Thêm kiểu dữ liệu nếu cần
   viewModeDialog?: boolean;
   event?: EventItemResponse;
+  truongBTCRole?: boolean;
 }
 
 const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
@@ -44,6 +45,7 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
   processData,
   viewModeDialog,
   event,
+  truongBTCRole,
 }) => {
   const [name, setName] = useState<string>("");
   const [description, setDescription] = useState<string>("");
@@ -817,6 +819,7 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
       </DialogContent>
       <DialogActions>
         {viewMode &&
+        truongBTCRole &&
         processData &&
         processData.status != EventProcessStatus.Completed &&
         processData.status != EventProcessStatus.Cancelled &&

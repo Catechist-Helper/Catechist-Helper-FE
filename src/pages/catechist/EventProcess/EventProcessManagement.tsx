@@ -296,7 +296,7 @@ const EventProcessManagement: React.FC = () => {
     {
       field: "actions",
       headerName: "Hành động",
-      width: currentStatusFilter != "Không được duyệt" ? 250 : 100,
+      width: currentStatusFilter != "Không được duyệt" ? 280 : 100,
       renderCell: (params: any) => (
         <Box>
           <Button
@@ -622,7 +622,6 @@ const EventProcessManagement: React.FC = () => {
       {/* Event Process Dialog */}
       {openDialog ? (
         <>
-          {" "}
           <EventProcessDialog
             open={openDialog}
             viewModeDialog={viewMode}
@@ -630,6 +629,7 @@ const EventProcessManagement: React.FC = () => {
             eventId={eventId}
             processData={selectedProcess}
             event={selectedEvent ? selectedEvent : undefined}
+            truongBTCRole={truongBTCRole}
           />
         </>
       ) : (

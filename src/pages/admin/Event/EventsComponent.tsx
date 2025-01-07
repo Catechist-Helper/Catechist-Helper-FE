@@ -239,14 +239,22 @@ export default function EventsComponent() {
         return (
           <div style={{ display: "flex", alignItems: "center" }}>
             <span>{participantsCount}</span>
-            <Button
-              variant="contained"
-              color="primary"
-              style={{ marginLeft: "10px" }}
-              onClick={() => handleParticipants(params.row.id, params.row.name)}
-            >
-              Xem
-            </Button>
+            {participantsCount && participantsCount > 0 ? (
+              <>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  style={{ marginLeft: "10px" }}
+                  onClick={() =>
+                    handleParticipants(params.row.id, params.row.name)
+                  }
+                >
+                  Xem
+                </Button>
+              </>
+            ) : (
+              <></>
+            )}
 
             {params.row.eventStatus == EventStatus.Not_Started ||
             params.row.eventStatus == EventStatus.In_Progress ? (
