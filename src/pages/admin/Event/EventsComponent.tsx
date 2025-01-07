@@ -527,18 +527,23 @@ export default function EventsComponent() {
       return;
     }
 
+    if (event.eventStatus == EventStatus.Completed) {
+      sweetAlert.alertFailed("Không thể xóa vì sự kiện này đã bắt đầu");
+      return;
+    }
+
+    if (event.eventStatus == EventStatus.In_Progress) {
+      sweetAlert.alertFailed("Không thể xóa vì sự kiện này đã hoàn thành");
+      return;
+    }
+
     const now = new Date();
     const invalidEvents = rows.filter(
       (row) => selectedIds.includes(row.id) && new Date(row.startTime) <= now
     );
 
     if (invalidEvents.length > 0) {
-      sweetAlert.alertFailed(
-        "Một hoặc nhiều sự kiện đã bắt đầu, không thể xóa!",
-        "",
-        5000,
-        30
-      );
+      sweetAlert.alertFailed("Không thể xóa vì sự kiện này đã bắt đầu");
       return;
     }
 

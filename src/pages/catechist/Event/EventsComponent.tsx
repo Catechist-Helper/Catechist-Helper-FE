@@ -270,17 +270,17 @@ export default function EventsComponent() {
 
   const columns: GridColDef[] = [
     { field: "name", headerName: "Tên sự kiện", width: 200 },
-    { field: "description", headerName: "Mô tả", width: 200 },
+    { field: "description", headerName: "Mô tả", width: 180 },
     {
       field: "startTime",
       headerName: "Thời gian bắt đầu",
-      width: 150,
+      width: 135,
       renderCell: (params) => formatDate.DD_MM_YYYY(params.row.startTime),
     },
     {
       field: "endTime",
       headerName: "Thời gian kết thúc",
-      width: 150,
+      width: 135,
       renderCell: (params) => formatDate.DD_MM_YYYY(params.row.endTime),
     },
     // {
@@ -330,7 +330,7 @@ export default function EventsComponent() {
     {
       field: "eventStatus",
       headerName: "Trạng thái",
-      width: 140,
+      width: 130,
       renderCell: (params) => {
         switch (params.value) {
           case EventStatus.Not_Started:
@@ -365,7 +365,7 @@ export default function EventsComponent() {
     {
       field: "userRole",
       headerName: "Vai trò trong sự kiện",
-      width: 180,
+      width: 170,
       renderCell: (params) => {
         return <span>{params.row.userRole}</span>;
       },

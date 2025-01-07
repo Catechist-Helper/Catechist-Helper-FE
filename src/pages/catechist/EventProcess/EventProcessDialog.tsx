@@ -163,10 +163,10 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
 
     if (
       endTime &&
-      new Date(endTime).getTime() <= new Date(startTime).getTime() + 3600000
+      new Date(endTime).getTime() <= new Date(startTime).getTime()
     ) {
       sweetAlert.alertWarning(
-        "Thời gian kết thúc phải sau thời gian bắt đầu ít nhất 1 giờ",
+        "Thời gian kết thúc phải sau thời gian bắt đầu",
         "",
         3000,
         38
