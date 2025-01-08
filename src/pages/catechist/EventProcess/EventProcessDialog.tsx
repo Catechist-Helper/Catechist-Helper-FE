@@ -591,10 +591,10 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
                               value: EventProcessStatus.In_Progress,
                               label: EventProcessStringStatus.In_Progress,
                             },
-                            {
-                              value: EventProcessStatus.Cancelled,
-                              label: EventProcessStringStatus.Cancelled,
-                            },
+                            // {
+                            //   value: EventProcessStatus.Cancelled,
+                            //   label: EventProcessStringStatus.Cancelled,
+                            // },
                           ]
                         : [
                             {
@@ -605,10 +605,10 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
                               value: EventProcessStatus.Completed,
                               label: EventProcessStringStatus.Completed,
                             },
-                            {
-                              value: EventProcessStatus.Cancelled,
-                              label: EventProcessStringStatus.Cancelled,
-                            },
+                            // {
+                            //   value: EventProcessStatus.Cancelled,
+                            //   label: EventProcessStringStatus.Cancelled,
+                            // },
                           ]
                   }
                   isMulti={false}
@@ -633,10 +633,10 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
                       value: EventProcessStatus.Completed,
                       label: EventProcessStringStatus.Completed,
                     },
-                    {
-                      value: EventProcessStatus.Cancelled,
-                      label: EventProcessStringStatus.Cancelled,
-                    },
+                    // {
+                    //   value: EventProcessStatus.Cancelled,
+                    //   label: EventProcessStringStatus.Cancelled,
+                    // },
                   ].find((item) => item.value == status)}
                   onChange={(newValue: any) => {
                     setStatus(newValue.value);

@@ -478,7 +478,6 @@ export default function ClassComponent() {
   const fetchCatechistCountOfClass = async (classId: string) => {
     try {
       const { data } = await classApi.getCatechistsOfClass(classId, 1, 100);
-      console.log("fetchCatechistCountOfClass", data.data.items);
       return {
         catechistCount: data.data.total,
       };
@@ -679,6 +678,7 @@ export default function ClassComponent() {
       setValueUpdateSlotTimeEnd(formatDate.HH_mm(chosenSlotToUpdate.endTime));
 
       fetchRoomsUpdateSlot(chosenSlotToUpdate.id);
+      fetchSlotUpdateCatechists(selectedClassView.gradeId);
     }
   }, [chosenSlotToUpdate]);
 
@@ -775,6 +775,7 @@ export default function ClassComponent() {
             response.data.data.items.findIndex(
               (item2) => item2.id == item.catechist.id
             ) >= 0 &&
+            chosenSlotToUpdate &&
             (!chosenSlotToUpdate.catechistInSlots ||
               chosenSlotToUpdate.catechistInSlots.findIndex(
                 (item2: any) => item2.catechist.id == item.catechist.id
@@ -2089,9 +2090,9 @@ export default function ClassComponent() {
                               const action = async () => {
                                 try {
                                   enableLoading();
-                                  await fetchSlotUpdateCatechists(
-                                    selectedClassView.gradeId
-                                  );
+                                  // await fetchSlotUpdateCatechists(
+                                  //   selectedClassView.gradeId
+                                  // );
 
                                   const { data } =
                                     await gradeApi.getCatechistsOfGrade(
@@ -2196,12 +2197,12 @@ export default function ClassComponent() {
                                   : "",
                             }}
                             onClick={() => {
-                              const action = async () => {
-                                fetchSlotUpdateCatechists(
-                                  selectedClassView.gradeId
-                                );
-                              };
-                              action();
+                              // const action = async () => {
+                              //   fetchSlotUpdateCatechists(
+                              //     selectedClassView.gradeId
+                              //   );
+                              // };
+                              // action();
                               setChosenSlotToUpdate(params.row);
                               setDialogUpdateSlotCatechist(true);
                             }}
