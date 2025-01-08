@@ -12,6 +12,7 @@ import { BasicResponse } from "../../../model/Response/BasicResponse";
 import sweetAlert from "../../../utils/sweetAlert";
 import * as Yup from "yup";
 import { CertificateResponse } from "../../../model/Response/Certificate"; // Đảm bảo đường dẫn đúng
+import theCertificateImage from "/public/image/certificate.png";
 
 interface RoomFormValues {
   name: string;
@@ -43,7 +44,7 @@ const CreateCertificate: React.FC = () => {
       const ctx = canvas.getContext("2d");
       if (ctx) {
         const backgroundImage = new Image();
-        backgroundImage.src = "/public/image/certificate.png"; // Đảm bảo đường dẫn tới ảnh nền là đúng
+        backgroundImage.src = theCertificateImage; // Đảm bảo đường dẫn tới ảnh nền là đúng
 
         backgroundImage.onload = () => {
           // Xóa nội dung cũ và vẽ ảnh nền
