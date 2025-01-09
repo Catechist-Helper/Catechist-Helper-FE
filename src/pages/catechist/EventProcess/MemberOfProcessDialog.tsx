@@ -12,6 +12,7 @@ import {
   MemberItemResponse,
 } from "../../../model/Response/Event";
 import processApi from "../../../api/EventProcess";
+import viVNGridTranslation from "../../../locale/MUITable";
 
 interface MemberOfProcessDialogProps {
   eventId: string;
@@ -21,7 +22,8 @@ interface MemberOfProcessDialogProps {
 
 export interface MemberOfProcessDialogHandle {
   handleChangeMemberOfProcess: (processId: string) => void;
-  checkValidMemberOfProcess: () => void;
+  checkValidMemberOfProcess: () => boolean;
+  checkHavingMemberOfProcess: () => boolean;
 }
 
 const MemberOfProcessDialog = forwardRef<
@@ -41,8 +43,39 @@ const MemberOfProcessDialog = forwardRef<
   >([]);
   const [roles, setRoles] = useState<any[]>([]);
   const [mainMember, setMainMember] = useState<string>("");
+  const [finishResetVietnamese, setFinishResetVietnamese] =
+    useState<boolean>(false);
 
   const { enableLoading, disableLoading } = useAppContext();
+
+  const resetVietnamese = () => {
+    let count = 1;
+    let theInterval = setInterval(() => {
+      const elements = document.querySelectorAll<HTMLElement>(
+        ".MuiTablePagination-selectLabel"
+      );
+      if (elements) {
+        elements.forEach((element) => {
+          element.innerHTML = "Số hàng mỗi trang";
+        });
+      }
+
+      const elements2 = document.querySelectorAll<HTMLElement>(
+        ".MuiTablePagination-displayedRows"
+      );
+      if (elements2) {
+        elements2.forEach((element2) => {
+          let text = element2.innerHTML;
+          text = text.replace(/\bof\b/g, "trong");
+          element2.innerHTML = text;
+        });
+      }
+      count++;
+      if (count == 5) {
+        clearInterval(theInterval);
+      }
+    }, 300);
+  };
 
   useEffect(() => {
     const fetchAccountsAndRoles = async () => {
@@ -134,6 +167,13 @@ const MemberOfProcessDialog = forwardRef<
     await memberApi.updateProcessMember(processId.trim(), request);
   };
 
+  const checkHavingMemberOfProcess = () => {
+    if (membersOfProcess.length <= 0) {
+      return false;
+    }
+    return true;
+  };
+
   const checkValidMemberOfProcess = () => {
     if (membersOfProcess.length > 0 && mainMember == "") {
       return false;
@@ -141,9 +181,25 @@ const MemberOfProcessDialog = forwardRef<
     return true;
   };
 
+  useEffect(() => {
+    if (
+      (availableAccounts.length > 0 || membersOfProcess.length > 0) &&
+      !finishResetVietnamese
+    ) {
+      resetVietnamese();
+      if (membersOfProcess.length > 0) {
+        setFinishResetVietnamese(true);
+      }
+    }
+    if (membersOfProcess.length <= 0) {
+      setFinishResetVietnamese(false);
+    }
+  }, [availableAccounts, membersOfProcess]);
+
   useImperativeHandle(ref, () => ({
     handleChangeMemberOfProcess,
     checkValidMemberOfProcess,
+    checkHavingMemberOfProcess,
   }));
 
   const handleRemoveMember = (accountId: string) => {
@@ -186,10 +242,14 @@ const MemberOfProcessDialog = forwardRef<
     return getRoleOrder(roleNameA) - getRoleOrder(roleNameB);
   });
 
-  const sortedMembersOfProcess = [...membersOfProcess].sort((a, b) => {
+  const preSortedMembersOfProcess = [...membersOfProcess].sort((a, b) => {
     const roleNameA = roles.find((r) => r.id === a.roleEventId)?.name || "";
     const roleNameB = roles.find((r) => r.id === b.roleEventId)?.name || "";
     return getRoleOrder(roleNameA) - getRoleOrder(roleNameB);
+  });
+
+  const sortedMembersOfProcess = [...preSortedMembersOfProcess].sort((a, b) => {
+    return a.id == mainMember && b.id != mainMember ? -1 : 1;
   });
 
   const handleMainCatechistChange = (id: string) => {
@@ -296,16 +356,26 @@ const MemberOfProcessDialog = forwardRef<
   return (
     <>
       <div>
-        <DialogTitle>Thành viên đảm nhận</DialogTitle>
+        <DialogTitle>
+          <p className="font-bold">Thành viên đảm nhận</p>
+        </DialogTitle>
         <DialogContent>
-          <h4>Danh sách chưa Gán</h4>
-          <DataGrid
-            disableRowSelectionOnClick
-            rows={sortedAvailables}
-            columns={columns1}
-            autoHeight
-          />
-          <h4 className="mt-3">Danh sách người đảm nhận</h4>
+          {!viewMode ? (
+            <div className="mb-4">
+              <h4 className="mb-2">Danh sách chưa Gán</h4>
+              <DataGrid
+                disableRowSelectionOnClick
+                rows={sortedAvailables}
+                columns={columns1}
+                autoHeight
+                localeText={viVNGridTranslation}
+              />
+            </div>
+          ) : (
+            <></>
+          )}
+
+          <h4 className="mb-2">Danh sách người đảm nhận</h4>
           {sortedMembersOfProcess.length > 0 ? (
             <>
               <DataGrid
@@ -313,6 +383,7 @@ const MemberOfProcessDialog = forwardRef<
                 rows={sortedMembersOfProcess}
                 columns={columns2}
                 autoHeight
+                localeText={viVNGridTranslation}
               />
             </>
           ) : (

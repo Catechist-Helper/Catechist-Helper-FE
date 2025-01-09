@@ -158,6 +158,35 @@ export default function ClassComponent() {
     setOpenDialogCreateUpdateClass(true);
   };
 
+  const resetVietnamese = () => {
+    let count = 1;
+    let theInterval = setInterval(() => {
+      const elements = document.querySelectorAll<HTMLElement>(
+        ".MuiTablePagination-selectLabel"
+      );
+      if (elements) {
+        elements.forEach((element) => {
+          element.innerHTML = "Số hàng mỗi trang";
+        });
+      }
+
+      const elements2 = document.querySelectorAll<HTMLElement>(
+        ".MuiTablePagination-displayedRows"
+      );
+      if (elements2) {
+        elements2.forEach((element2) => {
+          let text = element2.innerHTML;
+          text = text.replace(/\bof\b/g, "trong");
+          element2.innerHTML = text;
+        });
+      }
+      count++;
+      if (count == 5) {
+        clearInterval(theInterval);
+      }
+    }, 300);
+  };
+
   useEffect(() => {
     fetchMajors();
   }, []);
@@ -658,6 +687,7 @@ export default function ClassComponent() {
       setAssignedCatechists([...assignedCatechists, ...fetchItems]);
     }
     setOpenSlotDialog(true);
+    resetVietnamese();
   };
 
   useEffect(() => {
@@ -930,6 +960,7 @@ export default function ClassComponent() {
 
       setSlots(sortedArray);
 
+      resetVietnamese();
       setOpenSlotsDialog(true);
     } catch (error) {
       console.error("Error loading slots:", error);
@@ -944,6 +975,7 @@ export default function ClassComponent() {
 
   // Open Timetable Dialog
   const handleOpenTimetableDialog = () => {
+    resetVietnamese();
     setOpenTimetableDialog(true);
   };
 
@@ -2086,6 +2118,7 @@ export default function ClassComponent() {
                             }}
                             onClick={() => {
                               setChosenSlotToUpdate(params.row);
+                              resetVietnamese();
                               setDialogUpdateSlotCatechist(true);
                               const action = async () => {
                                 try {
@@ -2232,6 +2265,7 @@ export default function ClassComponent() {
                           color="secondary"
                           variant="outlined"
                           onClick={() => {
+                            resetVietnamese();
                             setOpenLeaveDialog(true);
                             setSlotAbsenceId(params.row.id);
                             setAbsenceCatechistOptions(

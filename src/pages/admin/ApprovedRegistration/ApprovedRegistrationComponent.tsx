@@ -1006,39 +1006,29 @@ export default function ApprovedRegistrationsTable() {
       </div>
 
       <div className="px-2">
-        {rows.length <= 0 ? (
-          <>
-            <h1 className="text-[1.2rem] mb-2">
-              <strong>Không có ứng viên nào</strong>
-            </h1>
-          </>
-        ) : (
-          <>
-            <DataGrid
-              rows={rows}
-              columns={columns}
-              paginationMode="client"
-              rowCount={rowCount} // Đảm bảo rowCount là tổng số hàng từ server
-              loading={loading}
-              initialState={{ pagination: { paginationModel } }}
-              paginationModel={paginationModel}
-              onPaginationModelChange={setPaginationModel} // Cập nhật paginationModel khi thay đổi
-              pageSizeOptions={[10, 25, 50, 100, 250]}
-              onRowSelectionModelChange={handleSelectionChange}
-              rowSelectionModel={selectedRegistrations}
-              checkboxSelection
-              sx={{
-                height: 480,
-                overflowX: "auto",
-                "& .MuiDataGrid-root": {
-                  overflowX: "auto",
-                },
-              }}
-              localeText={viVNGridTranslation}
-              disableMultipleRowSelection={!deleteMode}
-            />
-          </>
-        )}
+        <DataGrid
+          rows={rows}
+          columns={columns}
+          paginationMode="client"
+          rowCount={rowCount} // Đảm bảo rowCount là tổng số hàng từ server
+          loading={loading}
+          initialState={{ pagination: { paginationModel } }}
+          paginationModel={paginationModel}
+          onPaginationModelChange={setPaginationModel} // Cập nhật paginationModel khi thay đổi
+          pageSizeOptions={[10, 25, 50, 100, 250]}
+          onRowSelectionModelChange={handleSelectionChange}
+          rowSelectionModel={selectedRegistrations}
+          checkboxSelection
+          sx={{
+            height: 480,
+            overflowX: "auto",
+            "& .MuiDataGrid-root": {
+              overflowX: "auto",
+            },
+          }}
+          localeText={viVNGridTranslation}
+          disableMultipleRowSelection={!deleteMode}
+        />
       </div>
 
       {/* Modal phê duyệt phỏng vấn */}

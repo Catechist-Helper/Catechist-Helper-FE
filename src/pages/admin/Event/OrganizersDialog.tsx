@@ -18,6 +18,7 @@ import sweetAlert from "../../../utils/sweetAlert";
 import { UpdateMemberRequest } from "../../../model/Request/EventMember";
 import { RoleEventName } from "../../../enums/RoleEventEnum";
 import useAppContext from "../../../hooks/useAppContext";
+import viVNGridTranslation from "../../../locale/MUITable";
 
 interface OrganizersDialogProps {
   open: boolean;
@@ -407,6 +408,7 @@ const OrganizersDialog: React.FC<OrganizersDialogProps> = ({
               pageSizeOptions={[8, 10, 25, 50, 100, 250]}
               autoHeight
               disableRowSelectionOnClick
+              localeText={viVNGridTranslation}
             />
           </>
         ) : (
@@ -425,6 +427,7 @@ const OrganizersDialog: React.FC<OrganizersDialogProps> = ({
               autoHeight
               checkboxSelection={viewOrganizersDialogMode ? false : true}
               disableRowSelectionOnClick
+              localeText={viVNGridTranslation}
             />
           </>
         ) : (
