@@ -24,6 +24,7 @@ import sweetAlert from "../../../utils/sweetAlert";
 import { CatechistInSlotTypeEnumNumber } from "../../../enums/CatechistInSlot";
 import { GetAbsenceItemResponse } from "../../../model/Response/AbsenceRequest";
 import useAppContext from "../../../hooks/useAppContext";
+import viVNGridTranslation from "../../../locale/MUITable";
 
 interface ApprovalDialogProps {
   open: boolean;
@@ -159,9 +160,41 @@ const ApprovalDialog = ({
     },
   ];
 
+  const resetVietnamese = () => {
+    let count = 1;
+    let theInterval = setInterval(() => {
+      const elements = document.querySelectorAll<HTMLElement>(
+        ".MuiTablePagination-selectLabel"
+      );
+      if (elements) {
+        elements.forEach((element) => {
+          element.innerHTML = "Số hàng mỗi trang";
+        });
+      }
+
+      const elements2 = document.querySelectorAll<HTMLElement>(
+        ".MuiTablePagination-displayedRows"
+      );
+      if (elements2) {
+        elements2.forEach((element2) => {
+          let text = element2.innerHTML;
+          text = text.replace(/\bof\b/g, "trong");
+          element2.innerHTML = text;
+        });
+      }
+      count++;
+      if (count == 5) {
+        clearInterval(theInterval);
+      }
+    }, 300);
+  };
+
   useEffect(() => {
     if (status != AbsenceRequestStatus.Approved) {
       setSelectedReplacementId(null);
+    }
+    if (status == AbsenceRequestStatus.Approved) {
+      resetVietnamese();
     }
   }, [status]);
 
@@ -231,6 +264,8 @@ const ApprovalDialog = ({
                 columns={columns}
                 paginationMode="client"
                 disableRowSelectionOnClick
+                localeText={viVNGridTranslation}
+                sx={{ minHeight: "100px" }}
               />
             </FormControl>
           </>

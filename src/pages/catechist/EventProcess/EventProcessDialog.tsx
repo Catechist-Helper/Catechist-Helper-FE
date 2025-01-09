@@ -233,8 +233,37 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
       let createdProcessId = "";
       if (processData) {
         // Update process
+        if (
+          data.status == EventProcessStatus.In_Progress &&
+          !childRef?.current?.checkHavingMemberOfProcess()
+        ) {
+          sweetAlert.alertWarning(
+            "Hoạt động cần có ít nhất 1 người đảm nhận chính khi ở trạng thái đang làm"
+          );
+          return;
+        }
+
+        if (data.status == EventProcessStatus.Completed) {
+          if (!childRef?.current?.checkHavingMemberOfProcess()) {
+            sweetAlert.alertWarning(
+              "Hoạt động cần có ít nhất 1 người đảm nhận chính khi ở trạng thái hoàn thành"
+            );
+            return;
+          }
+
+          if (
+            !data.receiptImages ||
+            (data.receiptImages && data.receiptImages.length <= 0)
+          ) {
+            sweetAlert.alertWarning(
+              "Hoạt động hoàn thành cần cung cấp ít nhất 1 ảnh chứng minh"
+            );
+            return;
+          }
+        }
+
         await processApi.updateProcess(processData.id, data);
-        sweetAlert.alertSuccess("Cập nhật hoạt động thanh công", "", 3000, 25);
+        sweetAlert.alertSuccess("Cập nhật hoạt động thành công", "", 3000, 25);
 
         createdProcessId = processData.id;
       } else {
@@ -242,7 +271,7 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
         data.actualFee = data.fee;
         data.status = EventProcessStatus.Wait_Approval;
         const createdDataRes = await processApi.createProcess(data);
-        sweetAlert.alertSuccess("Tạo hoạt động thanh công", "", 3000, 25);
+        sweetAlert.alertSuccess("Tạo hoạt động thành công", "", 3000, 25);
 
         createdProcessId = createdDataRes.data.data.id;
       }
@@ -264,6 +293,15 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
         sweetAlert.alertFailed(
           "Thời gian hoạt động phải nằm trong thời gian sự kiện"
         );
+      } else if (
+        (error.message &&
+          error.message.includes(
+            "Chi phí thực tế phải nhỏ hơn chi phí dự tính"
+          )) ||
+        (error.Error &&
+          error.Error.includes("Chi phí thực tế phải nhỏ hơn chi phí dự tính"))
+      ) {
+        sweetAlert.alertFailed("Chi phí thực tế phải nhỏ hơn chi phí dự tính");
       } else {
         sweetAlert.alertFailed("Có lỗi xảy ra", "", 3000, 20);
       }
@@ -382,7 +420,11 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
               InputLabelProps={{
                 shrink: true,
               }}
-              disabled={viewMode}
+              disabled={
+                viewMode ||
+                (processData &&
+                  processData.status != EventProcessStatus.Wait_Approval)
+              }
             />
           </Grid>
           <Grid item xs={12} sm={6}>
@@ -433,7 +475,11 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
               InputLabelProps={{
                 shrink: true,
               }}
-              disabled={viewMode}
+              disabled={
+                viewMode ||
+                (processData &&
+                  processData.status != EventProcessStatus.Wait_Approval)
+              }
             />
           </Grid>
           {/* <Grid item xs={12} sm={4}>
@@ -507,7 +553,11 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
               }
             />
           </Grid>
-          {processData && status != EventProcessStatus.Wait_Approval ? (
+          {processData &&
+          processData.status != EventProcessStatus.Wait_Approval &&
+          status != EventProcessStatus.Wait_Approval &&
+          status != EventProcessStatus.Approval &&
+          status != EventProcessStatus.Not_Approval ? (
             <>
               <Grid item xs={12} sm={6}>
                 <TextField
@@ -743,7 +793,7 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
                     className="block mb-1 text-sm font-medium"
                     htmlFor="images"
                   >
-                    Ảnh chứng minh
+                    Ảnh chứng minh <span style={{ color: "red" }}>*</span>
                   </label>
                   <input
                     type="file"

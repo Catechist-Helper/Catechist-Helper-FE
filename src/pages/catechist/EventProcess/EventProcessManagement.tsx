@@ -27,6 +27,7 @@ import {
   EventStatus,
   EventStatusString,
 } from "../../../enums/Event";
+import viVNGridTranslation from "../../../locale/MUITable";
 
 const EventProcessManagement: React.FC = () => {
   const location = useLocation();
@@ -197,6 +198,8 @@ const EventProcessManagement: React.FC = () => {
     setOpenDialog(false);
     setSelectedProcess(null); // Reset selectedProcess khi đóng dialog
     setViewMode(false);
+    fetchSelectedEvent();
+    fetchEventProcesses();
   };
 
   const columns: GridColDef[] = [
@@ -661,6 +664,7 @@ const EventProcessManagement: React.FC = () => {
               overflowX: "auto",
             },
           }}
+          localeText={viVNGridTranslation}
         />
       </div>
       {/* )} */}
