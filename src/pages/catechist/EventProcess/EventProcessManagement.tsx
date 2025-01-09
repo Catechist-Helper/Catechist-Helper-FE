@@ -614,7 +614,10 @@ const EventProcessManagement: React.FC = () => {
           </div>
         </div>
         <div className="flex gap-x-2">
-          {truongBTCRole ? (
+          {truongBTCRole &&
+          selectedEvent &&
+          selectedEvent.eventStatus != EventStatus.Completed &&
+          selectedEvent.eventStatus != EventStatus.Cancelled ? (
             <>
               <Button
                 variant="contained"

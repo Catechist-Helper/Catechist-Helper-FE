@@ -173,15 +173,14 @@ export default function RegistrationDataTable() {
       // Lọc các đơn theo chế độ xem hiện tại
       const filteredRegistrations =
         (deleteModeOn === true || deleteMode) && deleteModeOn != "false"
-          ? data.data.items
-          : // .filter(
-            //     (item) =>
-            //       Number(formatDate.YYYY(item.createdAt)) <
-            //       Number(
-            //         formatDate.YYYY(formatDate.getISODateInVietnamTimeZone())
-            //       )
-            //   )
-            data.data.items;
+          ? data.data.items.filter(
+              (item) =>
+                Number(formatDate.YYYY(item.createdAt)) <
+                Number(
+                  formatDate.YYYY(formatDate.getISODateInVietnamTimeZone())
+                )
+            )
+          : data.data.items;
 
       // Cập nhật state với dữ liệu mới
       setRows(filteredRegistrations);

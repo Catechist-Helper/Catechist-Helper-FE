@@ -321,15 +321,14 @@ export default function ApprovedRegistrationsTable() {
 
       finalData =
         (deleteModeOn === true || deleteMode) && deleteModeOn != "false"
-          ? [...finalData]
-          : // .filter(
-            //     (item) =>
-            //       Number(formatDate.YYYY(item.createdAt)) <
-            //       Number(
-            //         formatDate.YYYY(formatDate.getISODateInVietnamTimeZone())
-            //       )
-            //   )
-            [...finalData];
+          ? [...finalData].filter(
+              (item) =>
+                Number(formatDate.YYYY(item.createdAt)) <
+                Number(
+                  formatDate.YYYY(formatDate.getISODateInVietnamTimeZone())
+                )
+            )
+          : [...finalData];
 
       setRowCount(finalData.length);
       setRows(finalData);

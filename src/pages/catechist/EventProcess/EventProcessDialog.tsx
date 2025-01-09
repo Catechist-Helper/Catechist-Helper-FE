@@ -249,9 +249,24 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
       childRef.current?.handleChangeMemberOfProcess(createdProcessId);
 
       onClose();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating/updating process:", error);
-      sweetAlert.alertFailed("Có lỗi xảy ra", "", 3000, 20);
+      if (
+        (error.message &&
+          error.message.includes(
+            "Thời gian hoạt động phải nằm trong thời gian sự kiện"
+          )) ||
+        (error.Error &&
+          error.Error.includes(
+            "Thời gian hoạt động phải nằm trong thời gian sự kiện"
+          ))
+      ) {
+        sweetAlert.alertFailed(
+          "Thời gian hoạt động phải nằm trong thời gian sự kiện"
+        );
+      } else {
+        sweetAlert.alertFailed("Có lỗi xảy ra", "", 3000, 20);
+      }
     }
   };
 
