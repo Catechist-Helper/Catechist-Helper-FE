@@ -130,7 +130,6 @@ const EventProcessManagement: React.FC = () => {
   const fetchSelectedEvent = async () => {
     try {
       const response = await eventApi.getEventById(eventId);
-      console.log("response.data.data", response.data.data);
       setSelectedEvent(response.data.data);
     } catch (error) {
       console.error("Lỗi khi lấy dữ liệu:", error);

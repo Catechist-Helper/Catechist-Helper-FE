@@ -35,8 +35,6 @@ const ListAllChristianNames: React.FC = () => {
       ) {
         setChristianNames(data.data.items);
         setFilteredChristianNames(data.data.items);
-      } else {
-        console.log("No items found");
       }
     } catch (err) {
       console.error("Không thấy danh sách tên thánh: ", err);

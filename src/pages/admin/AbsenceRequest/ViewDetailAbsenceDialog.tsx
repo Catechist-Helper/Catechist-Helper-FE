@@ -24,7 +24,7 @@ const ViewDetailAbsenceDialog = ({
   absence: GetAbsenceItemResponse | null;
 }) => {
   if (!absence) return null; // Trả về null nếu absence không tồn tại
-  console.log("absence,absence", absence);
+
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
       <DialogContent>

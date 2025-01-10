@@ -25,14 +25,13 @@ const CreatePostCategory: React.FC = () => {
     onSubmit: async (values) => {
       setIsSubmitting(true);
       try {
-        const response = await christianNamesApi.createChristianNames(
+        await christianNamesApi.createChristianNames(
           values.name,
           values.gender,
           values.holyDay
         );
 
         message.success("Tạo tên Thánh thành công!");
-        console.log("Response: ", response);
       } catch (error) {
         message.error("Tạo tên Thánh không thành công");
         console.error("Error: ", error);

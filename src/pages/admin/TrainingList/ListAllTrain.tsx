@@ -229,7 +229,6 @@ const ListAllTrain: React.FC = () => {
   ) => {
     const selectedTrain = trains.find((train) => train.id === trainId);
     if (selectedTrain) {
-      console.log("selectedTrain", selectedTrain);
       navigate("/admin/training-catechist", {
         state: {
           trainingInfo: {
@@ -378,7 +377,7 @@ const ListAllTrain: React.FC = () => {
       ),
     },
   ];
-  console.log("tranins", trains);
+
   if (!init) return <></>;
 
   return (
@@ -451,6 +450,13 @@ const ListAllTrain: React.FC = () => {
         </Button>
       </div>
       <div className="px-3">
+        {trains.length <= 0 && init && !loading ? (
+          <p className="mx-2 font-bold text-[1.2rem]">
+            Hiện tại không có danh sách đào tạo nào
+          </p>
+        ) : (
+          <></>
+        )}
         {trains.length > 0 && init && !loading ? (
           <>
             <DataGrid

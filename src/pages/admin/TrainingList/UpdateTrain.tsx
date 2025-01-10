@@ -15,7 +15,6 @@ const UpdateTrain: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [levels, setLevels] = useState<any[]>([]);
   const [levelMap, setLevelMap] = useState<{ [key: string]: string }>({});
-  console.log(id);
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [certificates, setCertificates] = useState<any[]>([]);
@@ -42,11 +41,11 @@ const UpdateTrain: React.FC = () => {
       endTime: "",
       trainingListStatus: trainingListStatus.Training,
     },
-    
+
     onSubmit: async (values) => {
       setIsSubmitting(true);
       try {
-        const response = await trainApi.updateTrain(
+        await trainApi.updateTrain(
           id!,
           values.name,
           values.description,
@@ -57,7 +56,6 @@ const UpdateTrain: React.FC = () => {
           values.endTime,
           values.trainingListStatus
         );
-        console.log("Update successful: ", response);
 
         sweetAlert.alertSuccess(
           "Cập nhật thành công!",
@@ -110,7 +108,6 @@ const UpdateTrain: React.FC = () => {
         if (train.nextLevel?.id) {
           fetchCertificatesByNextLevel(train.nextLevel.id);
         }
-        console.log("Updated Formik values:", formik.values);
       } catch (error) {
         console.error("Failed to fetch pastoralYear data:", error);
         message.error("Không thể tải thông tin đào tạo");

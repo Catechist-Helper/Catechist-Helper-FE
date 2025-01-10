@@ -58,14 +58,8 @@ const CreateRoom: React.FC = () => {
           return;
         }
 
-        // Debugging: Log FormData entries
-        for (const [key, value] of formData.entries()) {
-          console.log(`${key}:`, value);
-        }
-
         // Make API request
-        const response = await roomsApi.createRoom(formData);
-        console.log("Response:", response.data);
+        await roomsApi.createRoom(formData);
         message.success("Phòng học được tạo thành công!");
         resetForm(); // Reset form after success
         setImagePreview(null); // Reset image preview

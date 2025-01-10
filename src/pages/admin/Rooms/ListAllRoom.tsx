@@ -19,13 +19,11 @@ const ListAllRooms: React.FC = () => {
       .getAllRoom(1, firstRes.data.data.total)
       .then((axiosRes: AxiosResponse) => {
         const res: BasicResponse = axiosRes.data;
-        console.log("Response data: ", res);
 
         if (
           res.statusCode.toString().trim().startsWith("2") &&
           res.data.items != null
         ) {
-          console.log("Items: ", res.data.items);
           setRooms(res.data.items);
         } else {
           console.log("No items found");
@@ -173,12 +171,13 @@ const ListAllRooms: React.FC = () => {
           rowHeight={200}
           localeText={viVNGridTranslation}
           sx={{
-            height: 480,
+            height: 550,
             overflowX: "auto",
             "& .MuiDataGrid-root": {
               overflowX: "auto",
             },
           }}
+          disableRowSelectionOnClick
         />
       </div>
     </Paper>

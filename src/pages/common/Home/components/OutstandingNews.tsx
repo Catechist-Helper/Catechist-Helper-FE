@@ -18,12 +18,16 @@ interface Post {
 const OutstandingNews: React.FC = () => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  
+
   const mapApiModuleToEnum = (module: string): string => {
-    switch (module) {
-      case "PUBLIC":
+    switch (module.toLowerCase()) {
+      case PostStatus.PUBLIC.toLocaleLowerCase():
         return PostStatus.PUBLIC;
-      case "PRIVATE":
+      case PostStatus.PRIVATE.toLocaleLowerCase():
+        return PostStatus.PRIVATE;
+      case "PUBLIC".toLocaleLowerCase():
+        return PostStatus.PUBLIC;
+      case "PRIVATE".toLocaleLowerCase():
         return PostStatus.PRIVATE;
       default:
         return "Không xác định";
@@ -36,9 +40,12 @@ const OutstandingNews: React.FC = () => {
       try {
         const response = await postsApi.getAll(1, 6); // Lấy 6 bài tin tức mới nhất
         // Lọc bài viết có module là PUBLIC
-         const publicPosts = response.data.data.items.filter(
-          (post: Post) => mapApiModuleToEnum(post.module) === PostStatus.PUBLIC
-        ).sort((a: Post, b: Post) => {
+        const publicPosts = response.data.data.items
+          .filter(
+            (post: Post) =>
+              mapApiModuleToEnum(post.module) === PostStatus.PUBLIC
+          )
+          .sort((a: Post, b: Post) => {
             return (
               new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
             );
@@ -91,7 +98,8 @@ const OutstandingNews: React.FC = () => {
         {posts.map((post) => (
           <li key={post.id} className="news-item mb-[10px] w-full">
             <Link
-              to={PATH_HOME.news_detail_page(post.id)}
+              to={PATH_HOME.home_news_detail}
+              state={{ postId: post.id }}
               className="news-link inline-block"
               style={{ borderBottom: "1px solid #fff" }}
             >

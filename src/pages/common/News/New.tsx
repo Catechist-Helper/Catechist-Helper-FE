@@ -18,10 +18,14 @@ const New: React.FC = () => {
   const [publicPosts, setPublicPosts] = useState<Post[]>([]);
 
   const mapApiModuleToEnum = (module: string): string => {
-    switch (module) {
-      case "PUBLIC":
+    switch (module.toLowerCase()) {
+      case PostStatus.PUBLIC.toLocaleLowerCase():
         return PostStatus.PUBLIC;
-      case "PRIVATE":
+      case PostStatus.PRIVATE.toLocaleLowerCase():
+        return PostStatus.PRIVATE;
+      case "PUBLIC".toLocaleLowerCase():
+        return PostStatus.PUBLIC;
+      case "PRIVATE".toLocaleLowerCase():
         return PostStatus.PRIVATE;
       default:
         return "Không xác định";
@@ -32,7 +36,6 @@ const New: React.FC = () => {
     const fetchPublicPosts = async () => {
       try {
         const response = await postsApi.getAll(1, 10);
-        console.log(response.data.data.items);
         const allPosts: Post[] = response.data.data.items;
 
         const publicPosts = allPosts.filter(
@@ -69,12 +72,13 @@ const New: React.FC = () => {
                 className="border p-4 rounded-lg shadow-sm bg-gray-200"
               >
                 <Link
-                  to={PATH_HOME.news_detail_page(post.id)}
+                  to={PATH_HOME.home_news_detail}
+                  state={{ postId: post.id }}
                   className="text-2xl font-semibold text-blue-600 hover:underline"
                 >
                   {post.title}
                 </Link>
-                <p className="ml-1 mt-1 text-[0.8rem] italic text-gray-700">
+                <p className="ml-[2px] mt-1 text-[0.8rem] italic text-gray-700">
                   Đăng lúc: {formatDate.DD_MM_YYYY_Time(post.createdAt)}
                 </p>
                 <p className="text-gray-700 mt-2">

@@ -21,13 +21,12 @@ const UpdateLevel: React.FC = () => {
     onSubmit: async (values) => {
       setIsSubmitting(true);
       try {
-        const response = await levelApi.updateLevel(
+        await levelApi.updateLevel(
           id!,
           values.name,
           values.description,
           values.hierarchyLevel
         );
-        console.log("Update successful: ", response);
 
         sweetAlert.alertSuccess(
           "Cập nhật thành công!",
@@ -67,8 +66,6 @@ const UpdateLevel: React.FC = () => {
           description: level.data.description,
           hierarchyLevel: level.data.hierarchyLevel,
         });
-
-        console.log("Updated Formik values:", formik.values);
       } catch (error) {
         console.error("Failed to fetch category data:", error);
       }

@@ -19,13 +19,7 @@ const UpdatePostCategory: React.FC = () => {
     onSubmit: async (values) => {
       setIsSubmitting(true);
       try {
-        const response = await postCategoryApi.update(
-          id!,
-          values.name,
-          values.description
-        );
-        console.log("Update successful: ", response);
-        console.log("Update successful: ", response);
+        await postCategoryApi.update(id!, values.name, values.description);
         navigate(PATH_ADMIN.post_category);
         setTimeout(() => {
           sweetAlert.alertSuccess("Cập nhật danh mục thành công!");
@@ -53,8 +47,6 @@ const UpdatePostCategory: React.FC = () => {
           name: category.data.name,
           description: category.data.description,
         });
-
-        console.log("Updated Formik values:", formik.values);
       } catch (error) {
         console.error("Failed to fetch category data:", error);
       }

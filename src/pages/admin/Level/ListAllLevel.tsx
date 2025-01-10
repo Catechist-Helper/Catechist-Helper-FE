@@ -114,8 +114,6 @@ const ListAllLevel: React.FC = () => {
   const handleCloseDialogCertificateImage = () =>
     setDialogCertificateImageOpen(false);
 
-  console.log(levels);
-
   const columns: GridColDef[] = [
     { field: "name", headerName: "Tên", width: 200 },
     { field: "description", headerName: "Mô tả", width: 300 },

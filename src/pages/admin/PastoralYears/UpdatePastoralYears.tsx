@@ -26,14 +26,13 @@ const UpdatePastoralYear: React.FC = () => {
       try {
         const [startYear, endYear] = values.name.split("-");
         const formattedName = formatDate.YYYY_YYYY(startYear, endYear);
-        const response = await pastoralYearsApi.updatePastoralYears(
+        await pastoralYearsApi.updatePastoralYears(
           id!,
           formattedName,
           values.note,
           values.pastoralYearStatus
         );
 
-        console.log("Update successful: ", response);
         message.success("Cập nhật niên khóa thành công!");
         navigate(PATH_ADMIN.pastoral_years);
       } catch (error) {
@@ -56,8 +55,6 @@ const UpdatePastoralYear: React.FC = () => {
           note: pastoralYear.data.note,
           pastoralYearStatus: pastoralYear.data.pastoralYearStatus,
         });
-
-        console.log("Updated Formik values:", formik.values);
       } catch (error) {
         console.error("Failed to fetch pastoralYear data:", error);
         message.error("Không thể tải thông tin niên khóa");

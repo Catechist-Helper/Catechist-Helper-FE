@@ -422,10 +422,6 @@ export default function CatechistRegistrationsTable() {
     try {
       enableLoading();
       if (selectedRegistrationOfModal) {
-        console.log(selectedRegistrationOfModal.interview.id, {
-          recruiterAccountId: userLogin.id,
-          evaluation: interviewNote,
-        });
         await interviewApi.evaluateInterview(
           selectedRegistrationOfModal.interview.id,
           {
@@ -449,7 +445,6 @@ export default function CatechistRegistrationsTable() {
     }
     disableLoading();
   };
-  console.log(rows);
 
   useEffect(() => {
     if (!openApprovalModal) {

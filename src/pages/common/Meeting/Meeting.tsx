@@ -100,7 +100,6 @@ const Meeting = () => {
         setIsStartCallEnabled(true);
         setIsHangUpEnabled(false);
         setIsVideoEnabled(false);
-        console.log("Call ended:", call.callEndReason);
       }
     });
 

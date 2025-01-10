@@ -44,13 +44,12 @@ const UpdateConfig: React.FC = () => {
       }
 
       try {
-        const response = await systemConfigApi.updateConfig(
+        await systemConfigApi.updateConfig(
           id!,
           values.key,
           formattedValue.toString()
         );
         message.success("Cập nhật hệ thống thành công!");
-        console.log("Update successful: ", response);
         navigate("/admin/system-configurations");
       } catch (error) {
         console.error("Update failed: ", error);
@@ -74,8 +73,6 @@ const UpdateConfig: React.FC = () => {
           key: systemConfig.data.key,
           value: systemConfig.data.value,
         });
-
-        console.log("Updated Formik values:", formik.values);
       } catch (error) {
         console.error("Failed to fetch systemConfig data:", error);
       }

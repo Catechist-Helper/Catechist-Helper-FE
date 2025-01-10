@@ -80,6 +80,7 @@ export const PATH_CATECHIST = {
 export const PATH_HOME = {
   root: PATH_ROOT_HOME,
   news: path(PATH_ROOT_HOME, "news"),
+  home_news_detail: path(PATH_ROOT_HOME, "news-detail"),
   news_detail: path(PATH_ROOT_HOME, "news-detail/:id"),
   news_detail_page: (id: any) => path(PATH_ROOT_HOME, `news-detail/${id}`),
   registration: path(PATH_ROOT_HOME, "register-form"),

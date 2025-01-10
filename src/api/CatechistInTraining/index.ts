@@ -24,13 +24,10 @@ const createCatInTrain = (status: number): Promise<AxiosResponse<any>> =>
         payload: { id: string; status: number }[]
       ): Promise<AxiosResponse<any>> => {
         // Log URL và payload để debug
-        console.log("API URL:", `${ROOT_CATINTRAIN}/${trainingListId}`);
-        console.log("Payload gửi lên:", payload);
       
         return request
           .put(`${ROOT_CATINTRAIN}/${trainingListId}`, payload)
           .then((response) => {
-            console.log("API Response:", response.data);
             return response;
           })
           .catch((error) => {

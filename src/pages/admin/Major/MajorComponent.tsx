@@ -157,8 +157,6 @@ export default function MajorComponent() {
     setOpenDialog(true);
   };
 
-  console.log("aa", rows);
-
   // Handle creating Major
   const handleCreateMajor = async () => {
     if (majorName == "") {

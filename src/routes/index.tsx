@@ -105,7 +105,7 @@ export default function Router() {
           ),
         },
         {
-          path: PATH_HOME.news_detail,
+          path: PATH_HOME.home_news_detail,
           element: (
             // <GuestGuard>
             <NewDetails />

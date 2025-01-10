@@ -32,12 +32,8 @@ const CreatePostCategory: React.FC = () => {
       }
       setIsSubmitting(true);
       try {
-        const response = await postCategoryApi.create(
-          values.name,
-          values.description
-        );
+        await postCategoryApi.create(values.name, values.description);
 
-        console.log("Response: ", response);
         navigate(PATH_ADMIN.post_category);
         setTimeout(() => {
           sweetAlert.alertSuccess(

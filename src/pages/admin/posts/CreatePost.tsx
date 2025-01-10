@@ -10,6 +10,7 @@ import CkEditor from "../../../components/ckeditor5/CkEditor";
 import { PostStatus } from "../../../enums/Post";
 import { PATH_ADMIN } from "../../../routes/paths";
 import { getUserInfo } from "../../../utils/utils";
+import sweetAlert from "../../../utils/sweetAlert";
 
 interface UserLogin {
   id: string;
@@ -51,6 +52,17 @@ const CreatePost: React.FC = () => {
       });
   }, []);
 
+  const mapEnumToApiModule = (status: string): string => {
+    switch (status) {
+      case PostStatus.PUBLIC:
+        return "PUBLIC";
+      case PostStatus.PRIVATE:
+        return "PRIVATE";
+      default:
+        return "";
+    }
+  };
+
   const formik = useFormik({
     initialValues: {
       title: "",
@@ -60,13 +72,6 @@ const CreatePost: React.FC = () => {
     },
     onSubmit: async (values) => {
       setIsSubmitting(true);
-      console.log({
-        title: values.title,
-        content: values.content,
-        module: values.module,
-        accountId: "",
-        postCategoryId: values.postCategoryId,
-      });
 
       try {
         if (!userLogin || !userLogin.id) {
@@ -74,16 +79,33 @@ const CreatePost: React.FC = () => {
           return;
         }
 
+        if (values.title == "") {
+          sweetAlert.alertWarning("Vui lòng nhập tiêu đề bài viết");
+          return;
+        }
+
+        if (values.content == "") {
+          sweetAlert.alertWarning("Vui lòng nhập nội dung bài viết");
+          return;
+        }
+
+        if (values.module == "") {
+          sweetAlert.alertWarning("Vui lòng chọn trạng thái bài viết");
+          return;
+        }
+
+        if (values.postCategoryId == "") {
+          sweetAlert.alertWarning("Vui lòng chọn danh mục bài viết");
+          return;
+        }
         const accountId = userLogin.id;
         const newPost = {
           title: values.title,
           content: values.content,
-          module: values.module,
+          module: mapEnumToApiModule(values.module),
           accountId,
           postCategoryId: values.postCategoryId,
         };
-
-        console.log("New Post: ", newPost);
 
         await postsApi.create(
           newPost.title,
@@ -111,27 +133,21 @@ const CreatePost: React.FC = () => {
           className="w-full mx-auto px-20 mt-5"
         >
           <div className="mb-5">
-            <label
-              htmlFor="name"
-              className="block mb-2 text-sm font-medium text-gray-900 "
-            >
-              Tiêu đề
+            <label htmlFor="name">
+              Tiêu đề <span style={{ color: "red" }}>*</span>
             </label>
             <input
               type="text"
               name="title"
               value={formik.values.title}
               onChange={formik.handleChange}
-              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
+              className="bg-gray-50 border border-gray-300text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
             />
           </div>
 
           <div className="mb-5">
-            <label
-              htmlFor="content"
-              className="block mb-2 text-sm font-medium text-gray-900 "
-            >
-              Nội dung
+            <label htmlFor="content">
+              Nội dung <span style={{ color: "red" }}>*</span>
             </label>
             <div className="p-0">
               <div className="border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400">
@@ -144,12 +160,14 @@ const CreatePost: React.FC = () => {
           </div>
 
           <div className="mb-5">
-            <label>Trạng thái</label>
+            <label>
+              Trạng thái <span style={{ color: "red" }}>*</span>
+            </label>
             <select
               name="module"
               value={formik.values.module}
               onChange={formik.handleChange}
-              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
+              className="bg-gray-50 border border-gray-300text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
             >
               <option value="" disabled>
                 Chọn trạng thái
@@ -163,17 +181,14 @@ const CreatePost: React.FC = () => {
           </div>
 
           <div className="mb-5">
-            <label
-              htmlFor="name"
-              className="block mb-2 text-sm font-medium text-gray-900 "
-            >
-              Danh mục bài viết
+            <label htmlFor="name">
+              Danh mục bài viết <span style={{ color: "red" }}>*</span>
             </label>
             <select
               name="postCategoryId"
               value={formik.values.postCategoryId}
               onChange={formik.handleChange}
-              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
+              className="bg-gray-50 border border-gray-300text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
             >
               <option value="" disabled>
                 Chọn danh mục

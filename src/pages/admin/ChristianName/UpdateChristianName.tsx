@@ -24,13 +24,12 @@ const UpdateChristianName: React.FC = () => {
           ? new Date(values.holyDay).toISOString()
           : values.holyDay;
 
-        const response = await christianNamesApi.updateChristianNames(
+        await christianNamesApi.updateChristianNames(
           id!,
           values.name,
           values.gender,
           formattedHolyDay
         );
-        console.log("Update successful: ", response);
         navigate(PATH_ADMIN.christian_name);
       } catch (error) {
         console.error("Update failed: ", error);
@@ -59,8 +58,6 @@ const UpdateChristianName: React.FC = () => {
           gender: christianName.data.gender,
           holyDay: formattedHolyDay,
         });
-
-        console.log("Updated Formik values:", formik.values);
       } catch (error) {
         console.error("Failed to fetch christianNames data:", error);
       }

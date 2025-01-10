@@ -163,8 +163,6 @@ function AuthProvider({ children }: { children: ReactNode }) {
           password,
         })
         .then((response: AxiosResponse) => {
-          console.log(response);
-
           const res: BasicResponse = response.data;
           if (
             res.statusCode.toString().trim().startsWith("2") &&

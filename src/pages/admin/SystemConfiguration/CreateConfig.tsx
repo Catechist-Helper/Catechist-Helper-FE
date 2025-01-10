@@ -23,12 +23,8 @@ const CreateConfig: React.FC = () => {
     onSubmit: async (values) => {
       setIsSubmitting(true);
       try {
-        const response = await systemConfigApi.createConfig(
-          values.key,
-          values.value
-        );
+        await systemConfigApi.createConfig(values.key, values.value);
         message.success("Cấu hình tạo thành công!");
-        console.log("Response: ", response);
       } catch (error) {
         message.error("Không tạo được cấu hình.");
         console.error("Error: ", error);

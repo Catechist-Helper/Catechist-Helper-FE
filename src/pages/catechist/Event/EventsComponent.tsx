@@ -38,9 +38,6 @@ export default function EventsComponent() {
   const [loading, setLoading] = useState<boolean>(true);
   // const [selectedIds, setSelectedIds] = useState<GridRowSelectionModel>([]);
   const [userLogin, setUserLogin] = useState<any>(null);
-  const [userRoles, setUserRoles] = useState<{ [key: string]: RoleEventName }>(
-    {}
-  );
   const [eventCategories, setEventCategories] = useState<
     EventCategoryItemResponse[]
   >([]);
@@ -110,11 +107,10 @@ export default function EventsComponent() {
           );
           if (userInEvent) {
             const role = mapRoleToEnum(userInEvent.roleEvent.name);
-            setUserRoles((prevRoles) => ({
-              ...prevRoles,
-              [event.id]: role,
-            }));
-            console.log(userRoles);
+            // setUserRoles((prevRoles) => ({
+            //   ...prevRoles,
+            //   [event.id]: role,
+            // }));
             return { ...event, userRole: role }; // Attach the role to the event
           }
           return null; // User is not in the event

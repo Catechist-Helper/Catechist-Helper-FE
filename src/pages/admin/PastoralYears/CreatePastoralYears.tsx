@@ -30,14 +30,13 @@ const CreatePastoralYears: React.FC = () => {
         const [startYear, endYear] = values.name.split("-");
         const formattedName = formatDate.YYYY_YYYY(startYear, endYear);
 
-        const response = await pastoralYearsApi.createPastoralYears(
+        await pastoralYearsApi.createPastoralYears(
           formattedName,
           values.note,
           values.pastoralYearStatus
         );
 
         message.success("Tạo niên khóa thành công!");
-        console.log("Response: ", response);
         navigate(PATH_ADMIN.pastoral_years);
       } catch (error) {
         message.error("Tạo niên khóa không thành công");

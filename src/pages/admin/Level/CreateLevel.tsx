@@ -24,7 +24,7 @@ const CreateLevel: React.FC = () => {
     onSubmit: async (values) => {
       setIsSubmitting(true);
       try {
-        const response = await levelApi.createLevel(
+        await levelApi.createLevel(
           values.name,
           values.description,
           values.hierarchyLevel
@@ -36,7 +36,6 @@ const CreateLevel: React.FC = () => {
           3000,
           16
         );
-        console.log("Response: ", response);
         setTimeout(() => {
           window.location.reload();
         }, 2000);

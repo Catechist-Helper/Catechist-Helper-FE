@@ -387,7 +387,7 @@ const SideBarComponent = () => {
                       </Link>
                     </li>
                     <li className="min-w-max">
-                      <div onClick={() => console.log("Logout")}>
+                      <div>
                         <li
                           style={{
                             opacity: `${isHovered ? "1" : "0"}`,

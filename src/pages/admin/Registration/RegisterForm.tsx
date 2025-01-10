@@ -157,7 +157,6 @@ const RegisterForm: React.FC = () => {
     try {
       const response =
         await registrationApi.createRegistration(formDataToSubmit);
-      console.log("Registration Success", response);
       let process = await interviewProcessApi.createInterviewProcess({
         registrationId: response.data.data.id,
         name: RegistrationProcessTitle.NOP_HO_SO,

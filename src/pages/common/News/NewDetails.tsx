@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import postsApi from "../../../api/Post";
 import HeaderHome from "../../../components/Organisms/HeaderHome/HeaderHome";
 import FooterHome from "../../../components/Organisms/FooterHome/FooterHome";
@@ -14,73 +14,98 @@ interface Post {
 }
 
 const NewDetails: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
   const [post, setPost] = useState<Post | null>(null);
+  const location = useLocation();
+
+  const fetchPost = async (postId: string) => {
+    try {
+      const response = await postsApi.getById(postId);
+      setPost(response.data.data);
+    } catch (error) {
+      console.error("Failed to fetch post details", error);
+    }
+  };
 
   useEffect(() => {
-    const fetchPost = async () => {
-      try {
-        const response = await postsApi.getById(id!);
-        console.log(response.data);
-        setPost(response.data.data);
-      } catch (error) {
-        console.error("Failed to fetch post details", error);
-      }
-    };
+    if (location.state) {
+      const { postId } = location.state;
+      if (postId && postId != "") {
+        fetchPost(postId);
+        let count = 1;
 
-    if (id) {
-      fetchPost();
-    }
-
-    const addTargetBlankToLinks = () => {
-      const newsDetailComponent = document.getElementById(
-        "news_detail_component_id"
-      );
-
-      if (newsDetailComponent) {
-        const links = newsDetailComponent.querySelectorAll("a");
-
-        links.forEach((link) => {
-          const href = link.getAttribute("href");
-
-          if (href) {
-            if (href.includes("register-form")) {
-              // Tạo style animation cho các thẻ a có href chứa "register-form"
-              link.style.fontSize = "1.4rem";
-              link.style.color = "red";
-              link.style.animation = "colorChange 2s infinite";
-
-              // Thêm keyframes vào document
-              const styleSheet = document.styleSheets[0];
-              const keyframes = `
-                @keyframes colorChange {
-                  0% { color: #f94449; }
-                  50% { color: #1a66cc; }
-                  100% { color: #c30010; }
-                }
-              `;
-              if (styleSheet.insertRule) {
-                styleSheet.insertRule(keyframes, styleSheet.cssRules.length);
-              }
-            } else {
-              // Set target="_blank" cho các thẻ a khác
-              link.setAttribute("target", "_blank");
-            }
+        let interval = setInterval(() => {
+          addTargetBlankToLinks();
+          count++;
+          if (count == 10) {
+            clearInterval(interval);
           }
-        });
-      }
-    };
+        }, 150);
 
-    let count = 1;
+        const addTargetBlankToLinks = () => {
+          const newsDetailComponent = document.getElementById(
+            "news_detail_component_id"
+          );
 
-    let interval = setInterval(() => {
-      addTargetBlankToLinks();
-      count++;
-      if (count == 5) {
-        clearInterval(interval);
+          if (newsDetailComponent) {
+            const links = newsDetailComponent.querySelectorAll("a");
+
+            links.forEach((link) => {
+              const href = link.getAttribute("href");
+
+              if (href) {
+                clearInterval(interval);
+
+                if (href.includes("register-form")) {
+                  // Tạo style animation cho các thẻ a có href chứa "register-form"
+                  link.style.fontSize = "1.4rem";
+                  link.style.color = "red";
+                  link.style.animation = "colorChange 2s infinite";
+
+                  // Thêm keyframes vào document
+                  const styleSheet = document.styleSheets[0];
+                  const keyframes = `
+                    @keyframes colorChange {
+                      0% { color: #f94449; }
+                      50% { color: #1a66cc; }
+                      100% { color: #c30010; }
+                    }
+                  `;
+                  if (styleSheet.insertRule) {
+                    styleSheet.insertRule(
+                      keyframes,
+                      styleSheet.cssRules.length
+                    );
+                  }
+                } else {
+                  link.style.fontSize = "1.4rem";
+                  link.style.color = "red";
+                  link.style.animation = "colorChange 2s infinite";
+
+                  // Thêm keyframes vào document
+                  const styleSheet = document.styleSheets[0];
+                  const keyframes = `
+                    @keyframes colorChange {
+                      0% { color: #f94449; }
+                      50% { color: #1a66cc; }
+                      100% { color: #c30010; }
+                    }
+                  `;
+                  if (styleSheet.insertRule) {
+                    styleSheet.insertRule(
+                      keyframes,
+                      styleSheet.cssRules.length
+                    );
+                  }
+                  // Set target="_blank" cho các thẻ a khác
+                  link.setAttribute("target", "_blank");
+                }
+              }
+            });
+          }
+        };
       }
-    }, 300);
-  }, [id]);
+    }
+  }, [location.state]);
 
   const navigate = useNavigate();
   return (

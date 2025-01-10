@@ -56,7 +56,6 @@ const ApprovalDialog = ({
               absence.slot.classId,
               absence.catechistId
             );
-          console.log(response);
           setReplacementCatechists(response.data.data.items);
         } catch (error) {
           console.error("Error fetching replacement catechists:", error);
@@ -112,13 +111,7 @@ const ApprovalDialog = ({
           type: CatechistInSlotTypeEnumNumber.Substitute,
         };
 
-        console.log("aaa", {
-          requestId: absence.id,
-          replacementCatechistId: selectedReplacementId,
-          type: CatechistInSlotTypeEnumNumber.Substitute,
-        });
-        const res = await absenceApi.assignReplacement(assignRequest);
-        console.log("res", res);
+        await absenceApi.assignReplacement(assignRequest);
       }
 
       // Đóng dialog và thực hiện các hành động cần thiết sau khi phê duyệt và chỉ định người thay thế

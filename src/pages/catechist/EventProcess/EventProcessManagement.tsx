@@ -169,7 +169,6 @@ const EventProcessManagement: React.FC = () => {
       setViewMode(false);
     }
   }, [openDialog]);
-  console.log("aaaaa", eventProcesses);
 
   const handleDeleteProcess = async (processId: string) => {
     const confirmed = await sweetAlert.confirm(

@@ -63,8 +63,6 @@ const CatechistTrainingComponent = () => {
     fetchTraining();
   }, [userLogin]);
 
-  console.log("trainings", trainings);
-
   // Columns cho DataGrid
   const columns: GridColDef[] = [
     { field: "name", headerName: "Tên lớp", width: 200 },

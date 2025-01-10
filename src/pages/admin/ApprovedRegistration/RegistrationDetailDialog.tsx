@@ -38,7 +38,6 @@ const RegistrationDetailDialog: React.FC<RegistrationDetailDialogProps> = ({
         .catch((error) => console.error("Error fetching registration:", error));
     }
   }, [id, open]);
-  console.log(registration);
 
   const renderStatus = (status: number) => {
     switch (status) {
@@ -113,7 +112,6 @@ const RegistrationDetailDialog: React.FC<RegistrationDetailDialogProps> = ({
     certificates: CertificateOfCandidateResponse[],
     fullName: string
   ) => {
-    console.log("certificates", certificates);
     const images: any = certificates
       .filter((cert) => cert.imageUrl)
       .map((cert) => ({
