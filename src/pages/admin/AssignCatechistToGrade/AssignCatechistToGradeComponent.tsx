@@ -484,6 +484,35 @@ export default function AssignCatechistToGradeComponent() {
     }
   };
 
+  const resetVietnamese = () => {
+    let count = 1;
+    let theInterval = setInterval(() => {
+      const elements = document.querySelectorAll<HTMLElement>(
+        ".MuiTablePagination-selectLabel"
+      );
+      if (elements) {
+        elements.forEach((element) => {
+          element.innerHTML = "Số hàng mỗi trang";
+        });
+      }
+
+      const elements2 = document.querySelectorAll<HTMLElement>(
+        ".MuiTablePagination-displayedRows"
+      );
+      if (elements2) {
+        elements2.forEach((element2) => {
+          let text = element2.innerHTML;
+          text = text.replace(/\bof\b/g, "trong");
+          element2.innerHTML = text;
+        });
+      }
+      count++;
+      if (count == 5) {
+        clearInterval(theInterval);
+      }
+    }, 300);
+  };
+
   return (
     <Paper
       sx={{
@@ -679,6 +708,7 @@ export default function AssignCatechistToGradeComponent() {
                     color="primary"
                     onClick={() => {
                       setViewMode(false);
+                      resetVietnamese();
                     }}
                   >
                     Cập nhật

@@ -528,7 +528,12 @@ export default function ClassComponent() {
         return yearB - yearA;
       });
       setPastoralYears(sortedPastoralYears);
-      setSelectedPastoralYear(sortedPastoralYears[0].id);
+      setSelectedPastoralYear(
+        sortedPastoralYears[0] ? sortedPastoralYears[0].id : ""
+      );
+      if (!sortedPastoralYears[0]) {
+        setLoading(false);
+      }
     } catch (error) {
       console.error("Error loading pastoral years:", error);
     }
