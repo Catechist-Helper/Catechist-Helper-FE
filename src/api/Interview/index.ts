@@ -11,7 +11,8 @@ const createInterview = (data: { registrationId: string; meetingTime: string, in
 };
 
 // PUT: Cập nhật thông tin của một interview
-const updateInterview = (id: string, data: { meetingTime: string | null; note?: string | null; isPassed?: boolean; reason?: string; accounts?: string[] }) => {
+const updateInterview = (id: string, data: { meetingTime: string | null; note?: string | null;
+   isPassed?: boolean; reason?: string; accounts?: string[]; emailInterview?: boolean }) => {
     return request.put<BasicResponse<any>>(`${ROOT_INTERVIEW}/${id}`, data);
   };
   

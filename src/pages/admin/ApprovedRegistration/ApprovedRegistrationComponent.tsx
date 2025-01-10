@@ -481,6 +481,7 @@ export default function ApprovedRegistrationsTable() {
             meetingTime: null,
             note: interviewNote,
             isPassed,
+            emailInterview: true,
           });
         }
 
