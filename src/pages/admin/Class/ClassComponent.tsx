@@ -51,6 +51,7 @@ import absenceApi from "../../../api/AbsenceRequest";
 import CreateUpdateClassDialog from "./CreateUpdateClassDialog";
 import { PATH_ADMIN } from "../../../routes/paths";
 import catechistInSlotApi from "../../../api/CatechistInSlot";
+import catechistApi from "../../../api/Catechist";
 
 export default function ClassComponent() {
   const location = useLocation();
@@ -714,10 +715,7 @@ export default function ClassComponent() {
       setValueUpdateSlotTimeEnd(formatDate.HH_mm(chosenSlotToUpdate.endTime));
 
       fetchRoomsUpdateSlot(chosenSlotToUpdate.id);
-      fetchSlotUpdateCatechists(
-        selectedClassView?.gradeId,
-        chosenSlotToUpdate.id
-      );
+      fetchSlotUpdateCatechists(chosenSlotToUpdate.id);
     }
   }, [chosenSlotToUpdate]);
 
@@ -790,40 +788,29 @@ export default function ClassComponent() {
     }
   };
 
-  const fetchSlotUpdateCatechists = async (gradeId: string, slotId: string) => {
+  const fetchSlotUpdateCatechists = async (slotId: string) => {
     try {
-      const { data } = await gradeApi.getCatechistsOfGrade(
-        gradeId,
-        true,
-        1,
-        1000,
-        selectedPastoralYear
-      );
-
       const response = await catechistInSlotApi.findAvailableCatesExcludeId(
         slotId,
         1,
         1000
       );
-      console.log("res", response.data.data.items);
-      // setSlotUpdateCatechists(res.data.data.items);
 
       let fetchItems: any[] = [];
 
       const processItems = async () => {
-        const promises = [...data.data.items].map(async (item) => {
+        const promises = [...response.data.data.items].map(async (item) => {
           if (
-            response.data.data.items.findIndex(
-              (item2) => item2.id == item.catechist.id
-            ) >= 0 &&
             chosenSlotToUpdate &&
             (!chosenSlotToUpdate.catechistInSlots ||
               chosenSlotToUpdate.catechistInSlots.findIndex(
-                (item2: any) => item2.catechist.id == item.catechist.id
+                (item2: any) => item2.catechist.id == item.id
               ) < 0)
           ) {
             // Dùng concat thay vì push để tránh lỗi
-            fetchItems = fetchItems.concat({ ...item, id: item.catechist.id });
+            let newItem: any = { ...item };
+            newItem.level = { name: item.level };
+            fetchItems = fetchItems.concat({ catechist: newItem, id: item.id });
           }
         });
 
@@ -1040,7 +1027,9 @@ export default function ClassComponent() {
       renderCell: (params) => (
         <img
           src={
-            params.row.catechist.imageUrl || "https://via.placeholder.com/150"
+            params.row.catechist.imageUrl
+              ? params.row.catechist.imageUrl
+              : "https://via.placeholder.com/150"
           }
           alt="Catechist"
           width="50"
@@ -1103,7 +1092,9 @@ export default function ClassComponent() {
       renderCell: (params) => (
         <img
           src={
-            params.row.catechist.imageUrl || "https://via.placeholder.com/150"
+            params.row.catechist.imageUrl
+              ? params.row.catechist.imageUrl
+              : "https://via.placeholder.com/150"
           }
           alt="Catechist"
           width="50"
@@ -1166,7 +1157,9 @@ export default function ClassComponent() {
       renderCell: (params) => (
         <img
           src={
-            params.row.catechist.imageUrl || "https://via.placeholder.com/150"
+            params.row.catechist.imageUrl
+              ? params.row.catechist.imageUrl
+              : "https://via.placeholder.com/150"
           }
           alt="Catechist"
           width="50"
@@ -1243,7 +1236,9 @@ export default function ClassComponent() {
       renderCell: (params) => (
         <img
           src={
-            params.row.catechist.imageUrl || "https://via.placeholder.com/150"
+            params.row.catechist.imageUrl
+              ? params.row.catechist.imageUrl
+              : "https://via.placeholder.com/150"
           }
           alt="Catechist"
           width="50"
@@ -2134,17 +2129,11 @@ export default function ClassComponent() {
                               const action = async () => {
                                 try {
                                   enableLoading();
-                                  // await fetchSlotUpdateCatechists(
-                                  //   selectedClassView.gradeId
-                                  // );
 
                                   const { data } =
-                                    await gradeApi.getCatechistsOfGrade(
-                                      selectedClassView.gradeId,
-                                      false,
+                                    await catechistApi.getAllCatechists(
                                       1,
-                                      1000,
-                                      selectedPastoralYear
+                                      1000
                                     );
 
                                   let fetchItems: any[] = []; // Đảm bảo mảng là extensible
@@ -2155,14 +2144,13 @@ export default function ClassComponent() {
                                         const cateSlotExist =
                                           params.row.catechistInSlots.find(
                                             (item2: any) =>
-                                              item2.catechist.id ==
-                                              item.catechist.id
+                                              item2.catechist.id == item.id
                                           );
 
                                         if (cateSlotExist != undefined) {
                                           fetchItems = fetchItems.concat({
-                                            ...item,
-                                            id: item.catechist.id,
+                                            catechist: item,
+                                            id: item.id,
                                           });
                                           if (
                                             cateSlotExist.type ==
@@ -2241,12 +2229,6 @@ export default function ClassComponent() {
                                   : "",
                             }}
                             onClick={() => {
-                              // const action = async () => {
-                              //   fetchSlotUpdateCatechists(
-                              //     selectedClassView.gradeId
-                              //   );
-                              // };
-                              // action();
                               setChosenSlotToUpdate(params.row);
                               setDialogUpdateSlotCatechist(true);
                             }}

@@ -54,7 +54,7 @@ const ApprovalDialog = ({
         try {
           const response =
             await catechistInSlotApi.getAvailableCatechistsBySlotId(
-              absence.slot.classId,
+              absence.slot.id,
               absence.catechistId,
               1,
               1000
@@ -139,9 +139,27 @@ const ApprovalDialog = ({
 
   // Cấu hình DataGrid cho người thay thế
   const columns: GridColDef[] = [
+    {
+      field: "imageUrl",
+      headerName: "Ảnh",
+      width: 80,
+      renderCell: (params) => (
+        <img
+          src={
+            params.row.imageUrl
+              ? params.row.imageUrl
+              : "https://via.placeholder.com/150"
+          }
+          alt="Catechist"
+          width="50"
+          height="50"
+        />
+      ),
+    },
     { field: "fullName", headerName: "Họ và tên", width: 180 },
-    { field: "code", headerName: "Mã giáo viên", width: 150 },
-    { field: "major", headerName: "Chuyên ngành", width: 180 },
+    { field: "code", headerName: "Mã giáo viên", width: 120 },
+    { field: "level", headerName: "Cấp bậc", width: 100 },
+    { field: "major", headerName: "Chuyên ngành", width: 150 },
     {
       field: "replace",
       headerName: "Thay thế",
