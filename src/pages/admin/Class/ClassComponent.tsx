@@ -50,6 +50,7 @@ import AdminRequestLeaveDialog from "./AdminRequestLeaveDialog";
 import absenceApi from "../../../api/AbsenceRequest";
 import CreateUpdateClassDialog from "./CreateUpdateClassDialog";
 import { PATH_ADMIN } from "../../../routes/paths";
+import catechistInSlotApi from "../../../api/CatechistInSlot";
 
 export default function ClassComponent() {
   const location = useLocation();
@@ -713,7 +714,10 @@ export default function ClassComponent() {
       setValueUpdateSlotTimeEnd(formatDate.HH_mm(chosenSlotToUpdate.endTime));
 
       fetchRoomsUpdateSlot(chosenSlotToUpdate.id);
-      fetchSlotUpdateCatechists(selectedClassView.gradeId);
+      fetchSlotUpdateCatechists(
+        selectedClassView?.gradeId,
+        chosenSlotToUpdate.id
+      );
     }
   }, [chosenSlotToUpdate]);
 
@@ -786,7 +790,7 @@ export default function ClassComponent() {
     }
   };
 
-  const fetchSlotUpdateCatechists = async (gradeId: string) => {
+  const fetchSlotUpdateCatechists = async (gradeId: string, slotId: string) => {
     try {
       const { data } = await gradeApi.getCatechistsOfGrade(
         gradeId,
@@ -796,11 +800,13 @@ export default function ClassComponent() {
         selectedPastoralYear
       );
 
-      const response =
-        await catechistInClassApi.getAbsenceReplacementAvailableCatechists(
-          selectedClassView ? selectedClassView.id : "",
-          undefined
-        );
+      const response = await catechistInSlotApi.findAvailableCatesExcludeId(
+        slotId,
+        1,
+        1000
+      );
+      console.log("res", response.data.data.items);
+      // setSlotUpdateCatechists(res.data.data.items);
 
       let fetchItems: any[] = [];
 

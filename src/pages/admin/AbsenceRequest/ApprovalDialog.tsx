@@ -18,13 +18,13 @@ import {
 } from "../../../enums/AbsenceRequest";
 import absenceApi from "../../../api/AbsenceRequest";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
-import catechistInClassApi from "../../../api/CatechistInClass";
 import { AssignReplacementRequest } from "../../../model/Request/AbsenceRequest";
 import sweetAlert from "../../../utils/sweetAlert";
 import { CatechistInSlotTypeEnumNumber } from "../../../enums/CatechistInSlot";
 import { GetAbsenceItemResponse } from "../../../model/Response/AbsenceRequest";
 import useAppContext from "../../../hooks/useAppContext";
 import viVNGridTranslation from "../../../locale/MUITable";
+import catechistInSlotApi from "../../../api/CatechistInSlot";
 
 interface ApprovalDialogProps {
   open: boolean;
@@ -53,9 +53,11 @@ const ApprovalDialog = ({
       if (absence?.id) {
         try {
           const response =
-            await catechistInClassApi.getAbsenceReplacementAvailableCatechists(
+            await catechistInSlotApi.getAvailableCatechistsBySlotId(
               absence.slot.classId,
-              absence.catechistId
+              absence.catechistId,
+              1,
+              1000
             );
           setReplacementCatechists(response.data.data.items);
         } catch (error) {
