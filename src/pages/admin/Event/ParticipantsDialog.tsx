@@ -9,6 +9,7 @@ import {
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { ParticipantResponseItem } from "../../../model/Response/Event";
 import { formatDate } from "../../../utils/formatDate";
+import viVNGridTranslation from "../../../locale/MUITable";
 
 const ParticipantsDialog: React.FC<{
   open: boolean;
@@ -50,6 +51,7 @@ const ParticipantsDialog: React.FC<{
           columns={columns}
           paginationMode="client"
           disableRowSelectionOnClick
+          localeText={viVNGridTranslation}
         />
       </DialogContent>
       <DialogActions>

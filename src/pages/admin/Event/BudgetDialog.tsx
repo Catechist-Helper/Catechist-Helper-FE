@@ -13,6 +13,7 @@ import {
   BudgetTransactionResponseItem,
   BudgetTransactionImage,
 } from "../../../model/Response/Event";
+import viVNGridTranslation from "../../../locale/MUITable";
 
 const BudgetDialog: React.FC<{
   open: boolean;
@@ -107,6 +108,7 @@ const BudgetDialog: React.FC<{
           columns={columns}
           disableRowSelectionOnClick
           pageSizeOptions={[5, 10, 25]}
+          localeText={viVNGridTranslation}
         />
       </DialogContent>
       <DialogActions>

@@ -33,6 +33,7 @@ import sweetAlert from "../../../utils/sweetAlert";
 import processApi from "../../../api/EventProcess";
 import Swal from "sweetalert2";
 import useAppContext from "../../../hooks/useAppContext";
+import viVNGridTranslation from "../../../locale/MUITable";
 
 const EventProcessManagement: React.FC = () => {
   const location = useLocation();
@@ -718,7 +719,7 @@ const EventProcessManagement: React.FC = () => {
             variant="contained"
             color="primary"
             onClick={() => {
-              fetchEventProcesses();
+              fetchEventProcesses(true);
               fetchSelectedEvent();
             }}
             style={{ marginBottom: "20px" }}
@@ -748,6 +749,7 @@ const EventProcessManagement: React.FC = () => {
             checkboxSelection={currentStatusFilter == "Chờ phê duyệt"}
             rowSelectionModel={selectedIds}
             onRowSelectionModelChange={setSelectedIds}
+            localeText={viVNGridTranslation}
           />
         </div>
         {/* )} */}

@@ -85,13 +85,13 @@ const ListAllConfig: React.FC = () => {
   };
 
   const dayMap: Record<string, string> = {
-    Sunday: "Chủ nhật",
-    Monday: "Thứ hai",
-    Tuesday: "Thứ ba",
-    Wednesday: "Thứ tư",
-    Thursday: "Thứ năm",
-    Friday: "Thứ sáu",
-    Saturday: "Thứ bảy",
+    Sunday: "Chủ Nhật",
+    Monday: "Thứ Hai",
+    Tuesday: "Thứ Ba",
+    Wednesday: "Thứ Tư",
+    Thursday: "Thứ Năm",
+    Friday: "Thứ Sáu",
+    Saturday: "Thứ Bảy",
   };
 
   const columns: GridColDef[] = [
