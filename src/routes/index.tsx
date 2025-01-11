@@ -112,7 +112,7 @@ export default function Router() {
           ),
         },
         {
-          path: PATH_HOME.introduce,
+          path: PATH_HOME.introduction,
           element: (
             // <GuestGuard>
             <Introduction />
@@ -136,7 +136,7 @@ export default function Router() {
           ),
         },
         {
-          path: PATH_ADMIN.catechist_management,
+          path: PATH_ADMIN.admin_catechist_management,
           element: (
             <AuthGuard>
               <RoleBasedGuard accessibleRoles={[RoleNameEnum.Admin]}>
@@ -156,7 +156,7 @@ export default function Router() {
           ),
         },
         {
-          path: PATH_ADMIN.approved_registration,
+          path: PATH_ADMIN.admin_approved_registration,
           element: (
             <AuthGuard>
               <RoleBasedGuard accessibleRoles={[RoleNameEnum.Admin]}>
@@ -166,7 +166,7 @@ export default function Router() {
           ),
         },
         {
-          path: PATH_ADMIN.major_management,
+          path: PATH_ADMIN.admin_major_management,
           element: (
             <AuthGuard>
               <RoleBasedGuard accessibleRoles={[RoleNameEnum.Admin]}>
@@ -176,7 +176,7 @@ export default function Router() {
           ),
         },
         {
-          path: PATH_ADMIN.grade_management,
+          path: PATH_ADMIN.admin_grade_management,
           element: (
             <AuthGuard>
               <RoleBasedGuard accessibleRoles={[RoleNameEnum.Admin]}>
@@ -186,7 +186,7 @@ export default function Router() {
           ),
         },
         {
-          path: PATH_ADMIN.class_management,
+          path: PATH_ADMIN.admin_class_management,
           element: (
             <AuthGuard>
               <RoleBasedGuard accessibleRoles={[RoleNameEnum.Admin]}>
@@ -216,7 +216,7 @@ export default function Router() {
           ),
         },
         {
-          path: PATH_ADMIN.admin_event_process,
+          path: PATH_ADMIN.admin_event_process_management,
           element: (
             <AuthGuard>
               <RoleBasedGuard accessibleRoles={[RoleNameEnum.Admin]}>
@@ -226,7 +226,7 @@ export default function Router() {
           ),
         },
         {
-          path: PATH_ADMIN.assign_catechist_to_grade,
+          path: PATH_ADMIN.admin_assign_catechist_to_grade,
           element: (
             <AuthGuard>
               <RoleBasedGuard accessibleRoles={[RoleNameEnum.Admin]}>

@@ -280,8 +280,14 @@ const CatechistDialog: React.FC<CatechistDialogProps> = ({
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-      <DialogTitle>{updateMode ? "Cập nhật" : "Thêm"} giáo lý viên</DialogTitle>
+    <Dialog open={open} maxWidth="md" fullWidth>
+      <DialogTitle>
+        {updateMode ? (
+          <span className="text-primary font-bold">Cập nhật giáo lý viên</span>
+        ) : (
+          <span className="text-success font-bold">Cập nhật giáo lý viên</span>
+        )}
+      </DialogTitle>
       <DialogContent>
         <Formik
           initialValues={initialValues}
@@ -298,7 +304,6 @@ const CatechistDialog: React.FC<CatechistDialogProps> = ({
                       <div className="w-full flex flex-col items-center">
                         <img
                           src={URL.createObjectURL(values.avatar)}
-                          alt="Preview"
                           style={{
                             borderRadius: "3px",
                             width: "300px",
@@ -321,7 +326,6 @@ const CatechistDialog: React.FC<CatechistDialogProps> = ({
                             updatedCatechist?.imageUrl ??
                             "https://via.placeholder.com/150"
                           }
-                          alt="Preview"
                           style={{
                             borderRadius: "3px",
                             width: "300px",
@@ -680,6 +684,7 @@ const CatechistDialog: React.FC<CatechistDialogProps> = ({
                       variant="outlined"
                       onClick={onClose}
                       color="secondary"
+                      className="hover:bg-purple-800 hover:text-white hover:border-purple-800"
                     >
                       {updatedCatechist && !updatedCatechist.isTeaching
                         ? "Đóng"
@@ -693,11 +698,8 @@ const CatechistDialog: React.FC<CatechistDialogProps> = ({
                         <Button
                           variant="outlined"
                           type="submit"
-                          color="primary"
-                          // disabled={
-                          //   Object.keys(errors).length > 0 ||
-                          //   !Object.keys(touched).length
-                          // }
+                          color={updateMode ? "primary" : "success"}
+                          className={`btn ${updateMode ? "btn-primary" : "btn-success"}`}
                           onClick={() => {
                             if (Object.keys(errors).length > 0) {
                               sweetAlert.alertFailed(

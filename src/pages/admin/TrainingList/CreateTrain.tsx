@@ -93,18 +93,18 @@ const CreateTrain: React.FC = () => {
 
         sweetAlert.alertSuccess(
           "Tạo thành công!",
-          "Cấp bậc đã được tạo thành công.",
+          "Danh sách đào tạo đã được tạo thành công.",
           2000,
-          false
+          28
         );
 
         navigate(PATH_ADMIN.training_lists); // Chỉ chuyển hướng khi thành công
       } catch (error) {
         sweetAlert.alertFailed(
           "Thất bại!",
-          "Không thể tạo cấp bậc. Vui lòng thử lại.",
+          "Không thể tạo danh sách đào tạo. Vui lòng thử lại.",
           3000,
-          true
+          30
         );
       } finally {
         setIsSubmitting(false);
@@ -130,7 +130,7 @@ const CreateTrain: React.FC = () => {
         }
       })
       .catch((err) => {
-        console.error("Không thấy cấp bậc: ", err);
+        console.error("Không thấy danh sách: ", err);
       });
   }, []);
 

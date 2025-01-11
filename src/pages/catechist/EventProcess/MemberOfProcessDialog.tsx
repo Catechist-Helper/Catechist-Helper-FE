@@ -216,9 +216,10 @@ const MemberOfProcessDialog = forwardRef<
     return a.id == mainMember && b.id != mainMember ? -1 : 1;
   });
 
-  const handleMainCatechistChange = (id: string) => {
-    setMainMember(id);
-  };
+  // const handleMainCatechistChange = (id: string) => {
+  //   setMainMember(id);
+  // };
+
   const columns1: GridColDef[] = [
     {
       field: "avatar",
@@ -329,28 +330,28 @@ const MemberOfProcessDialog = forwardRef<
         return role ? role.name : "N/A";
       },
     },
-    {
-      field: "main",
-      headerName: "Đảm nhận chính",
-      width: 150,
-      renderCell: (params) => (
-        <input
-          type="checkbox"
-          checked={mainMember === params.row.id}
-          onChange={() => {
-            if (!viewMode) {
-              handleMainCatechistChange(params.row.id);
-            }
-          }}
-        />
-      ),
-    },
+    // {
+    //   field: "main",
+    //   headerName: "Đảm nhận chính",
+    //   width: 150,
+    //   renderCell: (params) => (
+    //     <input
+    //       type="checkbox"
+    //       checked={mainMember === params.row.id}
+    //       onChange={() => {
+    //         if (!viewMode) {
+    //           handleMainCatechistChange(params.row.id);
+    //         }
+    //       }}
+    //     />
+    //   ),
+    // },
   ];
 
   if (!viewMode) {
     columns2.push({
       field: "action",
-      headerName: "Xóa",
+      headerName: "Hành động",
       width: 150,
       renderCell: (params) => (
         <Button color="error" onClick={() => handleRemoveMember(params.row.id)}>
@@ -361,7 +362,7 @@ const MemberOfProcessDialog = forwardRef<
 
     columns1.push({
       field: "action",
-      headerName: "Xóa",
+      headerName: "Hành động",
       width: 150,
       renderCell: (params) => (
         <Button color="primary" onClick={() => handleAddMember(params.row.id)}>
@@ -389,7 +390,13 @@ const MemberOfProcessDialog = forwardRef<
                 disableRowSelectionOnClick
                 rows={sortedAvailables}
                 columns={columns1}
-                autoHeight
+                sx={{
+                  height: 300,
+                  overflowX: "auto",
+                  "& .MuiDataGrid-root": {
+                    overflowX: "auto",
+                  },
+                }}
                 localeText={viVNGridTranslation}
               />
             </div>
@@ -404,7 +411,13 @@ const MemberOfProcessDialog = forwardRef<
                 disableRowSelectionOnClick
                 rows={sortedMembersOfProcess}
                 columns={columns2}
-                autoHeight
+                sx={{
+                  height: 300,
+                  overflowX: "auto",
+                  "& .MuiDataGrid-root": {
+                    overflowX: "auto",
+                  },
+                }}
                 localeText={viVNGridTranslation}
               />
             </>

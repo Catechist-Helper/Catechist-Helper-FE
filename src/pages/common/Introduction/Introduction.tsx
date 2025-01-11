@@ -30,7 +30,7 @@ const ParishIntroduction = () => {
     if (typeof window !== "undefined") {
       localStorage.setItem(
         LOCALSTORAGE_CONSTANTS.CURRENT_PAGE,
-        PATH_HOME.introduce
+        PATH_HOME.introduction
       );
     }
   }, []);

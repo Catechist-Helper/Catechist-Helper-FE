@@ -165,11 +165,7 @@ const UpdateRoom: React.FC = () => {
 
             {imagePreview && (
               <div className="mt-2">
-                <img
-                  src={imagePreview}
-                  alt="Preview"
-                  className="w-full h-auto rounded"
-                />
+                <img src={imagePreview} className="w-full h-auto rounded" />
                 <button
                   type="button"
                   onClick={handleRemoveImage}

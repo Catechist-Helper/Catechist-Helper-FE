@@ -45,6 +45,7 @@ const EventProcessManagement: React.FC = () => {
   );
   const [loading, setLoading] = useState<boolean>(true);
   const [openDialog, setOpenDialog] = useState<boolean>(false);
+  const [reloading, setReloading] = useState<boolean>(false);
   const [truongBTCRole, setTruongBTCRole] = useState<boolean>(false);
   const [selectedProcess, setSelectedProcess] =
     useState<ProcessResponseItem | null>(null);
@@ -125,6 +126,7 @@ const EventProcessManagement: React.FC = () => {
       console.error("Lỗi khi lấy dữ liệu quá trình sự kiện:", error);
     } finally {
       setLoading(false);
+      setReloading(false);
     }
   };
 
@@ -315,6 +317,7 @@ const EventProcessManagement: React.FC = () => {
           <Button
             variant="outlined"
             color="secondary"
+            className="hover:bg-purple-800 hover:text-white hover:border-purple-800"
             onClick={() =>
               handleUpdateProcess(params.row as ProcessResponseItem, true)
             }
@@ -330,6 +333,7 @@ const EventProcessManagement: React.FC = () => {
               <Button
                 variant="outlined"
                 color="primary"
+                className="btn btn-primary"
                 onClick={() =>
                   handleUpdateProcess(params.row as ProcessResponseItem)
                 }
@@ -441,25 +445,25 @@ const EventProcessManagement: React.FC = () => {
     switch (value) {
       case EventStatus.Not_Started:
         return (
-          <span className="rounded-xl px-2 py-1 bg-black text-white">
+          <span className="rounded-xl px-2 py-[2px] bg-black text-white">
             {EventStatusString.Not_Started}
           </span>
         );
       case EventStatus.In_Progress:
         return (
-          <span className="rounded-xl px-2 py-1 bg-warning text-black">
+          <span className="rounded-xl px-2 py-[2px] bg-warning text-black">
             {EventStatusString.In_Progress}
           </span>
         );
       case EventStatus.Completed:
         return (
-          <span className="rounded-xl px-2 py-1 bg-success text-white">
+          <span className="rounded-xl px-2 py-[2px] bg-success text-white">
             {EventStatusString.Completed}
           </span>
         );
       case EventStatus.Cancelled:
         return (
-          <span className="rounded-xl px-2 py-1 bg-danger text-white">
+          <span className="rounded-xl px-2 py-[2px] bg-danger text-white">
             {EventStatusString.Cancelled}
           </span>
         );
@@ -490,163 +494,95 @@ const EventProcessManagement: React.FC = () => {
               }}
               style={{ marginRight: "15px" }}
               variant="outlined"
-              color="primary"
-              className="btn btn-primary"
+              color="inherit"
+              className=" border-black bg-white text-black hover:!text-white hover:!bg-black"
             >
               Quay lại
             </Button>
-            Các hoạt động của{" "}
-            <strong>{selectedEvent ? selectedEvent.name : ""}</strong>
+            <span className="text-black">
+              Các hoạt động của{" "}
+              <strong>{selectedEvent ? selectedEvent.name : ""}</strong>
+            </span>
           </Typography>
 
           <div className="w-full flex flex-wrap">
-            <div className="mt-2 w-[34%]">
-              <strong>Mô tả sự kiện:</strong> {selectedEvent.description}
+            <div className="mt-2 w-[40%]">
+              <h1 className="text-[1.3rem] text-black font-bold mt-1 mb-3">
+                Thông tin của sự kiện
+              </h1>
+              <div className="mt-2" style={{ transform: "translateX(2px)" }}>
+                <strong>Mô tả sự kiện:</strong> {selectedEvent.description}
+              </div>
+              <div className="mt-2">
+                <strong>Thời gian sự kiện:</strong>{" "}
+                {formatDate.DD_MM_YYYY(selectedEvent.startTime)} {" - "}
+                {formatDate.DD_MM_YYYY(selectedEvent.endTime)}
+              </div>
+              <div className="mt-2">
+                <strong>Trạng thái sự kiện:</strong>{" "}
+                {renderEventStatus(selectedEvent.eventStatus)}
+              </div>
             </div>
-            <div className="mt-2 w-[34%]">
-              <strong>Trạng thái sự kiện:</strong>{" "}
-              {renderEventStatus(selectedEvent.eventStatus)}
-            </div>
-            <div className="mt-2 w-[34%]">
-              <strong>Thời gian bắt đầu sự kiện:</strong>{" "}
-              {formatDate.DD_MM_YYYY(selectedEvent.startTime)}
-            </div>
-            <div className="mt-2 w-[34%]">
-              <strong>Thời gian kết thúc sự kiện:</strong>{" "}
-              {formatDate.DD_MM_YYYY(selectedEvent.endTime)}
-            </div>
-            <div className="mt-2 w-[100%]">
-              <div className="w-[25%] flex justify-between">
-                <div>
-                  <strong>Tổng chi phí dự tính:</strong>{" "}
+            <div className="mt-2 w-[40%]">
+              <h1 className="text-[1.3rem] text-black font-bold mt-1 mb-3">
+                Thông tin chi phí sự kiện
+              </h1>
+              <div className="mt-2 w-[100%]">
+                <div className="w-[55%] flex justify-between">
+                  <div>
+                    <strong>Tổng chi phí dự tính:</strong>{" "}
+                  </div>
+                  <div>
+                    <strong>
+                      <span> ₫ {formatPrice(selectedEvent.totalCost)}</span>
+                    </strong>
+                  </div>
                 </div>
-                <div>
-                  <strong>
-                    <span> ₫ {formatPrice(selectedEvent.totalCost)}</span>
-                  </strong>
+              </div>
+              <div className="mt-2 w-[100%]">
+                <div className="w-[55%] flex justify-between">
+                  <div>
+                    <strong>Tổng chi phí thực tế:</strong>{" "}
+                  </div>
+                  <div>
+                    <strong>
+                      <span>
+                        {" "}
+                        ₫ {formatPrice(selectedEvent.totalActualCost)}
+                      </span>
+                    </strong>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-2 w-[100%]">
+                <div className="w-[55%] flex justify-between">
+                  <div>
+                    <strong> Tình trạng số dư:</strong>
+                  </div>
+                  <div>
+                    <strong>
+                      <span
+                        className={`${selectedEvent.surplusCost >= 0 ? "text-success" : "text-danger"}`}
+                      >
+                        {selectedEvent.surplusCost >= 0 ? "" : "-"} ₫{" "}
+                        {formatPrice(
+                          selectedEvent.surplusCost >= 0
+                            ? selectedEvent.surplusCost
+                            : -selectedEvent.surplusCost
+                        )}
+                      </span>
+                    </strong>
+                  </div>
                 </div>
               </div>
             </div>
-
-            <div className="mt-2 w-[100%]">
-              <div className="w-[25%] flex justify-between">
-                <div>
-                  <strong>Tổng chi phí thực tế:</strong>{" "}
-                </div>
-                <div>
-                  <strong>
-                    <span> ₫ {formatPrice(selectedEvent.totalActualCost)}</span>
-                  </strong>
-                </div>
-              </div>
-            </div>
-            <div className="mt-2 w-[100%]">
-              <div className="w-[25%] flex justify-between">
-                <div>
-                  <strong> Tình trạng số dư:</strong>
-                </div>
-                <div>
-                  <strong>
-                    <span
-                      className={`${selectedEvent.surplusCost >= 0 ? "text-success" : "text-danger"}`}
-                    >
-                      {selectedEvent.surplusCost >= 0 ? "" : "-"} ₫{" "}
-                      {formatPrice(
-                        selectedEvent.surplusCost >= 0
-                          ? selectedEvent.surplusCost
-                          : -selectedEvent.surplusCost
-                      )}
-                    </span>
-                  </strong>
-                </div>
-              </div>
-            </div>
-            {/* <div className="mt-2 w-[34%]">
-                        <strong>
-                          <div className="flex justify-between w-[70%]">
-                            <p>Ngân sách hiện tại:</p>
-                            <p> ₫ {formatPrice(selectedEvent.current_budget)}</p>
-                          </div>
-                        </strong>
-                      </div>
-                      <div className="mt-2 w-[34%]">
-                        <strong>
-                          <div className="flex justify-between w-[70%]">
-                            <p>Tổng chi phí dự tính:</p>
-                            <p> ₫ {formatPrice(summaryFees)}</p>
-                          </div>
-                        </strong>
-                      </div>
-                      <div className="mt-2 w-[34%]">
-                        <strong>
-                          <div className="flex justify-between w-[70%]">
-                            <p>Tổng chi phí thực tế:</p>
-                            <p> ₫ {formatPrice(actualSummaryFees)}</p>
-                          </div>
-                        </strong>
-                      </div>
-                      <div className="mt-2 w-[34%]">
-                        <strong>
-                          <div className="flex justify-between w-[70%]">
-                            <p>{"Tình trạng số dư (dự tính):"}</p>
-                            <p>
-                              {selectedEvent.current_budget - summaryFees >= 0 ? (
-                                <>
-                                  <span className="font-bold text-success">
-                                    Dư ₫{" "}
-                                    {formatPrice(
-                                      selectedEvent.current_budget - summaryFees
-                                    )}
-                                  </span>
-                                </>
-                              ) : (
-                                <>
-                                  <span className="font-bold text-danger">
-                                    Thiếu{" "}
-                                    {formatPrice(
-                                      summaryFees - selectedEvent.current_budget
-                                    )}
-                                  </span>
-                                </>
-                              )}
-                            </p>
-                          </div>
-                        </strong>
-                      </div>
-                      <div className="mt-2 w-[34%]">
-                        <strong>
-                          <div className="flex justify-between w-[70%]">
-                            <p>{"Tình trạng số dư (thực tế):"}</p>
-                            <p>
-                              {selectedEvent.current_budget - actualSummaryFees >= 0 ? (
-                                <>
-                                  <span className="font-bold text-success">
-                                    Dư ₫{" "}
-                                    {formatPrice(
-                                      selectedEvent.current_budget - actualSummaryFees
-                                    )}
-                                  </span>
-                                </>
-                              ) : (
-                                <>
-                                  <span className="font-bold text-danger">
-                                    Thiếu{" "}
-                                    {formatPrice(
-                                      actualSummaryFees - selectedEvent.current_budget
-                                    )}
-                                  </span>
-                                </>
-                              )}
-                            </p>
-                          </div>
-                        </strong>
-                      </div> */}
           </div>
         </div>
       ) : (
         <></>
       )}
-      <div className="w-full h-full mt-4 px-3 flex justify-between">
+
+      <div className="w-full h-full mt-4 px-3 flex justify-between items-end">
         <div className="min-w-[10px] flex gap-x-5 mb-3">
           <div className="flex flex-col">
             <span className="mr-3 font-bold">Trạng thái phê duyệt</span>
@@ -685,7 +621,7 @@ const EventProcessManagement: React.FC = () => {
             </MuiSelect>
           </div>
           <div className="flex flex-col">
-            <span className="mr-3 font-bold">Vai trò trong hoạt động</span>
+            <span className="mr-3 font-bold">Hoạt động đảm nhận</span>
             <MuiSelect
               labelId="result-label"
               value={joinProcessFilter}
@@ -695,8 +631,8 @@ const EventProcessManagement: React.FC = () => {
                               `}
             >
               <MenuItem value="0">Tất cả</MenuItem>
-              <MenuItem value="1">Đảm nhận chính</MenuItem>
-              <MenuItem value="2">Đảm nhận phụ</MenuItem>
+              {/* <MenuItem value="1">Đảm nhận chính</MenuItem> */}
+              {/* <MenuItem value="2">Đảm nhận phụ</MenuItem> */}
               <MenuItem value="3">Có tham gia</MenuItem>
               <MenuItem value="4">Không tham gia</MenuItem>
             </MuiSelect>
@@ -709,8 +645,9 @@ const EventProcessManagement: React.FC = () => {
           selectedEvent.eventStatus != EventStatus.Cancelled ? (
             <div>
               <Button
-                variant="contained"
-                color="primary"
+                variant="outlined"
+                color="success"
+                className="btn btn-success"
                 onClick={handleCreateProcess}
                 style={{ marginBottom: "20px" }}
               >
@@ -725,6 +662,7 @@ const EventProcessManagement: React.FC = () => {
               variant="contained"
               color="primary"
               onClick={() => {
+                setReloading(true);
                 fetchEventProcesses();
                 fetchSelectedEvent();
               }}
@@ -743,6 +681,7 @@ const EventProcessManagement: React.FC = () => {
         <DataGrid
           rows={rows}
           columns={columns}
+          loading={reloading}
           disableRowSelectionOnClick
           paginationMode="client"
           sx={{

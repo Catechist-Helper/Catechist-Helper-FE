@@ -157,7 +157,13 @@ const CreateUpdateClassDialog: React.FC<CreateUpdateClassDialogProps> = ({
 
   return (
     <Dialog open={open}>
-      <DialogTitle>{updateMode ? "Cập nhật lớp" : "Tạo lớp mới"}</DialogTitle>
+      <DialogTitle>
+        {updateMode ? (
+          <span className="font-bold text-primary">Cập nhật lớp</span>
+        ) : (
+          <span className="font-bold text-success">Tạo lớp mới</span>
+        )}
+      </DialogTitle>
       <DialogContent>
         <Formik
           initialValues={{
@@ -306,10 +312,20 @@ const CreateUpdateClassDialog: React.FC<CreateUpdateClassDialogProps> = ({
               />
 
               <DialogActions>
-                <Button onClick={onClose} color="secondary" variant="outlined">
+                <Button
+                  onClick={onClose}
+                  color="secondary"
+                  variant="outlined"
+                  className="hover:bg-purple-800 hover:text-white hover:border-purple-800"
+                >
                   Hủy
                 </Button>
-                <Button type="submit" color="primary" variant="outlined">
+                <Button
+                  type="submit"
+                  color={updateMode ? "primary" : "success"}
+                  variant="outlined"
+                  className={`btn ${updateMode ? "btn-primary" : "btn-success"}`}
+                >
                   {updateMode ? "Cập nhật" : "Tạo lớp"}
                 </Button>
               </DialogActions>

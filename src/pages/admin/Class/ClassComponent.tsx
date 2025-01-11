@@ -181,7 +181,7 @@ export default function ClassComponent() {
 
   useEffect(() => {
     fetchMajors();
-    storeCurrentPath(PATH_ADMIN.class_management);
+    storeCurrentPath(PATH_ADMIN.admin_class_management);
   }, []);
 
   useEffect(() => {
@@ -330,7 +330,8 @@ export default function ClassComponent() {
               <>
                 <Button
                   color="success"
-                  variant="contained"
+                  variant="text"
+                  className="btn btn-success"
                   onClick={() => {
                     setSelectedClassView(params.row);
                     handleViewSlots(params.row.id);
@@ -357,6 +358,7 @@ export default function ClassComponent() {
         return (
           <Button
             color="primary"
+            className="btn btn-primary"
             onClick={() => {
               const action = async () => {
                 try {
@@ -1079,12 +1081,13 @@ export default function ClassComponent() {
     },
     {
       field: "assign",
-      headerName: "Thêm",
+      headerName: "Hành động",
       width: 100,
       renderCell: (params) => (
         <Button
-          variant="contained"
+          variant="outlined"
           color="primary"
+          className="btn btn-primary"
           onClick={() => handleAddCatechist([params.row.catechist.id])}
         >
           Thêm
@@ -1144,12 +1147,13 @@ export default function ClassComponent() {
     },
     {
       field: "assign",
-      headerName: "Thêm",
+      headerName: "Hành động",
       width: 100,
       renderCell: (params) => (
         <Button
-          variant="contained"
+          variant="outlined"
           color="primary"
+          className="btn btn-primary"
           onClick={() => handleAddCatechist([params.row.catechist.id], true)}
         >
           Thêm
@@ -1209,12 +1213,13 @@ export default function ClassComponent() {
     },
     {
       field: "remove",
-      headerName: "Xóa",
+      headerName: "Hành động",
       width: 100,
       renderCell: (params) => (
         <Button
-          variant="contained"
+          variant="outlined"
           color="error"
+          className="btn btn-danger"
           onClick={() => handleRemoveCatechist([params.row.id])}
         >
           Xóa
@@ -1288,12 +1293,13 @@ export default function ClassComponent() {
     },
     {
       field: "remove",
-      headerName: "Xóa",
+      headerName: "Hành động",
       width: 100,
       renderCell: (params) => (
         <Button
-          variant="contained"
+          variant="outlined"
           color="error"
+          className="btn btn-danger"
           onClick={() => handleRemoveCatechist([params.row.id], true)}
         >
           Xóa
@@ -2002,6 +2008,7 @@ export default function ClassComponent() {
           <div className="flex justify-end mt-3 gap-x-2">
             <Button
               variant="outlined"
+              className="btn btn-secondary"
               color={updateSlotMode ? "primary" : "success"}
               onClick={() => setOpenSlotDialog(false)}
             >
@@ -2071,6 +2078,7 @@ export default function ClassComponent() {
           >
             <Button
               variant="outlined"
+              className="btn btn-primary"
               onClick={() => {
                 handleOpenSlotDialog(selectedClassView, true);
               }}
@@ -2410,6 +2418,7 @@ export default function ClassComponent() {
                         <Button
                           color="secondary"
                           variant="outlined"
+                          className="hover:bg-purple-800 hover:text-white hover:border-purple-800"
                           onClick={() => {
                             setOpenLeaveDialog(true);
                             setSlotAbsenceId(params.row.id);
@@ -2450,6 +2459,7 @@ export default function ClassComponent() {
             <Button
               variant="outlined"
               color="primary"
+              className="btn btn-primary"
               onClick={() => {
                 setOpenSlotsDialog(false);
               }}
@@ -2576,6 +2586,7 @@ export default function ClassComponent() {
             <Button
               variant="outlined"
               color="primary"
+              className="btn btn-secondary"
               onClick={() => {
                 setDialogUpdateSlotTime(false);
                 setChosenSlotToUpdate(null);
@@ -2787,6 +2798,7 @@ export default function ClassComponent() {
             <Button
               variant="outlined"
               color="primary"
+              className="btn btn-secondary"
               onClick={() => {
                 setDialogUpdateSlotRoom(false);
                 setChosenSlotToUpdate(null);
@@ -2999,6 +3011,7 @@ export default function ClassComponent() {
             <Button
               variant="outlined"
               color="primary"
+              className="btn btn-secondary"
               onClick={() => {
                 setDialogUpdateSlotCatechist(false);
                 setChosenSlotToUpdate(null);
@@ -3092,6 +3105,8 @@ export default function ClassComponent() {
             <Button
               onClick={() => setOpenTimetableDialog(false)}
               variant="outlined"
+              color="primary"
+              className="btn btn-secondary"
             >
               Hủy bỏ
             </Button>
