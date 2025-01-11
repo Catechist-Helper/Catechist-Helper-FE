@@ -15,6 +15,7 @@ import sweetAlert from "../../../utils/sweetAlert";
 import { useNavigate } from "react-router-dom"; // Import useNavigate từ react-router-dom
 import { PATH_ADMIN } from "../../../routes/paths";
 import AddLevelDialog from "./AddLevelDialog";
+import { storeCurrentPath } from "../../../utils/utils";
 
 export default function MajorComponent() {
   const navigate = useNavigate();
@@ -150,6 +151,7 @@ export default function MajorComponent() {
 
   useEffect(() => {
     fetchMajors(); // Lấy danh sách các major
+    storeCurrentPath(PATH_ADMIN.major_management);
   }, [paginationModel]); // Gọi lại khi thay đổi pastoralYear
 
   // Open Dialog to create Major

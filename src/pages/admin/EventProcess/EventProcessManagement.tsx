@@ -557,7 +557,7 @@ const EventProcessManagement: React.FC = () => {
             <div className="mt-2 w-[100%]">
               <div className="w-[25%] flex justify-between">
                 <div>
-                  <strong> Tình trạng chi phí:</strong>
+                  <strong> Tình trạng số dư:</strong>
                 </div>
                 <div>
                   <strong>

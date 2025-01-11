@@ -7,6 +7,8 @@ import sweetAlert from "../../../utils/sweetAlert";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { Button, Paper } from "@mui/material";
 import viVNGridTranslation from "../../../locale/MUITable";
+import { PATH_ADMIN } from "../../../routes/paths";
+import { storeCurrentPath } from "../../../utils/utils";
 
 const ListAllRooms: React.FC = () => {
   const [rooms, setRooms] = useState([]);
@@ -37,6 +39,7 @@ const ListAllRooms: React.FC = () => {
 
   useEffect(() => {
     fetchRooms();
+    storeCurrentPath(PATH_ADMIN.rooms);
   }, []);
 
   const handleCreate = () => {

@@ -33,6 +33,7 @@ import ParticipantsDialog from "./ParticipantsDialog";
 import { PATH_ADMIN } from "../../../routes/paths";
 import { useNavigate } from "react-router-dom";
 import { EventStatus, EventStatusString } from "../../../enums/Event";
+import { storeCurrentPath } from "../../../utils/utils";
 
 export default function EventsComponent() {
   const [rows, setRows] = useState<EventItemResponse[]>([]);
@@ -77,13 +78,13 @@ export default function EventsComponent() {
     {
       field: "startTime",
       headerName: "Thời gian bắt đầu",
-      width: 150,
+      width: 140,
       renderCell: (params) => formatDate.DD_MM_YYYY(params.row.startTime),
     },
     {
       field: "endTime",
       headerName: "Thời gian kết thúc",
-      width: 150,
+      width: 140,
       renderCell: (params) => formatDate.DD_MM_YYYY(params.row.endTime),
     },
     // {
@@ -110,9 +111,15 @@ export default function EventsComponent() {
     // },
 
     {
+      field: "eventCategory",
+      headerName: "Danh mục",
+      width: 110,
+      renderCell: (params) => params.row.eventCategory?.name || "N/A",
+    },
+    {
       field: "totalCost",
-      headerName: "Tổng chi phí hiện tại",
-      width: 150,
+      headerName: "Tổng chi phí",
+      width: 110,
       align: "right",
       headerAlign: "right",
       renderCell: (params) => (
@@ -122,15 +129,9 @@ export default function EventsComponent() {
       ),
     },
     {
-      field: "eventCategory",
-      headerName: "Danh mục",
-      width: 120,
-      renderCell: (params) => params.row.eventCategory?.name || "N/A",
-    },
-    {
       field: "eventStatus",
       headerName: "Trạng thái",
-      width: 140,
+      width: 135,
       renderCell: (params) => {
         switch (params.value) {
           case EventStatus.Not_Started:
@@ -448,6 +449,7 @@ export default function EventsComponent() {
 
   useEffect(() => {
     fetchEventCategories(); // Fetch event categories khi component được mount
+    storeCurrentPath(PATH_ADMIN.admin_event_management);
   }, []);
 
   useEffect(() => {

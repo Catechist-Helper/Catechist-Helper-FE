@@ -60,7 +60,7 @@ const AddLevelDialog: React.FC<AddLevelDialogProps> = ({
       sweetAlert.alertFailed("Có lỗi xảy ra khi thêm cấp bậc", "", 2000, 27);
     }
   };
-  console.log("levelList", levelList);
+
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle>Thêm cấp bậc cho ngành {selectedRow?.name}</DialogTitle>

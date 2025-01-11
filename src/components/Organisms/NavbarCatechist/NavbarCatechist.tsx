@@ -1,7 +1,6 @@
 import ReactDOM from "react-dom";
 import useAuth from "../../../hooks/useAuth";
 import { useEffect, useState } from "react";
-import Swal from "sweetalert2";
 import { AuthUser } from "../../../types/authentication";
 import { getUserInfo } from "../../../utils/utils";
 import accountApi from "../../../api/Account";
@@ -72,19 +71,19 @@ const NavbarAdmin = () => {
         <div
           onClick={() => {
             toggleUserProfileMenu();
-            Swal.fire({
-              title: "Bạn có chắc muốn đăng xuất?",
-              icon: "question",
-              showCancelButton: true,
-              confirmButtonColor: "#3085d6",
-              cancelButtonColor: "#d33",
-              confirmButtonText: "Đăng xuất",
-              cancelButtonText: "Hủy bỏ",
-            }).then((result) => {
-              if (result.isConfirmed) {
+            const action = async () => {
+              const confirmLogOut = await sweetAlert.confirm(
+                "Bạn có chắc muốn đăng xuất?",
+                "",
+                "Đăng xuất",
+                "Hủy bỏ",
+                "question"
+              );
+              if (confirmLogOut) {
                 logout();
               }
-            });
+            };
+            action();
           }}
           className="px-4 py-2 text-black cursor-pointer hover:bg-gray-200"
         >

@@ -10,11 +10,12 @@ import {
   GridPaginationModel,
   GridRowSelectionModel,
 } from "@mui/x-data-grid";
+import Select from "react-select";
 import Paper from "@mui/material/Paper";
 import {
   Button,
   Dialog,
-  Select,
+  Select as MuiSelect,
   MenuItem,
   FormControl,
   InputLabel,
@@ -52,6 +53,8 @@ import CreateUpdateClassDialog from "./CreateUpdateClassDialog";
 import { PATH_ADMIN } from "../../../routes/paths";
 import catechistInSlotApi from "../../../api/CatechistInSlot";
 import catechistApi from "../../../api/Catechist";
+import { storeCurrentPath } from "../../../utils/utils";
+import { pastoralYearStatus } from "../../../enums/PastoralYear";
 
 export default function ClassComponent() {
   const location = useLocation();
@@ -62,7 +65,7 @@ export default function ClassComponent() {
   const [loading, setLoading] = useState<boolean>(true);
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({
     page: 0,
-    pageSize: 8,
+    pageSize: 10,
   });
   const [rowCount, setRowCount] = useState<number>(0);
   const [selectedRows, setSelectedRows] = useState<GridRowSelectionModel>([]);
@@ -120,9 +123,25 @@ export default function ClassComponent() {
       page: 0,
       pageSize: 8,
     });
-  // const [rowCountCatechists, setRowCountCatechists] = useState<number>(0);
-  const [selectedRowsCatechists, setSelectedRowsCatechists] =
-    useState<GridRowSelectionModel>([]);
+
+  const [paginationModel2, setPaginationModel2] = useState<GridPaginationModel>(
+    {
+      page: 0,
+      pageSize: 8,
+    }
+  );
+  const [paginationModel3, setPaginationModel3] = useState<GridPaginationModel>(
+    {
+      page: 0,
+      pageSize: 8,
+    }
+  );
+  const [paginationModel4, setPaginationModel4] = useState<GridPaginationModel>(
+    {
+      page: 0,
+      pageSize: 8,
+    }
+  );
 
   // States for slots
   const [openSlotsDialog, setOpenSlotsDialog] = useState<boolean>(false);
@@ -191,6 +210,7 @@ export default function ClassComponent() {
 
   useEffect(() => {
     fetchMajors();
+    storeCurrentPath(PATH_ADMIN.class_management);
   }, []);
 
   useEffect(() => {
@@ -239,17 +259,27 @@ export default function ClassComponent() {
   }, [selectedMajor]);
 
   const columns: GridColDef[] = [
-    { field: "name", headerName: "Tên lớp", width: 150 },
+    {
+      field: "name",
+      headerName: "Tên lớp",
+      width: 140,
+      renderCell: (params) =>
+        params.row.name
+          ? params.row.name.includes("Lớp")
+            ? params.row.name.split("Lớp")[1]
+            : params.row.name
+          : "",
+    },
     {
       field: "numberOfCatechist",
       headerName: "Số lượng giáo lý viên",
-      width: 160,
+      width: 170,
       renderCell: (params) => {
         return (
           <span
             className={`${params.row.catechistCount && params.row.catechistCount >= params.row.numberOfCatechist ? "" : "text-danger"}`}
           >
-            {`Hiện tại: ${params.row.catechistCount ? params.row.catechistCount : "0"} - Cần: ${params.row.numberOfCatechist}`}
+            {`Trong lớp: ${params.row.catechistCount ? params.row.catechistCount : "0"} - Cần: ${params.row.numberOfCatechist}`}
           </span>
         );
       },
@@ -646,7 +676,7 @@ export default function ClassComponent() {
         selectedIds.includes(catechist.id)
       ),
     ]); // Add back to unassigned list
-    if (selectedIds.findIndex((item) => item == mainCatechistId)) {
+    if (selectedIds.findIndex((item) => item == mainCatechistId) >= 0) {
       setMainCatechistId("");
     }
   };
@@ -655,6 +685,7 @@ export default function ClassComponent() {
     selectedClass: ClassResponse,
     updateMode?: boolean
   ) => {
+    enableLoading();
     setUpdateSlotMode(false);
     setSelectedClass(selectedClass);
     await fetchRooms();
@@ -691,9 +722,17 @@ export default function ClassComponent() {
       [...selectedCatechists].forEach((item) => {
         fetchItems.push({ ...item, id: item.catechist.id });
       });
-      setAssignedCatechists([...assignedCatechists, ...fetchItems]);
+      setAssignedCatechists(
+        [...assignedCatechists, ...fetchItems].sort((a, b) => {
+          if (a.catechist && b.catechist && b.catechist.isMain) {
+            return 1;
+          }
+          return -1;
+        })
+      );
     }
     setOpenSlotDialog(true);
+    disableLoading();
     resetVietnamese();
   };
 
@@ -762,15 +801,15 @@ export default function ClassComponent() {
 
       const processItems = async () => {
         const promises = [...data.data.items].map(async (item) => {
-          const remainingClassHavingSlots =
-            await catechistInClassApi.getClassesRemainingSlotsOfCatechist(
-              item.catechist.id
-            );
+          // const remainingClassHavingSlots =
+          //   await catechistInClassApi.getClassesRemainingSlotsOfCatechist(
+          //     item.catechist.id
+          //   );
 
-          if (remainingClassHavingSlots.data.data.length <= 0) {
-            // Dùng concat thay vì push để tránh lỗi
-            fetchItems = fetchItems.concat({ ...item, id: item.catechist.id });
-          }
+          // if (remainingClassHavingSlots.data.data.length <= 0) {
+          // Dùng concat thay vì push để tránh lỗi
+          fetchItems = fetchItems.concat({ ...item, id: item.catechist.id });
+          // }
         });
 
         // Chờ cho tất cả các promise hoàn thành
@@ -889,11 +928,13 @@ export default function ClassComponent() {
         );
 
         setTimeout(() => {
-          sweetAlert.alertSuccess("Cập nhật tiết học thành công!");
-          setOpenSlotDialog(false);
-          handleViewSlots(selectedClass ? selectedClass.id : "");
           fetchClasses();
-        }, 3000);
+          handleViewSlots(selectedClass ? selectedClass.id : "");
+          setTimeout(() => {
+            setOpenSlotDialog(false);
+            sweetAlert.alertSuccess("Cập nhật tiết học thành công!");
+          }, 1000);
+        }, 2500);
       } catch (error: any) {
         disableLoading();
         if (
@@ -1413,6 +1454,79 @@ export default function ClassComponent() {
     }
   };
 
+  const options = rooms.map((room) => ({
+    value: room.id,
+    label: room.name, // Dùng label để search
+    image: room.image, // Custom hiển thị
+    name: room.name, // Hiển thị khi search
+  }));
+
+  const slotUpdateRoomOptions = optionRoomsUpdateSlot.map((room) => ({
+    value: room.id,
+    label: room.name, // Dùng label để search
+    image: room.image, // Custom hiển thị
+    name: room.name, // Hiển thị khi search
+  }));
+
+  // Tùy chỉnh giao diện options
+  const customSingleValue = ({ data }: any) => (
+    <div className="flex items-center">
+      {data.image && (
+        <img
+          src={data.image}
+          alt={data.name}
+          width={80}
+          height={80}
+          className="mr-2 rounded-sm"
+        />
+      )}
+      <span>{data.name}</span>
+    </div>
+  );
+
+  const customOption = (props: any) => {
+    const { data, innerRef, innerProps } = props;
+    return (
+      <div
+        ref={innerRef}
+        {...innerProps}
+        className="flex items-center p-2 border-b border-gray-200 cursor-pointer hover:bg-gray-100"
+      >
+        {data.image && (
+          <img
+            src={data.image}
+            alt={data.name}
+            width={80}
+            height={80}
+            className="mr-3 rounded-sm"
+          />
+        )}
+        <span>{data.name}</span>
+      </div>
+    );
+  };
+
+  const customValueContainer = ({ children, ...props }: any) => {
+    const [value, input] = children;
+    return (
+      <div className="flex items-center px-2 py-2">
+        {props.hasValue && value?.props?.data && (
+          <>
+            <img
+              src={value.props.data.image}
+              alt={value.props.data.name}
+              width={80}
+              height={80}
+              className="mr-2 rounded-sm"
+            />
+            <span className="mr-2">{value.props.data.name}</span>
+          </>
+        )}
+        {input}
+      </div>
+    );
+  };
+
   return (
     <Paper
       sx={{
@@ -1446,7 +1560,7 @@ export default function ClassComponent() {
               }}
             >
               <InputLabel>Chọn Niên Khóa</InputLabel>
-              <Select
+              <MuiSelect
                 value={selectedPastoralYear}
                 onChange={(e) => {
                   setSelectedPastoralYear(e.target.value);
@@ -1458,10 +1572,14 @@ export default function ClassComponent() {
               >
                 {pastoralYears.map((year) => (
                   <MenuItem key={year.id} value={year.id}>
-                    {year.name}
+                    {year.name.split("-")[1]
+                      ? year.name.split("-")[0] +
+                        " - " +
+                        year.name.split("-")[1]
+                      : year.name}
                   </MenuItem>
                 ))}
-              </Select>
+              </MuiSelect>
             </FormControl>
 
             {/* Select for Major */}
@@ -1482,7 +1600,7 @@ export default function ClassComponent() {
               }}
             >
               <InputLabel>Chọn Ngành</InputLabel>
-              <Select
+              <MuiSelect
                 value={selectedMajor}
                 onChange={(e) => {
                   setSelectedMajor(e.target.value);
@@ -1498,7 +1616,7 @@ export default function ClassComponent() {
                     {major.name}
                   </MenuItem>
                 ))}
-              </Select>
+              </MuiSelect>
             </FormControl>
 
             {selectedMajor && selectedMajor != "all" && (
@@ -1519,7 +1637,7 @@ export default function ClassComponent() {
                 }}
               >
                 <InputLabel>Chọn Khối</InputLabel>
-                <Select
+                <MuiSelect
                   value={selectedGrade}
                   onChange={(e) => setSelectedGrade(e.target.value)}
                   displayEmpty
@@ -1532,7 +1650,7 @@ export default function ClassComponent() {
                       {grade.name}
                     </MenuItem>
                   ))}
-                </Select>
+                </MuiSelect>
               </FormControl>
             )}
           </div>
@@ -1572,7 +1690,27 @@ export default function ClassComponent() {
             <div>
               <Button
                 onClick={() => {
-                  handleOpenDialogCreateUpdateClass();
+                  const year = pastoralYears.find(
+                    (item) => item.id == selectedPastoralYear
+                  );
+                  if (year) {
+                    if (year.pastoralYearStatus == pastoralYearStatus.FINISH) {
+                      sweetAlert.alertInfo(
+                        `Niên khóa ${
+                          year.name.split("-")[1]
+                            ? year.name.split("-")[0] +
+                              " - " +
+                              year.name.split("-")[1]
+                            : year.name
+                        } đã kết thúc`,
+                        "",
+                        4000,
+                        27
+                      );
+                      return;
+                    }
+                    handleOpenDialogCreateUpdateClass();
+                  }
                 }} // Mở dialog thêm dữ liệu năm học mới
                 variant="outlined"
                 className="btn btn-success"
@@ -1639,7 +1777,7 @@ export default function ClassComponent() {
               <Button
                 onClick={() => fetchClasses()}
                 variant="contained"
-                color="secondary"
+                color="primary"
                 style={{ marginBottom: "16px" }}
               >
                 Tải lại
@@ -1657,7 +1795,7 @@ export default function ClassComponent() {
           loading={loading}
           paginationModel={paginationModel}
           onPaginationModelChange={(newModel) => setPaginationModel(newModel)}
-          pageSizeOptions={[8, 25, 50]}
+          pageSizeOptions={[10, 25, 50]}
           onRowClick={() => {}}
           onRowSelectionModelChange={handleSelectionChange}
           rowSelectionModel={selectedRows}
@@ -1669,7 +1807,14 @@ export default function ClassComponent() {
             },
           }}
           localeText={viVNGridTranslation}
-          checkboxSelection
+          checkboxSelection={
+            !(
+              pastoralYears.find((item) => item.id == selectedPastoralYear) !=
+                undefined &&
+              pastoralYears.find((item) => item.id == selectedPastoralYear)
+                .pastoralYearStatus == pastoralYearStatus.FINISH
+            )
+          }
           disableRowSelectionOnClick
           disableMultipleRowSelection
         />
@@ -1718,6 +1863,26 @@ export default function ClassComponent() {
               {selectedClass?.name}
             </strong>
           </h3>
+
+          {selectedClassView ? (
+            <div className="flex gap-x-20 mb-3">
+              <p>
+                <strong>Ngành: </strong>
+                {selectedClassView.majorName ? selectedClassView.majorName : ""}
+              </p>
+              <p>
+                <strong>Khối: </strong>
+                {selectedClassView.gradeName
+                  ? selectedClassView.gradeName.includes("Khối")
+                    ? selectedClassView.gradeName.split("Khối")[1]
+                    : selectedClassView.gradeName
+                  : ""}
+              </p>
+            </div>
+          ) : (
+            <></>
+          )}
+
           {selectedClassView &&
           selectedClassView.slotMessage &&
           selectedClassView.slotMessage
@@ -1750,7 +1915,7 @@ export default function ClassComponent() {
                 <FormControlLabel
                   value={true}
                   control={<Radio />}
-                  label="Chỉ xóa phòng học hiện tại"
+                  label="Xóa phòng học hiện tại"
                 />
               </RadioGroup>
             </>
@@ -1758,56 +1923,31 @@ export default function ClassComponent() {
           {!isDeletedAllRoom ? (
             <>
               <FormControl fullWidth>
-                <InputLabel>
-                  {updateSlotMode ? "Chọn phòng học " : "Chọn phòng học "}
-                  {!updateSlotMode ? (
-                    <span style={{ color: "red" }}>*</span>
-                  ) : (
-                    <></>
-                  )}
-                </InputLabel>
+                <strong>Chọn phòng học</strong>
+
                 <Select
-                  value={selectedRoom}
-                  onChange={(e) => {
-                    setSelectedRoom(e.target.value);
-                  }}
-                  label={
-                    <span>
-                      {updateSlotMode ? "Chọn phòng học " : "Chọn phòng học "}
-                      {!updateSlotMode ? (
-                        <span style={{ color: "red" }}>*</span>
-                      ) : (
-                        <></>
-                      )}
-                    </span>
+                  options={options}
+                  value={
+                    options.find((option) => option.value === selectedRoom) ||
+                    null
                   }
-                >
-                  {rooms.map((room) => (
-                    <MenuItem
-                      key={room.id}
-                      value={room.id}
-                      style={{ borderBottom: "1px solid gray" }}
-                      className="mx-2"
-                    >
-                      <div className="flex items-center">
-                        {room.image && room.image != "" ? (
-                          <img
-                            src={room.image ?? ""}
-                            alt={room.image ?? ""}
-                            width={120}
-                            height={120}
-                            className="mr-3 rounded-sm"
-                          />
-                        ) : (
-                          ""
-                        )}
-                        <p>
-                          <strong>Tên phòng: </strong> {room.name}
-                        </p>
-                      </div>
-                    </MenuItem>
-                  ))}
-                </Select>
+                  onChange={(selectedOption) =>
+                    setSelectedRoom(selectedOption?.value || "")
+                  }
+                  placeholder={`Chọn phòng học`}
+                  isSearchable
+                  components={{
+                    SingleValue: customSingleValue,
+                    Option: customOption,
+                    ValueContainer: customValueContainer,
+                  }}
+                  styles={{
+                    control: (provided) => ({
+                      ...provided,
+                      minHeight: "40px",
+                    }),
+                  }}
+                />
               </FormControl>
             </>
           ) : (
@@ -1845,13 +1985,12 @@ export default function ClassComponent() {
               setPaginationModelCatechists(newModel)
             }
             pageSizeOptions={[8, 25, 50]}
-            // checkboxSelection
-            onRowSelectionModelChange={(newSelectionModel) =>
-              setSelectedRowsCatechists(newSelectionModel)
-            }
-            rowSelectionModel={selectedRowsCatechists} // Use selectedRowsCatechists as controlled model
             sx={{
-              border: 0,
+              height: 300,
+              overflowX: "auto",
+              "& .MuiDataGrid-root": {
+                overflowX: "auto",
+              },
             }}
             localeText={viVNGridTranslation}
             disableRowSelectionOnClick
@@ -1877,20 +2016,16 @@ export default function ClassComponent() {
             rows={assignedCatechists}
             columns={columns2}
             paginationMode="client"
-            rowCount={assignedCatechists.length}
             loading={loading}
-            paginationModel={paginationModelCatechists} // Use separate pagination model for assigned catechists
-            onPaginationModelChange={(newModel) =>
-              setPaginationModelCatechists(newModel)
-            }
+            paginationModel={paginationModel2} // Use separate pagination model for assigned catechists
+            onPaginationModelChange={setPaginationModel2}
             pageSizeOptions={[8, 25, 50]}
-            // checkboxSelection
-            onRowSelectionModelChange={(newSelectionModel) =>
-              setSelectedRowsCatechists(newSelectionModel)
-            }
-            rowSelectionModel={selectedRowsCatechists} // Use selectedRowsCatechists as controlled model
             sx={{
-              border: 0,
+              maxHeight: 300,
+              overflowX: "auto",
+              "& .MuiDataGrid-root": {
+                overflowX: "auto",
+              },
             }}
             localeText={viVNGridTranslation}
             disableRowSelectionOnClick
@@ -1916,14 +2051,9 @@ export default function ClassComponent() {
       </Dialog>
 
       {/* Dialog for viewing slots */}
-      <Dialog
-        fullWidth
-        maxWidth="lg"
-        open={openSlotsDialog}
-        onClose={() => setOpenSlotsDialog(false)}
-      >
+      <Dialog fullWidth maxWidth="lg" open={openSlotsDialog}>
         <div style={{ padding: "20px" }}>
-          <h3 className="text-[1.2rem]">
+          <h3 className="text-[1.2rem] mb-2">
             Thông tin các tiết học của{" "}
             {selectedClassView ? (
               <>
@@ -1932,8 +2062,45 @@ export default function ClassComponent() {
             ) : (
               <></>
             )}
+            {" ("}
+            {selectedClassView ? (
+              <span>
+                Ngành{" "}
+                {selectedClassView.majorName ? selectedClassView.majorName : ""}
+                {" - "}
+                Khối{" "}
+                {selectedClassView.gradeName
+                  ? selectedClassView.gradeName.includes("Khối")
+                    ? selectedClassView.gradeName.split("Khối")[1]
+                    : selectedClassView.gradeName
+                  : ""}
+                {" - "}
+                Niên khóa{" "}
+                {pastoralYears.findIndex(
+                  (item) => item.id == selectedPastoralYear
+                ) >= 0
+                  ? pastoralYears.find(
+                      (item) => item.id == selectedPastoralYear
+                    ).name
+                  : ""}
+              </span>
+            ) : (
+              <></>
+            )}
+            {")"}
           </h3>
-          <div className="w-full flex justify-end mb-2">
+          <div
+            className="w-full justify-end mb-2"
+            style={{
+              display:
+                pastoralYears.find((item) => item.id == selectedPastoralYear) !=
+                  undefined &&
+                pastoralYears.find((item) => item.id == selectedPastoralYear)
+                  .pastoralYearStatus == pastoralYearStatus.FINISH
+                  ? "none"
+                  : "flex",
+            }}
+          >
             <Button
               variant="outlined"
               onClick={() => {
@@ -1974,15 +2141,22 @@ export default function ClassComponent() {
                       <span
                         className={`rounded-xl px-2 py-1
                       ${
-                        formatDate.DD_MM_YYYY(
-                          formatDate.getISODateInVietnamTimeZone()
-                        ) == formatDate.DD_MM_YYYY(params.row.date)
-                          ? "bg-blue-300"
-                          : new Date().getTime() -
-                                new Date(params.row.date).getTime() >=
-                              0
-                            ? "bg-yellow-300"
-                            : ""
+                        pastoralYears.find(
+                          (item) => item.id == selectedPastoralYear
+                        ) != undefined &&
+                        pastoralYears.find(
+                          (item) => item.id == selectedPastoralYear
+                        ).pastoralYearStatus == pastoralYearStatus.FINISH
+                          ? "bg-success text-white"
+                          : formatDate.DD_MM_YYYY(
+                                formatDate.getISODateInVietnamTimeZone()
+                              ) == formatDate.DD_MM_YYYY(params.row.date)
+                            ? "bg-blue-300"
+                            : new Date().getTime() -
+                                  new Date(params.row.date).getTime() >=
+                                0
+                              ? "bg-yellow-300"
+                              : ""
                       }`}
                       >
                         {formatDate.DD_MM_YYYY(params.row.date)}
@@ -2151,6 +2325,7 @@ export default function ClassComponent() {
                                           fetchItems = fetchItems.concat({
                                             catechist: item,
                                             id: item.id,
+                                            type: cateSlotExist.type,
                                           });
                                           if (
                                             cateSlotExist.type ==
@@ -2170,7 +2345,18 @@ export default function ClassComponent() {
 
                                   // Gọi hàm xử lý
                                   processItems().then(() => {
-                                    setSlotUpdateAssignedCatechists(fetchItems);
+                                    setSlotUpdateAssignedCatechists(
+                                      fetchItems.sort((a, b) => {
+                                        if (
+                                          a.type &&
+                                          b.type &&
+                                          b.type == CatechistInSlotTypeEnum.Main
+                                        ) {
+                                          return 1;
+                                        }
+                                        return -1;
+                                      })
+                                    );
                                   });
 
                                   // setCatechists(fetchItems);
@@ -2325,7 +2511,7 @@ export default function ClassComponent() {
           <div className="flex justify-between flex-wrap">
             {selectedClass ? (
               <>
-                <div className="w-[45%] my-2">
+                <div className="w-[45%] my-1">
                   <strong>Lớp học:</strong> {selectedClass.name}
                 </div>
               </>
@@ -2334,12 +2520,12 @@ export default function ClassComponent() {
             )}
             {chosenSlotToUpdate ? (
               <>
-                <div className="w-[50%] my-2">
+                <div className="w-[50%] my-1">
                   <strong>Ngày học:</strong>{" "}
                   {formatDate.DD_MM_YYYY(chosenSlotToUpdate.date)}
                 </div>
 
-                <div className="w-[45%] my-2">
+                <div className="w-[45%] my-1">
                   <strong>Giờ học:</strong>{" "}
                   {formatDate.HH_mm(chosenSlotToUpdate.startTime)} -{" "}
                   {formatDate.HH_mm(chosenSlotToUpdate.endTime)}
@@ -2347,17 +2533,38 @@ export default function ClassComponent() {
 
                 {chosenSlotToUpdate.room ? (
                   <>
-                    <div className="w-[50%] my-2">
+                    <div className="w-[50%] my-1">
                       <strong>Phòng học:</strong> {chosenSlotToUpdate.room.name}
                     </div>
                   </>
                 ) : (
                   <>
-                    <div className="w-[50%] my-2">
+                    <div className="w-[50%] my-1">
                       <strong>Phòng học:</strong> Chưa có
                     </div>
                   </>
                 )}
+              </>
+            ) : (
+              <></>
+            )}
+
+            {selectedClassView ? (
+              <>
+                <div className="w-[45%] my-1">
+                  <strong>Ngành: </strong>
+                  {selectedClassView.majorName
+                    ? selectedClassView.majorName
+                    : ""}
+                </div>
+                <div className="w-[50%] my-1">
+                  <strong>Khối: </strong>
+                  {selectedClassView.gradeName
+                    ? selectedClassView.gradeName.includes("Khối")
+                      ? selectedClassView.gradeName.split("Khối")[1]
+                      : selectedClassView.gradeName
+                    : ""}
+                </div>
               </>
             ) : (
               <></>
@@ -2463,7 +2670,16 @@ export default function ClassComponent() {
         </div>
       </Dialog>
 
-      <Dialog fullWidth maxWidth="sm" open={dialogUpdateSlotRoom}>
+      <Dialog
+        fullWidth
+        maxWidth="sm"
+        open={dialogUpdateSlotRoom}
+        sx={{
+          "& .MuiDialog-paper": {
+            maxHeight: "100vh",
+          },
+        }}
+      >
         <div style={{ padding: "20px" }}>
           <h3 className={`mb-3 text-[1.2rem] text-primary`}>
             <strong>Cập nhật phòng học</strong>
@@ -2471,7 +2687,7 @@ export default function ClassComponent() {
           <div className="flex justify-between flex-wrap">
             {selectedClass ? (
               <>
-                <div className="w-[45%] my-2">
+                <div className="w-[45%] my-1">
                   <strong>Lớp học:</strong> {selectedClass.name}
                 </div>
               </>
@@ -2480,12 +2696,12 @@ export default function ClassComponent() {
             )}
             {chosenSlotToUpdate ? (
               <>
-                <div className="w-[50%] my-2">
+                <div className="w-[50%] my-1">
                   <strong>Ngày học:</strong>{" "}
                   {formatDate.DD_MM_YYYY(chosenSlotToUpdate.date)}
                 </div>
 
-                <div className="w-[45%] my-2">
+                <div className="w-[45%] my-1">
                   <strong>Giờ học:</strong>{" "}
                   {formatDate.HH_mm(chosenSlotToUpdate.startTime)} -{" "}
                   {formatDate.HH_mm(chosenSlotToUpdate.endTime)}
@@ -2493,17 +2709,38 @@ export default function ClassComponent() {
 
                 {chosenSlotToUpdate.room ? (
                   <>
-                    <div className="w-[50%] my-2">
+                    <div className="w-[50%] my-1">
                       <strong>Phòng học:</strong> {chosenSlotToUpdate.room.name}
                     </div>
                   </>
                 ) : (
                   <>
-                    <div className="w-[50%] my-2">
+                    <div className="w-[50%] my-1">
                       <strong>Phòng học:</strong> Chưa có
                     </div>
                   </>
                 )}
+              </>
+            ) : (
+              <></>
+            )}
+
+            {selectedClassView ? (
+              <>
+                <div className="w-[45%] my-1">
+                  <strong>Ngành: </strong>
+                  {selectedClassView.majorName
+                    ? selectedClassView.majorName
+                    : ""}
+                </div>
+                <div className="w-[50%] my-1">
+                  <strong>Khối: </strong>
+                  {selectedClassView.gradeName
+                    ? selectedClassView.gradeName.includes("Khối")
+                      ? selectedClassView.gradeName.split("Khối")[1]
+                      : selectedClassView.gradeName
+                    : ""}
+                </div>
               </>
             ) : (
               <></>
@@ -2535,7 +2772,7 @@ export default function ClassComponent() {
                 <FormControlLabel
                   value={true}
                   control={<Radio />}
-                  label="Chỉ xóa phòng học hiện tại"
+                  label="Xóa phòng học hiện tại"
                 />
               </RadioGroup>
             </>
@@ -2548,48 +2785,32 @@ export default function ClassComponent() {
                 fullWidth
                 sx={{ marginTop: "15px", marginBottom: "15px" }}
               >
-                <InputLabel>
-                  <span>
-                    Chọn phòng học <span style={{ color: "red" }}>*</span>
-                  </span>
-                </InputLabel>
+                <strong>Chọn phòng học</strong>
+
                 <Select
-                  value={selectedRoomUpdateSlot}
-                  onChange={(e) => {
-                    setSelectedRoomUpdateSlot(e.target.value);
-                  }}
-                  label={
-                    <span>
-                      Chọn phòng học <span style={{ color: "red" }}>*</span>
-                    </span>
+                  options={slotUpdateRoomOptions}
+                  value={
+                    options.find(
+                      (option) => option.value === selectedRoomUpdateSlot
+                    ) || null
                   }
-                >
-                  {optionRoomsUpdateSlot.map((room) => (
-                    <MenuItem
-                      key={room.id}
-                      value={room.id}
-                      style={{ borderBottom: "1px solid gray" }}
-                      className="mx-2"
-                    >
-                      <div className="flex items-center">
-                        {room.image && room.image != "" ? (
-                          <img
-                            src={room.image ?? ""}
-                            alt={room.image ?? ""}
-                            width={120}
-                            height={120}
-                            className="mr-3 rounded-sm"
-                          />
-                        ) : (
-                          ""
-                        )}
-                        <p>
-                          <strong>Tên phòng: </strong> {room.name}
-                        </p>
-                      </div>
-                    </MenuItem>
-                  ))}
-                </Select>
+                  onChange={(selectedOption) =>
+                    setSelectedRoomUpdateSlot(selectedOption?.value || "")
+                  }
+                  placeholder={`Chọn phòng học`}
+                  isSearchable
+                  components={{
+                    SingleValue: customSingleValue,
+                    Option: customOption,
+                    ValueContainer: customValueContainer,
+                  }}
+                  styles={{
+                    control: (provided) => ({
+                      ...provided,
+                      minHeight: "40px",
+                    }),
+                  }}
+                />
               </FormControl>
             </>
           ) : (
@@ -2668,7 +2889,7 @@ export default function ClassComponent() {
           <div className="flex justify-between flex-wrap">
             {selectedClass ? (
               <>
-                <div className="w-[45%] my-2">
+                <div className="w-[45%] my-1">
                   <strong>Lớp học:</strong> {selectedClass.name}
                 </div>
               </>
@@ -2677,12 +2898,12 @@ export default function ClassComponent() {
             )}
             {chosenSlotToUpdate ? (
               <>
-                <div className="w-[50%] my-2">
+                <div className="w-[50%] my-1">
                   <strong>Ngày học:</strong>{" "}
                   {formatDate.DD_MM_YYYY(chosenSlotToUpdate.date)}
                 </div>
 
-                <div className="w-[45%] my-2">
+                <div className="w-[45%] my-1">
                   <strong>Giờ học:</strong>{" "}
                   {formatDate.HH_mm(chosenSlotToUpdate.startTime)} -{" "}
                   {formatDate.HH_mm(chosenSlotToUpdate.endTime)}
@@ -2690,17 +2911,38 @@ export default function ClassComponent() {
 
                 {chosenSlotToUpdate.room ? (
                   <>
-                    <div className="w-[50%] my-2">
+                    <div className="w-[50%] my-1">
                       <strong>Phòng học:</strong> {chosenSlotToUpdate.room.name}
                     </div>
                   </>
                 ) : (
                   <>
-                    <div className="w-[50%] my-2">
+                    <div className="w-[50%] my-1">
                       <strong>Phòng học:</strong> Chưa có
                     </div>
                   </>
                 )}
+              </>
+            ) : (
+              <></>
+            )}
+
+            {selectedClassView ? (
+              <>
+                <div className="w-[45%] my-1">
+                  <strong>Ngành: </strong>
+                  {selectedClassView.majorName
+                    ? selectedClassView.majorName
+                    : ""}
+                </div>
+                <div className="w-[50%] my-1">
+                  <strong>Khối: </strong>
+                  {selectedClassView.gradeName
+                    ? selectedClassView.gradeName.includes("Khối")
+                      ? selectedClassView.gradeName.split("Khối")[1]
+                      : selectedClassView.gradeName
+                    : ""}
+                </div>
               </>
             ) : (
               <></>
@@ -2733,18 +2975,17 @@ export default function ClassComponent() {
             paginationMode="client"
             rowCount={slotUpdateCatechists.length}
             loading={loading}
-            paginationModel={paginationModelCatechists}
+            paginationModel={paginationModel3}
             onPaginationModelChange={(newModel) =>
-              setPaginationModelCatechists(newModel)
+              setPaginationModel3(newModel)
             }
             pageSizeOptions={[8, 25, 50]}
-            // checkboxSelection
-            onRowSelectionModelChange={(newSelectionModel) =>
-              setSelectedRowsCatechists(newSelectionModel)
-            }
-            rowSelectionModel={selectedRowsCatechists} // Use selectedRowsCatechists as controlled model
             sx={{
-              border: 0,
+              height: 300,
+              overflowX: "auto",
+              "& .MuiDataGrid-root": {
+                overflowX: "auto",
+              },
             }}
             localeText={viVNGridTranslation}
             disableRowSelectionOnClick
@@ -2772,18 +3013,17 @@ export default function ClassComponent() {
             paginationMode="client"
             rowCount={slotUpdateAssignedCatechists.length}
             loading={loading}
-            paginationModel={paginationModelCatechists} // Use separate pagination model for assigned catechists
+            paginationModel={paginationModel4} // Use separate pagination model for assigned catechists
             onPaginationModelChange={(newModel) =>
-              setPaginationModelCatechists(newModel)
+              setPaginationModel4(newModel)
             }
             pageSizeOptions={[8, 25, 50]}
-            // checkboxSelection
-            onRowSelectionModelChange={(newSelectionModel) =>
-              setSelectedRowsCatechists(newSelectionModel)
-            }
-            rowSelectionModel={selectedRowsCatechists} // Use selectedRowsCatechists as controlled model
             sx={{
-              border: 0,
+              maxHeight: 300,
+              overflowX: "auto",
+              "& .MuiDataGrid-root": {
+                overflowX: "auto",
+              },
             }}
             localeText={viVNGridTranslation}
             disableRowSelectionOnClick

@@ -4,7 +4,7 @@ import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { Button, Dialog } from "@mui/material";
 import pastoralYearApi from "../../../api/PastoralYear";
 import catechistApi from "../../../api/Catechist";
-import { getUserInfo } from "../../../utils/utils";
+import { getUserInfo, storeCurrentPath } from "../../../utils/utils";
 import { formatDate } from "../../../utils/formatDate";
 import classApi from "../../../api/Class";
 import sweetAlert from "../../../utils/sweetAlert";
@@ -23,6 +23,8 @@ import {
   AbsenceRequestStatus,
   AbsenceRequestStatusString,
 } from "../../../enums/AbsenceRequest";
+import { PATH_CATECHIST } from "../../../routes/paths";
+import { pastoralYearStatus } from "../../../enums/PastoralYear";
 
 const CatechistClassComponent = () => {
   const [userLogin, setUserLogin] = useState<any>(null);
@@ -55,6 +57,7 @@ const CatechistClassComponent = () => {
       }
     };
     fetchUser();
+    storeCurrentPath(PATH_CATECHIST.class);
   }, []);
 
   // Fetch danh sách niên khóa
@@ -93,10 +96,16 @@ const CatechistClassComponent = () => {
           try {
             const promises = response.data.data.items.map(async (item: any) => {
               const slotCount = await fetchSlotCountOfClass(item.class.id);
+              const catechistCount = await fetchCatechistCountOfClass(
+                item.class.id
+              );
               return {
                 ...item.class,
                 isMain: item.isMain,
                 slotCount: slotCount,
+                catechistCount: catechistCount
+                  ? catechistCount.catechistCount
+                  : 0,
               };
             });
 
@@ -141,13 +150,36 @@ const CatechistClassComponent = () => {
     }
   };
 
+  const fetchCatechistCountOfClass = async (classId: string) => {
+    try {
+      const { data } = await classApi.getCatechistsOfClass(classId, 1, 100);
+      return {
+        catechistCount: data.data.total,
+      };
+    } catch (error) {
+      console.error("Error loading grades:", error);
+      return {
+        catechistCount: 0,
+      };
+    }
+  };
+
   // Columns cho DataGrid
   const columns: GridColDef[] = [
     { field: "name", headerName: "Tên lớp", width: 200 },
     {
       field: "numberOfCatechist",
       headerName: "Số lượng giáo lý viên",
-      width: 180,
+      width: 170,
+      renderCell: (params) => {
+        return (
+          <span
+            className={`${params.row.catechistCount && params.row.catechistCount >= params.row.numberOfCatechist ? "" : "text-danger"}`}
+          >
+            {`Trong lớp: ${params.row.catechistCount ? params.row.catechistCount : "0"} - Cần: ${params.row.numberOfCatechist}`}
+          </span>
+        );
+      },
     },
     {
       field: "major",
@@ -316,10 +348,13 @@ const CatechistClassComponent = () => {
       <h1 className="text-center text-[2.2rem] bg_title text-text_primary_light py-2 font-bold">
         Thông tin lớp giáo lý
       </h1>
-      <div className="w-full px-3">
+      <div className="w-full px-0">
         {/* Dropdown để chọn niên khóa */}
-        <div className="w-full flex items-center mt-2 justify-between">
+        <div className="w-full flex items-center mt-2 justify-between px-3">
           <div>
+            <label htmlFor="" className="mr-3">
+              Niên khóa
+            </label>
             <select
               value={selectedPastoralYear}
               className="py-1 px-2 border-gray-400 border-1 rounded mb-3 mt-3"
@@ -337,7 +372,7 @@ const CatechistClassComponent = () => {
             <Button
               onClick={() => fetchClasses()}
               variant="contained"
-              color="secondary"
+              color="primary"
               style={{ marginBottom: "16px" }}
             >
               Tải lại
@@ -393,15 +428,22 @@ const CatechistClassComponent = () => {
                       <span
                         className={`rounded-xl px-2 py-1
                       ${
-                        formatDate.DD_MM_YYYY(
-                          formatDate.getISODateInVietnamTimeZone()
-                        ) == formatDate.DD_MM_YYYY(params.row.date)
-                          ? "bg-blue-300"
-                          : new Date().getTime() -
-                                new Date(params.row.date).getTime() >=
-                              0
-                            ? "bg-yellow-300"
-                            : ""
+                        pastoralYears.find(
+                          (item) => item.name == selectedPastoralYear
+                        ) != undefined &&
+                        pastoralYears.find(
+                          (item) => item.name == selectedPastoralYear
+                        ).pastoralYearStatus == pastoralYearStatus.FINISH
+                          ? "bg-success text-white"
+                          : formatDate.DD_MM_YYYY(
+                                formatDate.getISODateInVietnamTimeZone()
+                              ) == formatDate.DD_MM_YYYY(params.row.date)
+                            ? "bg-blue-300"
+                            : new Date().getTime() -
+                                  new Date(params.row.date).getTime() >=
+                                0
+                              ? "bg-yellow-300"
+                              : ""
                       }`}
                       >
                         {formatDate.DD_MM_YYYY(params.row.date)}

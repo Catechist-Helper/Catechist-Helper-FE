@@ -39,6 +39,7 @@ export interface ProcessResponseItem {
   note: string;
   status: number;
   eventId: string;
+  memberOfProcesses: MemberOfProcessItemResponse[];
 }
 
 export interface ParticipantResponseItem {

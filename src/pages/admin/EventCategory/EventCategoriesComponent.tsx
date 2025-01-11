@@ -7,6 +7,8 @@ import { EventCategoryItemResponse } from "../../../model/Response/EventCategory
 import sweetAlert from "../../../utils/sweetAlert";
 import viVNGridTranslation from "../../../locale/MUITable";
 import EventCategoryDialog from "./EventCategoryDialog";
+import { PATH_ADMIN } from "../../../routes/paths";
+import { storeCurrentPath } from "../../../utils/utils";
 
 const columns: GridColDef[] = [
   { field: "name", headerName: "Tên danh mục", width: 250 },
@@ -37,6 +39,7 @@ export default function EventCategoriesComponent() {
 
   useEffect(() => {
     fetchEventCategories(); // Lấy dữ liệu khi component được mount
+    storeCurrentPath(PATH_ADMIN.admin_event_category_management);
   }, []);
 
   // Mở Dialog để thêm mới danh mục

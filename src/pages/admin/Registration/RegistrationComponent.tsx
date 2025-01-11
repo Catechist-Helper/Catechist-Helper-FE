@@ -26,7 +26,7 @@ import { RecruitersByMeetingTimeItemResponse } from "../../../model/Response/Acc
 import { RegistrationStatus } from "../../../enums/Registration";
 import viVNGridTranslation from "../../../locale/MUITable";
 import { formatDate } from "../../../utils/formatDate";
-import { formatPhone } from "../../../utils/utils";
+import { formatPhone, storeCurrentPath } from "../../../utils/utils";
 import sweetAlert from "../../../utils/sweetAlert";
 import useAppContext from "../../../hooks/useAppContext";
 import {
@@ -36,6 +36,7 @@ import {
 import { RoleNameEnum } from "../../../enums/RoleEnum";
 import RegistrationDetailDialog from "../ApprovedRegistration/RegistrationDetailDialog";
 import catechistApi from "../../../api/Catechist";
+import { PATH_ADMIN } from "../../../routes/paths";
 
 export default function RegistrationDataTable() {
   const [rows, setRows] = useState<RegistrationItemResponse[]>([]);
@@ -194,6 +195,7 @@ export default function RegistrationDataTable() {
 
   useEffect(() => {
     fetchRegistrations();
+    storeCurrentPath(PATH_ADMIN.admin_registration);
   }, [paginationModel, viewMode]); // Cập nhật lại khi paginationModel hoặc viewMode thay đổi
 
   // Xử lý sự kiện khi thay đổi trang hoặc kích thước trang

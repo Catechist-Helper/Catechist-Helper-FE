@@ -1,3 +1,5 @@
+import { LOCALSTORAGE_CONSTANTS } from "../constants/WebsiteConstant";
+
 export const setLocalStorage = (name: string, value: string) => {
   try {
     if (typeof localStorage !== "undefined") {
@@ -58,4 +60,13 @@ export const formatPhone = (phone: string): string => {
     return phone;
   }
 };
+
+export const storeCurrentPath = (path: string) => {
+  if (typeof window !== "undefined") {
+    localStorage.setItem(
+      LOCALSTORAGE_CONSTANTS.CURRENT_PAGE,
+      path
+    );
+  }
+}
 

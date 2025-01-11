@@ -8,6 +8,8 @@ import sweetAlert from "../../../utils/sweetAlert";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { Button, Paper } from "@mui/material";
 import viVNGridTranslation from "../../../locale/MUITable";
+import { PATH_ADMIN } from "../../../routes/paths";
+import { storeCurrentPath } from "../../../utils/utils";
 
 const ListAllPastoralYears: React.FC = () => {
   const [pastoralYears, setPastoralYears] = useState<any[]>([]);
@@ -22,7 +24,13 @@ const ListAllPastoralYears: React.FC = () => {
         data.statusCode.toString().trim().startsWith("2") &&
         data.data.items != null
       ) {
-        setPastoralYears(data.data.items);
+        setPastoralYears(
+          data.data.items.sort((a: any, b: any) => {
+            const yearA = parseInt(a.name.split("-")[0]);
+            const yearB = parseInt(b.name.split("-")[0]);
+            return yearB - yearA;
+          })
+        );
       } else {
         console.log("No items found");
       }
@@ -35,6 +43,7 @@ const ListAllPastoralYears: React.FC = () => {
 
   useEffect(() => {
     fetchPastoralYears();
+    storeCurrentPath(PATH_ADMIN.pastoral_years);
   }, []);
 
   const handleCreate = () => {
@@ -97,26 +106,75 @@ const ListAllPastoralYears: React.FC = () => {
   };
 
   const columns: GridColDef[] = [
-    { field: "name", headerName: "Niên Khóa", width: 200 },
-    { field: "note", headerName: "Ghi chú", width: 300 },
+    {
+      field: "name",
+      headerName: "Niên Khóa",
+      width: 200,
+      renderCell: (params) => {
+        return (
+          <span>
+            {params.row.name.split("-")[1]
+              ? params.row.name.split("-")[0] +
+                " - " +
+                params.row.name.split("-")[1]
+              : params.row.name}
+          </span>
+        );
+      },
+    },
+    { field: "note", headerName: "Ghi chú", width: 310 },
     {
       field: "pastoralYearStatus",
       headerName: "Trạng thái",
-      width: 200,
-      renderCell: (params) => (
-        <label className="inline-flex items-center cursor-pointer">
-          <span className="text-sm font-medium text-gray-900 mr-2">
-            {params.value === pastoralYearStatus.START ? "Bắt đầu" : "Kết thúc"}
-          </span>
-          <input
-            type="checkbox"
-            className="sr-only peer"
-            checked={params.value === pastoralYearStatus.START}
-            onChange={() => handleToggleChange(params.row)}
-          />
-          <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-30 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-al peer-checked:bg-blue-600"></div>
-        </label>
-      ),
+      width: 250,
+      renderCell: (params) => {
+        console.log(params.row);
+        return (
+          <label className="inline-flex items-center cursor-pointer">
+            <span className="text-sm font-medium text-gray-900 mr-2">
+              {params.value === pastoralYearStatus.START ? (
+                <span className="py-1 px-2 rounded-xl bg-success text-white">
+                  Đang hoạt động
+                </span>
+              ) : (
+                <span className="py-1 px-2 rounded-xl bg-black text-white">
+                  Đã kết thúc
+                </span>
+              )}
+            </span>
+            {params.value === pastoralYearStatus.START ? (
+              <>
+                <input
+                  type="checkbox"
+                  className="sr-only peer"
+                  checked={params.value === pastoralYearStatus.START}
+                  onChange={() => {
+                    if (params.value === pastoralYearStatus.FINISH) {
+                      sweetAlert.alertInfo(
+                        "Niên khóa " + params.row.name + " đã kết thúc"
+                      );
+                      return;
+                    }
+                    const action = async () => {
+                      const confirm = await sweetAlert.confirm(
+                        "Xác nhận kết thúc niên khóa " + params.row.name,
+                        ""
+                      );
+                      if (confirm) {
+                        handleToggleChange(params.row);
+                      }
+                    };
+                    action();
+                  }}
+                />
+                <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-30 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-al peer-checked:bg-blue-600"></div>
+              </>
+            ) : (
+              <></>
+            )}
+          </label>
+        );
+      },
     },
     {
       field: "actions",
@@ -124,24 +182,30 @@ const ListAllPastoralYears: React.FC = () => {
       width: 200,
       renderCell: (params) => (
         <div className="space-x-2">
-          <Button
-            className="btn btn-primary"
-            color="primary"
-            variant="outlined"
-            onClick={() =>
-              navigate(`/admin/update-pastoral-years/${params.row.id}`)
-            }
-          >
-            Chỉnh sửa
-          </Button>
-          <Button
-            className="btn btn-danger"
-            color="error"
-            variant="outlined"
-            onClick={() => handleDeletePastoralYearClick(params.row.id)}
-          >
-            Xóa
-          </Button>
+          {params.row.pastoralYearStatus === pastoralYearStatus.START ? (
+            <>
+              <Button
+                className="btn btn-primary"
+                color="primary"
+                variant="outlined"
+                onClick={() =>
+                  navigate(`/admin/update-pastoral-years/${params.row.id}`)
+                }
+              >
+                Chỉnh sửa
+              </Button>
+              <Button
+                className="btn btn-danger"
+                color="error"
+                variant="outlined"
+                onClick={() => handleDeletePastoralYearClick(params.row.id)}
+              >
+                Xóa
+              </Button>
+            </>
+          ) : (
+            <></>
+          )}
         </div>
       ),
       sortable: false,

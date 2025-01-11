@@ -83,6 +83,7 @@ const UpdatePastoralYear: React.FC = () => {
               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
               onChange={formik.handleChange}
               value={formik.values.name}
+              disabled
             />
           </div>
 
@@ -103,7 +104,7 @@ const UpdatePastoralYear: React.FC = () => {
             />
           </div>
 
-          <div className="mb-5">
+          {/* <div className="mb-5">
             <label className="block mb-1 text-sm font-medium">Trạng thái</label>
             <div className="flex items-center">
               <div className="flex items-center mr-4">
@@ -145,7 +146,7 @@ const UpdatePastoralYear: React.FC = () => {
                 <label className="ml-2">Kết thúc</label>
               </div>
             </div>
-          </div>
+          </div> */}
 
           <div className="flex items-start mb-5">
             <button

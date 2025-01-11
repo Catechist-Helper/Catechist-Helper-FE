@@ -7,7 +7,7 @@ import {
   GridRowSelectionModel,
 } from "@mui/x-data-grid";
 import catechistApi from "../../../api/Catechist";
-import { getUserInfo } from "../../../utils/utils";
+import { getUserInfo, storeCurrentPath } from "../../../utils/utils";
 import { formatDate } from "../../../utils/formatDate";
 import viVNGridTranslation from "../../../locale/MUITable";
 import {
@@ -19,6 +19,7 @@ import {
   trainingListStatusString,
 } from "../../../enums/TrainingList";
 import { Button } from "@mui/material";
+import { PATH_CATECHIST } from "../../../routes/paths";
 
 const CatechistTrainingComponent = () => {
   const [userLogin, setUserLogin] = useState<any>(null);
@@ -41,6 +42,7 @@ const CatechistTrainingComponent = () => {
       }
     };
     fetchUser();
+    storeCurrentPath(PATH_CATECHIST.catechist_training);
   }, []);
 
   const fetchTraining = async () => {
@@ -159,14 +161,14 @@ const CatechistTrainingComponent = () => {
       <h1 className="text-center text-[2.2rem] bg_title text-text_primary_light py-2 font-bold">
         Thông tin các khóa đào tạo tham gia
       </h1>
-      <div className="w-full flex items-center mt-2 justify-between px-3">
+      <div className="w-full flex items-center justify-between px-3 mt-3">
         <div className="min-w-[2px]"></div>
 
         <div>
           <Button
             onClick={() => fetchTraining()}
             variant="contained"
-            color="secondary"
+            color="primary"
             style={{ marginBottom: "16px" }}
           >
             Tải lại

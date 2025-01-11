@@ -28,6 +28,8 @@ import {
   EventStatusString,
 } from "../../../enums/Event";
 import viVNGridTranslation from "../../../locale/MUITable";
+import { AuthUser } from "../../../types/authentication";
+import { getUserInfo } from "../../../utils/utils";
 
 const EventProcessManagement: React.FC = () => {
   const location = useLocation();
@@ -49,6 +51,15 @@ const EventProcessManagement: React.FC = () => {
   // const [summaryFees, setSummaryFees] = useState<number>(0);
   // const [actualSummaryFees, setActualSummaryFees] = useState<number>(0);
   const [currentStatusFilter, setCurrentStatusFilter] = useState<string>("");
+  const [joinProcessFilter, setJoinProcessFilter] = useState<string>("0");
+
+  const [userLogin, setUserLogin] = useState<AuthUser>({});
+  useEffect(() => {
+    const user: AuthUser = getUserInfo();
+    if (user && user.id) {
+      setUserLogin(user);
+    }
+  }, []);
 
   const fetchEventProcesses = async (init?: boolean) => {
     try {
@@ -359,7 +370,59 @@ const EventProcessManagement: React.FC = () => {
     });
   }
 
-  const rows: GridRowsProp = eventProcesses;
+  const rows: GridRowsProp = [...eventProcesses].filter(
+    (item: ProcessResponseItem) => {
+      if (joinProcessFilter == "3") {
+        return (
+          userLogin &&
+          item.memberOfProcesses &&
+          item.memberOfProcesses.findIndex(
+            (item2) =>
+              item2.getAccountResponse &&
+              item2.getAccountResponse.id == userLogin.id
+          ) >= 0
+        );
+      }
+      if (joinProcessFilter == "4") {
+        return (
+          userLogin &&
+          item.memberOfProcesses &&
+          item.memberOfProcesses.findIndex(
+            (item2) =>
+              item2.getAccountResponse &&
+              item2.getAccountResponse.id == userLogin.id
+          ) < 0
+        );
+      }
+      if (joinProcessFilter == "1") {
+        return (
+          userLogin &&
+          item.memberOfProcesses &&
+          userLogin &&
+          item.memberOfProcesses &&
+          item.memberOfProcesses.findIndex(
+            (item2) =>
+              item2.getAccountResponse &&
+              item2.getAccountResponse.id == userLogin.id &&
+              item2.isMain
+          ) >= 0
+        );
+      }
+      if (joinProcessFilter == "2") {
+        return (
+          userLogin &&
+          item.memberOfProcesses &&
+          item.memberOfProcesses.findIndex(
+            (item2) =>
+              item2.getAccountResponse &&
+              item2.getAccountResponse.id == userLogin.id &&
+              !item2.isMain
+          ) >= 0
+        );
+      }
+      return true;
+    }
+  );
 
   if (loading) {
     return (
@@ -405,6 +468,10 @@ const EventProcessManagement: React.FC = () => {
     }
   };
 
+  if (!userLogin || !userLogin.id) {
+    return <></>;
+  }
+  console.log("rows", rows);
   return (
     <Paper
       sx={{
@@ -476,7 +543,7 @@ const EventProcessManagement: React.FC = () => {
             <div className="mt-2 w-[100%]">
               <div className="w-[25%] flex justify-between">
                 <div>
-                  <strong> Tình trạng chi phí:</strong>
+                  <strong> Tình trạng số dư:</strong>
                 </div>
                 <div>
                   <strong>
@@ -580,19 +647,22 @@ const EventProcessManagement: React.FC = () => {
         <></>
       )}
       <div className="w-full h-full mt-4 px-3 flex justify-between">
-        <div className="min-w-[10px]">
-          <div>
+        <div className="min-w-[10px] flex gap-x-5 mb-3">
+          <div className="flex flex-col">
             <span className="mr-3 font-bold">Trạng thái phê duyệt</span>
             <MuiSelect
               labelId="result-label"
               value={currentStatusFilter}
-              onChange={(e) => setCurrentStatusFilter(e.target.value)}
+              onChange={(e) => {
+                setCurrentStatusFilter(e.target.value);
+                setJoinProcessFilter("0");
+              }}
               className={`
-               h-[40px] w-[200px]
-              ${currentStatusFilter == "Chờ phê duyệt" ? "bg-black text-white" : ""}
-              ${currentStatusFilter == "Đã phê duyệt" ? "bg-primary text-white" : ""}
-              ${currentStatusFilter == "Không được duyệt" ? "bg-danger text-white" : ""}
-              `}
+                               h-[40px] w-[200px]
+                              ${currentStatusFilter == "Chờ phê duyệt" ? "bg-black text-white" : ""}
+                              ${currentStatusFilter == "Đã phê duyệt" ? "bg-primary text-white" : ""}
+                              ${currentStatusFilter == "Không được duyệt" ? "bg-danger text-white" : ""}
+                              `}
             >
               <MenuItem
                 value="Chờ phê duyệt"
@@ -614,13 +684,30 @@ const EventProcessManagement: React.FC = () => {
               </MenuItem>
             </MuiSelect>
           </div>
+          <div className="flex flex-col">
+            <span className="mr-3 font-bold">Vai trò trong hoạt động</span>
+            <MuiSelect
+              labelId="result-label"
+              value={joinProcessFilter}
+              onChange={(e) => setJoinProcessFilter(e.target.value)}
+              className={`
+                               h-[40px] w-[200px]
+                              `}
+            >
+              <MenuItem value="0">Tất cả</MenuItem>
+              <MenuItem value="1">Đảm nhận chính</MenuItem>
+              <MenuItem value="2">Đảm nhận phụ</MenuItem>
+              <MenuItem value="3">Có tham gia</MenuItem>
+              <MenuItem value="4">Không tham gia</MenuItem>
+            </MuiSelect>
+          </div>
         </div>
         <div className="flex gap-x-2">
           {truongBTCRole &&
           selectedEvent &&
           selectedEvent.eventStatus != EventStatus.Completed &&
           selectedEvent.eventStatus != EventStatus.Cancelled ? (
-            <>
+            <div>
               <Button
                 variant="contained"
                 color="primary"
@@ -629,21 +716,23 @@ const EventProcessManagement: React.FC = () => {
               >
                 Tạo mới
               </Button>
-            </>
+            </div>
           ) : (
             <></>
           )}
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => {
-              fetchEventProcesses();
-              fetchSelectedEvent();
-            }}
-            style={{ marginBottom: "20px" }}
-          >
-            Tải lại
-          </Button>
+          <div>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => {
+                fetchEventProcesses();
+                fetchSelectedEvent();
+              }}
+              style={{ marginBottom: "20px" }}
+            >
+              Tải lại
+            </Button>
+          </div>
         </div>
       </div>
 

@@ -3,6 +3,8 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { PATH_ADMIN, PATH_HOME } from "../../../routes/paths";
 import useAuth from "../../../hooks/useAuth";
+import { LOCALSTORAGE_CONSTANTS } from "../../../constants/WebsiteConstant";
+import sweetAlert from "../../../utils/sweetAlert";
 
 const SideBarComponent = () => {
   const [isHovered, setIsHovered] = useState(false);
@@ -26,15 +28,15 @@ const SideBarComponent = () => {
       }}
     >
       <div
-        className="sidebar h-full w-[3.8rem] overflow-hidden border-r hover:w-56 hover:bg-white hover:shadow-lg"
-        onMouseEnter={() => setIsHovered(true)}
+        className={`sidebar h-full w-[3.8rem] overflow-hidden border-r ${isHovered ? "hover:w-56 hover:shadow-xl" : ""}`}
+        onClick={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         style={{ height: "100%" }}
       >
         <div
           className="flex h-screen flex-col justify-between pt-2 pb-6"
           style={{
-            overflowY: `${isHovered ? "scroll" : "hidden"}`,
+            overflowY: `${isHovered ? "auto" : "hidden"}`,
             overflowX: "hidden",
           }}
         >
@@ -48,7 +50,12 @@ const SideBarComponent = () => {
               />
             </div>
 
-            <ul className="mt-6 space-y-2 tracking-wide">
+            <ul
+              className="mt-6 space-y-2 tracking-wide"
+              style={{
+                display: isHovered ? "block" : "none",
+              }}
+            >
               {/* Thời gian biểu */}
               <li className="min-w-max">
                 <Link
@@ -57,7 +64,26 @@ const SideBarComponent = () => {
                     transition: "all ease 0.2s",
                   }}
                   to={PATH_ADMIN.admin_calendar}
-                  className="sidebar-link relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-primary_color hover:to-amber-600 px-4 py-3 hover:text-white"
+                  onClick={() => {
+                    if (typeof window !== "undefined") {
+                      localStorage.setItem(
+                        LOCALSTORAGE_CONSTANTS.CURRENT_PAGE,
+                        PATH_ADMIN.admin_calendar
+                      );
+                    }
+                  }}
+                  className={`sidebar-link relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-blue-950 hover:to-blue-400 px-4 py-3 hover:text-white
+                     ${
+                       typeof window !== "undefined" &&
+                       localStorage.getItem(
+                         LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
+                       ) &&
+                       localStorage.getItem(
+                         LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
+                       ) == PATH_ADMIN.admin_calendar
+                         ? "bg-gradient-to-r from-primary_color to-amber-600 hover:!from-primary_color hover:!to-amber-600 px-4 py-3 text-white"
+                         : ""
+                     }`}
                 >
                   Thời gian biểu
                 </Link>
@@ -71,12 +97,30 @@ const SideBarComponent = () => {
                     opacity: `${isHovered ? "1" : "0"}`,
                     transition: "all ease 0.2s",
                   }}
-                  className="group-title sidebar-link rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-primary_color hover:to-amber-600 px-4 py-3 hover:text-white"
+                  className={`cursor-pointer group-title sidebar-link rounded-full space-x-4
+                   text-gray-700 hover:bg-gradient-to-r hover:from-blue-950
+                    hover:to-blue-400 px-4 py-3 hover:text-white
+                    ${
+                      typeof window !== "undefined" &&
+                      openGroup != "tuyendung" &&
+                      localStorage.getItem(
+                        LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
+                      ) &&
+                      (localStorage.getItem(
+                        LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
+                      ) == PATH_ADMIN.admin_registration ||
+                        localStorage.getItem(
+                          LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
+                        ) == PATH_ADMIN.approved_registration)
+                        ? "bg-gradient-to-r from-primary_color to-amber-600 hover:!from-primary_color hover:!to-amber-600 px-4 py-3 text-white"
+                        : ""
+                    }
+                    `}
                 >
                   Tuyển dụng
                 </div>
                 {openGroup === "tuyendung" && (
-                  <ul className="pl-4 space-y-2">
+                  <ul className="pl-4 space-y-2 ml-2">
                     <li className="min-w-max">
                       <Link
                         style={{
@@ -84,7 +128,27 @@ const SideBarComponent = () => {
                           transition: "all ease 0.2s",
                         }}
                         to={PATH_ADMIN.admin_registration}
-                        className="sidebar-link relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-primary_color hover:to-amber-600 px-4 py-3 hover:text-white"
+                        onClick={() => {
+                          if (typeof window !== "undefined") {
+                            localStorage.setItem(
+                              LOCALSTORAGE_CONSTANTS.CURRENT_PAGE,
+                              PATH_ADMIN.admin_registration
+                            );
+                          }
+                        }}
+                        className={`sidebar-link relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-blue-950 hover:to-blue-400 px-4 py-3 hover:text-white
+                           ${
+                             typeof window !== "undefined" &&
+                             localStorage.getItem(
+                               LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
+                             ) &&
+                             localStorage.getItem(
+                               LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
+                             ) == PATH_ADMIN.admin_registration
+                               ? "bg-gradient-to-r from-primary_color to-amber-600 hover:!from-primary_color hover:!to-amber-600 px-4 py-3 text-white"
+                               : ""
+                           }
+                           `}
                       >
                         Ứng tuyển
                       </Link>
@@ -96,7 +160,27 @@ const SideBarComponent = () => {
                           transition: "all ease 0.2s",
                         }}
                         to={PATH_ADMIN.approved_registration}
-                        className="sidebar-link relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-primary_color hover:to-amber-600 px-4 py-3 hover:text-white"
+                        onClick={() => {
+                          if (typeof window !== "undefined") {
+                            localStorage.setItem(
+                              LOCALSTORAGE_CONSTANTS.CURRENT_PAGE,
+                              PATH_ADMIN.approved_registration
+                            );
+                          }
+                        }}
+                        className={`sidebar-link relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-blue-950 hover:to-blue-400 px-4 py-3 hover:text-white
+                           ${
+                             typeof window !== "undefined" &&
+                             localStorage.getItem(
+                               LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
+                             ) &&
+                             localStorage.getItem(
+                               LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
+                             ) == PATH_ADMIN.approved_registration
+                               ? "bg-gradient-to-r from-primary_color to-amber-600 hover:!from-primary_color hover:!to-amber-600 px-4 py-3 text-white"
+                               : ""
+                           }
+                           `}
                       >
                         Phỏng vấn
                       </Link>
@@ -112,13 +196,37 @@ const SideBarComponent = () => {
                     opacity: `${isHovered ? "1" : "0"}`,
                     transition: "all ease 0.2s",
                   }}
-                  className="group-title sidebar-link rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-primary_color hover:to-amber-600 px-4 py-3 hover:text-white"
+                  className={`cursor-pointer group-title sidebar-link rounded-full space-x-4
+                   text-gray-700 hover:bg-gradient-to-r hover:from-blue-950
+                    hover:to-blue-400 px-4 py-3 hover:text-white 
+                    ${
+                      typeof window !== "undefined" &&
+                      openGroup != "giaoly" &&
+                      localStorage.getItem(
+                        LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
+                      ) &&
+                      (localStorage.getItem(
+                        LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
+                      ) == PATH_ADMIN.major_management ||
+                        localStorage.getItem(
+                          LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
+                        ) == PATH_ADMIN.grade_management ||
+                        localStorage.getItem(
+                          LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
+                        ) == PATH_ADMIN.class_management ||
+                        localStorage.getItem(
+                          LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
+                        ) == PATH_ADMIN.admin_management_absence)
+                        ? "bg-gradient-to-r from-primary_color to-amber-600 hover:!from-primary_color hover:!to-amber-600 px-4 py-3 text-white"
+                        : ""
+                    }
+                    `}
                   onClick={() => toggleGroup("giaoly")}
                 >
                   Giáo lý
                 </div>
                 {openGroup === "giaoly" && (
-                  <ul className="pl-4 space-y-2">
+                  <ul className="pl-4 space-y-2 ml-2">
                     <li className="min-w-max">
                       <Link
                         style={{
@@ -126,7 +234,27 @@ const SideBarComponent = () => {
                           transition: "all ease 0.2s",
                         }}
                         to={PATH_ADMIN.major_management}
-                        className="sidebar-link relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-primary_color hover:to-amber-600 px-4 py-3 hover:text-white"
+                        onClick={() => {
+                          if (typeof window !== "undefined") {
+                            localStorage.setItem(
+                              LOCALSTORAGE_CONSTANTS.CURRENT_PAGE,
+                              PATH_ADMIN.major_management
+                            );
+                          }
+                        }}
+                        className={`sidebar-link relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-blue-950 hover:to-blue-400 px-4 py-3 hover:text-white
+                           ${
+                             typeof window !== "undefined" &&
+                             localStorage.getItem(
+                               LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
+                             ) &&
+                             localStorage.getItem(
+                               LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
+                             ) == PATH_ADMIN.major_management
+                               ? "bg-gradient-to-r from-primary_color to-amber-600 hover:!from-primary_color hover:!to-amber-600 px-4 py-3 text-white"
+                               : ""
+                           }
+                           `}
                       >
                         Ngành học
                       </Link>
@@ -138,7 +266,27 @@ const SideBarComponent = () => {
                           transition: "all ease 0.2s",
                         }}
                         to={PATH_ADMIN.grade_management}
-                        className="sidebar-link relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-primary_color hover:to-amber-600 px-4 py-3 hover:text-white"
+                        onClick={() => {
+                          if (typeof window !== "undefined") {
+                            localStorage.setItem(
+                              LOCALSTORAGE_CONSTANTS.CURRENT_PAGE,
+                              PATH_ADMIN.grade_management
+                            );
+                          }
+                        }}
+                        className={`sidebar-link relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-blue-950 hover:to-blue-400 px-4 py-3 hover:text-white
+                           ${
+                             typeof window !== "undefined" &&
+                             localStorage.getItem(
+                               LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
+                             ) &&
+                             localStorage.getItem(
+                               LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
+                             ) == PATH_ADMIN.grade_management
+                               ? "bg-gradient-to-r from-primary_color to-amber-600 hover:!from-primary_color hover:!to-amber-600 px-4 py-3 text-white"
+                               : ""
+                           }
+                           `}
                       >
                         Khối học
                       </Link>
@@ -150,7 +298,27 @@ const SideBarComponent = () => {
                           transition: "all ease 0.2s",
                         }}
                         to={PATH_ADMIN.class_management}
-                        className="sidebar-link relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-primary_color hover:to-amber-600 px-4 py-3 hover:text-white"
+                        onClick={() => {
+                          if (typeof window !== "undefined") {
+                            localStorage.setItem(
+                              LOCALSTORAGE_CONSTANTS.CURRENT_PAGE,
+                              PATH_ADMIN.class_management
+                            );
+                          }
+                        }}
+                        className={`sidebar-link relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-blue-950 hover:to-blue-400 px-4 py-3 hover:text-white
+                           ${
+                             typeof window !== "undefined" &&
+                             localStorage.getItem(
+                               LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
+                             ) &&
+                             localStorage.getItem(
+                               LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
+                             ) == PATH_ADMIN.class_management
+                               ? "bg-gradient-to-r from-primary_color to-amber-600 hover:!from-primary_color hover:!to-amber-600 px-4 py-3 text-white"
+                               : ""
+                           }
+                           `}
                       >
                         Lớp học
                       </Link>
@@ -162,7 +330,27 @@ const SideBarComponent = () => {
                           transition: "all ease 0.2s",
                         }}
                         to={PATH_ADMIN.admin_management_absence}
-                        className="sidebar-link relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-primary_color hover:to-amber-600 px-4 py-3 hover:text-white"
+                        onClick={() => {
+                          if (typeof window !== "undefined") {
+                            localStorage.setItem(
+                              LOCALSTORAGE_CONSTANTS.CURRENT_PAGE,
+                              PATH_ADMIN.admin_management_absence
+                            );
+                          }
+                        }}
+                        className={`sidebar-link relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-blue-950 hover:to-blue-400 px-4 py-3 hover:text-white
+                           ${
+                             typeof window !== "undefined" &&
+                             localStorage.getItem(
+                               LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
+                             ) &&
+                             localStorage.getItem(
+                               LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
+                             ) == PATH_ADMIN.admin_management_absence
+                               ? "bg-gradient-to-r from-primary_color to-amber-600 hover:!from-primary_color hover:!to-amber-600 px-4 py-3 text-white"
+                               : ""
+                           }
+                           `}
                       >
                         Nghỉ phép
                       </Link>
@@ -178,13 +366,43 @@ const SideBarComponent = () => {
                     opacity: `${isHovered ? "1" : "0"}`,
                     transition: "all ease 0.2s",
                   }}
-                  className="group-title sidebar-link rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-primary_color hover:to-amber-600 px-4 py-3 hover:text-white"
+                  className={`cursor-pointer group-title sidebar-link rounded-full space-x-4
+                   text-gray-700 hover:bg-gradient-to-r hover:from-blue-950
+                    hover:to-blue-400 px-4 py-3 hover:text-white 
+                    ${
+                      typeof window !== "undefined" &&
+                      openGroup != "quanly" &&
+                      localStorage.getItem(
+                        LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
+                      ) &&
+                      (localStorage.getItem(
+                        LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
+                      ) == PATH_ADMIN.catechist_management ||
+                        localStorage.getItem(
+                          LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
+                        ) == PATH_ADMIN.levels ||
+                        localStorage.getItem(
+                          LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
+                        ) == PATH_ADMIN.rooms ||
+                        localStorage.getItem(
+                          LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
+                        ) == PATH_ADMIN.pastoral_years ||
+                        localStorage.getItem(
+                          LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
+                        ) == PATH_ADMIN.christian_name ||
+                        localStorage.getItem(
+                          LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
+                        ) == PATH_ADMIN.system_configurations)
+                        ? "bg-gradient-to-r from-primary_color to-amber-600 hover:!from-primary_color hover:!to-amber-600 px-4 py-3 text-white"
+                        : ""
+                    }
+                    `}
                   onClick={() => toggleGroup("quanly")}
                 >
                   Quản lý
                 </div>
                 {openGroup === "quanly" && (
-                  <ul className="pl-4 space-y-2">
+                  <ul className="pl-4 space-y-2 ml-2">
                     <li className="min-w-max">
                       <Link
                         style={{
@@ -192,7 +410,27 @@ const SideBarComponent = () => {
                           transition: "all ease 0.2s",
                         }}
                         to={PATH_ADMIN.catechist_management}
-                        className="sidebar-link relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-primary_color hover:to-amber-600 px-4 py-3 hover:text-white"
+                        onClick={() => {
+                          if (typeof window !== "undefined") {
+                            localStorage.setItem(
+                              LOCALSTORAGE_CONSTANTS.CURRENT_PAGE,
+                              PATH_ADMIN.catechist_management
+                            );
+                          }
+                        }}
+                        className={`sidebar-link relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-blue-950 hover:to-blue-400 px-4 py-3 hover:text-white
+                           ${
+                             typeof window !== "undefined" &&
+                             localStorage.getItem(
+                               LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
+                             ) &&
+                             localStorage.getItem(
+                               LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
+                             ) == PATH_ADMIN.catechist_management
+                               ? "bg-gradient-to-r from-primary_color to-amber-600 hover:!from-primary_color hover:!to-amber-600 px-4 py-3 text-white"
+                               : ""
+                           }
+                           `}
                       >
                         Giáo lý viên
                       </Link>
@@ -204,7 +442,27 @@ const SideBarComponent = () => {
                           transition: "all ease 0.2s",
                         }}
                         to={PATH_ADMIN.levels}
-                        className="sidebar-link relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-primary_color hover:to-amber-600 px-4 py-3 hover:text-white"
+                        onClick={() => {
+                          if (typeof window !== "undefined") {
+                            localStorage.setItem(
+                              LOCALSTORAGE_CONSTANTS.CURRENT_PAGE,
+                              PATH_ADMIN.levels
+                            );
+                          }
+                        }}
+                        className={`sidebar-link relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-blue-950 hover:to-blue-400 px-4 py-3 hover:text-white
+                           ${
+                             typeof window !== "undefined" &&
+                             localStorage.getItem(
+                               LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
+                             ) &&
+                             localStorage.getItem(
+                               LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
+                             ) == PATH_ADMIN.levels
+                               ? "bg-gradient-to-r from-primary_color to-amber-600 hover:!from-primary_color hover:!to-amber-600 px-4 py-3 text-white"
+                               : ""
+                           }
+                           `}
                       >
                         Cấp độ
                       </Link>
@@ -216,7 +474,27 @@ const SideBarComponent = () => {
                           transition: "all ease 0.2s",
                         }}
                         to={PATH_ADMIN.rooms}
-                        className="sidebar-link relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-primary_color hover:to-amber-600 px-4 py-3 hover:text-white"
+                        onClick={() => {
+                          if (typeof window !== "undefined") {
+                            localStorage.setItem(
+                              LOCALSTORAGE_CONSTANTS.CURRENT_PAGE,
+                              PATH_ADMIN.rooms
+                            );
+                          }
+                        }}
+                        className={`sidebar-link relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-blue-950 hover:to-blue-400 px-4 py-3 hover:text-white
+                           ${
+                             typeof window !== "undefined" &&
+                             localStorage.getItem(
+                               LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
+                             ) &&
+                             localStorage.getItem(
+                               LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
+                             ) == PATH_ADMIN.rooms
+                               ? "bg-gradient-to-r from-primary_color to-amber-600 hover:!from-primary_color hover:!to-amber-600 px-4 py-3 text-white"
+                               : ""
+                           }
+                           `}
                       >
                         Phòng học
                       </Link>
@@ -228,7 +506,27 @@ const SideBarComponent = () => {
                           transition: "all ease 0.2s",
                         }}
                         to={PATH_ADMIN.pastoral_years}
-                        className="sidebar-link relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-primary_color hover:to-amber-600 px-4 py-3 hover:text-white"
+                        onClick={() => {
+                          if (typeof window !== "undefined") {
+                            localStorage.setItem(
+                              LOCALSTORAGE_CONSTANTS.CURRENT_PAGE,
+                              PATH_ADMIN.pastoral_years
+                            );
+                          }
+                        }}
+                        className={`sidebar-link relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-blue-950 hover:to-blue-400 px-4 py-3 hover:text-white
+                           ${
+                             typeof window !== "undefined" &&
+                             localStorage.getItem(
+                               LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
+                             ) &&
+                             localStorage.getItem(
+                               LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
+                             ) == PATH_ADMIN.pastoral_years
+                               ? "bg-gradient-to-r from-primary_color to-amber-600 hover:!from-primary_color hover:!to-amber-600 px-4 py-3 text-white"
+                               : ""
+                           }
+                           `}
                       >
                         Niên khóa
                       </Link>
@@ -240,7 +538,27 @@ const SideBarComponent = () => {
                           transition: "all ease 0.2s",
                         }}
                         to={PATH_ADMIN.christian_name}
-                        className="sidebar-link relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-primary_color hover:to-amber-600 px-4 py-3 hover:text-white"
+                        onClick={() => {
+                          if (typeof window !== "undefined") {
+                            localStorage.setItem(
+                              LOCALSTORAGE_CONSTANTS.CURRENT_PAGE,
+                              PATH_ADMIN.christian_name
+                            );
+                          }
+                        }}
+                        className={`sidebar-link relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-blue-950 hover:to-blue-400 px-4 py-3 hover:text-white
+                           ${
+                             typeof window !== "undefined" &&
+                             localStorage.getItem(
+                               LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
+                             ) &&
+                             localStorage.getItem(
+                               LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
+                             ) == PATH_ADMIN.christian_name
+                               ? "bg-gradient-to-r from-primary_color to-amber-600 hover:!from-primary_color hover:!to-amber-600 px-4 py-3 text-white"
+                               : ""
+                           }
+                           `}
                       >
                         Tên Thánh
                       </Link>
@@ -252,7 +570,27 @@ const SideBarComponent = () => {
                           transition: "all ease 0.2s",
                         }}
                         to={PATH_ADMIN.system_configurations}
-                        className="sidebar-link relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-primary_color hover:to-amber-600 px-4 py-3 hover:text-white"
+                        onClick={() => {
+                          if (typeof window !== "undefined") {
+                            localStorage.setItem(
+                              LOCALSTORAGE_CONSTANTS.CURRENT_PAGE,
+                              PATH_ADMIN.system_configurations
+                            );
+                          }
+                        }}
+                        className={`sidebar-link relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-blue-950 hover:to-blue-400 px-4 py-3 hover:text-white
+                           ${
+                             typeof window !== "undefined" &&
+                             localStorage.getItem(
+                               LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
+                             ) &&
+                             localStorage.getItem(
+                               LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
+                             ) == PATH_ADMIN.system_configurations
+                               ? "bg-gradient-to-r from-primary_color to-amber-600 hover:!from-primary_color hover:!to-amber-600 px-4 py-3 text-white"
+                               : ""
+                           }
+                           `}
                       >
                         Thông số
                       </Link>
@@ -262,7 +600,6 @@ const SideBarComponent = () => {
               </li>
 
               {/* Đào tạo */}
-
               <li className="min-w-max">
                 <Link
                   style={{
@@ -270,7 +607,27 @@ const SideBarComponent = () => {
                     transition: "all ease 0.2s",
                   }}
                   to={PATH_ADMIN.training_lists}
-                  className="sidebar-link relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-primary_color hover:to-amber-600 px-4 py-3 hover:text-white"
+                  onClick={() => {
+                    if (typeof window !== "undefined") {
+                      localStorage.setItem(
+                        LOCALSTORAGE_CONSTANTS.CURRENT_PAGE,
+                        PATH_ADMIN.training_lists
+                      );
+                    }
+                  }}
+                  className={`sidebar-link relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-blue-950 hover:to-blue-400 px-4 py-3 hover:text-white
+                           ${
+                             typeof window !== "undefined" &&
+                             localStorage.getItem(
+                               LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
+                             ) &&
+                             localStorage.getItem(
+                               LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
+                             ) == PATH_ADMIN.training_lists
+                               ? "bg-gradient-to-r from-primary_color to-amber-600 hover:!from-primary_color hover:!to-amber-600 px-4 py-3 text-white"
+                               : ""
+                           }
+                           `}
                 >
                   Đào tạo
                 </Link>
@@ -283,13 +640,31 @@ const SideBarComponent = () => {
                     opacity: `${isHovered ? "1" : "0"}`,
                     transition: "all ease 0.2s",
                   }}
-                  className="group-title sidebar-link rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-primary_color hover:to-amber-600 px-4 py-3 hover:text-white"
+                  className={`cursor-pointer group-title sidebar-link rounded-full space-x-4
+                   text-gray-700 hover:bg-gradient-to-r hover:from-blue-950
+                    hover:to-blue-400 px-4 py-3 hover:text-white 
+                    ${
+                      typeof window !== "undefined" &&
+                      openGroup != "sukien" &&
+                      localStorage.getItem(
+                        LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
+                      ) &&
+                      (localStorage.getItem(
+                        LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
+                      ) == PATH_ADMIN.admin_event_category_management ||
+                        localStorage.getItem(
+                          LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
+                        ) == PATH_ADMIN.admin_event_management)
+                        ? "bg-gradient-to-r from-primary_color to-amber-600 hover:!from-primary_color hover:!to-amber-600 px-4 py-3 text-white"
+                        : ""
+                    }
+                    `}
                   onClick={() => toggleGroup("sukien")}
                 >
                   Sự kiện
                 </div>
                 {openGroup === "sukien" && (
-                  <ul className="pl-4 space-y-2">
+                  <ul className="pl-4 space-y-2 ml-2">
                     <li className="min-w-max">
                       <Link
                         style={{
@@ -297,7 +672,27 @@ const SideBarComponent = () => {
                           transition: "all ease 0.2s",
                         }}
                         to={PATH_ADMIN.admin_event_category_management}
-                        className="sidebar-link relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-primary_color hover:to-amber-600 px-4 py-3 hover:text-white"
+                        onClick={() => {
+                          if (typeof window !== "undefined") {
+                            localStorage.setItem(
+                              LOCALSTORAGE_CONSTANTS.CURRENT_PAGE,
+                              PATH_ADMIN.admin_event_category_management
+                            );
+                          }
+                        }}
+                        className={`sidebar-link relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-blue-950 hover:to-blue-400 px-4 py-3 hover:text-white
+                           ${
+                             typeof window !== "undefined" &&
+                             localStorage.getItem(
+                               LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
+                             ) &&
+                             localStorage.getItem(
+                               LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
+                             ) == PATH_ADMIN.admin_event_category_management
+                               ? "bg-gradient-to-r from-primary_color to-amber-600 hover:!from-primary_color hover:!to-amber-600 px-4 py-3 text-white"
+                               : ""
+                           }
+                           `}
                       >
                         Danh mục sự kiện
                       </Link>
@@ -309,7 +704,27 @@ const SideBarComponent = () => {
                           transition: "all ease 0.2s",
                         }}
                         to={PATH_ADMIN.admin_event_management}
-                        className="sidebar-link relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-primary_color hover:to-amber-600 px-4 py-3 hover:text-white"
+                        onClick={() => {
+                          if (typeof window !== "undefined") {
+                            localStorage.setItem(
+                              LOCALSTORAGE_CONSTANTS.CURRENT_PAGE,
+                              PATH_ADMIN.admin_event_management
+                            );
+                          }
+                        }}
+                        className={`sidebar-link relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-blue-950 hover:to-blue-400 px-4 py-3 hover:text-white
+                           ${
+                             typeof window !== "undefined" &&
+                             localStorage.getItem(
+                               LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
+                             ) &&
+                             localStorage.getItem(
+                               LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
+                             ) == PATH_ADMIN.admin_event_management
+                               ? "bg-gradient-to-r from-primary_color to-amber-600 hover:!from-primary_color hover:!to-amber-600 px-4 py-3 text-white"
+                               : ""
+                           }
+                           `}
                       >
                         Sự kiện
                       </Link>
@@ -325,13 +740,31 @@ const SideBarComponent = () => {
                     opacity: `${isHovered ? "1" : "0"}`,
                     transition: "all ease 0.2s",
                   }}
-                  className="group-title sidebar-link rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-primary_color hover:to-amber-600 px-4 py-3 hover:text-white"
+                  className={`cursor-pointer group-title sidebar-link rounded-full space-x-4
+                   text-gray-700 hover:bg-gradient-to-r hover:from-blue-950
+                    hover:to-blue-400 px-4 py-3 hover:text-white 
+                    ${
+                      typeof window !== "undefined" &&
+                      openGroup != "tintuc" &&
+                      localStorage.getItem(
+                        LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
+                      ) &&
+                      (localStorage.getItem(
+                        LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
+                      ) == PATH_ADMIN.post_category ||
+                        localStorage.getItem(
+                          LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
+                        ) == PATH_ADMIN.post)
+                        ? "bg-gradient-to-r from-primary_color to-amber-600 hover:!from-primary_color hover:!to-amber-600 px-4 py-3 text-white"
+                        : ""
+                    }
+                    `}
                   onClick={() => toggleGroup("tintuc")}
                 >
                   Tin tức
                 </div>
                 {openGroup === "tintuc" && (
-                  <ul className="pl-4 space-y-2">
+                  <ul className="pl-4 space-y-2 ml-2">
                     <li className="min-w-max">
                       <Link
                         style={{
@@ -339,7 +772,27 @@ const SideBarComponent = () => {
                           transition: "all ease 0.2s",
                         }}
                         to={PATH_ADMIN.post_category}
-                        className="sidebar-link relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-primary_color hover:to-amber-600 px-4 py-3 hover:text-white"
+                        onClick={() => {
+                          if (typeof window !== "undefined") {
+                            localStorage.setItem(
+                              LOCALSTORAGE_CONSTANTS.CURRENT_PAGE,
+                              PATH_ADMIN.post_category
+                            );
+                          }
+                        }}
+                        className={`sidebar-link relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-blue-950 hover:to-blue-400 px-4 py-3 hover:text-white
+                           ${
+                             typeof window !== "undefined" &&
+                             localStorage.getItem(
+                               LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
+                             ) &&
+                             localStorage.getItem(
+                               LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
+                             ) == PATH_ADMIN.post_category
+                               ? "bg-gradient-to-r from-primary_color to-amber-600 hover:!from-primary_color hover:!to-amber-600 px-4 py-3 text-white"
+                               : ""
+                           }
+                           `}
                       >
                         Danh mục tin tức
                       </Link>
@@ -351,7 +804,27 @@ const SideBarComponent = () => {
                           transition: "all ease 0.2s",
                         }}
                         to={PATH_ADMIN.post}
-                        className="sidebar-link relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-primary_color hover:to-amber-600 px-4 py-3 hover:text-white"
+                        onClick={() => {
+                          if (typeof window !== "undefined") {
+                            localStorage.setItem(
+                              LOCALSTORAGE_CONSTANTS.CURRENT_PAGE,
+                              PATH_ADMIN.post
+                            );
+                          }
+                        }}
+                        className={`sidebar-link relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-blue-950 hover:to-blue-400 px-4 py-3 hover:text-white
+                           ${
+                             typeof window !== "undefined" &&
+                             localStorage.getItem(
+                               LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
+                             ) &&
+                             localStorage.getItem(
+                               LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
+                             ) == PATH_ADMIN.post
+                               ? "bg-gradient-to-r from-primary_color to-amber-600 hover:!from-primary_color hover:!to-amber-600 px-4 py-3 text-white"
+                               : ""
+                           }
+                           `}
                       >
                         Tin tức
                       </Link>
@@ -367,13 +840,13 @@ const SideBarComponent = () => {
                     opacity: `${isHovered ? "1" : "0"}`,
                     transition: "all ease 0.2s",
                   }}
-                  className="group-title sidebar-link rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-primary_color hover:to-amber-600 px-4 py-3 hover:text-white"
+                  className="cursor-pointer group-title sidebar-link rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-blue-950 hover:to-blue-400 px-4 py-3 hover:text-white"
                   onClick={() => toggleGroup("khac")}
                 >
                   Khác
                 </div>
                 {openGroup === "khac" && (
-                  <ul className="pl-4 space-y-2">
+                  <ul className="pl-4 space-y-2 ml-2">
                     <li className="min-w-max">
                       <Link
                         style={{
@@ -381,7 +854,8 @@ const SideBarComponent = () => {
                           transition: "all ease 0.2s",
                         }}
                         to={PATH_HOME.root}
-                        className="sidebar-link relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-primary_color hover:to-amber-600 px-4 py-3 hover:text-white"
+                        className={`sidebar-link relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-blue-950 hover:to-blue-400 px-4 py-3 hover:text-white
+                           `}
                       >
                         Trang chủ
                       </Link>
@@ -394,9 +868,23 @@ const SideBarComponent = () => {
                             transition: "all ease 0.2s",
                           }}
                           onClick={() => {
-                            logout();
+                            const action = async () => {
+                              const confirmLogOut = await sweetAlert.confirm(
+                                "Bạn có chắc muốn đăng xuất?",
+                                "",
+                                "Đăng xuất",
+                                "Hủy bỏ",
+                                "question"
+                              );
+                              if (confirmLogOut) {
+                                logout();
+                              }
+                            };
+                            action();
                           }}
-                          className="sidebar-link relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-primary_color hover:to-amber-600 px-4 py-3 hover:text-white"
+                          className={`cursor-pointer sidebar-link relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-blue-950 hover:to-blue-400 px-4 py-3 hover:text-white
+                           
+                           `}
                         >
                           Đăng xuất
                         </li>

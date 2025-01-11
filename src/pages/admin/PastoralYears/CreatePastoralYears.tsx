@@ -86,7 +86,7 @@ const CreatePastoralYears: React.FC = () => {
             />
           </div>
 
-          <div className="mb-5">
+          {/* <div className="mb-5">
             <label className="block mb-1 text-sm font-medium">Trạng thái</label>
             <div className="flex items-center">
               <div className="flex items-center mr-4">
@@ -109,7 +109,7 @@ const CreatePastoralYears: React.FC = () => {
                 <label className="ml-2">Bắt đầu</label>
               </div>
             </div>
-          </div>
+          </div> */}
 
           <div className="flex items-start mb-5">
             <button

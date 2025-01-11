@@ -82,22 +82,6 @@ const CreateUpdateClassDialog: React.FC<CreateUpdateClassDialogProps> = ({
   }, [updateMode]);
 
   const handleSubmit = async (values: any) => {
-    if (
-      rows &&
-      rows?.findIndex(
-        (item) =>
-          item.name.trim().toLowerCase() == values.name.trim().toLowerCase()
-      ) >= 0
-    ) {
-      sweetAlert.alertWarning(
-        "Tên lớp này đã tồn tại trong niên khóa này",
-        "",
-        2500,
-        30
-      );
-      return;
-    }
-
     const data = {
       name: values.name,
       numberOfCatechist: values.numberOfCatechist,
@@ -123,6 +107,22 @@ const CreateUpdateClassDialog: React.FC<CreateUpdateClassDialogProps> = ({
           disableLoading();
         });
     } else {
+      if (
+        rows &&
+        rows?.findIndex(
+          (item) =>
+            item.name.trim().toLowerCase() == values.name.trim().toLowerCase()
+        ) >= 0
+      ) {
+        sweetAlert.alertWarning(
+          "Tên lớp này đã tồn tại trong niên khóa này",
+          "",
+          2500,
+          30
+        );
+        return;
+      }
+      enableLoading();
       await classApi
         .createClass(data)
         .then(() => {
@@ -179,7 +179,13 @@ const CreateUpdateClassDialog: React.FC<CreateUpdateClassDialogProps> = ({
                 </label>
                 <TextField
                   fullWidth
-                  value={pastoralYearName}
+                  value={
+                    pastoralYearName.split("-")[1]
+                      ? pastoralYearName.split("-")[0] +
+                        " - " +
+                        pastoralYearName.split("-")[1]
+                      : pastoralYearName
+                  }
                   InputProps={{
                     readOnly: true,
                   }}
@@ -263,6 +269,7 @@ const CreateUpdateClassDialog: React.FC<CreateUpdateClassDialogProps> = ({
                 error={touched.name && !!errors.name}
                 helperText={touched.name && errors.name}
                 margin="normal"
+                disabled={updateMode}
               />
 
               <TextField

@@ -13,6 +13,8 @@ import {
 } from "../../../model/Response/Event";
 import processApi from "../../../api/EventProcess";
 import viVNGridTranslation from "../../../locale/MUITable";
+import { AuthUser } from "../../../types/authentication";
+import { getUserInfo } from "../../../utils/utils";
 
 interface MemberOfProcessDialogProps {
   eventId: string;
@@ -76,6 +78,14 @@ const MemberOfProcessDialog = forwardRef<
       }
     }, 300);
   };
+
+  const [userLogin, setUserLogin] = useState<AuthUser>({});
+  useEffect(() => {
+    const user: AuthUser = getUserInfo();
+    if (user && user.id) {
+      setUserLogin(user);
+    }
+  }, []);
 
   useEffect(() => {
     const fetchAccountsAndRoles = async () => {
@@ -270,7 +280,33 @@ const MemberOfProcessDialog = forwardRef<
         />
       ),
     },
-    { field: "fullName", headerName: "Họ và Tên", width: 200 },
+    {
+      field: "fullName",
+      headerName: "Họ và Tên",
+      width: 200,
+      renderCell: (params) => {
+        return (
+          <p
+            style={{
+              transform:
+                userLogin && userLogin.id && userLogin.id == params.row.id
+                  ? "translateX(-6px)"
+                  : "",
+            }}
+          >
+            <span
+              className={`${
+                userLogin && userLogin.id && userLogin.id == params.row.id
+                  ? "bg-primary text-white py-1 px-2 rounded-xl font-bold"
+                  : ""
+              }`}
+            >
+              {params.value}
+            </span>
+          </p>
+        );
+      },
+    },
     { field: "gender", headerName: "Giới tính", width: 105 },
     { field: "email", headerName: "Email", width: 200 },
     { field: "phone", headerName: "Số Điện Thoại", width: 150 },
@@ -299,7 +335,34 @@ const MemberOfProcessDialog = forwardRef<
         />
       ),
     },
-    { field: "fullName", headerName: "Họ và Tên", width: 200 },
+
+    {
+      field: "fullName",
+      headerName: "Họ và Tên",
+      width: 200,
+      renderCell: (params) => {
+        return (
+          <p
+            style={{
+              transform:
+                userLogin && userLogin.id && userLogin.id == params.row.id
+                  ? "translateX(-6px)"
+                  : "",
+            }}
+          >
+            <span
+              className={`${
+                userLogin && userLogin.id && userLogin.id == params.row.id
+                  ? "bg-primary text-white py-1 px-2 rounded-xl font-bold"
+                  : ""
+              }`}
+            >
+              {params.value}
+            </span>
+          </p>
+        );
+      },
+    },
     { field: "gender", headerName: "Giới tính", width: 105 },
     { field: "email", headerName: "Email", width: 200 },
     { field: "phone", headerName: "Số Điện Thoại", width: 150 },
@@ -353,6 +416,11 @@ const MemberOfProcessDialog = forwardRef<
       ),
     });
   }
+
+  if (!userLogin || !userLogin.id) {
+    return <></>;
+  }
+
   return (
     <>
       <div>

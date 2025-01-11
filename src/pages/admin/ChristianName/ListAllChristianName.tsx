@@ -15,6 +15,8 @@ import {
 import { useNavigate } from "react-router-dom";
 import viVNGridTranslation from "../../../locale/MUITable";
 import { formatDate } from "../../../utils/formatDate";
+import { PATH_ADMIN } from "../../../routes/paths";
+import { storeCurrentPath } from "../../../utils/utils";
 
 const ListAllChristianNames: React.FC = () => {
   const [christianNames, setChristianNames] = useState<any[]>([]);
@@ -45,6 +47,7 @@ const ListAllChristianNames: React.FC = () => {
 
   useEffect(() => {
     fetchChristianNames();
+    storeCurrentPath(PATH_ADMIN.christian_name);
   }, []);
 
   useEffect(() => {

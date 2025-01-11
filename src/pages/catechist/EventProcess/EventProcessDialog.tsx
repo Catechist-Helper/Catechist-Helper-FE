@@ -121,26 +121,6 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
     }
   }, [processData]);
 
-  useEffect(() => {
-    if (startTime && endTime && startTime != "" && endTime != "") {
-      // Chuyển đổi startDate và endDate sang đối tượng Date
-      const start = new Date(startTime).getTime();
-      const end = new Date(endTime).getTime();
-
-      // Tính sự chênh lệch giữa hai thời gian (millisecond)
-      const diffInMilliseconds = end - start;
-
-      if (diffInMilliseconds <= 0) {
-        sweetAlert.alertWarning(
-          "Thời gian kết thúc phải sau hơn thời gian bắt đầu",
-          "",
-          5000,
-          35
-        );
-      }
-    }
-  }, [startTime, endTime]);
-
   // Hàm để validate form trước khi submit
   const handleSubmit = async () => {
     if (!name || name.trim() == "") {
@@ -165,6 +145,7 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
 
     if (
       endTime &&
+      startTime &&
       new Date(endTime).getTime() <= new Date(startTime).getTime()
     ) {
       sweetAlert.alertWarning(
@@ -396,7 +377,8 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
               }}
               label={
                 <span>
-                  Thời gian bắt đầu <span style={{ color: "red" }}>*</span>
+                  Thời gian bắt đầu hoạt động{" "}
+                  <span style={{ color: "red" }}>*</span>
                 </span>
               }
               type="datetime-local"
@@ -430,7 +412,7 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
           <Grid item xs={12} sm={6}>
             {event && event.endTime ? (
               <p className="text-gray-500 ml-2 mt-1">
-                Thời gian bắt đầu kết thúc:{" "}
+                Thời gian kết thúc sự kiện:{" "}
                 {formatDate.DD_MM_YYYY(event?.endTime)}
               </p>
             ) : (
@@ -451,7 +433,8 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
               }}
               label={
                 <span>
-                  Thời gian kết thúc <span style={{ color: "red" }}>*</span>
+                  Thời gian kết thúc hoạt động{" "}
+                  <span style={{ color: "red" }}>*</span>
                 </span>
               }
               type="datetime-local"
