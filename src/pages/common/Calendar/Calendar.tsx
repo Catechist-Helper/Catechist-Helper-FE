@@ -158,7 +158,7 @@ const CalendarComponent: React.FC = () => {
           style: { borderRadius: "12px", padding: "10px" },
         }}
         fullWidth
-        maxWidth={"md"}
+        maxWidth={"sm"}
       >
         <DialogTitle>
           <Typography variant="h5" component="div" color="primary">
