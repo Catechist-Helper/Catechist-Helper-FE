@@ -352,7 +352,7 @@ export default function ApprovedRegistrationsTable() {
   // Gọi API khi component được render
   useEffect(() => {
     fetchApprovedRegistrations();
-    storeCurrentPath(PATH_ADMIN.approved_registration);
+    storeCurrentPath(PATH_ADMIN.admin_approved_registration);
   }, [selectedDate, currentFilter]);
 
   useEffect(() => {

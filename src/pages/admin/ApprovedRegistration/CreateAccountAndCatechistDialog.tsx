@@ -330,7 +330,6 @@ const CreateAccountAndCatechistDialog: React.FC<
                       <div className="w-full flex flex-col items-center">
                         <img
                           src={URL.createObjectURL(values.avatar)}
-                          alt="Preview"
                           style={{
                             borderRadius: "3px",
                             width: "300px",
@@ -353,7 +352,6 @@ const CreateAccountAndCatechistDialog: React.FC<
                             updatedCatechist?.imageUrl ??
                             "https://via.placeholder.com/150"
                           }
-                          alt="Preview"
                           style={{
                             borderRadius: "3px",
                             width: "300px",

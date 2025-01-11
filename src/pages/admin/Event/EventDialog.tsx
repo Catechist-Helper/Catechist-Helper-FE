@@ -171,7 +171,7 @@ const EventDialog: React.FC<EventDialogProps> = ({
                 fullWidth
                 margin="none"
                 error={touched.eventCategoryId && !!errors.eventCategoryId}
-                sx={{ marginBottom: "5px" }}
+                sx={{ marginBottom: "15px" }}
               >
                 <label className="ml-3 text-gray-500 text-[0.8rem]">
                   Danh mục sự kiện <span style={{ color: "red" }}>*</span>
@@ -243,10 +243,10 @@ const EventDialog: React.FC<EventDialogProps> = ({
                 name="name"
                 value={values.name}
                 onChange={handleChange}
-                margin="normal"
                 error={touched.name && !!errors.name}
                 helperText={touched.name && errors.name}
                 disabled={values.eventStatus != EventStatus.Not_Started}
+                sx={{ marginBottom: "15px" }}
               />
 
               {/* Mô tả */}
@@ -260,7 +260,6 @@ const EventDialog: React.FC<EventDialogProps> = ({
                 name="description"
                 value={values.description}
                 onChange={handleChange}
-                margin="normal"
                 multiline
                 rows={1}
                 disabled={values.eventStatus != EventStatus.Not_Started}
@@ -371,7 +370,7 @@ const EventDialog: React.FC<EventDialogProps> = ({
                   ) : (
                     <></>
                   )}
-                  <FormControl fullWidth margin="normal">
+                  <FormControl fullWidth sx={{ marginTop: "10px" }}>
                     <InputLabel>
                       Trạng thái sự kiện <span style={{ color: "red" }}>*</span>
                     </InputLabel>
@@ -550,12 +549,20 @@ const EventDialog: React.FC<EventDialogProps> = ({
               />
 
               {/* Actions */}
-              <DialogActions>
-                <Button onClick={onClose} color="secondary">
+              <DialogActions sx={{ marginTop: "0px" }}>
+                <Button
+                  onClick={onClose}
+                  color="secondary"
+                  className="hover:bg-purple-800 hover:text-white hover:border-purple-800"
+                >
                   Hủy
                 </Button>
-                <Button type="submit" color="primary">
-                  Lưu
+                <Button
+                  type="submit"
+                  color={event ? "primary" : "success"}
+                  className={`btn ${event ? "btn-primary" : "btn-success"}`}
+                >
+                  {event ? "Lưu" : "Thêm"}
                 </Button>
               </DialogActions>
             </Form>

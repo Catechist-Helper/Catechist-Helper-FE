@@ -1,5 +1,5 @@
 import "./SideBarComponent.scss";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { PATH_ADMIN, PATH_HOME } from "../../../routes/paths";
 import useAuth from "../../../hooks/useAuth";
@@ -10,6 +10,16 @@ const SideBarComponent = () => {
   const [isHovered, setIsHovered] = useState(false);
   const { logout } = useAuth();
   const [openGroup, setOpenGroup] = useState<string | null>(null);
+  const [displayContent, setDisplayContent] = useState(false);
+  useEffect(() => {
+    if (!isHovered) {
+      setDisplayContent(false);
+    } else {
+      setTimeout(() => {
+        setDisplayContent(true);
+      }, 260);
+    }
+  }, [isHovered]);
 
   const toggleGroup = (group: string) => {
     setOpenGroup(openGroup === group ? null : group);
@@ -34,28 +44,31 @@ const SideBarComponent = () => {
         style={{ height: "100%" }}
       >
         <div
-          className="flex h-screen flex-col justify-between pt-2 pb-6"
+          className="flex h-screen flex-col justify-between pb-6"
           style={{
-            overflowY: `${isHovered ? "auto" : "hidden"}`,
+            overflowY: `${displayContent ? "auto" : "hidden"}`,
             overflowX: "hidden",
           }}
         >
-          <div>
-            <div className={`w-max p-2.5 ${isHovered ? "block" : "hidden"}`}>
+          <div
+            style={{
+              display: displayContent ? "block" : "none",
+            }}
+          >
+            {/* <div
+              className={`w-max p-2.5 pt-0 ${isHovered ? "block" : "hidden"}`}
+            >
               <img
                 src="/Icons/logo.png"
                 className="w-32 logo"
                 alt=""
                 style={{ width: "12rem", marginLeft: "5px" }}
               />
+            </div> */}
+            <div className="space-y-2 tracking-wide text-center text-[1.33rem] mb-3 py-3 font-bold bg_title_sidebar">
+              Catechist Helper
             </div>
-
-            <ul
-              className="mt-6 space-y-2 tracking-wide"
-              style={{
-                display: isHovered ? "block" : "none",
-              }}
-            >
+            <ul className="space-y-2 tracking-wide">
               {/* Thời gian biểu */}
               <li className="min-w-max">
                 <Link
@@ -111,7 +124,7 @@ const SideBarComponent = () => {
                       ) == PATH_ADMIN.admin_registration ||
                         localStorage.getItem(
                           LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
-                        ) == PATH_ADMIN.approved_registration)
+                        ) == PATH_ADMIN.admin_approved_registration)
                         ? "bg-gradient-to-r from-primary_color to-amber-600 hover:!from-primary_color hover:!to-amber-600 px-4 py-3 text-white"
                         : ""
                     }
@@ -159,12 +172,12 @@ const SideBarComponent = () => {
                           opacity: `${isHovered ? "1" : "0"}`,
                           transition: "all ease 0.2s",
                         }}
-                        to={PATH_ADMIN.approved_registration}
+                        to={PATH_ADMIN.admin_approved_registration}
                         onClick={() => {
                           if (typeof window !== "undefined") {
                             localStorage.setItem(
                               LOCALSTORAGE_CONSTANTS.CURRENT_PAGE,
-                              PATH_ADMIN.approved_registration
+                              PATH_ADMIN.admin_approved_registration
                             );
                           }
                         }}
@@ -176,7 +189,7 @@ const SideBarComponent = () => {
                              ) &&
                              localStorage.getItem(
                                LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
-                             ) == PATH_ADMIN.approved_registration
+                             ) == PATH_ADMIN.admin_approved_registration
                                ? "bg-gradient-to-r from-primary_color to-amber-600 hover:!from-primary_color hover:!to-amber-600 px-4 py-3 text-white"
                                : ""
                            }
@@ -207,13 +220,13 @@ const SideBarComponent = () => {
                       ) &&
                       (localStorage.getItem(
                         LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
-                      ) == PATH_ADMIN.major_management ||
+                      ) == PATH_ADMIN.admin_major_management ||
                         localStorage.getItem(
                           LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
-                        ) == PATH_ADMIN.grade_management ||
+                        ) == PATH_ADMIN.admin_grade_management ||
                         localStorage.getItem(
                           LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
-                        ) == PATH_ADMIN.class_management ||
+                        ) == PATH_ADMIN.admin_class_management ||
                         localStorage.getItem(
                           LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
                         ) == PATH_ADMIN.admin_management_absence)
@@ -233,12 +246,12 @@ const SideBarComponent = () => {
                           opacity: `${isHovered ? "1" : "0"}`,
                           transition: "all ease 0.2s",
                         }}
-                        to={PATH_ADMIN.major_management}
+                        to={PATH_ADMIN.admin_major_management}
                         onClick={() => {
                           if (typeof window !== "undefined") {
                             localStorage.setItem(
                               LOCALSTORAGE_CONSTANTS.CURRENT_PAGE,
-                              PATH_ADMIN.major_management
+                              PATH_ADMIN.admin_major_management
                             );
                           }
                         }}
@@ -250,7 +263,7 @@ const SideBarComponent = () => {
                              ) &&
                              localStorage.getItem(
                                LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
-                             ) == PATH_ADMIN.major_management
+                             ) == PATH_ADMIN.admin_major_management
                                ? "bg-gradient-to-r from-primary_color to-amber-600 hover:!from-primary_color hover:!to-amber-600 px-4 py-3 text-white"
                                : ""
                            }
@@ -265,12 +278,12 @@ const SideBarComponent = () => {
                           opacity: `${isHovered ? "1" : "0"}`,
                           transition: "all ease 0.2s",
                         }}
-                        to={PATH_ADMIN.grade_management}
+                        to={PATH_ADMIN.admin_grade_management}
                         onClick={() => {
                           if (typeof window !== "undefined") {
                             localStorage.setItem(
                               LOCALSTORAGE_CONSTANTS.CURRENT_PAGE,
-                              PATH_ADMIN.grade_management
+                              PATH_ADMIN.admin_grade_management
                             );
                           }
                         }}
@@ -282,7 +295,7 @@ const SideBarComponent = () => {
                              ) &&
                              localStorage.getItem(
                                LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
-                             ) == PATH_ADMIN.grade_management
+                             ) == PATH_ADMIN.admin_grade_management
                                ? "bg-gradient-to-r from-primary_color to-amber-600 hover:!from-primary_color hover:!to-amber-600 px-4 py-3 text-white"
                                : ""
                            }
@@ -297,12 +310,12 @@ const SideBarComponent = () => {
                           opacity: `${isHovered ? "1" : "0"}`,
                           transition: "all ease 0.2s",
                         }}
-                        to={PATH_ADMIN.class_management}
+                        to={PATH_ADMIN.admin_class_management}
                         onClick={() => {
                           if (typeof window !== "undefined") {
                             localStorage.setItem(
                               LOCALSTORAGE_CONSTANTS.CURRENT_PAGE,
-                              PATH_ADMIN.class_management
+                              PATH_ADMIN.admin_class_management
                             );
                           }
                         }}
@@ -314,7 +327,7 @@ const SideBarComponent = () => {
                              ) &&
                              localStorage.getItem(
                                LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
-                             ) == PATH_ADMIN.class_management
+                             ) == PATH_ADMIN.admin_class_management
                                ? "bg-gradient-to-r from-primary_color to-amber-600 hover:!from-primary_color hover:!to-amber-600 px-4 py-3 text-white"
                                : ""
                            }
@@ -377,7 +390,7 @@ const SideBarComponent = () => {
                       ) &&
                       (localStorage.getItem(
                         LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
-                      ) == PATH_ADMIN.catechist_management ||
+                      ) == PATH_ADMIN.admin_catechist_management ||
                         localStorage.getItem(
                           LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
                         ) == PATH_ADMIN.levels ||
@@ -409,12 +422,12 @@ const SideBarComponent = () => {
                           opacity: `${isHovered ? "1" : "0"}`,
                           transition: "all ease 0.2s",
                         }}
-                        to={PATH_ADMIN.catechist_management}
+                        to={PATH_ADMIN.admin_catechist_management}
                         onClick={() => {
                           if (typeof window !== "undefined") {
                             localStorage.setItem(
                               LOCALSTORAGE_CONSTANTS.CURRENT_PAGE,
-                              PATH_ADMIN.catechist_management
+                              PATH_ADMIN.admin_catechist_management
                             );
                           }
                         }}
@@ -426,7 +439,7 @@ const SideBarComponent = () => {
                              ) &&
                              localStorage.getItem(
                                LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
-                             ) == PATH_ADMIN.catechist_management
+                             ) == PATH_ADMIN.admin_catechist_management
                                ? "bg-gradient-to-r from-primary_color to-amber-600 hover:!from-primary_color hover:!to-amber-600 px-4 py-3 text-white"
                                : ""
                            }

@@ -331,6 +331,7 @@ const OrganizersDialog: React.FC<OrganizersDialogProps> = ({
       renderCell: (params) => (
         <Button
           color="error"
+          className="btn btn-danger"
           onClick={() => handleRemoveOrganizer(params.row.id)}
         >
           Xóa
@@ -464,17 +465,23 @@ const OrganizersDialog: React.FC<OrganizersDialogProps> = ({
           <>
             {updateMode ? (
               <>
-                <Button variant="outlined" onClick={handleSave} color="primary">
-                  Lưu
-                </Button>
                 <Button
                   variant="outlined"
                   color="secondary"
+                  className="hover:bg-purple-800 hover:text-white hover:border-purple-800 ml-1"
                   onClick={() => {
                     setUpdateMode(false);
                   }}
                 >
                   Hủy
+                </Button>
+                <Button
+                  variant="outlined"
+                  onClick={handleSave}
+                  color="primary"
+                  className="btn btn-primary"
+                >
+                  Lưu
                 </Button>
               </>
             ) : (
@@ -503,11 +510,21 @@ const OrganizersDialog: React.FC<OrganizersDialogProps> = ({
           </>
         ) : (
           <>
-            <Button variant="outlined" color="secondary" onClick={onClose}>
+            <Button
+              variant="outlined"
+              color="secondary"
+              className="hover:bg-purple-800 hover:text-white hover:border-purple-800 ml-1"
+              onClick={onClose}
+            >
               Hủy
             </Button>
-            <Button variant="outlined" onClick={handleSave} color="primary">
-              Lưu
+            <Button
+              variant="outlined"
+              onClick={handleSave}
+              color="success"
+              className="btn btn-success"
+            >
+              Thêm
             </Button>
           </>
         )}

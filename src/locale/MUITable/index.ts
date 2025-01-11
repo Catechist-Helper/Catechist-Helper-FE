@@ -1,9 +1,9 @@
 import { GridLocaleText } from "@mui/x-data-grid";
 
-const viVNGridTranslation: GridLocaleText  = {
+const viVNGridTranslation: GridLocaleText = {
   // Root
   noRowsLabel: 'Không có dữ liệu',
-  noResultsOverlayLabel: 'Không tìm thấy kết quả.',
+  noResultsOverlayLabel: 'Không tìm thấy kết quả',
 
   // Density selector toolbar button text
   toolbarDensity: 'Độ giãn',
@@ -177,10 +177,11 @@ const viVNGridTranslation: GridLocaleText  = {
   aggregationFunctionLabelMax: 'Tối đa',
   aggregationFunctionLabelSize: 'Kích cỡ',
 
+  // MuiTablePagination
   MuiTablePagination: {
     labelRowsPerPage: "Số hàng mỗi trang",
-    labelDisplayedRows: ({ from, to, count }:any) =>
-      `${from}-${to} trong ${count !== -1 ? count : `nhiều hơn ${to}`}`, // Tùy chỉnh "of" thành "trong"
+    labelDisplayedRows: ({ from, to, count } : any) =>
+      `${from}-${to} trong ${count !== -1 ? count : `nhiều hơn ${to}`}`,
   }
 };
 

@@ -214,7 +214,7 @@ const CreateCertificate: React.FC = () => {
 
         sweetAlert.alertSuccess(
           "Tạo thành công!",
-          "Cấp bậc đã được tạo thành công.",
+          "Chứng chỉ đã được tạo thành công.",
           2000,
           20
         );

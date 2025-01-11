@@ -97,7 +97,7 @@ export default function MajorComponent() {
     }
     if (majorId) {
       // Điều hướng tới trang Grade với majorId và pastoralYearId
-      navigate(`${PATH_ADMIN.grade_management}`, {
+      navigate(`${PATH_ADMIN.admin_grade_management}`, {
         state: {
           majorId: majorId,
         },
@@ -151,7 +151,7 @@ export default function MajorComponent() {
 
   useEffect(() => {
     fetchMajors(); // Lấy danh sách các major
-    storeCurrentPath(PATH_ADMIN.major_management);
+    storeCurrentPath(PATH_ADMIN.admin_major_management);
   }, [paginationModel]); // Gọi lại khi thay đổi pastoralYear
 
   // Open Dialog to create Major

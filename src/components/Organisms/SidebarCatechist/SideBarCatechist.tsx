@@ -1,5 +1,5 @@
 import "./SideBarCatechist.scss";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { PATH_CATECHIST, PATH_HOME } from "../../../routes/paths";
 import useAuth from "../../../hooks/useAuth";
@@ -9,6 +9,17 @@ import sweetAlert from "../../../utils/sweetAlert";
 const SideBarCatechist = () => {
   const [isHovered, setIsHovered] = useState(false);
   const { logout } = useAuth();
+
+  const [displayContent, setDisplayContent] = useState(false);
+  useEffect(() => {
+    if (!isHovered) {
+      setDisplayContent(false);
+    } else {
+      setTimeout(() => {
+        setDisplayContent(true);
+      }, 260);
+    }
+  }, [isHovered]);
 
   return (
     <div
@@ -29,20 +40,29 @@ const SideBarCatechist = () => {
         style={{ height: "100%" }}
       >
         <div
-          className="flex h-screen flex-col justify-between pt-2 pb-6"
+          className="flex h-screen flex-col justify-between pb-6"
           style={{
-            overflowY: `${isHovered ? "auto" : "hidden"}`,
+            overflowY: `${displayContent ? "auto" : "hidden"}`,
             overflowX: "hidden",
           }}
         >
-          <div>
-            <div className={`w-max p-2.5 ${isHovered ? "block" : "hidden"}`}>
-              <img
-                src="/Icons/logo.png"
-                className="w-32 logo"
-                alt=""
-                style={{ width: "12rem", marginLeft: "5px" }}
-              />
+          <div
+            style={{
+              display: displayContent ? "block" : "none",
+            }}
+          >
+            {/* <div
+            className={`w-max p-2.5 pt-0 ${isHovered ? "block" : "hidden"}`}
+          >
+            <img
+              src="/Icons/logo.png"
+              className="w-32 logo"
+              alt=""
+              style={{ width: "12rem", marginLeft: "5px" }}
+            />
+          </div> */}
+            <div className="space-y-2 tracking-wide text-center text-[1.35rem] mb-3 py-3 font-bold bg_title_sidebar">
+              Catechist Helper
             </div>
             <ul
               className="mt-6 space-y-2 tracking-wide"
