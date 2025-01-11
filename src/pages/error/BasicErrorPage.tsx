@@ -1,11 +1,17 @@
 // src/pages/NotFoundPage.tsx
 
-import React from "react";
+import React, { useEffect } from "react";
 import { Box, Typography, Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import HomeTemplate from "../../components/Templates/HomeTemplate/HomeTemplate";
+import { LOCALSTORAGE_CONSTANTS } from "../../constants/WebsiteConstant";
 
 const NotFoundPage: React.FC = () => {
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem(LOCALSTORAGE_CONSTANTS.CURRENT_PAGE, "NotFoundPage");
+    }
+  }, []);
   const navigate = useNavigate();
 
   return (

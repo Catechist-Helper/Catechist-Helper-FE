@@ -28,7 +28,7 @@ const SideBarComponent = () => {
       }}
     >
       <div
-        className={`sidebar h-full w-[3.8rem] overflow-hidden border-r ${isHovered ? "hover:w-56 hover:shadow-xl" : ""}`}
+        className={`sidebar h-full w-[3.8rem] overflow-hidden border-r ${isHovered ? "hover:w-56 hover:shadow-xl" : "cursor-pointer"}`}
         onClick={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         style={{ height: "100%" }}
@@ -856,6 +856,14 @@ const SideBarComponent = () => {
                         to={PATH_HOME.root}
                         className={`sidebar-link relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-blue-950 hover:to-blue-400 px-4 py-3 hover:text-white
                            `}
+                        onClick={() => {
+                          if (typeof window !== "undefined") {
+                            localStorage.setItem(
+                              LOCALSTORAGE_CONSTANTS.CURRENT_PAGE,
+                              PATH_HOME.root
+                            );
+                          }
+                        }}
                       >
                         Trang chủ
                       </Link>

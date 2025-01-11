@@ -5,6 +5,8 @@ import HeaderHome from "../../../components/Organisms/HeaderHome/HeaderHome";
 import FooterHome from "../../../components/Organisms/FooterHome/FooterHome";
 import { formatDate } from "../../../utils/formatDate";
 import { Button } from "@mui/material";
+import { LOCALSTORAGE_CONSTANTS } from "../../../constants/WebsiteConstant";
+import { PATH_HOME } from "../../../routes/paths";
 interface Post {
   id: string;
   title: string;
@@ -104,6 +106,9 @@ const NewDetails: React.FC = () => {
           }
         };
       }
+    }
+    if (typeof window !== "undefined") {
+      localStorage.setItem(LOCALSTORAGE_CONSTANTS.CURRENT_PAGE, PATH_HOME.news);
     }
   }, [location.state]);
 

@@ -5,6 +5,7 @@ import { PostStatus } from "../../../enums/Post";
 import { PATH_HOME } from "../../../routes/paths";
 import HomeTemplate from "../../../components/Templates/HomeTemplate/HomeTemplate";
 import { formatDate } from "../../../utils/formatDate";
+import { LOCALSTORAGE_CONSTANTS } from "../../../constants/WebsiteConstant";
 
 interface Post {
   id: string;
@@ -49,6 +50,9 @@ const New: React.FC = () => {
     };
 
     fetchPublicPosts();
+    if (typeof window !== "undefined") {
+      localStorage.setItem(LOCALSTORAGE_CONSTANTS.CURRENT_PAGE, PATH_HOME.news);
+    }
   }, []);
 
   return (

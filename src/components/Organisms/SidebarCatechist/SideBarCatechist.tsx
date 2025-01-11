@@ -1,7 +1,7 @@
 import "./SideBarCatechist.scss";
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { PATH_CATECHIST } from "../../../routes/paths";
+import { PATH_CATECHIST, PATH_HOME } from "../../../routes/paths";
 import useAuth from "../../../hooks/useAuth";
 import { LOCALSTORAGE_CONSTANTS } from "../../../constants/WebsiteConstant";
 import sweetAlert from "../../../utils/sweetAlert";
@@ -23,7 +23,7 @@ const SideBarCatechist = () => {
       }}
     >
       <div
-        className={`sidebar h-full w-[3.8rem] overflow-hidden border-r ${isHovered ? "hover:w-56 hover:shadow-xl" : ""}`}
+        className={`sidebar h-full w-[3.8rem] overflow-hidden border-r ${isHovered ? "hover:w-56 hover:shadow-xl" : "cursor-pointer"}`}
         onClick={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         style={{ height: "100%" }}
@@ -305,6 +305,14 @@ const SideBarCatechist = () => {
                     transition: "all ease 0.2s",
                   }}
                   to={"/"}
+                  onClick={() => {
+                    if (typeof window !== "undefined") {
+                      localStorage.setItem(
+                        LOCALSTORAGE_CONSTANTS.CURRENT_PAGE,
+                        PATH_HOME.root
+                      );
+                    }
+                  }}
                   className="relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-blue-950 hover:to-blue-400 px-4 py-3 hover:text-white"
                 >
                   <svg

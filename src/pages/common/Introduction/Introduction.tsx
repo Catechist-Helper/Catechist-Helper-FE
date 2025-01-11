@@ -12,6 +12,9 @@ import ChurchIcon from "@mui/icons-material/Church";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import HeaderHome from "../../../components/Organisms/HeaderHome/HeaderHome";
 import FooterHome from "../../../components/Organisms/FooterHome/FooterHome";
+import { useEffect } from "react";
+import { LOCALSTORAGE_CONSTANTS } from "../../../constants/WebsiteConstant";
+import { PATH_HOME } from "../../../routes/paths";
 
 export const CORE_INFORMATION = {
   MAIL_CONSTANT: "catechisthelper@gmail.com",
@@ -23,6 +26,14 @@ export const CORE_INFORMATION = {
 };
 
 const ParishIntroduction = () => {
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem(
+        LOCALSTORAGE_CONSTANTS.CURRENT_PAGE,
+        PATH_HOME.introduce
+      );
+    }
+  }, []);
   return (
     <div className="overflow-hidden flex flex-col min-h-screen">
       <HeaderHome />

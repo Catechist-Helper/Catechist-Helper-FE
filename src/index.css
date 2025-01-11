@@ -43,13 +43,90 @@ a {
 
 .links_dark_hover {
   cursor: pointer;
+  padding: 2px 6px;
 }
 
 .links_dark_hover:hover {
-  font-weight: bold;
+  /* font-weight: bold; */
   color: #fff;
-  border-bottom: 3px solid #fff;
+  /* border-bottom: 3px solid #fff; */
   /* transition: all 0.5s ease; */
+}
+
+/* stroke */
+.nav_header_home a {
+  position: relative;
+}
+
+.nav_header_home a:after {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: auto;
+  width: 0%;
+  content: ".";
+  color: transparent;
+  background: #fff;
+  height: 1px;
+}
+
+.nav_header_home a {
+  transition: all 2s;
+}
+
+.nav_header_home a:after {
+  text-align: left;
+  content: ".";
+  margin: 0;
+  opacity: 0;
+}
+.nav_header_home a:hover {
+  color: #fff;
+  z-index: 1;
+}
+.nav_header_home a:hover:after {
+  z-index: -10;
+  animation: fill 0.5s forwards;
+  -webkit-animation: fill 0.5s forwards;
+  -moz-animation: fill 0.5s forwards;
+  opacity: 1;
+}
+
+/* Keyframes */
+@keyframes fill {
+  0% {
+    width: 0%;
+    height: 1px;
+  }
+  50% {
+    width: 100%;
+    height: 1px;
+  }
+  100% {
+    width: 100%;
+    height: 100%;
+    background: #885838;
+    border-radius: 3px;
+  }
+}
+
+/* Keyframes */
+@-webkit-keyframes fill {
+  0% {
+    width: 0%;
+    height: 1px;
+  }
+  50% {
+    width: 100%;
+    height: 1px;
+  }
+  100% {
+    width: 100%;
+    height: 100%;
+    background: #885838;
+    border-radius: 3px;
+  }
 }
 
 body {
