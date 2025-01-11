@@ -182,7 +182,12 @@ const AdminRequestLeaveDialog: React.FC<AdminRequestLeaveDialogProps> = ({
       </DialogContent>
 
       <DialogActions className="mt-3">
-        <Button onClick={onClose} color="primary" variant="outlined">
+        <Button
+          onClick={onClose}
+          color="primary"
+          variant="outlined"
+          className="btn btn-secondary"
+        >
           Hủy
         </Button>
         <Button onClick={handleSubmit} color="primary" variant="contained">

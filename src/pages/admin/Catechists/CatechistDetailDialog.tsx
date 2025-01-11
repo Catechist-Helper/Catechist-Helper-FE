@@ -13,19 +13,19 @@ import {
   CatechistItemResponse,
   CertificateResponse,
 } from "../../../model/Response/Catechist";
-import { getUserInfo } from "../../../utils/utils";
-import ImageDialog from "../../Molecules/ImageDialog";
+import ImageDialog from "../../../components/Molecules/ImageDialog";
 import { formatDate } from "../../../utils/formatDate";
-import { AuthUser } from "../../../types/authentication";
 import gradeApi from "../../../api/Grade";
 import { GradeResponse } from "../../../model/Response/Grade";
 
-interface ViewCatechistInfoDialogProps {
+interface CatechistDetailDialogProps {
+  catechistId: string;
   open: boolean;
   onClose: () => void;
 }
 
-const ViewCatechistInfoDialog: React.FC<ViewCatechistInfoDialogProps> = ({
+const CatechistDetailDialog: React.FC<CatechistDetailDialogProps> = ({
+  catechistId,
   open,
   onClose,
 }) => {
@@ -37,20 +37,15 @@ const ViewCatechistInfoDialog: React.FC<ViewCatechistInfoDialogProps> = ({
     (GradeResponse & { isMain: boolean }) | null
   >(null);
 
-  // Lấy catechistId từ userLogin
   useEffect(() => {
     const fetchCatechistInfo = async () => {
       try {
-        const user: AuthUser = getUserInfo();
-        if (user?.catechistId) {
-          const response = await catechistApi.getCatechistById(
-            user.catechistId
-          );
+        if (catechistId && catechistId != "") {
+          const response = await catechistApi.getCatechistById(catechistId);
           setCatechist(response.data.data);
 
-          const gradeResponse = await catechistApi.getCatechistGrades(
-            user.catechistId
-          );
+          const gradeResponse =
+            await catechistApi.getCatechistGrades(catechistId);
           if (
             gradeResponse.data.data &&
             gradeResponse.data.data.items[0] &&
@@ -106,12 +101,12 @@ const ViewCatechistInfoDialog: React.FC<ViewCatechistInfoDialogProps> = ({
   const handleCloseDialogCertificateImage = () =>
     setDialogCertificateImageOpen(false);
 
-  if (loading) {
+  if (loading || !catechistId || catechistId == "") {
     return null;
   }
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
+    <Dialog open={open} maxWidth="md" fullWidth>
       <DialogTitle>
         <h2 className="text-primary font-bold">
           Thông tin giáo lý viên {catechist?.fullName || ""}
@@ -344,4 +339,4 @@ const ViewCatechistInfoDialog: React.FC<ViewCatechistInfoDialogProps> = ({
   );
 };
 
-export default ViewCatechistInfoDialog;
+export default CatechistDetailDialog;

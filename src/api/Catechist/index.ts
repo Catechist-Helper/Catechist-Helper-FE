@@ -72,13 +72,30 @@ const getCatechistClasses = (id: string, pastoralYear?: string, page?: number, s
 };
 
 // GET: Lấy danh sách điểm số của một catechist
-const getCatechistGrades = (id: string, pastoralYear?: string, page?: number, size?: number) => {
+const getCatechistGrades = (id: string, page?: number, size?: number) => {
   const params = {
-    ...(pastoralYear !== undefined && { pastoralYear }),
     ...(page !== undefined && { page }),
     ...(size !== undefined && { size }),
   };
-  return request.get<BasicResponse<any>>(`${ROOT_CATECHIST}/${id}/grades`, { params });
+  return request.get<BasicResponse<{
+    size: number;
+    page: number;
+    total: number;
+    totalPages: number;
+    items: {
+      grade: {
+          id: string,
+          name: string,
+          totalCatechist: number,
+          major: {
+            id: string,
+            name: string,
+            hierarchyLevel: number
+          }
+        },
+        isMain: boolean
+    }[];
+  }>>(`${ROOT_CATECHIST}/${id}/grades`, { params });
 };
 
 const getTrainingsOfCatechist = (id: string) => {

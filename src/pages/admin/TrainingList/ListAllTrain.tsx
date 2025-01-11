@@ -261,11 +261,11 @@ const ListAllTrain: React.FC = () => {
       headerName: "Tên",
       width: 200,
     },
-    { field: "description", headerName: "Mô tả", width: 200 },
+    { field: "description", headerName: "Mô tả", width: 170 },
     {
       field: "previousLevel",
       headerName: "Cấp bậc trước",
-      width: 150,
+      width: 120,
       renderCell: (params: any) =>
         params.row.previousLevel?.hierarchyLevel ||
         levelMap[params.row.previousLevelId] ||
@@ -274,7 +274,7 @@ const ListAllTrain: React.FC = () => {
     {
       field: "nextLevel",
       headerName: "Cấp bậc tiếp theo",
-      width: 150,
+      width: 135,
       renderCell: (params: any) =>
         params.row.nextLevel?.hierarchyLevel ||
         levelMap[params.row.nextLevelId] ||
@@ -283,21 +283,21 @@ const ListAllTrain: React.FC = () => {
     {
       field: "startTime",
       headerName: "Ngày bắt đầu",
-      width: 140,
+      width: 120,
       renderCell: (params: any) =>
         new Date(params.row.startTime).toLocaleDateString("vi-VN"),
     },
     {
       field: "endTime",
       headerName: "Ngày kết thúc",
-      width: 140,
+      width: 120,
       renderCell: (params: any) =>
         new Date(params.row.endTime).toLocaleDateString("vi-VN"),
     },
     {
       field: "catechists",
       headerName: "Số lượng Giáo lý viên",
-      width: 200,
+      width: 165,
       renderCell: (params) =>
         catechists[params.row.id]?.length ? (
           <>
@@ -338,7 +338,7 @@ const ListAllTrain: React.FC = () => {
     {
       field: "trainingListStatus",
       headerName: "Trạng thái",
-      width: 180,
+      width: 130,
       renderCell: (params) => {
         const status = params.row.trainingListStatus as trainingListStatus;
         return (
@@ -357,7 +357,7 @@ const ListAllTrain: React.FC = () => {
     {
       field: "actions",
       headerName: "Hành động",
-      width: 250,
+      width: 205,
       renderCell: (params) => (
         <div className="space-x-2">
           <Button

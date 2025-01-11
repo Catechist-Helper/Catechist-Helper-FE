@@ -45,6 +45,7 @@ export default function EventsComponent() {
   const [selectedCategoryId, setSelectedCategoryId] = useState<
     string | "Tất cả"
   >("Tất cả");
+  const [filteredStatus, setFilteredStatus] = useState<number>(-1);
   const [openDialog, setOpenDialog] = useState<boolean>(false);
   const [editingEvent, setEditingEvent] = useState<EventItemResponse | null>(
     null
@@ -194,8 +195,9 @@ export default function EventsComponent() {
                 {organizersCount > 0 ? (
                   <>
                     <Button
-                      variant="contained"
+                      variant="text"
                       color={"primary"}
+                      className="btn btn-primary"
                       style={{ marginLeft: "10px" }}
                       onClick={() =>
                         handleOrganizers(
@@ -215,8 +217,9 @@ export default function EventsComponent() {
             ) : (
               <>
                 <Button
-                  variant="contained"
+                  variant="text"
                   color={organizersCount > 0 ? "primary" : "secondary"}
+                  className={`${organizersCount > 0 ? "btn btn-primary" : "hover:bg-purple-800 hover:text-white hover:border-purple-800"}`}
                   style={{ marginLeft: "10px" }}
                   onClick={() =>
                     handleOrganizers(params.row.id, organizersCount > 0)
@@ -261,6 +264,7 @@ export default function EventsComponent() {
               <>
                 <Button
                   color="secondary"
+                  className="hover:bg-purple-800 hover:text-white hover:border-purple-800 ml-1"
                   style={{ marginLeft: "5px" }}
                   onClick={() =>
                     openAddParticipantsDialog(params.row.id, params.row.name)
@@ -326,7 +330,15 @@ export default function EventsComponent() {
               1,
               firstRes.data.data.total
             );
-      await fetchAdditionalData(data.data.items); // Gọi thêm fetch dữ liệu bổ sung
+
+      let finalItems = [...data.data.items];
+      if (filteredStatus >= 0) {
+        finalItems = [...data.data.items].filter(
+          (item) => item.eventStatus == filteredStatus
+        );
+      }
+
+      await fetchAdditionalData(finalItems);
     } catch (error) {
       console.error("Lỗi khi tải danh sách sự kiện:", error);
       sweetAlert.alertFailed("Không thể tải danh sách sự kiện!", "", 1000, 22);
@@ -454,7 +466,7 @@ export default function EventsComponent() {
 
   useEffect(() => {
     fetchEvents(); // Fetch events khi selectedCategoryId thay đổi
-  }, [selectedCategoryId]);
+  }, [selectedCategoryId, filteredStatus]);
 
   // Mở dialog để thêm mới sự kiện
   const handleAddEvent = () => {
@@ -468,7 +480,7 @@ export default function EventsComponent() {
       return;
     }
 
-    navigate(PATH_ADMIN.admin_event_process, {
+    navigate(PATH_ADMIN.admin_event_process_management, {
       state: { eventId: eventId ? eventId : selectedIds[0] },
     });
   };
@@ -590,33 +602,52 @@ export default function EventsComponent() {
       </h1>
       <div className="my-2 flex justify-between mx-3 mt-3">
         {/* Bộ lọc danh mục sự kiện */}
-        <FormControl variant="outlined" style={{ minWidth: 200 }}>
-          <InputLabel>Danh mục sự kiện</InputLabel>
-          <Select
-            value={selectedCategoryId}
-            onChange={(e) => setSelectedCategoryId(e.target.value)}
-            label="Danh mục sự kiện"
-          >
-            <MenuItem value="Tất cả">Tất cả</MenuItem>
-            {eventCategories.map((category) => (
-              <MenuItem key={category.id} value={category.id}>
-                {category.name}
+        <div className="flex gap-x-3">
+          <FormControl variant="outlined" style={{ minWidth: 200 }}>
+            <InputLabel>Danh mục sự kiện</InputLabel>
+            <Select
+              value={selectedCategoryId}
+              onChange={(e) => setSelectedCategoryId(e.target.value)}
+              label="Danh mục sự kiện"
+              className="h-[43px]"
+            >
+              <MenuItem value="Tất cả">Tất cả</MenuItem>
+              {eventCategories.map((category) => (
+                <MenuItem key={category.id} value={category.id}>
+                  {category.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <FormControl variant="outlined" style={{ minWidth: 200 }}>
+            <InputLabel>Trạng thái sự kiện</InputLabel>
+            <Select
+              value={filteredStatus}
+              onChange={(e) => setFilteredStatus(Number(e.target.value))}
+              label="Trạng thái sự kiện"
+              className="h-[43px]"
+            >
+              <MenuItem value={-1}>Tất cả</MenuItem>
+              <MenuItem value={EventStatus.Not_Started}>
+                {EventStatusString.Not_Started}
               </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+              <MenuItem value={EventStatus.In_Progress}>
+                {EventStatusString.In_Progress}
+              </MenuItem>
+              <MenuItem value={EventStatus.Completed}>
+                {EventStatusString.Completed}
+              </MenuItem>
+              <MenuItem value={EventStatus.Cancelled}>
+                {EventStatusString.Cancelled}
+              </MenuItem>
+            </Select>
+          </FormControl>
+        </div>
+
         {/* Các nút thêm, sửa, xóa */}
         <div className="space-x-2">
           {selectedIds.length === 1 ? (
             <>
-              <Button
-                variant="outlined"
-                color="warning"
-                className="btn btn-warning"
-                onClick={handleEditEvent}
-              >
-                Chỉnh sửa
-              </Button>
               <Button
                 variant="outlined"
                 color="error"
@@ -624,6 +655,14 @@ export default function EventsComponent() {
                 onClick={handleDeleteEvent}
               >
                 Xóa
+              </Button>
+              <Button
+                variant="outlined"
+                color="warning"
+                className="btn btn-warning"
+                onClick={handleEditEvent}
+              >
+                Chỉnh sửa
               </Button>
               {/* <Button
                 variant="outlined"

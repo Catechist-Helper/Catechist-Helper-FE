@@ -64,12 +64,12 @@ const HeaderHome: React.FC = () => {
             TRANG CHỦ
           </Link>
           <Link
-            to={PATH_HOME.introduce}
+            to={PATH_HOME.introduction}
             className={`links_dark_hover 
             ${
               typeof window !== undefined &&
               localStorage.getItem(LOCALSTORAGE_CONSTANTS.CURRENT_PAGE) ==
-                PATH_HOME.introduce
+                PATH_HOME.introduction
                 ? "bg-white text-black rounded-[3px] font-bold"
                 : ""
             }`}
@@ -77,7 +77,7 @@ const HeaderHome: React.FC = () => {
               if (typeof window !== "undefined") {
                 localStorage.setItem(
                   LOCALSTORAGE_CONSTANTS.CURRENT_PAGE,
-                  PATH_HOME.introduce
+                  PATH_HOME.introduction
                 );
               }
             }}

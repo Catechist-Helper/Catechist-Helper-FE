@@ -48,7 +48,7 @@ export default function GradeComponent() {
 
   useEffect(() => {
     fetchMajors();
-    storeCurrentPath(PATH_ADMIN.grade_management);
+    storeCurrentPath(PATH_ADMIN.admin_grade_management);
 
     // Nếu có majorId và pastoralYearId từ location.state, set chúng làm giá trị mặc định
     if (location.state) {
@@ -267,7 +267,7 @@ export default function GradeComponent() {
   const handleAddCatechist = (gradeId: string) => {
     const selectedGrade = rows.find((row) => row.id === gradeId);
     if (selectedGrade) {
-      navigate(`${PATH_ADMIN.assign_catechist_to_grade}`, {
+      navigate(`${PATH_ADMIN.admin_assign_catechist_to_grade}`, {
         state: {
           majorId: selectedGrade.major.id,
           gradeId: selectedGrade.id,
@@ -283,7 +283,7 @@ export default function GradeComponent() {
   const handleUpdateCatechist = (gradeId: string) => {
     const selectedGrade = rows.find((row) => row.id === gradeId);
     if (selectedGrade) {
-      navigate(`${PATH_ADMIN.assign_catechist_to_grade}`, {
+      navigate(`${PATH_ADMIN.admin_assign_catechist_to_grade}`, {
         state: {
           majorId: selectedGrade.major.id,
           gradeId: selectedGrade.id,
@@ -316,7 +316,7 @@ export default function GradeComponent() {
   //       const yearB = parseInt(b.name.split("-")[0]);
   //       return yearB - yearA;
   //     });
-  //     navigate(`${PATH_ADMIN.class_management}`, {
+  //     navigate(`${PATH_ADMIN.admin_class_management}`, {
   //       state: {
   //         majorId: majorId,
   //         gradeId: gradeId,

@@ -177,12 +177,12 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
       return;
     }
 
-    if (!childRef?.current?.checkValidMemberOfProcess()) {
-      sweetAlert.alertWarning(
-        "Nếu đã gán người đảm nhận thì cần có 1 người đảm nhận chính"
-      );
-      return;
-    }
+    // if (!childRef?.current?.checkValidMemberOfProcess()) {
+    //   sweetAlert.alertWarning(
+    //     "Nếu đã gán người đảm nhận thì cần có 1 người đảm nhận chính"
+    //   );
+    //   return;
+    // }
 
     // const durationTicks =
     //   durationDays * 24 * 60 * 60 * 10000000 +
@@ -219,7 +219,7 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
           !childRef?.current?.checkHavingMemberOfProcess()
         ) {
           sweetAlert.alertWarning(
-            "Hoạt động cần có ít nhất 1 người đảm nhận chính khi ở trạng thái đang làm"
+            "Hoạt động cần có ít nhất 1 người đảm nhận khi ở trạng thái đang làm"
           );
           return;
         }
@@ -227,7 +227,7 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
         if (data.status == EventProcessStatus.Completed) {
           if (!childRef?.current?.checkHavingMemberOfProcess()) {
             sweetAlert.alertWarning(
-              "Hoạt động cần có ít nhất 1 người đảm nhận chính khi ở trạng thái hoàn thành"
+              "Hoạt động cần có ít nhất 1 người đảm nhận khi ở trạng thái hoàn thành"
             );
             return;
           }
@@ -280,9 +280,13 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
             "Chi phí thực tế phải nhỏ hơn chi phí dự tính"
           )) ||
         (error.Error &&
-          error.Error.includes("Chi phí thực tế phải nhỏ hơn chi phí dự tính"))
+          error.Error.includes(
+            "Chi phí thực tế không được lớn hơn chi phí dự tính"
+          ))
       ) {
-        sweetAlert.alertFailed("Chi phí thực tế phải nhỏ hơn chi phí dự tính");
+        sweetAlert.alertFailed(
+          "Chi phí thực tế không được lớn hơn chi phí dự tính"
+        );
       } else {
         sweetAlert.alertFailed("Có lỗi xảy ra", "", 3000, 20);
       }
@@ -297,9 +301,15 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
   return (
     <Dialog open={open} maxWidth="xl" fullWidth>
       <DialogTitle>
-        {viewMode
-          ? "Xem chi tiết hoạt động"
-          : `${processData ? "Cập nhật hoạt động" : "Tạo mới hoạt động"}`}
+        {viewMode ? (
+          <span className="font-bold text-secondary">
+            Xem chi tiết hoạt động
+          </span>
+        ) : processData ? (
+          <span className="font-bold text-primary">Cập nhật hoạt động</span>
+        ) : (
+          <span className="font-bold text-success">Tạo mới hoạt động</span>
+        )}
       </DialogTitle>
       <DialogContent>
         <Grid container spacing={2}>
@@ -879,6 +889,7 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
                 setViewMode(false);
               }}
               color="primary"
+              className="btn btn-primary"
             >
               Chỉnh sửa
             </Button>
@@ -892,12 +903,17 @@ const EventProcessDialog: React.FC<EventProcessDialogProps> = ({
             handleCloseDialog();
           }}
           color="secondary"
+          className="hover:bg-purple-800 hover:text-white hover:border-purple-800"
         >
           {!viewMode ? <>Hủy bỏ</> : <>Đóng</>}
         </Button>
         {!viewMode ? (
           <>
-            <Button variant="contained" onClick={handleSubmit} color="primary">
+            <Button
+              variant="contained"
+              onClick={handleSubmit}
+              color={processData ? "primary" : "success"}
+            >
               {processData ? "Cập nhật" : "Tạo"}
             </Button>
           </>

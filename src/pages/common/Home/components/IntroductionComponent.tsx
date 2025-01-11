@@ -25,7 +25,7 @@ const IntroductionComponent: React.FC = () => {
         className="text-primary_color bg-white py-2 px-3 border-0 mt-2 hover:bg-black"
         style={{ fontWeight: "bolder", letterSpacing: "0.5px" }}
         onClick={() => {
-          navigate(PATH_HOME.introduce);
+          navigate(PATH_HOME.introduction);
         }}
       >
         THÔNG TIN VỀ GIÁO XỨ

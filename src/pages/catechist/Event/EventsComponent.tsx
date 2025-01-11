@@ -44,6 +44,8 @@ export default function EventsComponent() {
   const [selectedCategoryId, setSelectedCategoryId] = useState<
     string | "Tất cả"
   >("Tất cả");
+  const [filteredStatus, setFilteredStatus] = useState<number>(-1);
+
   const navigate = useNavigate();
 
   // Fetch Event Categories
@@ -84,7 +86,15 @@ export default function EventsComponent() {
               1,
               firstRes.data.data.total
             );
-      const eventsWithUserRole = await fetchUserEventsRole(data.data.items);
+
+      let finalItems = [...data.data.items];
+      if (filteredStatus >= 0) {
+        finalItems = [...data.data.items].filter(
+          (item) => item.eventStatus == filteredStatus
+        );
+      }
+
+      const eventsWithUserRole = await fetchUserEventsRole(finalItems);
       await fetchAdditionalData(eventsWithUserRole);
     } catch (error) {
       console.error("Error fetching events:", error);
@@ -266,7 +276,7 @@ export default function EventsComponent() {
 
   const columns: GridColDef[] = [
     { field: "name", headerName: "Tên sự kiện", width: 200 },
-    { field: "description", headerName: "Mô tả", width: 180 },
+    { field: "description", headerName: "Mô tả", width: 170 },
     {
       field: "startTime",
       headerName: "Thời gian bắt đầu",
@@ -480,7 +490,7 @@ export default function EventsComponent() {
     if (userLogin) {
       fetchEvents(); // Fetch events once the user is fetched
     }
-  }, [userLogin]);
+  }, [userLogin, selectedCategoryId, filteredStatus]);
 
   if (!userLogin || !userLogin.id) {
     return <></>;
@@ -502,22 +512,47 @@ export default function EventsComponent() {
         </h1>
 
         <div className="my-2 flex justify-between mx-3 mt-3">
-          {/* Bộ lọc danh mục sự kiện */}
-          <FormControl variant="outlined" style={{ minWidth: 200 }}>
-            <InputLabel>Danh mục sự kiện</InputLabel>
-            <Select
-              value={selectedCategoryId}
-              onChange={(e) => setSelectedCategoryId(e.target.value)}
-              label="Danh mục sự kiện"
-            >
-              <MenuItem value="Tất cả">Tất cả</MenuItem>
-              {eventCategories.map((category) => (
-                <MenuItem key={category.id} value={category.id}>
-                  {category.name}
+          <div className="flex gap-x-3">
+            <FormControl variant="outlined" style={{ minWidth: 200 }}>
+              <InputLabel>Danh mục sự kiện</InputLabel>
+              <Select
+                value={selectedCategoryId}
+                onChange={(e) => setSelectedCategoryId(e.target.value)}
+                label="Danh mục sự kiện"
+                className="h-[43px]"
+              >
+                <MenuItem value="Tất cả">Tất cả</MenuItem>
+                {eventCategories.map((category) => (
+                  <MenuItem key={category.id} value={category.id}>
+                    {category.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <FormControl variant="outlined" style={{ minWidth: 200 }}>
+              <InputLabel>Trạng thái sự kiện</InputLabel>
+              <Select
+                value={filteredStatus}
+                onChange={(e) => setFilteredStatus(Number(e.target.value))}
+                label="Trạng thái sự kiện"
+                className="h-[43px]"
+              >
+                <MenuItem value={-1}>Tất cả</MenuItem>
+                <MenuItem value={EventStatus.Not_Started}>
+                  {EventStatusString.Not_Started}
                 </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+                <MenuItem value={EventStatus.In_Progress}>
+                  {EventStatusString.In_Progress}
+                </MenuItem>
+                <MenuItem value={EventStatus.Completed}>
+                  {EventStatusString.Completed}
+                </MenuItem>
+                <MenuItem value={EventStatus.Cancelled}>
+                  {EventStatusString.Cancelled}
+                </MenuItem>
+              </Select>
+            </FormControl>
+          </div>
           {/* Các nút thêm, sửa, xóa */}
           <div className="space-x-2">
             <Button onClick={fetchEvents} variant="contained" color="primary">

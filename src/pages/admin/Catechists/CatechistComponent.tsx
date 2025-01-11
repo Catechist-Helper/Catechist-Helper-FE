@@ -8,10 +8,7 @@ import Paper from "@mui/material/Paper";
 import { Button } from "@mui/material";
 import { useState, useEffect } from "react";
 import catechistApi from "../../../api/Catechist";
-import {
-  CatechistItemResponse,
-  CertificateResponse,
-} from "../../../model/Response/Catechist";
+import { CatechistItemResponse } from "../../../model/Response/Catechist";
 import { formatPhone, storeCurrentPath } from "../../../utils/utils";
 import viVNGridTranslation from "../../../locale/MUITable";
 import sweetAlert from "../../../utils/sweetAlert";
@@ -29,7 +26,7 @@ import LeaveRequestDialog from "./LeaveRequestDialog";
 import { GetLeaveRequestItemResponse } from "../../../model/Response/LeaveRequest";
 import leaveRequestApi from "../../../api/LeaveRequest";
 import { LeaveRequestStatus } from "../../../enums/LeaveRequest";
-import ImageDialog from "../../../components/Molecules/ImageDialog";
+import CatechistDetailDialog from "./CatechistDetailDialog";
 
 export default function CatechistComponent() {
   const [rows, setRows] = useState<CatechistItemResponse[]>([]);
@@ -74,40 +71,14 @@ export default function CatechistComponent() {
     GetLeaveRequestItemResponse | undefined
   >(undefined);
 
-  const [dialogCertificateImageOpen, setDialogCertificateImageOpen] =
+  const [dialogCatechistDetailOpen, setDialogCatechistDetailOpen] =
     useState(false);
-  const [dialogData, setDialogData] = useState({
-    images: [],
-    title: "",
-  });
-
-  const handleOpenDialogCertificateImage = (
-    certificates: CertificateResponse[],
-    fullName: string,
-    code: string
-  ) => {
-    const images: any = certificates
-      .filter((cert) => cert.image)
-      .map((cert) => ({
-        name: cert.name,
-        url: cert.image,
-      }));
-
-    setDialogData({
-      images,
-      title: `Chứng chỉ của giáo lý viên ${fullName} - ${code}`,
-    });
-    setDialogCertificateImageOpen(true);
-  };
-
-  const handleCloseDialogCertificateImage = () =>
-    setDialogCertificateImageOpen(false);
 
   const columns: GridColDef[] = [
     {
       field: "no",
       headerName: "STT",
-      width: 50,
+      width: 15,
       renderCell: (params) => {
         {
           const rowIndex = params.api.getRowIndexRelativeToVisibleRows(
@@ -122,7 +93,7 @@ export default function CatechistComponent() {
     {
       field: "imageUrl",
       headerName: "Ảnh",
-      width: 100,
+      width: 70,
       renderCell: (params) => (
         <img
           src={
@@ -136,85 +107,61 @@ export default function CatechistComponent() {
         />
       ),
     },
-    { field: "code", headerName: "Mã giáo lý viên", width: 140 },
-    { field: "fullName", headerName: "Tên đầy đủ", width: 200 },
+    { field: "code", headerName: "Mã giáo lý viên", width: 115 },
+    { field: "fullName", headerName: "Tên đầy đủ", width: 180 },
     {
       field: "christianName",
       headerName: "Tên Thánh",
-      width: 150,
-      renderCell: (params) => params.row.christianName || "N/A", // Chỉnh sửa hiển thị tên thánh
+      width: 120,
+      renderCell: (params) =>
+        params.row.christianName.replace("Thánh", "").trim() || "N/A", // Chỉnh sửa hiển thị tên thánh
     },
-    { field: "gender", headerName: "Giới tính", width: 100 },
+    { field: "gender", headerName: "Giới tính", width: 85 },
     {
       field: "dateOfBirth",
       headerName: "Ngày sinh",
-      width: 120,
+      width: 110,
       renderCell: (params) => formatDate.DD_MM_YYYY(params.value),
     },
-    { field: "qualification", headerName: "Trình độ", width: 120 },
     {
-      field: "level",
+      field: "level.name",
       headerName: "Cấp bậc",
-      width: 120,
+      width: 90,
       renderCell: (params) =>
         params.row.level ? params.row.level.name : "N/A",
     },
     {
       field: "email",
       headerName: "Email",
-      width: 200,
+      width: 170,
       renderCell: (params) => params.row.email || "N/A", // Hiển thị email nếu có
     },
     {
       field: "phone",
       headerName: "Số điện thoại",
-      width: 150,
+      width: 120,
       renderCell: (params) => formatPhone(params.value),
     },
-    { field: "address", headerName: "Địa chỉ", width: 200 },
-    { field: "fatherName", headerName: "Tên cha", width: 150 },
-    { field: "motherName", headerName: "Tên mẹ", width: 150 },
-    // { field: "note", headerName: "Ghi chú", width: 200 },
+
     {
-      field: "certificates",
-      headerName: "Số chứng chỉ",
-      width: 120,
+      field: "certificates.length",
+      headerName: "Chứng chỉ",
+      align: "center",
+      width: 85,
       renderCell: (params) => {
-        const { certificates, fullName, code } = params.row;
-        return (
-          <>
-            <span>{certificates.length}</span>
-            {certificates.length > 0 ? (
-              <>
-                <Button
-                  size="small"
-                  style={{ marginLeft: "8px" }}
-                  onClick={() =>
-                    handleOpenDialogCertificateImage(
-                      certificates,
-                      fullName,
-                      code
-                    )
-                  }
-                >
-                  Xem
-                </Button>
-              </>
-            ) : (
-              <></>
-            )}
-          </>
-        );
+        const { certificates } = params.row;
+        return <span>{certificates.length}</span>;
       },
     },
     {
       field: "numberOfClass",
       headerName: "Lớp hiện tại",
-      width: 130,
+      width: 100,
       renderCell: (params) => {
         return (
           <Button
             color="secondary"
+            className="hover:bg-purple-800 hover:text-white hover:border-purple-800"
             onClick={() => {
               handleViewClassCatechist(params.row);
             }}
@@ -239,6 +186,7 @@ export default function CatechistComponent() {
             <div>
               <Button
                 color="primary"
+                className="btn btn-primary"
                 onClick={() => {
                   handleChangeIsTeaching(params.row);
                 }}
@@ -373,7 +321,7 @@ export default function CatechistComponent() {
 
   useEffect(() => {
     fetchCatechists();
-    storeCurrentPath(PATH_ADMIN.catechist_management);
+    storeCurrentPath(PATH_ADMIN.admin_catechist_management);
   }, [statusIsTeaching]);
 
   const handleChangeIsTeaching = async (catechist: CatechistItemResponse) => {
@@ -400,7 +348,7 @@ export default function CatechistComponent() {
           remainingClassHavingSlots.data.data.forEach((item) => {
             selectClassIds.push(item.id);
           });
-          navigate(`${PATH_ADMIN.class_management}`, {
+          navigate(`${PATH_ADMIN.admin_class_management}`, {
             state: {
               classIds: selectClassIds,
             },
@@ -447,7 +395,7 @@ export default function CatechistComponent() {
           remainingClassHavingSlots.data.data.forEach((item) => {
             selectClassIds.push(item.id);
           });
-          navigate(`${PATH_ADMIN.class_management}`, {
+          navigate(`${PATH_ADMIN.admin_class_management}`, {
             state: {
               classIds: selectClassIds,
             },
@@ -518,6 +466,19 @@ export default function CatechistComponent() {
             <>
               <div>
                 <Button
+                  onClick={() => {
+                    setDialogCatechistDetailOpen(true);
+                  }} // Open dialog
+                  variant="outlined"
+                  color="secondary"
+                  className="hover:bg-purple-800 hover:text-white hover:border-purple-800"
+                  style={{ marginBottom: "16px" }}
+                >
+                  Xem chi tiết
+                </Button>
+              </div>
+              <div>
+                <Button
                   className="btn btn-primary"
                   onClick={() => {
                     handleUpdateCatechist();
@@ -526,7 +487,7 @@ export default function CatechistComponent() {
                   color="primary"
                   style={{ marginBottom: "16px" }}
                 >
-                  Cập nhật giáo lý viên
+                  Cập nhật
                 </Button>
               </div>
             </>
@@ -541,7 +502,7 @@ export default function CatechistComponent() {
               color="success"
               style={{ marginBottom: "16px" }}
             >
-              Thêm giáo lý viên
+              Thêm mới
             </Button>
           </div>
           <div>
@@ -621,14 +582,14 @@ export default function CatechistComponent() {
       ) : (
         <></>
       )}
-      {dialogCertificateImageOpen ? (
+      {dialogCatechistDetailOpen ? (
         <>
-          <ImageDialog
-            images={dialogData.images}
-            title={dialogData.title}
-            open={dialogCertificateImageOpen}
-            onClose={handleCloseDialogCertificateImage}
-            imageTitle="Tên chứng chỉ"
+          <CatechistDetailDialog
+            catechistId={selectedIds[0].toString()}
+            open={dialogCatechistDetailOpen}
+            onClose={() => {
+              setDialogCatechistDetailOpen(false);
+            }}
           />
         </>
       ) : (
