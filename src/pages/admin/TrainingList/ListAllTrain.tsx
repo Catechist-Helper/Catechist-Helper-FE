@@ -460,33 +460,29 @@ const ListAllTrain: React.FC = () => {
         ) : (
           <></>
         )}
-        {trains.length > 0 && init && !loading ? (
-          <>
-            <DataGrid
-              rows={trains}
-              columns={columns}
-              loading={loading}
-              paginationMode="client"
-              localeText={viVNGridTranslation}
-              getRowId={(row) => row.id}
-              rowSelectionModel={selectedIds}
-              onRowSelectionModelChange={(newSelection) => {
-                setSelectedIds(newSelection);
-              }}
-              checkboxSelection
-              disableMultipleRowSelection
-              sx={{
-                height: 480,
+        <>
+          <DataGrid
+            rows={trains}
+            columns={columns}
+            loading={loading}
+            paginationMode="client"
+            localeText={viVNGridTranslation}
+            getRowId={(row) => row.id}
+            rowSelectionModel={selectedIds}
+            onRowSelectionModelChange={(newSelection) => {
+              setSelectedIds(newSelection);
+            }}
+            checkboxSelection
+            disableMultipleRowSelection
+            sx={{
+              height: 480,
+              overflowX: "auto",
+              "& .MuiDataGrid-root": {
                 overflowX: "auto",
-                "& .MuiDataGrid-root": {
-                  overflowX: "auto",
-                },
-              }}
-            />
-          </>
-        ) : (
-          <></>
-        )}
+              },
+            }}
+          />
+        </>
       </div>
     </Paper>
   );

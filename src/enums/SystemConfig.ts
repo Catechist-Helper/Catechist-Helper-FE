@@ -1,22 +1,22 @@
 export enum SystemConfigKey {
+    RestrictedUpdateDaysBeforeInterview = "RestrictedUpdateDaysBeforeInterview",
     START_DATE = "startdate",
     END_DATE = "enddate",
+    WEEKDAY = "weekday",
     START_TIME = "starttime",
     END_TIME = "endtime",
-    WEEKDAY = "weekday",
-    RestrictedUpdateDaysBeforeInterview = "RestrictedUpdateDaysBeforeInterview",
-    RestrictedDateManagingCatechism = "RestrictedDateManagingCatechism"
+    RestrictedDateManagingCatechism = "RestrictedDateManagingCatechism",
 }
  
 // Map ánh xạ giá trị enum với chuỗi mô tả
 const enumDescriptions: Record<SystemConfigKey, string> = {
-    [SystemConfigKey.START_DATE]: "Ngày bắt đầu năm học",
-    [SystemConfigKey.END_DATE]: "Ngày kết thúc năm học",
-    [SystemConfigKey.START_TIME]: "Thời gian bắt đầu năm học",
-    [SystemConfigKey.END_TIME]: "Thời gian kết thúc năm học",
-    [SystemConfigKey.WEEKDAY]: "Ngày học của các lớp giáo lý",
-    [SystemConfigKey.RestrictedUpdateDaysBeforeInterview]: "Số ngày giới hạn trước khi phỏng vấn",
-    [SystemConfigKey.RestrictedDateManagingCatechism]: "Ngày giới hạn quản lý giáo lý",
+    [SystemConfigKey.RestrictedUpdateDaysBeforeInterview]: "Số ngày tối thiểu trước lịch phỏng vấn",
+    [SystemConfigKey.START_DATE]: "Ngày bắt đầu các lớp giáo lý",
+    [SystemConfigKey.END_DATE]: "Ngày kết thúc các lớp giáo lý",
+    [SystemConfigKey.WEEKDAY]: "Ngày học trong tuần của các lớp giáo lý",
+    [SystemConfigKey.START_TIME]: "Thời gian bắt đầu các tiết học giáo lý",
+    [SystemConfigKey.END_TIME]: "Thời gian kết thúc các tiết học giáo lý",
+    [SystemConfigKey.RestrictedDateManagingCatechism]: "Ngày giới hạn quản lý nghiệp vụ giáo lý",
 };
 
 // Hàm nhận giá trị enum và trả về chuỗi mô tả

@@ -59,35 +59,6 @@ const OrganizersDialog: React.FC<OrganizersDialogProps> = ({
     }
   );
 
-  const resetVietnamese = () => {
-    let count = 1;
-    let theInterval = setInterval(() => {
-      const elements = document.querySelectorAll<HTMLElement>(
-        ".MuiTablePagination-selectLabel"
-      );
-      if (elements) {
-        elements.forEach((element) => {
-          element.innerHTML = "Số hàng mỗi trang";
-        });
-      }
-
-      const elements2 = document.querySelectorAll<HTMLElement>(
-        ".MuiTablePagination-displayedRows"
-      );
-      if (elements2) {
-        elements2.forEach((element2) => {
-          let text = element2.innerHTML;
-          text = text.replace(/\bof\b/g, "trong");
-          element2.innerHTML = text;
-        });
-      }
-      count++;
-      if (count == 5) {
-        clearInterval(theInterval);
-      }
-    }, 200);
-  };
-
   useEffect(() => {
     const fetchAccountsAndRoles = async () => {
       enableLoading();
@@ -128,7 +99,6 @@ const OrganizersDialog: React.FC<OrganizersDialogProps> = ({
 
         setAvailableAccounts(available);
         setOrganizers(currentOrganizers);
-        resetVietnamese();
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -517,7 +487,6 @@ const OrganizersDialog: React.FC<OrganizersDialogProps> = ({
                       variant="contained"
                       onClick={() => {
                         setUpdateMode(true);
-                        resetVietnamese();
                       }}
                       color="primary"
                     >

@@ -1,4 +1,6 @@
-const viVNGridTranslation = {
+import { GridLocaleText } from "@mui/x-data-grid";
+
+const viVNGridTranslation: GridLocaleText  = {
   // Root
   noRowsLabel: 'Không có dữ liệu',
   noResultsOverlayLabel: 'Không tìm thấy kết quả.',
@@ -174,7 +176,12 @@ const viVNGridTranslation = {
   aggregationFunctionLabelMin: 'Tối thiểu',
   aggregationFunctionLabelMax: 'Tối đa',
   aggregationFunctionLabelSize: 'Kích cỡ',
-  labelRowsPerPage: "Số hàng mỗi trang"
+
+  MuiTablePagination: {
+    labelRowsPerPage: "Số hàng mỗi trang",
+    labelDisplayedRows: ({ from, to, count }:any) =>
+      `${from}-${to} trong ${count !== -1 ? count : `nhiều hơn ${to}`}`, // Tùy chỉnh "of" thành "trong"
+  }
 };
 
 export default viVNGridTranslation;

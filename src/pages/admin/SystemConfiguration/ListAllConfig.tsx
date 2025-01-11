@@ -35,13 +35,18 @@ const ListAllConfig: React.FC = () => {
         data.statusCode.toString().trim().startsWith("2") &&
         data.data.items != null
       ) {
-        const sortedData = data.data.items.sort(
+        let sortedData = data.data.items.sort(
           (a: any, b: any) =>
             Object.values(SystemConfigKey).indexOf(a.key) -
             Object.values(SystemConfigKey).indexOf(b.key)
         );
-        setSystemConfig(sortedData);
-        setFilteredConfig(sortedData);
+        let finalData: any = [];
+        sortedData.forEach((item: any) => {
+          item.keyName = getSystemConfigEnumDescription(item.key);
+          finalData.push(item);
+        });
+        setSystemConfig(finalData);
+        setFilteredConfig(finalData);
       } else {
         console.log("No items found");
       }
@@ -60,7 +65,7 @@ const ListAllConfig: React.FC = () => {
   useEffect(() => {
     if (categoryFilter === "Tất cả") {
       setFilteredConfig(systemConfig);
-    } else if (categoryFilter === "Xếp lớp giáo lý") {
+    } else if (categoryFilter === "Quản lý giáo lý") {
       setFilteredConfig(
         systemConfig.filter((item) =>
           [
@@ -73,7 +78,7 @@ const ListAllConfig: React.FC = () => {
           ].includes(item.key)
         )
       );
-    } else if (categoryFilter === "Phỏng vấn") {
+    } else if (categoryFilter === "Quản lý phỏng vấn") {
       setFilteredConfig(
         systemConfig.filter(
           (item) =>
@@ -99,10 +104,13 @@ const ListAllConfig: React.FC = () => {
 
   const columns: GridColDef[] = [
     {
-      field: "key",
+      field: "keyName",
       headerName: "Thông số",
       width: 350,
-      renderCell: (params) => getSystemConfigEnumDescription(params.value),
+      renderCell: (params) =>
+        params.value
+          ? params.value
+          : getSystemConfigEnumDescription(params.row.key),
     },
     {
       field: "value",
@@ -157,8 +165,8 @@ const ListAllConfig: React.FC = () => {
               onChange={(e) => setCategoryFilter(e.target.value)}
             >
               <MenuItem value="Tất cả">Tất cả</MenuItem>
-              <MenuItem value="Xếp lớp giáo lý">Xếp lớp giáo lý</MenuItem>
-              <MenuItem value="Phỏng vấn">Phỏng vấn</MenuItem>
+              <MenuItem value="Quản lý phỏng vấn">Quản lý phỏng vấn</MenuItem>
+              <MenuItem value="Quản lý giáo lý">Quản lý giáo lý</MenuItem>
             </Select>
           </FormControl>
         </div>
