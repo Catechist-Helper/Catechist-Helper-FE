@@ -224,7 +224,7 @@ const UpdateConfig: React.FC = () => {
                 <div className="mt-3 mb-4 text-primary font-bold">
                   {formik.values.key === SystemConfigKey.START_TIME ? (
                     <p>
-                      Thời gian kết thúc năm học:{" "}
+                      Thời gian kết thúc các tiết học giáo lý:{" "}
                       <input
                         id="value"
                         name="value"
@@ -248,7 +248,7 @@ const UpdateConfig: React.FC = () => {
                   {formik.values.key === SystemConfigKey.END_TIME ? (
                     <>
                       <p>
-                        Thời gian bắt đầu năm học:{" "}
+                        Thời gian bắt đầu các tiết học giáo lý:{" "}
                         <input
                           id="value"
                           name="value"

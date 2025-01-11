@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect } from "react";
+import { lazy, Suspense } from "react";
 import { useRoutes } from "react-router-dom";
 // components
 import LoadingScreen from "../components/Organisms/LoadingScreen/LoadingScreen";
@@ -36,31 +36,6 @@ import Introduction from "../pages/common/Introduction/Introduction";
 // ----------------------------------------------------------------------
 
 const Loadable = (Component: any) => (props: any) => {
-  useEffect(() => {
-    let count = 1;
-    let theInterval = setInterval(() => {
-      const element = document.querySelector<HTMLElement>(
-        ".MuiTablePagination-selectLabel"
-      );
-      if (element) {
-        element.innerHTML = "Số hàng mỗi trang";
-      }
-
-      const element2 = document.querySelector<HTMLElement>(
-        ".MuiTablePagination-displayedRows"
-      );
-      if (element2) {
-        let text = element2.innerHTML;
-        text = text.replace(/\bof\b/g, "trong");
-        element2.innerHTML = text;
-      }
-      count++;
-      if (count == 10) {
-        clearInterval(theInterval);
-      }
-    }, 300);
-  }, []);
-
   return (
     <Suspense
       fallback={

@@ -88,32 +88,42 @@ const CalendarComponent: React.FC = () => {
 
   const translateTitles = (events: EventCalendar[]): EventCalendar[] => {
     const translationMap: { [key: string]: string } = {
-      "Christmas Day": "Ngày Lễ Giáng Sinh",
-      "Easter Sunday": "Lễ Phục Sinh",
-      "International New Year's Day": "Tết Dương Lịch",
-      "International New Year's Eve": "Đêm Giao Thừa Dương Lịch",
-      "Vietnamese New Year": "Tết Nguyên Đán",
-      "Vietnamese New Year's Eve": "Đêm Giao Thừa",
-      "Hung Kings Festival": "Giỗ Tổ Hùng Vương",
-      "Liberation Day/Reunification Day": "Ngày Giải Phóng Miền Nam",
-      "Liberation Day/Reunification Day Holiday":
-        "Ngày Nghỉ Lễ Giải Phóng Miền Nam",
-      "Day off for Liberation Day/Reunification Day":
-        "Ngày Nghỉ Bù Cho Ngày Giải Phóng Miền Nam",
-      "International Labor Day": "Ngày Quốc Tế Lao Động",
-      "Day off for International Labor Day":
-        "Ngày Nghỉ Bù Cho Ngày Quốc Tế Lao Động",
-      "Independence Day": "Ngày Quốc Khánh",
-      "Independence Day observed": "Ngày Nghỉ Quốc Khánh",
-      "Tet Holiday": "Kỳ Nghỉ Tết",
-      "Christmas Eve": "Đêm Giáng Sinh",
       Vesak: "Lễ Phật Đản",
-      "New Year's Eve": "Đêm Giao Thừa",
-      "Working day for Liberation Day Holiday":
-        "Ngày Làm Việc Cho Kỳ Nghỉ Giải Phóng",
+
+      "Christmas Day": "Ngày Lễ Giáng Sinh",
+      "Christmas Eve": "Đêm Vọng Giáng Sinh",
+
+      "Easter Sunday": "Lễ Phục Sinh",
+
       "Day off for International New Year's Day":
         "Ngày Nghỉ Bù Cho Tết Dương Lịch",
+      "International New Year's Day": "Tết Dương Lịch",
+      "International New Year's Eve": "Đêm Giao Thừa Tết Dương Lịch",
+
+      "Vietnamese New Year's Eve": "Đêm Giao Thừa Tết Nguyên Đán",
+      "New Year's Eve": "Đêm Giao Thừa Năm Mới",
+      "Vietnamese New Year": "Tết Nguyên Đán",
+      "Tet Holiday": "Kỳ Nghỉ Tết",
+
       "Day off for Hung Kings Festival": "Ngày Nghỉ Bù Cho Giỗ Tổ Hùng Vương",
+      "Hung Kings Festival": "Giỗ Tổ Hùng Vương",
+
+      "Day off for Liberation Day/Reunification Day":
+        "Ngày Nghỉ Bù Cho Ngày Giải Phóng Miền Nam",
+      "Working day for Liberation Day Holiday":
+        "Ngày Làm Việc Bù Cho Kỳ Nghỉ Giải Phóng",
+      "Working Day for May 2": "Ngày Làm Việc Bù Cho Ngày Nghỉ 2/5",
+      "Liberation Day/Reunification Day Holiday":
+        "Ngày Nghỉ Lễ Giải Phóng Miền Nam",
+      "Liberation Day/Reunification Day": "Ngày Giải Phóng Miền Nam",
+
+      "Day off for International Labor Day":
+        "Ngày Nghỉ Bù Cho Ngày Quốc Tế Lao Động",
+      "International Labor Day": "Ngày Quốc Tế Lao Động",
+
+      "Independence Day observed": "Ngày Nghỉ Quốc Khánh",
+      "Independence Day Holiday": "Ngày Nghỉ Quốc Khánh",
+      "Independence Day": "Ngày Quốc Khánh",
     };
 
     return events.map((event) => {

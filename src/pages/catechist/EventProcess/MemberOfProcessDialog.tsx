@@ -45,39 +45,8 @@ const MemberOfProcessDialog = forwardRef<
   >([]);
   const [roles, setRoles] = useState<any[]>([]);
   const [mainMember, setMainMember] = useState<string>("");
-  const [finishResetVietnamese, setFinishResetVietnamese] =
-    useState<boolean>(false);
 
   const { enableLoading, disableLoading } = useAppContext();
-
-  const resetVietnamese = () => {
-    let count = 1;
-    let theInterval = setInterval(() => {
-      const elements = document.querySelectorAll<HTMLElement>(
-        ".MuiTablePagination-selectLabel"
-      );
-      if (elements) {
-        elements.forEach((element) => {
-          element.innerHTML = "Số hàng mỗi trang";
-        });
-      }
-
-      const elements2 = document.querySelectorAll<HTMLElement>(
-        ".MuiTablePagination-displayedRows"
-      );
-      if (elements2) {
-        elements2.forEach((element2) => {
-          let text = element2.innerHTML;
-          text = text.replace(/\bof\b/g, "trong");
-          element2.innerHTML = text;
-        });
-      }
-      count++;
-      if (count == 5) {
-        clearInterval(theInterval);
-      }
-    }, 300);
-  };
 
   const [userLogin, setUserLogin] = useState<AuthUser>({});
   useEffect(() => {
@@ -190,21 +159,6 @@ const MemberOfProcessDialog = forwardRef<
     }
     return true;
   };
-
-  useEffect(() => {
-    if (
-      (availableAccounts.length > 0 || membersOfProcess.length > 0) &&
-      !finishResetVietnamese
-    ) {
-      resetVietnamese();
-      if (membersOfProcess.length > 0) {
-        setFinishResetVietnamese(true);
-      }
-    }
-    if (membersOfProcess.length <= 0) {
-      setFinishResetVietnamese(false);
-    }
-  }, [availableAccounts, membersOfProcess]);
 
   useImperativeHandle(ref, () => ({
     handleChangeMemberOfProcess,

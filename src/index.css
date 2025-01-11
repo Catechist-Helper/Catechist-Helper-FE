@@ -44,16 +44,15 @@ a {
 .links_dark_hover {
   cursor: pointer;
   padding: 2px 6px;
+  transition: all 0.5s ease;
 }
 
 .links_dark_hover:hover {
-  /* font-weight: bold; */
   color: #fff;
-  /* border-bottom: 3px solid #fff; */
-  /* transition: all 0.5s ease; */
+  transition: all 0.5s ease;
 }
 
-/* stroke */
+/* animation hover custom */
 .nav_header_home a {
   position: relative;
 }
@@ -73,6 +72,7 @@ a {
 
 .nav_header_home a {
   transition: all 2s;
+  transition: all 0.5s ease;
 }
 
 .nav_header_home a:after {
@@ -80,6 +80,7 @@ a {
   content: ".";
   margin: 0;
   opacity: 0;
+  transition: all 0.5s ease;
 }
 .nav_header_home a:hover {
   color: #fff;

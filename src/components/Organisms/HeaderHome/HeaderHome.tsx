@@ -49,7 +49,7 @@ const HeaderHome: React.FC = () => {
               typeof window !== undefined &&
               localStorage.getItem(LOCALSTORAGE_CONSTANTS.CURRENT_PAGE) ==
                 PATH_HOME.root
-                ? "bg-white text-black rounded-[3px]"
+                ? "bg-white text-black rounded-[3px] font-bold"
                 : ""
             }`}
             onClick={() => {
@@ -70,7 +70,7 @@ const HeaderHome: React.FC = () => {
               typeof window !== undefined &&
               localStorage.getItem(LOCALSTORAGE_CONSTANTS.CURRENT_PAGE) ==
                 PATH_HOME.introduce
-                ? "bg-white text-black rounded-[3px]"
+                ? "bg-white text-black rounded-[3px] font-bold"
                 : ""
             }`}
             onClick={() => {
@@ -91,7 +91,7 @@ const HeaderHome: React.FC = () => {
               typeof window !== undefined &&
               localStorage.getItem(LOCALSTORAGE_CONSTANTS.CURRENT_PAGE) ==
                 PATH_HOME.news
-                ? "bg-white text-black rounded-[3px]"
+                ? "bg-white text-black rounded-[3px] font-bold"
                 : ""
             }`}
             onClick={() => {
@@ -114,7 +114,7 @@ const HeaderHome: React.FC = () => {
                   typeof window !== undefined &&
                   localStorage.getItem(LOCALSTORAGE_CONSTANTS.CURRENT_PAGE) ==
                     PATH_AUTH.login
-                    ? "bg-white text-black rounded-[3px]"
+                    ? "bg-white text-black rounded-[3px] font-bold"
                     : ""
                 }`}
                 onClick={() => {
@@ -180,8 +180,7 @@ const HeaderHome: React.FC = () => {
               ) : (
                 <></>
               )}
-              <Link
-                to={"/"}
+              <a
                 onClick={() => {
                   const action = async () => {
                     const confirmLogOut = await sweetAlert.confirm(
@@ -200,7 +199,7 @@ const HeaderHome: React.FC = () => {
                 className={`links_dark_hover`}
               >
                 ĐĂNG XUẤT
-              </Link>
+              </a>
             </>
           ) : (
             <></>
