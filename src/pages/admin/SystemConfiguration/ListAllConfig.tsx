@@ -17,6 +17,8 @@ import {
   Select,
 } from "@mui/material";
 import viVNGridTranslation from "../../../locale/MUITable";
+import { PATH_ADMIN } from "../../../routes/paths";
+import { storeCurrentPath } from "../../../utils/utils";
 
 const ListAllConfig: React.FC = () => {
   const [systemConfig, setSystemConfig] = useState<any[]>([]);
@@ -28,7 +30,7 @@ const ListAllConfig: React.FC = () => {
   const fetchSystemConfigs = async () => {
     try {
       const { data }: AxiosResponse<BasicResponse> =
-        await systemConfigApi.getAllConfig(1, 10);
+        await systemConfigApi.getAllConfig(1, 1000);
       if (
         data.statusCode.toString().trim().startsWith("2") &&
         data.data.items != null
@@ -52,6 +54,7 @@ const ListAllConfig: React.FC = () => {
 
   useEffect(() => {
     fetchSystemConfigs();
+    storeCurrentPath(PATH_ADMIN.system_configurations);
   }, []);
 
   useEffect(() => {

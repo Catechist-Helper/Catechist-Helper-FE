@@ -12,7 +12,7 @@ import {
   CatechistItemResponse,
   CertificateResponse,
 } from "../../../model/Response/Catechist";
-import { formatPhone } from "../../../utils/utils";
+import { formatPhone, storeCurrentPath } from "../../../utils/utils";
 import viVNGridTranslation from "../../../locale/MUITable";
 import sweetAlert from "../../../utils/sweetAlert";
 import { formatDate } from "../../../utils/formatDate";
@@ -373,6 +373,7 @@ export default function CatechistComponent() {
 
   useEffect(() => {
     fetchCatechists();
+    storeCurrentPath(PATH_ADMIN.catechist_management);
   }, [statusIsTeaching]);
 
   const handleChangeIsTeaching = async (catechist: CatechistItemResponse) => {

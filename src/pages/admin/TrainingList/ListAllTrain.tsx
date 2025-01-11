@@ -13,6 +13,8 @@ import {
   trainingListStatusLabel,
 } from "../../../enums/TrainingList";
 import useAppContext from "../../../hooks/useAppContext";
+import { storeCurrentPath } from "../../../utils/utils";
+import { PATH_ADMIN } from "../../../routes/paths";
 
 const ListAllTrain: React.FC = () => {
   const [trains, setTrains] = useState<any[]>([]);
@@ -83,6 +85,7 @@ const ListAllTrain: React.FC = () => {
   useEffect(() => {
     fetchLevels();
     fetchTrains();
+    storeCurrentPath(PATH_ADMIN.training_lists);
   }, []);
 
   const handleCreate = () => navigate("/admin/create-training-lists");

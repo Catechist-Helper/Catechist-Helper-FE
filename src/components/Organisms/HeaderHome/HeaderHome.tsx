@@ -10,6 +10,8 @@ import {
 import { getUserInfo } from "../../../utils/utils";
 import { AuthUser } from "../../../types/authentication";
 import { AccountRoleString } from "../../../enums/Account";
+import { LOCALSTORAGE_CONSTANTS } from "../../../constants/WebsiteConstant";
+import sweetAlert from "../../../utils/sweetAlert";
 
 const HeaderHome: React.FC = () => {
   const { isAuthenticated, logout } = useAuth();
@@ -59,7 +61,19 @@ const HeaderHome: React.FC = () => {
             <>
               <p
                 onClick={() => {
-                  logout();
+                  const action = async () => {
+                    const confirmLogOut = await sweetAlert.confirm(
+                      "Bạn có chắc muốn đăng xuất?",
+                      "",
+                      "Đăng xuất",
+                      "Hủy bỏ",
+                      "question"
+                    );
+                    if (confirmLogOut) {
+                      logout();
+                    }
+                  };
+                  action();
                 }}
                 className="links_dark_hover"
               >
@@ -70,7 +84,18 @@ const HeaderHome: React.FC = () => {
               userLogin.role.trim().toLowerCase() ===
                 AccountRoleString.ADMIN.trim().toLowerCase() ? (
                 <>
-                  <Link to={PATH_ADMIN.root} className="links_dark_hover">
+                  <Link
+                    to={PATH_ADMIN.root}
+                    className="links_dark_hover"
+                    onClick={() => {
+                      if (typeof window !== "undefined") {
+                        localStorage.setItem(
+                          LOCALSTORAGE_CONSTANTS.CURRENT_PAGE,
+                          PATH_ADMIN.admin_calendar
+                        );
+                      }
+                    }}
+                  >
                     QUẢN LÝ
                   </Link>
                 </>
@@ -82,7 +107,18 @@ const HeaderHome: React.FC = () => {
               userLogin.role.trim().toLowerCase() ===
                 AccountRoleString.CATECHIST.trim().toLowerCase() ? (
                 <>
-                  <Link to={PATH_CATECHIST.root} className="links_dark_hover">
+                  <Link
+                    to={PATH_CATECHIST.root}
+                    className="links_dark_hover"
+                    onClick={() => {
+                      if (typeof window !== "undefined") {
+                        localStorage.setItem(
+                          LOCALSTORAGE_CONSTANTS.CURRENT_PAGE,
+                          PATH_CATECHIST.catechist_calendar
+                        );
+                      }
+                    }}
+                  >
                     THÔNG TIN
                   </Link>
                 </>

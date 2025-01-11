@@ -40,6 +40,8 @@ import { RoleNameEnum } from "../../../enums/RoleEnum";
 import CkEditor from "../../../components/ckeditor5/CkEditor";
 import { RecruitersByMeetingTimeItemResponse } from "../../../model/Response/Account";
 import catechistApi from "../../../api/Catechist";
+import { storeCurrentPath } from "../../../utils/utils";
+import { PATH_ADMIN } from "../../../routes/paths";
 
 // import { RegistrationProcessTitle } from "../../../enums/RegistrationProcess";
 
@@ -350,6 +352,7 @@ export default function ApprovedRegistrationsTable() {
   // Gọi API khi component được render
   useEffect(() => {
     fetchApprovedRegistrations();
+    storeCurrentPath(PATH_ADMIN.approved_registration);
   }, [selectedDate, currentFilter]);
 
   useEffect(() => {

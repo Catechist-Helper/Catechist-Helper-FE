@@ -8,6 +8,8 @@ import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { Button, Paper } from "@mui/material";
 import viVNGridTranslation from "../../../locale/MUITable";
 import { useNavigate } from "react-router-dom";
+import { PATH_ADMIN } from "../../../routes/paths";
+import { storeCurrentPath } from "../../../utils/utils";
 
 const ListAllPostCategory: React.FC = () => {
   const [postCategories, setPostCategories] = useState<any[]>([]);
@@ -35,6 +37,7 @@ const ListAllPostCategory: React.FC = () => {
 
   useEffect(() => {
     fetchPostCategories();
+    storeCurrentPath(PATH_ADMIN.post_category);
   }, []);
 
   const handleCreate = () => {

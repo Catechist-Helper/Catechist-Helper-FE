@@ -13,12 +13,13 @@ import registrationApi from "../../../api/Registration";
 import { RegistrationItemResponse } from "../../../model/Response/Registration";
 import { RegistrationStatus } from "../../../enums/Registration";
 import { formatDate } from "../../../utils/formatDate";
-import { getUserInfo } from "../../../utils/utils";
+import { getUserInfo, storeCurrentPath } from "../../../utils/utils";
 import sweetAlert from "../../../utils/sweetAlert";
 import { Button, MenuItem, Modal, Select } from "@mui/material";
 import CkEditorComponent from "../../../components/ckeditor5/CkEditor";
 import useAppContext from "../../../hooks/useAppContext";
 import interviewApi from "../../../api/Interview";
+import { PATH_CATECHIST } from "../../../routes/paths";
 
 // Hàm chính để hiển thị danh sách đơn
 export default function CatechistRegistrationsTable() {
@@ -56,6 +57,7 @@ export default function CatechistRegistrationsTable() {
       }
     };
     fetchUser();
+    storeCurrentPath(PATH_CATECHIST.interview);
   }, []);
 
   // Fetch các đơn đã duyệt dựa trên trạng thái và lọc theo ngày
@@ -484,7 +486,7 @@ export default function CatechistRegistrationsTable() {
             onChange={(e) => setSelectedDate(e.target.value)}
           />
         </div>
-        <div className="flex">
+        <div className="flex px-2">
           {selectedRegistrations.length == 1 && currentFilter == "waiting" ? (
             <>
               <button
@@ -512,14 +514,15 @@ export default function CatechistRegistrationsTable() {
             <></>
           )}
 
-          <button
-            className="btn btn-primary ml-1 mr-2"
+          <Button
+            variant="contained"
+            color="primary"
             onClick={() => {
               handleRefresh();
             }}
           >
             Tải lại
-          </button>
+          </Button>
         </div>
       </div>
 

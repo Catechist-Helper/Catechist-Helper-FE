@@ -41,6 +41,7 @@ const OrganizersDialog: React.FC<OrganizersDialogProps> = ({
   const [organizers, setOrganizers] = useState<
     (UpdateMemberRequest & {
       fullName: string;
+      email: string;
       avatar: string;
       phone: string;
     })[]
@@ -57,6 +58,35 @@ const OrganizersDialog: React.FC<OrganizersDialogProps> = ({
       pageSize: 8,
     }
   );
+
+  const resetVietnamese = () => {
+    let count = 1;
+    let theInterval = setInterval(() => {
+      const elements = document.querySelectorAll<HTMLElement>(
+        ".MuiTablePagination-selectLabel"
+      );
+      if (elements) {
+        elements.forEach((element) => {
+          element.innerHTML = "Số hàng mỗi trang";
+        });
+      }
+
+      const elements2 = document.querySelectorAll<HTMLElement>(
+        ".MuiTablePagination-displayedRows"
+      );
+      if (elements2) {
+        elements2.forEach((element2) => {
+          let text = element2.innerHTML;
+          text = text.replace(/\bof\b/g, "trong");
+          element2.innerHTML = text;
+        });
+      }
+      count++;
+      if (count == 5) {
+        clearInterval(theInterval);
+      }
+    }, 200);
+  };
 
   useEffect(() => {
     const fetchAccountsAndRoles = async () => {
@@ -87,6 +117,7 @@ const OrganizersDialog: React.FC<OrganizersDialogProps> = ({
             fullName: item.account.fullName,
             avatar: item.account.avatar,
             phone: item.account.phone,
+            email: item.account.email,
           })
         );
 
@@ -97,6 +128,7 @@ const OrganizersDialog: React.FC<OrganizersDialogProps> = ({
 
         setAvailableAccounts(available);
         setOrganizers(currentOrganizers);
+        resetVietnamese();
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -255,7 +287,7 @@ const OrganizersDialog: React.FC<OrganizersDialogProps> = ({
   const columns: GridColDef[] = [
     {
       field: "avatar",
-      headerName: "Avatar",
+      headerName: "Ảnh",
       width: 100,
       renderCell: (params) => (
         <img
@@ -268,6 +300,8 @@ const OrganizersDialog: React.FC<OrganizersDialogProps> = ({
       ),
     },
     { field: "fullName", headerName: "Họ và Tên", width: 200 },
+    { field: "email", headerName: "Email", width: 220 },
+
     { field: "phone", headerName: "Số Điện Thoại", width: 150 },
     {
       field: "roleEventId",
@@ -322,7 +356,7 @@ const OrganizersDialog: React.FC<OrganizersDialogProps> = ({
   if (!viewOrganizersDialogMode || (viewOrganizersDialogMode && updateMode)) {
     columns.push({
       field: "action",
-      headerName: "Xóa",
+      headerName: "Hành động",
       width: 150,
       renderCell: (params) => (
         <Button
@@ -339,9 +373,17 @@ const OrganizersDialog: React.FC<OrganizersDialogProps> = ({
     <Dialog open={open} onClose={onClose} maxWidth="xl" fullWidth>
       <DialogTitle>
         {viewOrganizersDialogMode ? (
-          <>{updateMode ? "Cập Nhật Ban Tổ Chức" : "Xem Ban Tổ Chức"}</>
+          <>
+            {updateMode ? (
+              <span className="text-primary font-bold">
+                Cập Nhật Ban Tổ Chức
+              </span>
+            ) : (
+              <span className="text-secondary font-bold">Xem Ban Tổ Chức</span>
+            )}
+          </>
         ) : (
-          "Thêm Ban Tổ Chức"
+          <span className="text-success font-bold">Thêm Ban Tổ Chức</span>
         )}
       </DialogTitle>
       <DialogContent>
@@ -369,6 +411,7 @@ const OrganizersDialog: React.FC<OrganizersDialogProps> = ({
                   ),
                 },
                 { field: "fullName", headerName: "Họ và Tên", width: 200 },
+                { field: "email", headerName: "Email", width: 220 },
                 { field: "phone", headerName: "Số Điện Thoại", width: 150 },
                 {
                   field: "action",
@@ -406,9 +449,16 @@ const OrganizersDialog: React.FC<OrganizersDialogProps> = ({
               paginationModel={paginationModel}
               onPaginationModelChange={setPaginationModel}
               pageSizeOptions={[8, 10, 25, 50, 100, 250]}
-              autoHeight
               disableRowSelectionOnClick
               localeText={viVNGridTranslation}
+              paginationMode="client"
+              sx={{
+                maxHeight: 300,
+                overflowX: "auto",
+                "& .MuiDataGrid-root": {
+                  overflowX: "auto",
+                },
+              }}
             />
           </>
         ) : (
@@ -424,10 +474,15 @@ const OrganizersDialog: React.FC<OrganizersDialogProps> = ({
               paginationModel={paginationModel2}
               onPaginationModelChange={setPaginationModel2}
               pageSizeOptions={[8, 10, 25, 50, 100, 250]}
-              autoHeight
-              checkboxSelection={viewOrganizersDialogMode ? false : true}
               disableRowSelectionOnClick
               localeText={viVNGridTranslation}
+              sx={{
+                maxHeight: 300,
+                overflowX: "auto",
+                "& .MuiDataGrid-root": {
+                  overflowX: "auto",
+                },
+              }}
             />
           </>
         ) : (
@@ -462,6 +517,7 @@ const OrganizersDialog: React.FC<OrganizersDialogProps> = ({
                       variant="contained"
                       onClick={() => {
                         setUpdateMode(true);
+                        resetVietnamese();
                       }}
                       color="primary"
                     >

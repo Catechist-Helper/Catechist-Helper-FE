@@ -14,7 +14,7 @@ import {
 import { formatDate } from "../../../utils/formatDate";
 import viVNGridTranslation from "../../../locale/MUITable";
 import { Button } from "@mui/material";
-import { getUserInfo } from "../../../utils/utils";
+import { getUserInfo, storeCurrentPath } from "../../../utils/utils";
 import {
   AbsenceRequestStatus,
   AbsenceRequestStatusString,
@@ -23,6 +23,7 @@ import ApprovalDialog from "./ApprovalDialog";
 import ViewDetailAbsenceDialog from "./ViewDetailAbsenceDialog";
 import catechistApi from "../../../api/Catechist";
 import ImageDialog from "../../../components/Molecules/ImageDialog";
+import { PATH_ADMIN } from "../../../routes/paths";
 
 const AbsencePage = () => {
   const [absences, setAbsences] = useState<GetAbsenceItemResponse[]>([]);
@@ -77,6 +78,7 @@ const AbsencePage = () => {
       }
     };
     fetchUser();
+    storeCurrentPath(PATH_ADMIN.admin_management_absence);
   }, []);
 
   // Cấu hình các cột trong DataGrid

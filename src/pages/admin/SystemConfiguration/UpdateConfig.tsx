@@ -86,7 +86,7 @@ const UpdateConfig: React.FC = () => {
   const fetchAllSystemConfigs = async () => {
     try {
       const { data }: AxiosResponse<BasicResponse> =
-        await systemConfigApi.getAllConfig(1, 10);
+        await systemConfigApi.getAllConfig(1, 1000);
       if (
         data.statusCode.toString().trim().startsWith("2") &&
         data.data.items != null

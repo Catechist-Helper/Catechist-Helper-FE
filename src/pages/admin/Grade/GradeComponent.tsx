@@ -24,6 +24,7 @@ import viVNGridTranslation from "../../../locale/MUITable";
 import { PATH_ADMIN } from "../../../routes/paths";
 import { GradeResponse } from "../../../model/Response/Grade";
 import useAppContext from "../../../hooks/useAppContext";
+import { storeCurrentPath } from "../../../utils/utils";
 
 export default function GradeComponent() {
   const navigate = useNavigate();
@@ -47,6 +48,7 @@ export default function GradeComponent() {
 
   useEffect(() => {
     fetchMajors();
+    storeCurrentPath(PATH_ADMIN.grade_management);
 
     // Nếu có majorId và pastoralYearId từ location.state, set chúng làm giá trị mặc định
     if (location.state) {

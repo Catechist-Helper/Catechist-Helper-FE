@@ -9,6 +9,7 @@ import viVNGridTranslation from "../../../locale/MUITable";
 import { PATH_ADMIN } from "../../../routes/paths";
 import ImageDialog from "../../../components/Molecules/ImageDialog";
 import { CertificateResponse } from "../../../model/Response/Catechist";
+import { storeCurrentPath } from "../../../utils/utils";
 
 const ListAllLevel: React.FC = () => {
   const [levels, setLevels] = useState([]);
@@ -55,6 +56,7 @@ const ListAllLevel: React.FC = () => {
 
   useEffect(() => {
     fetchLevels();
+    storeCurrentPath(PATH_ADMIN.levels);
   }, []);
 
   const handleCreate = () => {

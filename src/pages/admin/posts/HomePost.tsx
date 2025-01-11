@@ -10,6 +10,8 @@ import { useNavigate, Link } from "react-router-dom";
 import viVNGridTranslation from "../../../locale/MUITable";
 import { PostStatus } from "../../../enums/Post";
 import AdminTemplate from "../../../components/Templates/AdminTemplate/AdminTemplate";
+import { storeCurrentPath } from "../../../utils/utils";
+import { PATH_ADMIN } from "../../../routes/paths";
 
 const HomePost: React.FC = () => {
   const [postCategories, setPostCategories] = useState<any[]>([]);
@@ -58,6 +60,7 @@ const HomePost: React.FC = () => {
   useEffect(() => {
     fetchPosts();
     fetchPostCategories();
+    storeCurrentPath(PATH_ADMIN.post);
   }, []);
 
   const handleCreatePost = () => {

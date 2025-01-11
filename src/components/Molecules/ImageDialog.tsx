@@ -31,7 +31,6 @@ const ImageDialog: React.FC<ImageDialogProps> = ({
   onClose,
   imageTitle,
 }) => {
-  console.log("images", images);
   return (
     <div>
       <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">

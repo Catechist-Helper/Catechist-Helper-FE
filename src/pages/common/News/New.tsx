@@ -35,7 +35,7 @@ const New: React.FC = () => {
   useEffect(() => {
     const fetchPublicPosts = async () => {
       try {
-        const response = await postsApi.getAll(1, 10);
+        const response = await postsApi.getAll(1, 1000);
         const allPosts: Post[] = response.data.data.items;
 
         const publicPosts = allPosts.filter(

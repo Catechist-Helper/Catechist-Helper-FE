@@ -3,6 +3,8 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { PATH_CATECHIST } from "../../../routes/paths";
 import useAuth from "../../../hooks/useAuth";
+import { LOCALSTORAGE_CONSTANTS } from "../../../constants/WebsiteConstant";
+import sweetAlert from "../../../utils/sweetAlert";
 
 const SideBarCatechist = () => {
   const [isHovered, setIsHovered] = useState(false);
@@ -21,15 +23,15 @@ const SideBarCatechist = () => {
       }}
     >
       <div
-        className="sidebar h-full w-[3.8rem] overflow-hidden border-r hover:w-56 hover:bg-white hover:shadow-lg"
-        onMouseEnter={() => setIsHovered(true)}
+        className={`sidebar h-full w-[3.8rem] overflow-hidden border-r ${isHovered ? "hover:w-56 hover:shadow-xl" : ""}`}
+        onClick={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         style={{ height: "100%" }}
       >
         <div
           className="flex h-screen flex-col justify-between pt-2 pb-6"
           style={{
-            overflowY: `${isHovered ? "scroll" : "hidden"}`,
+            overflowY: `${isHovered ? "auto" : "hidden"}`,
             overflowX: "hidden",
           }}
         >
@@ -42,7 +44,10 @@ const SideBarCatechist = () => {
                 style={{ width: "12rem", marginLeft: "5px" }}
               />
             </div>
-            <ul className="mt-6 space-y-2 tracking-wide">
+            <ul
+              className="mt-6 space-y-2 tracking-wide"
+              style={{ display: isHovered ? "block" : "none" }}
+            >
               <li className="min-w-max">
                 <div>
                   <Link
@@ -51,7 +56,26 @@ const SideBarCatechist = () => {
                       transition: "all ease 0.2s",
                     }}
                     to={PATH_CATECHIST.catechist_calendar}
-                    className="relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-primary_color hover:to-amber-600 px-4 py-3 hover:text-white"
+                    onClick={() => {
+                      if (typeof window !== "undefined") {
+                        localStorage.setItem(
+                          LOCALSTORAGE_CONSTANTS.CURRENT_PAGE,
+                          PATH_CATECHIST.catechist_calendar
+                        );
+                      }
+                    }}
+                    className={`relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-blue-950 hover:to-blue-400 px-4 py-3 hover:text-white
+                    ${
+                      typeof window !== "undefined" &&
+                      localStorage.getItem(
+                        LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
+                      ) &&
+                      localStorage.getItem(
+                        LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
+                      ) == PATH_CATECHIST.catechist_calendar
+                        ? "bg-gradient-to-r from-primary_color to-amber-600 hover:!from-primary_color hover:!to-amber-600 px-4 py-3 text-white"
+                        : ""
+                    }`}
                   >
                     <svg
                       style={{ display: "none" }}
@@ -83,7 +107,26 @@ const SideBarCatechist = () => {
                       transition: "all ease 0.2s",
                     }}
                     to={PATH_CATECHIST.class}
-                    className="relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-primary_color hover:to-amber-600 px-4 py-3 hover:text-white"
+                    onClick={() => {
+                      if (typeof window !== "undefined") {
+                        localStorage.setItem(
+                          LOCALSTORAGE_CONSTANTS.CURRENT_PAGE,
+                          PATH_CATECHIST.class
+                        );
+                      }
+                    }}
+                    className={`relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-blue-950 hover:to-blue-400 px-4 py-3 hover:text-white
+                    ${
+                      typeof window !== "undefined" &&
+                      localStorage.getItem(
+                        LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
+                      ) &&
+                      localStorage.getItem(
+                        LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
+                      ) == PATH_CATECHIST.class
+                        ? "bg-gradient-to-r from-primary_color to-amber-600 hover:!from-primary_color hover:!to-amber-600 px-4 py-3 text-white"
+                        : ""
+                    }`}
                   >
                     <svg
                       style={{ display: "none" }}
@@ -115,7 +158,26 @@ const SideBarCatechist = () => {
                       transition: "all ease 0.2s",
                     }}
                     to={PATH_CATECHIST.interview}
-                    className="relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-primary_color hover:to-amber-600 px-4 py-3 hover:text-white"
+                    onClick={() => {
+                      if (typeof window !== "undefined") {
+                        localStorage.setItem(
+                          LOCALSTORAGE_CONSTANTS.CURRENT_PAGE,
+                          PATH_CATECHIST.interview
+                        );
+                      }
+                    }}
+                    className={`relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-blue-950 hover:to-blue-400 px-4 py-3 hover:text-white
+                    ${
+                      typeof window !== "undefined" &&
+                      localStorage.getItem(
+                        LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
+                      ) &&
+                      localStorage.getItem(
+                        LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
+                      ) == PATH_CATECHIST.interview
+                        ? "bg-gradient-to-r from-primary_color to-amber-600 hover:!from-primary_color hover:!to-amber-600 px-4 py-3 text-white"
+                        : ""
+                    }`}
                   >
                     <svg
                       style={{ display: "none" }}
@@ -145,7 +207,26 @@ const SideBarCatechist = () => {
                       transition: "all ease 0.2s",
                     }}
                     to={PATH_CATECHIST.catechist_training}
-                    className="relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-primary_color hover:to-amber-600 px-4 py-3 hover:text-white"
+                    onClick={() => {
+                      if (typeof window !== "undefined") {
+                        localStorage.setItem(
+                          LOCALSTORAGE_CONSTANTS.CURRENT_PAGE,
+                          PATH_CATECHIST.catechist_training
+                        );
+                      }
+                    }}
+                    className={`relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-blue-950 hover:to-blue-400 px-4 py-3 hover:text-white
+                    ${
+                      typeof window !== "undefined" &&
+                      localStorage.getItem(
+                        LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
+                      ) &&
+                      localStorage.getItem(
+                        LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
+                      ) == PATH_CATECHIST.catechist_training
+                        ? "bg-gradient-to-r from-primary_color to-amber-600 hover:!from-primary_color hover:!to-amber-600 px-4 py-3 text-white"
+                        : ""
+                    }`}
                   >
                     <svg
                       style={{ display: "none" }}
@@ -175,7 +256,26 @@ const SideBarCatechist = () => {
                       transition: "all ease 0.2s",
                     }}
                     to={PATH_CATECHIST.event}
-                    className="relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-primary_color hover:to-amber-600 px-4 py-3 hover:text-white"
+                    onClick={() => {
+                      if (typeof window !== "undefined") {
+                        localStorage.setItem(
+                          LOCALSTORAGE_CONSTANTS.CURRENT_PAGE,
+                          PATH_CATECHIST.event
+                        );
+                      }
+                    }}
+                    className={`relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-blue-950 hover:to-blue-400 px-4 py-3 hover:text-white
+                    ${
+                      typeof window !== "undefined" &&
+                      localStorage.getItem(
+                        LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
+                      ) &&
+                      localStorage.getItem(
+                        LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
+                      ) == PATH_CATECHIST.event
+                        ? "bg-gradient-to-r from-primary_color to-amber-600 hover:!from-primary_color hover:!to-amber-600 px-4 py-3 text-white"
+                        : ""
+                    }`}
                   >
                     <svg
                       style={{ display: "none" }}
@@ -205,7 +305,7 @@ const SideBarCatechist = () => {
                     transition: "all ease 0.2s",
                   }}
                   to={"/"}
-                  className="relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-primary_color hover:to-amber-600 px-4 py-3 hover:text-white"
+                  className="relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-blue-950 hover:to-blue-400 px-4 py-3 hover:text-white"
                 >
                   <svg
                     style={{ display: "none" }}
@@ -231,16 +331,27 @@ const SideBarCatechist = () => {
               <li className="min-w-max cursor-pointer">
                 <div
                   onClick={() => {
-                    logout();
+                    const action = async () => {
+                      const confirmLogOut = await sweetAlert.confirm(
+                        "Bạn có chắc muốn đăng xuất?",
+                        "",
+                        "Đăng xuất",
+                        "Hủy bỏ",
+                        "question"
+                      );
+                      if (confirmLogOut) {
+                        logout();
+                      }
+                    };
+                    action();
                   }}
                 >
-                  <Link
+                  <li
                     style={{
                       opacity: `${isHovered ? "1" : "0"}`,
                       transition: "all ease 0.2s",
                     }}
-                    to={"/"}
-                    className="relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-primary_color hover:to-amber-600 px-4 py-3 hover:text-white"
+                    className="relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-blue-950 hover:to-blue-400 px-4 py-3 hover:text-white"
                   >
                     <svg
                       style={{ display: "none" }}
@@ -261,7 +372,7 @@ const SideBarCatechist = () => {
                       />
                     </svg>
                     <span className="group-hover:text-gray-700">Đăng xuất</span>
-                  </Link>
+                  </li>
                 </div>
               </li>
             </ul>

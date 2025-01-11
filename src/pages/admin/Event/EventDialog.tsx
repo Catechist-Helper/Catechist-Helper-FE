@@ -8,11 +8,12 @@ import {
   TextField,
   FormControl,
   InputLabel,
-  Select,
   MenuItem,
+  Select as MUISelect,
   // FormControlLabel,
   // Checkbox,
 } from "@mui/material";
+import Select from "react-select";
 import { Formik, Form, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import sweetAlert from "../../../utils/sweetAlert";
@@ -140,7 +141,11 @@ const EventDialog: React.FC<EventDialogProps> = ({
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle>
-        {event ? "Chỉnh sửa sự kiện" : "Thêm mới sự kiện"}
+        {event ? (
+          <span className="text-primary font-bold">Chỉnh sửa sự kiện</span>
+        ) : (
+          <span className="text-success font-bold">Thêm mới sự kiện</span>
+        )}
       </DialogTitle>
       <DialogContent>
         <Formik
@@ -164,29 +169,60 @@ const EventDialog: React.FC<EventDialogProps> = ({
               {/* Danh mục sự kiện */}
               <FormControl
                 fullWidth
-                margin="normal"
+                margin="none"
                 error={touched.eventCategoryId && !!errors.eventCategoryId}
+                sx={{ marginBottom: "5px" }}
               >
-                <InputLabel>
+                <label className="ml-3 text-gray-500 text-[0.8rem]">
                   Danh mục sự kiện <span style={{ color: "red" }}>*</span>
-                </InputLabel>
+                </label>
                 <Select
                   name="eventCategoryId"
-                  value={values.eventCategoryId}
-                  onChange={handleChange}
-                  label={
-                    <span>
-                      Danh mục sự kiện <span style={{ color: "red" }}>*</span>
-                    </span>
+                  value={eventCategories
+                    .map((category) => ({
+                      value: category.id,
+                      label: category.name,
+                    }))
+                    .find((item) => item.value === values.eventCategoryId)}
+                  onChange={(selectedOption) => {
+                    setFieldValue(
+                      "eventCategoryId",
+                      selectedOption?.value || ""
+                    );
+                  }}
+                  options={eventCategories.map((category) => ({
+                    value: category.id,
+                    label: category.name,
+                  }))}
+                  isDisabled={
+                    !!event || values.eventStatus != EventStatus.Not_Started
                   }
-                  disabled={event ? true : false}
-                >
-                  {eventCategories.map((category) => (
-                    <MenuItem key={category.id} value={category.id}>
-                      {category.name}
-                    </MenuItem>
-                  ))}
-                </Select>
+                  styles={{
+                    control: (provided) => ({
+                      ...provided,
+                      padding: "4px",
+                      boxShadow: "none",
+                    }),
+                    valueContainer: (provided) => ({
+                      ...provided,
+                      padding: "0 10px",
+                    }),
+                    input: (provided) => ({
+                      ...provided,
+                      margin: "0",
+                      padding: "8px 0",
+                    }),
+                    menu: (provided) => ({
+                      ...provided,
+                      zIndex: 10,
+                    }),
+                    menuPortal: (provided) => ({
+                      ...provided,
+                      zIndex: 10,
+                    }),
+                  }}
+                  placeholder="Chọn danh mục sự kiện"
+                />
                 <ErrorMessage name="eventCategoryId">
                   {(msg) => (
                     <p className="ml-3 text-[0.8rem]" style={{ color: "red" }}>
@@ -226,7 +262,7 @@ const EventDialog: React.FC<EventDialogProps> = ({
                 onChange={handleChange}
                 margin="normal"
                 multiline
-                rows={3}
+                rows={1}
                 disabled={values.eventStatus != EventStatus.Not_Started}
                 error={touched.description && !!errors.description}
                 helperText={touched.description && errors.description}
@@ -268,10 +304,7 @@ const EventDialog: React.FC<EventDialogProps> = ({
                 fullWidth
                 rows={3}
                 margin="normal"
-                disabled={
-                  values.eventStatus != EventStatus.Not_Started &&
-                  values.eventStatus != EventStatus.In_Progress
-                }
+                disabled={values.eventStatus != EventStatus.Not_Started}
               />
 
               {/* Địa chỉ */}
@@ -345,7 +378,7 @@ const EventDialog: React.FC<EventDialogProps> = ({
 
                     {event.eventStatus == EventStatus.Not_Started ? (
                       <>
-                        <Select
+                        <MUISelect
                           name="eventStatus"
                           value={values.eventStatus}
                           onChange={handleChange}
@@ -385,7 +418,7 @@ const EventDialog: React.FC<EventDialogProps> = ({
                           >
                             {EventStatusString.Cancelled}
                           </MenuItem>
-                        </Select>
+                        </MUISelect>
                       </>
                     ) : (
                       <></>
@@ -393,7 +426,7 @@ const EventDialog: React.FC<EventDialogProps> = ({
 
                     {event.eventStatus == EventStatus.In_Progress ? (
                       <>
-                        <Select
+                        <MUISelect
                           name="eventStatus"
                           value={values.eventStatus}
                           onChange={handleChange}
@@ -433,7 +466,7 @@ const EventDialog: React.FC<EventDialogProps> = ({
                           >
                             {EventStatusString.Cancelled}
                           </MenuItem>
-                        </Select>
+                        </MUISelect>
                       </>
                     ) : (
                       <></>

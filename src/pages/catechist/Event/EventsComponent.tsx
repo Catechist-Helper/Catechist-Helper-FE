@@ -21,7 +21,7 @@ import {
 import { RoleEventName } from "../../../enums/RoleEventEnum"; // Import enum
 import sweetAlert from "../../../utils/sweetAlert";
 import viVNGridTranslation from "../../../locale/MUITable";
-import { getUserInfo } from "../../../utils/utils";
+import { getUserInfo, storeCurrentPath } from "../../../utils/utils";
 import { formatDate } from "../../../utils/formatDate";
 import { useNavigate } from "react-router-dom";
 import { PATH_CATECHIST } from "../../../routes/paths";
@@ -306,9 +306,15 @@ export default function EventsComponent() {
     //   },
     // },
     {
+      field: "eventCategory",
+      headerName: "Danh mục",
+      width: 105,
+      renderCell: (params) => params.row.eventCategory?.name || "N/A",
+    },
+    {
       field: "totalCost",
-      headerName: "Tổng chi phí hiện tại",
-      width: 150,
+      headerName: "Tổng chi phí",
+      width: 105,
       align: "right",
       headerAlign: "right",
       renderCell: (params) => (
@@ -318,15 +324,9 @@ export default function EventsComponent() {
       ),
     },
     {
-      field: "eventCategory",
-      headerName: "Danh mục",
-      width: 120,
-      renderCell: (params) => params.row.eventCategory?.name || "N/A",
-    },
-    {
       field: "eventStatus",
       headerName: "Trạng thái",
-      width: 130,
+      width: 125,
       renderCell: (params) => {
         switch (params.value) {
           case EventStatus.Not_Started:
@@ -369,7 +369,7 @@ export default function EventsComponent() {
     {
       field: "actions",
       headerName: "Hành động",
-      width: 200,
+      width: 190,
       renderCell: (params) => {
         const userRole = params.row.userRole;
         return (
@@ -473,6 +473,7 @@ export default function EventsComponent() {
 
   useEffect(() => {
     fetchUser(); // Fetch user info when the component is mounted
+    storeCurrentPath(PATH_CATECHIST.event);
   }, []);
 
   useEffect(() => {
