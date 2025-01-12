@@ -263,7 +263,9 @@ const EventProcessManagement: React.FC = () => {
           >
             Xem
           </Button>
-          {params.row.status == EventProcessStatus.Wait_Approval ? (
+          {params.row.status == EventProcessStatus.Wait_Approval &&
+          selectedEvent &&
+          selectedEvent.eventStatus == EventStatus.In_Progress ? (
             <>
               <Button
                 variant="outlined"
@@ -629,7 +631,10 @@ const EventProcessManagement: React.FC = () => {
           </div>
         </div>
         <div className="">
-          {selectedIds.length >= 1 && currentStatusFilter == "Chờ phê duyệt" ? (
+          {selectedIds.length >= 1 &&
+          currentStatusFilter == "Chờ phê duyệt" &&
+          selectedEvent &&
+          selectedEvent.eventStatus == EventStatus.In_Progress ? (
             <>
               <Button
                 variant="contained"

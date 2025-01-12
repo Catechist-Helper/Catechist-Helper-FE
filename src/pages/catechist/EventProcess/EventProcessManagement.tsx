@@ -328,7 +328,9 @@ const EventProcessManagement: React.FC = () => {
           {truongBTCRole &&
           params.row.status != EventProcessStatus.Completed &&
           params.row.status != EventProcessStatus.Cancelled &&
-          params.row.status != EventProcessStatus.Not_Approval ? (
+          params.row.status != EventProcessStatus.Not_Approval &&
+          selectedEvent &&
+          selectedEvent.eventStatus == EventStatus.In_Progress ? (
             <>
               <Button
                 variant="outlined"
