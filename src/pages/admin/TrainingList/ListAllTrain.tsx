@@ -392,7 +392,7 @@ const ListAllTrain: React.FC = () => {
       }}
     >
       <h1 className="text-center text-[2.2rem] bg_title text-text_primary_light py-2 font-bold">
-        DANH SÁCH ĐÀO TẠO
+        Danh sách đào tạo
       </h1>
       <div className="flex justify-end mb-3 mt-3 px-3 gap-x-2">
         {selectedIds.length === 1 ? (

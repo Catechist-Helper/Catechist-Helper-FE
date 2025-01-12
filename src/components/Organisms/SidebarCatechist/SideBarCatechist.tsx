@@ -34,7 +34,7 @@ const SideBarCatechist = () => {
       }}
     >
       <div
-        className={`sidebar h-full w-[3.8rem] overflow-hidden border-r ${isHovered ? "hover:w-56 hover:shadow-xl" : "cursor-pointer"}`}
+        className={`sidebar_management sidebar h-full w-[3.8rem] overflow-hidden border-r ${isHovered ? "hover:w-56 hover:shadow-xl" : "cursor-pointer"}`}
         onClick={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         style={{ height: "100%" }}

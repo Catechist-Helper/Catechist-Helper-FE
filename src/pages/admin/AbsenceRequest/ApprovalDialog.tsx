@@ -148,7 +148,7 @@ const ApprovalDialog = ({
           src={
             params.row.imageUrl
               ? params.row.imageUrl
-              : "https://via.placeholder.com/150"
+              : "https://firebasestorage.googleapis.com/v0/b/catechisthelper-1f8af.appspot.com/o/defaultAvatar%2FDefaultAvatar.png?alt=media&token=e117852a-f40f-47d8-9801-b802e438de96"
           }
           alt="Catechist"
           width="50"

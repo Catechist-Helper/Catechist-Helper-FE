@@ -38,7 +38,7 @@ const SideBarComponent = () => {
       }}
     >
       <div
-        className={`sidebar h-full w-[3.8rem] overflow-hidden border-r ${isHovered ? "hover:w-56 hover:shadow-xl" : "cursor-pointer"}`}
+        className={`sidebar_management sidebar h-full w-[3.8rem] overflow-hidden border-r ${isHovered ? "hover:w-56 hover:shadow-xl" : "cursor-pointer"}`}
         onClick={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         style={{ height: "100%" }}
@@ -220,7 +220,10 @@ const SideBarComponent = () => {
                       ) &&
                       (localStorage.getItem(
                         LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
-                      ) == PATH_ADMIN.admin_major_management ||
+                      ) == PATH_ADMIN.levels ||
+                        localStorage.getItem(
+                          LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
+                        ) == PATH_ADMIN.admin_major_management ||
                         localStorage.getItem(
                           LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
                         ) == PATH_ADMIN.admin_grade_management ||
@@ -229,7 +232,10 @@ const SideBarComponent = () => {
                         ) == PATH_ADMIN.admin_class_management ||
                         localStorage.getItem(
                           LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
-                        ) == PATH_ADMIN.admin_management_absence)
+                        ) == PATH_ADMIN.admin_management_absence ||
+                        localStorage.getItem(
+                          LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
+                        ) == PATH_ADMIN.pastoral_years)
                         ? "bg-gradient-to-r from-primary_color to-amber-600 hover:!from-primary_color hover:!to-amber-600 px-4 py-3 text-white"
                         : ""
                     }
@@ -240,6 +246,38 @@ const SideBarComponent = () => {
                 </div>
                 {openGroup === "giaoly" && (
                   <ul className="pl-4 space-y-2 ml-2">
+                    <li className="min-w-max">
+                      <Link
+                        style={{
+                          opacity: `${isHovered ? "1" : "0"}`,
+                          transition: "all ease 0.2s",
+                        }}
+                        to={PATH_ADMIN.levels}
+                        onClick={() => {
+                          if (typeof window !== "undefined") {
+                            localStorage.setItem(
+                              LOCALSTORAGE_CONSTANTS.CURRENT_PAGE,
+                              PATH_ADMIN.levels
+                            );
+                          }
+                        }}
+                        className={`sidebar-link relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-blue-950 hover:to-blue-400 px-4 py-3 hover:text-white
+                         ${
+                           typeof window !== "undefined" &&
+                           localStorage.getItem(
+                             LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
+                           ) &&
+                           localStorage.getItem(
+                             LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
+                           ) == PATH_ADMIN.levels
+                             ? "bg-gradient-to-r from-primary_color to-amber-600 hover:!from-primary_color hover:!to-amber-600 px-4 py-3 text-white"
+                             : ""
+                         }
+                         `}
+                      >
+                        Cấp bậc
+                      </Link>
+                    </li>
                     <li className="min-w-max">
                       <Link
                         style={{
@@ -368,6 +406,38 @@ const SideBarComponent = () => {
                         Nghỉ phép
                       </Link>
                     </li>
+                    <li className="min-w-max">
+                      <Link
+                        style={{
+                          opacity: `${isHovered ? "1" : "0"}`,
+                          transition: "all ease 0.2s",
+                        }}
+                        to={PATH_ADMIN.pastoral_years}
+                        onClick={() => {
+                          if (typeof window !== "undefined") {
+                            localStorage.setItem(
+                              LOCALSTORAGE_CONSTANTS.CURRENT_PAGE,
+                              PATH_ADMIN.pastoral_years
+                            );
+                          }
+                        }}
+                        className={`sidebar-link relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-blue-950 hover:to-blue-400 px-4 py-3 hover:text-white
+                           ${
+                             typeof window !== "undefined" &&
+                             localStorage.getItem(
+                               LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
+                             ) &&
+                             localStorage.getItem(
+                               LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
+                             ) == PATH_ADMIN.pastoral_years
+                               ? "bg-gradient-to-r from-primary_color to-amber-600 hover:!from-primary_color hover:!to-amber-600 px-4 py-3 text-white"
+                               : ""
+                           }
+                           `}
+                      >
+                        Niên khóa
+                      </Link>
+                    </li>
                   </ul>
                 )}
               </li>
@@ -393,13 +463,7 @@ const SideBarComponent = () => {
                       ) == PATH_ADMIN.admin_catechist_management ||
                         localStorage.getItem(
                           LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
-                        ) == PATH_ADMIN.levels ||
-                        localStorage.getItem(
-                          LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
                         ) == PATH_ADMIN.rooms ||
-                        localStorage.getItem(
-                          LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
-                        ) == PATH_ADMIN.pastoral_years ||
                         localStorage.getItem(
                           LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
                         ) == PATH_ADMIN.christian_name ||
@@ -454,12 +518,12 @@ const SideBarComponent = () => {
                           opacity: `${isHovered ? "1" : "0"}`,
                           transition: "all ease 0.2s",
                         }}
-                        to={PATH_ADMIN.levels}
+                        to={PATH_ADMIN.christian_name}
                         onClick={() => {
                           if (typeof window !== "undefined") {
                             localStorage.setItem(
                               LOCALSTORAGE_CONSTANTS.CURRENT_PAGE,
-                              PATH_ADMIN.levels
+                              PATH_ADMIN.christian_name
                             );
                           }
                         }}
@@ -471,13 +535,13 @@ const SideBarComponent = () => {
                              ) &&
                              localStorage.getItem(
                                LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
-                             ) == PATH_ADMIN.levels
+                             ) == PATH_ADMIN.christian_name
                                ? "bg-gradient-to-r from-primary_color to-amber-600 hover:!from-primary_color hover:!to-amber-600 px-4 py-3 text-white"
                                : ""
                            }
                            `}
                       >
-                        Cấp độ
+                        Tên Thánh
                       </Link>
                     </li>
                     <li className="min-w-max">
@@ -510,70 +574,6 @@ const SideBarComponent = () => {
                            `}
                       >
                         Phòng học
-                      </Link>
-                    </li>
-                    <li className="min-w-max">
-                      <Link
-                        style={{
-                          opacity: `${isHovered ? "1" : "0"}`,
-                          transition: "all ease 0.2s",
-                        }}
-                        to={PATH_ADMIN.pastoral_years}
-                        onClick={() => {
-                          if (typeof window !== "undefined") {
-                            localStorage.setItem(
-                              LOCALSTORAGE_CONSTANTS.CURRENT_PAGE,
-                              PATH_ADMIN.pastoral_years
-                            );
-                          }
-                        }}
-                        className={`sidebar-link relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-blue-950 hover:to-blue-400 px-4 py-3 hover:text-white
-                           ${
-                             typeof window !== "undefined" &&
-                             localStorage.getItem(
-                               LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
-                             ) &&
-                             localStorage.getItem(
-                               LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
-                             ) == PATH_ADMIN.pastoral_years
-                               ? "bg-gradient-to-r from-primary_color to-amber-600 hover:!from-primary_color hover:!to-amber-600 px-4 py-3 text-white"
-                               : ""
-                           }
-                           `}
-                      >
-                        Niên khóa
-                      </Link>
-                    </li>
-                    <li className="min-w-max">
-                      <Link
-                        style={{
-                          opacity: `${isHovered ? "1" : "0"}`,
-                          transition: "all ease 0.2s",
-                        }}
-                        to={PATH_ADMIN.christian_name}
-                        onClick={() => {
-                          if (typeof window !== "undefined") {
-                            localStorage.setItem(
-                              LOCALSTORAGE_CONSTANTS.CURRENT_PAGE,
-                              PATH_ADMIN.christian_name
-                            );
-                          }
-                        }}
-                        className={`sidebar-link relative flex items-center rounded-full space-x-4 text-gray-700 hover:bg-gradient-to-r hover:from-blue-950 hover:to-blue-400 px-4 py-3 hover:text-white
-                           ${
-                             typeof window !== "undefined" &&
-                             localStorage.getItem(
-                               LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
-                             ) &&
-                             localStorage.getItem(
-                               LOCALSTORAGE_CONSTANTS.CURRENT_PAGE
-                             ) == PATH_ADMIN.christian_name
-                               ? "bg-gradient-to-r from-primary_color to-amber-600 hover:!from-primary_color hover:!to-amber-600 px-4 py-3 text-white"
-                               : ""
-                           }
-                           `}
-                      >
-                        Tên Thánh
                       </Link>
                     </li>
                     <li className="min-w-max">

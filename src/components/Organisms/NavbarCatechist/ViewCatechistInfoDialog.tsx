@@ -123,7 +123,10 @@ const ViewCatechistInfoDialog: React.FC<ViewCatechistInfoDialogProps> = ({
             <div className="mt-4">
               <div className="w-full flex flex-col items-center">
                 <img
-                  src={catechist?.imageUrl ?? "https://via.placeholder.com/150"}
+                  src={
+                    catechist?.imageUrl ??
+                    "https://firebasestorage.googleapis.com/v0/b/catechisthelper-1f8af.appspot.com/o/defaultAvatar%2FDefaultAvatar.png?alt=media&token=e117852a-f40f-47d8-9801-b802e438de96"
+                  }
                   style={{
                     borderRadius: "3px",
                     width: "300px",
@@ -135,15 +138,22 @@ const ViewCatechistInfoDialog: React.FC<ViewCatechistInfoDialogProps> = ({
           </Grid>
           <Grid item xs={6}>
             <TextField
-              label="Tên đầy đủ"
-              value={catechist?.fullName || ""}
-              fullWidth
-              InputProps={{ readOnly: true }}
-              sx={{ marginTop: "10px" }}
-            />
-            <TextField
               label="Mã giáo lý viên"
               value={catechist?.code || ""}
+              fullWidth
+              InputProps={{ readOnly: true }}
+              sx={{ marginTop: "15px" }}
+            />
+            <TextField
+              label="Tên Thánh"
+              value={catechist?.christianName || "Chưa cập nhật"}
+              fullWidth
+              InputProps={{ readOnly: true }}
+              sx={{ marginTop: "15px" }}
+            />
+            <TextField
+              label="Tên đầy đủ"
+              value={catechist?.fullName || ""}
               fullWidth
               InputProps={{ readOnly: true }}
               sx={{ marginTop: "15px" }}
@@ -165,13 +175,6 @@ const ViewCatechistInfoDialog: React.FC<ViewCatechistInfoDialogProps> = ({
             <TextField
               label="Nơi sinh"
               value={catechist?.birthPlace || "Chưa cập nhật"}
-              fullWidth
-              InputProps={{ readOnly: true }}
-              sx={{ marginTop: "15px" }}
-            />
-            <TextField
-              label="Tên Thánh"
-              value={catechist?.christianName || "Chưa cập nhật"}
               fullWidth
               InputProps={{ readOnly: true }}
               sx={{ marginTop: "15px" }}

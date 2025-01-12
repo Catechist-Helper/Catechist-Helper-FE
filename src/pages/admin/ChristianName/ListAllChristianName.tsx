@@ -39,7 +39,7 @@ const ListAllChristianNames: React.FC = () => {
         setFilteredChristianNames(data.data.items);
       }
     } catch (err) {
-      console.error("Không thấy danh sách tên thánh: ", err);
+      console.error("Không thấy danh sách tên Thánh: ", err);
     } finally {
       setLoading(false);
     }
@@ -70,7 +70,7 @@ const ListAllChristianNames: React.FC = () => {
 
   const handleDeleteNameClick = async (id: string) => {
     const confirm = await sweetAlert.confirm(
-      "Bạn có chắc là muốn xóa tên thánh này không?",
+      "Bạn có chắc là muốn xóa tên Thánh này không?",
       "",
       undefined,
       undefined,
@@ -83,25 +83,25 @@ const ListAllChristianNames: React.FC = () => {
         sweetAlert.alertSuccess("Tên Thánh đã xóa thành công.", "", 3000, 26);
         setChristianNames((prev) => prev.filter((name) => name.id !== id));
       } catch (err) {
-        console.error(`Không thể xóa tên thánh với ID: ${id}`, err);
+        console.error(`Không thể xóa tên Thánh với ID: ${id}`, err);
         sweetAlert.alertFailed("Không thể xóa tên Thánh này");
       }
     }
   };
 
   const columns: GridColDef[] = [
-    { field: "name", headerName: "Tên", width: 200 },
+    { field: "name", headerName: "Tên Thánh", width: 300 },
     { field: "gender", headerName: "Giới tính", width: 150 },
     {
       field: "holyDay",
-      headerName: "Ngày thánh",
+      headerName: "Ngày Thánh",
       width: 150,
-      renderCell: (params) => formatDate.DD_MM_YYYY(params.value),
+      renderCell: (params) => formatDate.DD_MM(params.value),
     },
     {
       field: "actions",
       headerName: "Hành động",
-      width: 200,
+      width: 220,
       renderCell: (params) => (
         <div className="space-x-2">
           <Button
@@ -136,7 +136,7 @@ const ListAllChristianNames: React.FC = () => {
       }}
     >
       <h1 className="text-center text-[2.2rem] bg_title text-text_primary_light py-2 font-bold">
-        DANH SÁCH TÊN THÁNH
+        Danh Sách Tên Thánh
       </h1>
       <div className="flex justify-between mb-3 mt-3 px-3">
         <div>
@@ -169,7 +169,7 @@ const ListAllChristianNames: React.FC = () => {
               variant="outlined"
               onClick={handleCreate}
             >
-              Tạo tên thánh
+              Tạo tên Thánh
             </Button>
             <Button
               color="primary"

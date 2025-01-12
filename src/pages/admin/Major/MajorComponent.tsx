@@ -304,7 +304,7 @@ export default function MajorComponent() {
       }}
     >
       <h1 className="text-center text-[2.2rem] bg_title text-text_primary_light py-2 font-bold">
-        Danh sách ngành
+        Danh sách ngành học
       </h1>
 
       <div className="my-2 flex justify-between mx-3">
