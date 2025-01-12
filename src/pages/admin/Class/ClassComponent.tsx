@@ -242,7 +242,7 @@ export default function ClassComponent() {
           : "",
     },
     {
-      field: "numberOfCatechist",
+      field: "catechistCount",
       headerName: "Số lượng giáo lý viên",
       width: 170,
       renderCell: (params) => {

@@ -168,7 +168,7 @@ const CatechistClassComponent = () => {
   const columns: GridColDef[] = [
     { field: "name", headerName: "Tên lớp", width: 200 },
     {
-      field: "numberOfCatechist",
+      field: "catechistCount",
       headerName: "Số lượng giáo lý viên",
       width: 170,
       renderCell: (params) => {
