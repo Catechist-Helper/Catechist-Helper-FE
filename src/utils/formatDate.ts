@@ -6,6 +6,8 @@ const YYYY_MMMM_DD_Time = (dateStr: string) => moment(dateStr).format('YYYY MMMM
 
 const DD_MM_YYYY = (dateStr: string) => moment(dateStr).format('DD/MM/YYYY');
 
+const DD_MM= (dateStr: string) => moment(dateStr).format('DD/MM');
+
 const YYYY_YYYY = (startYear: string, endYear: string) => `${moment(startYear).format('YYYY')}-${moment(endYear).format('YYYY')}`;
 
 const DD_MM_YYYY_Time = (dateStr: string) => moment(dateStr).format('DD/MM/YYYY, HH:mm');
@@ -48,5 +50,6 @@ export const formatDate = {
     DD_MM_YYYY_Time,
     HH_mm,
     YYYY,
+    DD_MM,
     getISODateInVietnamTimeZone
 }
