@@ -280,6 +280,8 @@ export default function EventsComponent() {
         );
       },
     },
+
+    { field: "address", headerName: "Địa chỉ", width: 100 },
   ];
 
   // Fetch số người trong ban tổ chức và tham gia
@@ -549,7 +551,7 @@ export default function EventsComponent() {
     }
 
     if (event.eventStatus == EventStatus.In_Progress) {
-      sweetAlert.alertFailed("Không thể xóa vì sự kiện này đã bắt đầu");
+      sweetAlert.alertFailed("Không thể xóa vì sự kiện này đang làm");
       return;
     }
 
@@ -558,19 +560,20 @@ export default function EventsComponent() {
       return;
     }
 
-    const now = new Date();
-    const invalidEvents = rows.filter(
-      (row) => selectedIds.includes(row.id) && new Date(row.startTime) <= now
-    );
+    // const now = new Date();
+    // const invalidEvents = rows.filter(
+    //   (row) => selectedIds.includes(row.id) && new Date(row.startTime) <= now
+    // );
 
-    if (invalidEvents.length > 0) {
-      sweetAlert.alertFailed("Không thể xóa vì sự kiện này đã bắt đầu");
-      return;
-    }
+    // if (invalidEvents.length > 0) {
+    //   sweetAlert.alertFailed("Không thể xóa vì sự kiện này đã bắt đầu");
+    //   return;
+    // }
 
     const confirm = await sweetAlert.confirm(
-      "Xác nhận xóa",
       `Xác nhận xóa sự kiện ${event ? event?.name : ""}?`,
+      "",
+      // `Xác nhận xóa sự kiện ${event ? event?.name : ""}?`,
       "Xóa",
       "Hủy",
       "question"

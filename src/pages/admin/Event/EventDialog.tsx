@@ -69,7 +69,7 @@ const EventDialog: React.FC<EventDialogProps> = ({
         return new Date(originalValue); // Chuyển đổi thành Date
       })
       .required("Thời gian bắt đầu là bắt buộc")
-      .min(new Date(), "Thời gian bắt đầu phải là ngày trong tương lai"),
+      .min(new Date(), "Thời gian bắt đầu không thể là 1 ngày trong quá khứ"),
 
     endTime: Yup.date()
       .nullable()
@@ -90,12 +90,13 @@ const EventDialog: React.FC<EventDialogProps> = ({
       }),
 
     eventCategoryId: Yup.string().required("Danh mục sự kiện là bắt buộc"),
-    name: Yup.string().required("Tên sự kiện không được để trống"),
+    name: Yup.string().required("Tên sự kiện là bắt buộc"),
     description: Yup.string().required("Mô tả là bắt buộc"),
     address: Yup.string().required("Địa chỉ tổ chức là bắt buộc"),
-    current_budget: Yup.number()
-      .min(0, "Ngân sách phải lớn hơn hoặc bằng 0")
-      .required("Ngân sách hiện tại là bắt buộc"),
+  });
+
+  const validationSchema2 = Yup.object().shape({
+    address: Yup.string().required("Địa chỉ tổ chức là bắt buộc"),
   });
 
   const handleSubmit = async (values: any) => {
@@ -161,7 +162,7 @@ const EventDialog: React.FC<EventDialogProps> = ({
             isCheckedIn: event?.isCheckedIn || false,
             eventStatus: event?.eventStatus || 0,
           }}
-          validationSchema={validationSchema}
+          validationSchema={event ? validationSchema2 : validationSchema}
           onSubmit={handleSubmit}
         >
           {({ values, handleChange, setFieldValue, errors, touched }) => (
