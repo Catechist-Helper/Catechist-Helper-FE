@@ -473,6 +473,8 @@ export default function EventsComponent() {
         );
       },
     },
+    { field: "address", headerName: "Địa chỉ", width: 100 },
+    { field: "note", headerName: "Ghi chú", width: 100 },
   ];
 
   const handleEventManagement = (eventId: string, userRole: string) => {
