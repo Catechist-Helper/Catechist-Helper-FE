@@ -280,8 +280,8 @@ export default function EventsComponent() {
         );
       },
     },
-
     { field: "address", headerName: "Địa chỉ", width: 100 },
+    { field: "note", headerName: "Ghi chú", width: 100 },
   ];
 
   // Fetch số người trong ban tổ chức và tham gia

@@ -258,6 +258,7 @@ const EventProcessManagement: React.FC = () => {
           <Button
             variant="outlined"
             color="secondary"
+            className="hover:bg-purple-800 hover:text-white hover:border-purple-800 ml-1"
             onClick={() => handleViewProcess(params.row as ProcessResponseItem)}
             style={{ marginRight: 10 }}
           >
@@ -270,6 +271,7 @@ const EventProcessManagement: React.FC = () => {
               <Button
                 variant="outlined"
                 color="success"
+                className="btn btn-success"
                 onClick={() => {
                   handleApprove(params.row.id, params.row.name, true);
                 }}
@@ -280,6 +282,7 @@ const EventProcessManagement: React.FC = () => {
               <Button
                 variant="outlined"
                 color="error"
+                className="btn btn-danger"
                 onClick={() => {
                   handleApprove(params.row.id, params.row.name, false);
                 }}
