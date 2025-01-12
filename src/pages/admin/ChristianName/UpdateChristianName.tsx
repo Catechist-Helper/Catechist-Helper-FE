@@ -120,7 +120,7 @@ const UpdateChristianName: React.FC = () => {
               htmlFor="holyDay"
               className="block mb-2 text-sm font-medium text-gray-900 "
             >
-              Ngày thánh
+              Ngày Thánh
             </label>
             <input
               id="holyDay"

@@ -152,7 +152,7 @@ const ListAllConfig: React.FC = () => {
       }}
     >
       <h1 className="text-center text-[2.2rem] bg_title text-text_primary_light py-2 font-bold">
-        CẤU HÌNH HỆ THỐNG
+        Thông Số Hệ Thống
       </h1>
       <div className="flex justify-between mb-3 mt-3 px-3">
         <div>

@@ -95,7 +95,7 @@ const CreatePostCategory: React.FC = () => {
               htmlFor="holyDay"
               className="block mb-2 text-sm font-medium text-gray-900 "
             >
-              Ngày thánh
+              Ngày Thánh
             </label>
             <input
               id="holyDay"
@@ -114,7 +114,7 @@ const CreatePostCategory: React.FC = () => {
               disabled={isSubmitting}
               onClick={handleGoBack}
             >
-              {isSubmitting ? "Đang tạo" : "Tạo tên thánh"}
+              {isSubmitting ? "Đang Tạo" : "Tạo Tên Thánh"}
             </button>
             <Link
               to={PATH_ADMIN.christian_name}

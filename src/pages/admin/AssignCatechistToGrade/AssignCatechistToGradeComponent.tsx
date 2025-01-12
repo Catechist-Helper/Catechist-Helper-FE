@@ -293,21 +293,25 @@ export default function AssignCatechistToGradeComponent() {
       width: 100,
       renderCell: (params) => (
         <img
-          src={params.row.imageUrl || "https://via.placeholder.com/150"}
+          src={
+            params.row.imageUrl ||
+            "https://firebasestorage.googleapis.com/v0/b/catechisthelper-1f8af.appspot.com/o/defaultAvatar%2FDefaultAvatar.png?alt=media&token=e117852a-f40f-47d8-9801-b802e438de96"
+          }
           alt="Catechist"
           width="50"
           height="50"
         />
       ),
     },
-    { field: "fullName", headerName: "Tên giáo lý viên", width: 200 },
-    { field: "gender", headerName: "Giới tính", width: 100 },
     {
       field: "christianName",
-      headerName: "Tên thánh",
+      headerName: "Tên Thánh",
       width: 150,
-      renderCell: (params) => params.row.christianName || "N/A", // Chỉnh sửa hiển thị tên thánh
+      renderCell: (params) =>
+        params.row.christianName.replace("Thánh", "").trim() || "N/A",
     },
+    { field: "fullName", headerName: "Tên giáo lý viên", width: 200 },
+    { field: "gender", headerName: "Giới tính", width: 100 },
     {
       field: "catechist.level.name",
       headerName: "Cấp bậc",
@@ -325,13 +329,21 @@ export default function AssignCatechistToGradeComponent() {
       renderCell: (params) => (
         <img
           src={
-            params.row.catechist.imageUrl || "https://via.placeholder.com/150"
+            params.row.catechist.imageUrl ||
+            "https://firebasestorage.googleapis.com/v0/b/catechisthelper-1f8af.appspot.com/o/defaultAvatar%2FDefaultAvatar.png?alt=media&token=e117852a-f40f-47d8-9801-b802e438de96"
           }
           alt="Catechist"
           width="50"
           height="50"
         />
       ),
+    },
+    {
+      field: "christianName",
+      headerName: "Tên Thánh",
+      width: 150,
+      renderCell: (params) =>
+        params.row.catechist.christianName.replace("Thánh", "").trim() || "N/A",
     },
     {
       field: "fullName",
@@ -344,12 +356,6 @@ export default function AssignCatechistToGradeComponent() {
       headerName: "Giới tính",
       width: 100,
       renderCell: (params) => params.row.catechist.gender,
-    },
-    {
-      field: "christianName",
-      headerName: "Tên thánh",
-      width: 150,
-      renderCell: (params) => params.row.catechist.christianName || "N/A", // Chỉnh sửa hiển thị tên thánh
     },
     {
       field: "catechist.level.name",
@@ -417,13 +423,21 @@ export default function AssignCatechistToGradeComponent() {
       renderCell: (params) => (
         <img
           src={
-            params.row.catechist.imageUrl || "https://via.placeholder.com/150"
+            params.row.catechist.imageUrl ||
+            "https://firebasestorage.googleapis.com/v0/b/catechisthelper-1f8af.appspot.com/o/defaultAvatar%2FDefaultAvatar.png?alt=media&token=e117852a-f40f-47d8-9801-b802e438de96"
           }
           alt="Catechist"
           width="50"
           height="50"
         />
       ),
+    },
+    {
+      field: "christianName",
+      headerName: "Tên Thánh",
+      width: 150,
+      renderCell: (params) =>
+        params.row.catechist.christianName.replace("Thánh", "").trim() || "N/A",
     },
     {
       field: "fullName",
@@ -436,12 +450,6 @@ export default function AssignCatechistToGradeComponent() {
       headerName: "Giới tính",
       width: 100,
       renderCell: (params) => params.row.catechist.gender,
-    },
-    {
-      field: "christianName",
-      headerName: "Tên thánh",
-      width: 150,
-      renderCell: (params) => params.row.catechist.christianName || "N/A", // Chỉnh sửa hiển thị tên thánh
     },
     {
       field: "catechist.level.name",

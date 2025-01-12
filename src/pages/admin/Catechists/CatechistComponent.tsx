@@ -99,7 +99,7 @@ export default function CatechistComponent() {
           src={
             params.row.imageUrl && params.row.imageUrl != ""
               ? params.row.imageUrl
-              : "https://via.placeholder.com/150"
+              : "https://firebasestorage.googleapis.com/v0/b/catechisthelper-1f8af.appspot.com/o/defaultAvatar%2FDefaultAvatar.png?alt=media&token=e117852a-f40f-47d8-9801-b802e438de96"
           }
           alt="Catechist"
           width="50"
@@ -108,14 +108,14 @@ export default function CatechistComponent() {
       ),
     },
     { field: "code", headerName: "Mã giáo lý viên", width: 115 },
-    { field: "fullName", headerName: "Tên đầy đủ", width: 180 },
     {
       field: "christianName",
       headerName: "Tên Thánh",
       width: 120,
       renderCell: (params) =>
-        params.row.christianName.replace("Thánh", "").trim() || "N/A", // Chỉnh sửa hiển thị tên thánh
+        params.row.christianName.replace("Thánh", "").trim() || "N/A",
     },
+    { field: "fullName", headerName: "Tên đầy đủ", width: 180 },
     { field: "gender", headerName: "Giới tính", width: 85 },
     {
       field: "dateOfBirth",
