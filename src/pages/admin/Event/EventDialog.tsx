@@ -69,7 +69,10 @@ const EventDialog: React.FC<EventDialogProps> = ({
         return new Date(originalValue); // Chuyển đổi thành Date
       })
       .required("Thời gian bắt đầu là bắt buộc")
-      .min(new Date(), "Thời gian bắt đầu không thể là 1 ngày trong quá khứ"),
+      .min(
+        new Date().setHours(0, 0, 0, 0),
+        "Thời gian bắt đầu không thể là 1 ngày trong quá khứ"
+      ),
 
     endTime: Yup.date()
       .nullable()
