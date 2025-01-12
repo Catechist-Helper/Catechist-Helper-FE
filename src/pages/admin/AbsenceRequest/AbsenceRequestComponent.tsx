@@ -86,7 +86,7 @@ const AbsencePage = () => {
     {
       field: "catechistName",
       headerName: "Giáo lý viên xin nghỉ",
-      width: 250,
+      width: 200,
       renderCell: (params) => (
         <>
           {params.row.catechistAbsence.fullName}{" "}
@@ -97,22 +97,28 @@ const AbsencePage = () => {
     {
       field: "createAt",
       headerName: "Thời gian gửi đơn",
-      width: 180,
+      width: 150,
       renderCell: (params) => formatDate.DD_MM_YYYY_Time(params.value),
     },
     {
       field: "slot.className",
       headerName: "Tên lớp",
-      width: 180,
+      width: 130,
       renderCell: (params) =>
         params.row.slot && params.row.slot.className
           ? params.row.slot.className
           : "",
     },
     {
+      field: "pastoralYearName",
+      headerName: "Niên khóa",
+      width: 100,
+      renderCell: (params) => (params.value ? params.value : ""),
+    },
+    {
       field: "slot.date",
       headerName: "Ngày vắng",
-      width: 120,
+      width: 110,
       renderCell: (params) =>
         params.row.slot && params.row.slot.date
           ? formatDate.DD_MM_YYYY(params.row.slot.date)
@@ -186,8 +192,9 @@ const AbsencePage = () => {
         return params.row.status == AbsenceRequestStatus.Pending ? (
           <>
             <Button
-              variant="contained"
+              variant="text"
               color="primary"
+              className="btn btn-primary"
               onClick={() => {
                 setSelectedAbsence(params.row);
                 setOpenDialog(true);
@@ -199,8 +206,9 @@ const AbsencePage = () => {
         ) : (
           <>
             <Button
-              variant="contained"
-              color="secondary"
+              variant="text"
+              color="success"
+              className="btn btn-success"
               onClick={() => {
                 setSelectedAbsence(params.row);
                 setOpenViewDetailDialog(true);
@@ -215,7 +223,7 @@ const AbsencePage = () => {
     {
       field: "cateReplace",
       headerName: "Giáo lý viên thay thế",
-      width: 300,
+      width: 210,
       renderCell: (params) => {
         if (params.row.status == AbsenceRequestStatus.Rejected) {
           return <></>;
@@ -291,6 +299,8 @@ const AbsencePage = () => {
           };
         })
       );
+
+      console.log("updatedRows", updatedRows);
 
       setAbsences(
         updatedRows.sort(

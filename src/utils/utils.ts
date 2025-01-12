@@ -51,6 +51,10 @@ export const getUserInfoId = () => {
 };
 
 export const formatPhone = (phone: string): string => {
+  if(phone.trim()=="") {
+    return "";
+  }
+  
   const cleanedPhone = phone.replace(/\D/g, '');
   if (cleanedPhone.length === 10) {
     return cleanedPhone.replace(/(\d{4})(\d{3})(\d{3})/, '$1 $2 $3');

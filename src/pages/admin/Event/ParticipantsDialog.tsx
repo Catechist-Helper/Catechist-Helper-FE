@@ -10,6 +10,7 @@ import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { ParticipantResponseItem } from "../../../model/Response/Event";
 import { formatDate } from "../../../utils/formatDate";
 import viVNGridTranslation from "../../../locale/MUITable";
+import { formatPhone } from "../../../utils/utils";
 
 const ParticipantsDialog: React.FC<{
   open: boolean;
@@ -20,7 +21,12 @@ const ParticipantsDialog: React.FC<{
   const columns: GridColDef[] = [
     { field: "fullName", headerName: "Họ tên", width: 200 },
     { field: "email", headerName: "Email", width: 200 },
-    { field: "phone", headerName: "Số điện thoại", width: 150 },
+    {
+      field: "phone",
+      headerName: "Số điện thoại",
+      width: 150,
+      renderCell: (params) => formatPhone(params.value ? params.value : ""),
+    },
     { field: "gender", headerName: "Giới tính", width: 120 },
     {
       field: "dateOfBirth",

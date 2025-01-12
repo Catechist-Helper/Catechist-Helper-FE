@@ -156,10 +156,11 @@ const ApprovalDialog = ({
         />
       ),
     },
-    { field: "fullName", headerName: "Họ và tên", width: 180 },
-    { field: "code", headerName: "Mã giáo viên", width: 120 },
+    { field: "code", headerName: "Mã giáo viên", width: 100 },
+    { field: "christianName", headerName: "Tên Thánh", width: 180 },
+    { field: "fullName", headerName: "Họ và tên", width: 170 },
     { field: "level", headerName: "Cấp bậc", width: 100 },
-    { field: "major", headerName: "Chuyên ngành", width: 150 },
+    { field: "major", headerName: "Ngành", width: 100 },
     {
       field: "replace",
       headerName: "Thay thế",
