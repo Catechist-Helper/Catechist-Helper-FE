@@ -13,7 +13,7 @@ import {
   CatechistItemResponse,
   CertificateResponse,
 } from "../../../model/Response/Catechist";
-import { getUserInfo } from "../../../utils/utils";
+import { formatPhone, getUserInfo } from "../../../utils/utils";
 import ImageDialog from "../../Molecules/ImageDialog";
 import { formatDate } from "../../../utils/formatDate";
 import { AuthUser } from "../../../types/authentication";
@@ -191,7 +191,11 @@ const ViewCatechistInfoDialog: React.FC<ViewCatechistInfoDialogProps> = ({
           <Grid item xs={6}>
             <TextField
               label="Số điện thoại"
-              value={catechist?.phone || "Chưa cập nhật"}
+              value={
+                catechist && catechist?.phone
+                  ? formatPhone(catechist.phone)
+                  : "Chưa cập nhật"
+              }
               fullWidth
               InputProps={{ readOnly: true }}
             />

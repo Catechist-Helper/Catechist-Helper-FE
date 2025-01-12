@@ -61,6 +61,14 @@ export default function AssignCatechistToGradeComponent() {
     }
   );
   const [viewMode, setViewMode] = useState<boolean>(false);
+  const [selectedRows1, setSelectedRows1] = useState<GridRowSelectionModel>([]);
+  const [selectedRows2, setSelectedRows2] = useState<GridRowSelectionModel>([]);
+  const handleSelectionChange1 = (newSelectionModel: GridRowSelectionModel) => {
+    setSelectedRows1(newSelectionModel);
+  };
+  const handleSelectionChange2 = (newSelectionModel: GridRowSelectionModel) => {
+    setSelectedRows2(newSelectionModel);
+  };
 
   // Thông tin grade từ location.state
   useEffect(() => {
@@ -111,7 +119,7 @@ export default function AssignCatechistToGradeComponent() {
       const { data } = await gradeApi.getCatechistsOfGrade(gradeId);
       const fetchItems: any[] = [];
       [...data.data.items].forEach((item) => {
-        fetchItems.push({ ...item, id: item.catechist.id });
+        fetchItems.push({ ...item, ...item.catechist });
       });
 
       setAssignedCatechists(
@@ -158,7 +166,7 @@ export default function AssignCatechistToGradeComponent() {
     );
     const addItems: any[] = [];
     selectedCatechists.forEach((item) => {
-      addItems.push({ catechist: item, id: item.id });
+      addItems.push({ catechist: item, id: item.id, ...item });
     });
     setAssignedCatechists([...assignedCatechists, ...addItems]);
     setCatechists(
@@ -303,12 +311,16 @@ export default function AssignCatechistToGradeComponent() {
         />
       ),
     },
+    { field: "code", headerName: "Mã giáo lý viên", width: 150 },
+
     {
       field: "christianName",
       headerName: "Tên Thánh",
-      width: 150,
+      width: 200,
       renderCell: (params) =>
-        params.row.christianName.replace("Thánh", "").trim() || "N/A",
+        params.row.christianName
+          ? params.row.christianName.replace("Thánh", "").trim()
+          : "",
     },
     { field: "fullName", headerName: "Tên giáo lý viên", width: 200 },
     { field: "gender", headerName: "Giới tính", width: 100 },
@@ -339,9 +351,15 @@ export default function AssignCatechistToGradeComponent() {
       ),
     },
     {
+      field: "code",
+      headerName: "Mã giáo lý viên",
+      width: 150,
+      renderCell: (params) => params.row.catechist.code,
+    },
+    {
       field: "christianName",
       headerName: "Tên Thánh",
-      width: 150,
+      width: 200,
       renderCell: (params) =>
         params.row.catechist.christianName.replace("Thánh", "").trim() || "N/A",
     },
@@ -386,12 +404,13 @@ export default function AssignCatechistToGradeComponent() {
   if (!viewMode) {
     columns1.push({
       field: "assign",
-      headerName: "Thêm",
+      headerName: "Hành động",
       width: 100,
       renderCell: (params) => (
         <Button
-          variant="contained"
+          variant="text"
           color="primary"
+          className="btn btn-primary"
           onClick={() => handleAddCatechist([params.row.id])}
         >
           Thêm
@@ -401,12 +420,13 @@ export default function AssignCatechistToGradeComponent() {
 
     columns2.push({
       field: "remove",
-      headerName: "Xóa",
+      headerName: "Hành động",
       width: 100,
       renderCell: (params) => (
         <Button
-          variant="contained"
+          variant="text"
           color="error"
+          className="btn btn-danger"
           onClick={() => handleRemoveCatechist([params.row.catechist.id])}
         >
           Xóa
@@ -433,9 +453,15 @@ export default function AssignCatechistToGradeComponent() {
       ),
     },
     {
+      field: "code",
+      headerName: "Mã giáo lý viên",
+      width: 150,
+      renderCell: (params) => params.row.catechist.code,
+    },
+    {
       field: "christianName",
       headerName: "Tên Thánh",
-      width: 150,
+      width: 200,
       renderCell: (params) =>
         params.row.catechist.christianName.replace("Thánh", "").trim() || "N/A",
     },
@@ -536,9 +562,30 @@ export default function AssignCatechistToGradeComponent() {
             {/* Bảng DataGrid chưa gán */}
             {!viewMode ? (
               <>
-                <h3 className="mt-3">
-                  <strong>Danh sách giáo lý viên chưa gán</strong>
-                </h3>
+                <div className="mt-3 flex gap-x-14 items-end mb-3 w-full min-h-[38px]">
+                  <h3>
+                    <strong>Danh sách giáo lý viên chưa gán</strong>
+                  </h3>
+                  {selectedRows1.length > 0 ? (
+                    <>
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={() => {
+                          const selectedIds = selectedRows1.map((item) =>
+                            item.toString()
+                          );
+                          handleAddCatechist(selectedIds);
+                          setSelectedRows1([]);
+                        }}
+                      >
+                        Thêm
+                      </Button>
+                    </>
+                  ) : (
+                    <></>
+                  )}
+                </div>
                 <DataGrid
                   rows={catechists}
                   columns={columns1}
@@ -558,23 +605,46 @@ export default function AssignCatechistToGradeComponent() {
                   }}
                   localeText={viVNGridTranslation}
                   disableRowSelectionOnClick
+                  onRowSelectionModelChange={handleSelectionChange1}
+                  rowSelectionModel={selectedRows1}
                 />
               </>
             ) : (
               <></>
             )}
             {/* Bảng DataGrid đã gán */}
-            <h3 className="mt-3">
-              <strong>
-                {viewMode
-                  ? "Danh sách giáo lý viên trong khối"
-                  : "Danh sách giáo lý viên đã gán"}
-                <br />
-                <span className="inline-block mt-2">
-                  Số lượng hiện tại: {assignedCatechists.length}
-                </span>
-              </strong>
-            </h3>
+            <div className="mt-3 flex gap-x-14 items-end mb-3 w-full min-h-[38px]">
+              <h3>
+                <strong>
+                  {viewMode
+                    ? "Danh sách giáo lý viên trong khối"
+                    : "Danh sách giáo lý viên đã gán"}
+                  <br />
+                  <span className="inline-block mt-2">
+                    Số lượng hiện tại: {assignedCatechists.length}
+                  </span>
+                </strong>
+              </h3>
+              {selectedRows2.length > 0 ? (
+                <>
+                  <Button
+                    variant="contained"
+                    color="error"
+                    onClick={() => {
+                      const selectedIds = selectedRows2.map((item) =>
+                        item.toString()
+                      );
+                      handleRemoveCatechist(selectedIds);
+                      setSelectedRows2([]);
+                    }}
+                  >
+                    Xóa
+                  </Button>
+                </>
+              ) : (
+                <></>
+              )}
+            </div>
             <DataGrid
               rows={assignedCatechists}
               columns={columns2}
@@ -586,7 +656,7 @@ export default function AssignCatechistToGradeComponent() {
                 setPaginationModel2(newModel)
               }
               pageSizeOptions={[4, 10, 25, 50, 100, 250]}
-              checkboxSelection
+              checkboxSelection={!viewMode}
               localeText={viVNGridTranslation}
               disableRowSelectionOnClick
               sx={{
@@ -596,6 +666,8 @@ export default function AssignCatechistToGradeComponent() {
                   overflowX: "auto",
                 },
               }}
+              onRowSelectionModelChange={handleSelectionChange2}
+              rowSelectionModel={selectedRows2}
             />
           </>
         ) : (
@@ -699,6 +771,7 @@ export default function AssignCatechistToGradeComponent() {
               <Button
                 variant="outlined"
                 color="primary"
+                className="btn btn-secondary"
                 onClick={() => navigate(-1)}
               >
                 Quay lại
@@ -716,6 +789,7 @@ export default function AssignCatechistToGradeComponent() {
               <Button
                 variant="outlined"
                 color="success"
+                className="btn btn-secondary"
                 onClick={() => navigate(-1)}
               >
                 Hủy bỏ

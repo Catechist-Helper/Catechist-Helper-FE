@@ -14,7 +14,7 @@ import {
 import processApi from "../../../api/EventProcess";
 import viVNGridTranslation from "../../../locale/MUITable";
 import { AuthUser } from "../../../types/authentication";
-import { getUserInfo } from "../../../utils/utils";
+import { formatPhone, getUserInfo } from "../../../utils/utils";
 
 interface MemberOfProcessDialogProps {
   eventId: string;
@@ -264,7 +264,12 @@ const MemberOfProcessDialog = forwardRef<
     },
     { field: "gender", headerName: "Giới tính", width: 105 },
     { field: "email", headerName: "Email", width: 200 },
-    { field: "phone", headerName: "Số Điện Thoại", width: 150 },
+    {
+      field: "phone",
+      headerName: "Số Điện Thoại",
+      width: 150,
+      renderCell: (params) => formatPhone(params.value ? params.value : ""),
+    },
     {
       field: "roleEventId",
       headerName: "Vai trò",
@@ -320,7 +325,12 @@ const MemberOfProcessDialog = forwardRef<
     },
     { field: "gender", headerName: "Giới tính", width: 105 },
     { field: "email", headerName: "Email", width: 200 },
-    { field: "phone", headerName: "Số Điện Thoại", width: 150 },
+    {
+      field: "phone",
+      headerName: "Số Điện Thoại",
+      width: 150,
+      renderCell: (params) => formatPhone(params.value ? params.value : ""),
+    },
     {
       field: "roleEventId",
       headerName: "Vai trò",

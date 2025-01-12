@@ -25,8 +25,8 @@ import { PATH_ADMIN } from "../../../routes/paths";
 import LeaveRequestDialog from "./LeaveRequestDialog";
 import { GetLeaveRequestItemResponse } from "../../../model/Response/LeaveRequest";
 import leaveRequestApi from "../../../api/LeaveRequest";
-import { LeaveRequestStatus } from "../../../enums/LeaveRequest";
 import CatechistDetailDialog from "./CatechistDetailDialog";
+import { LeaveRequestStatus } from "../../../enums/LeaveRequest";
 
 export default function CatechistComponent() {
   const [rows, setRows] = useState<CatechistItemResponse[]>([]);
@@ -51,6 +51,8 @@ export default function CatechistComponent() {
   });
   const [totalCate, setTotalCate] = useState<number>(0);
   const [totalActiveCate, setTotalActiveCate] = useState<number>(0);
+  const [leaveCatechist, setLeaveCatechist] =
+    useState<CatechistItemResponse | null>(null);
   const navigate = useNavigate();
 
   const handleOpenDialog = (catechist: CatechistItemResponse) => {
@@ -67,29 +69,14 @@ export default function CatechistComponent() {
     useState<boolean>(false);
 
   const handleCloseViewLeaveRequest = () => setOpenViewLeaveRequest(false);
-  const [selectedLeaveRequest, setSelectedLeaveRequest] = useState<
-    GetLeaveRequestItemResponse | undefined
+  const [selectedLeaveRequests, setSelectedLeaveRequests] = useState<
+    GetLeaveRequestItemResponse[] | undefined
   >(undefined);
 
   const [dialogCatechistDetailOpen, setDialogCatechistDetailOpen] =
     useState(false);
 
   const columns: GridColDef[] = [
-    {
-      field: "no",
-      headerName: "STT",
-      width: 15,
-      renderCell: (params) => {
-        {
-          const rowIndex = params.api.getRowIndexRelativeToVisibleRows(
-            params.row.id
-          );
-          return rowIndex != null && rowIndex != undefined && rowIndex >= 0
-            ? rowIndex + 1
-            : 0;
-        }
-      },
-    },
     {
       field: "imageUrl",
       headerName: "Ảnh",
@@ -113,7 +100,9 @@ export default function CatechistComponent() {
       headerName: "Tên Thánh",
       width: 120,
       renderCell: (params) =>
-        params.row.christianName.replace("Thánh", "").trim() || "N/A",
+        params.row.christianName
+          ? params.row.christianName.replace("Thánh", "").trim()
+          : "",
     },
     { field: "fullName", headerName: "Tên đầy đủ", width: 180 },
     { field: "gender", headerName: "Giới tính", width: 85 },
@@ -174,7 +163,7 @@ export default function CatechistComponent() {
     {
       field: "isTeaching",
       headerName: "Trạng thái giảng dạy",
-      width: 250,
+      width: 285,
       renderCell: (params) => {
         return params.value ? (
           <div className="flex gap-x-1">
@@ -193,6 +182,53 @@ export default function CatechistComponent() {
               >
                 Thay đổi
               </Button>
+              <Button
+                color="secondary"
+                className="hover:bg-purple-800 hover:text-white hover:border-purple-800"
+                onClick={() => {
+                  const action = async () => {
+                    try {
+                      const firstRes = await leaveRequestApi.getLeaveRequests(
+                        undefined,
+                        params.row.id
+                      );
+                      const leave = firstRes.data.data
+                        .filter(
+                          (item) => item.status != LeaveRequestStatus.Pending
+                        )
+                        .sort((a, b) => {
+                          if (a.leaveDate && b.leaveDate) {
+                            return (
+                              new Date(b.leaveDate).getTime() -
+                              new Date(a.leaveDate).getTime()
+                            );
+                          }
+                          return -1;
+                        });
+                      if (leave && leave.length > 0) {
+                        setLeaveCatechist(params.row);
+                        setSelectedLeaveRequests(leave);
+                        setOpenViewLeaveRequest(true);
+                      } else {
+                        sweetAlert.alertInfo(
+                          "Giáo lý viên " +
+                            params.row.fullName +
+                            " chưa có phê duyệt xin nghỉ hay quay lại giảng dạy",
+                          "",
+                          6000,
+                          32
+                        );
+                      }
+                    } catch (err) {
+                      console.error(err);
+                      sweetAlert.alertFailed("Có lỗi khi tải đơn");
+                    }
+                  };
+                  action();
+                }}
+              >
+                Xem
+              </Button>
             </div>
           </div>
         ) : (
@@ -206,40 +242,59 @@ export default function CatechistComponent() {
               <div>
                 <Button
                   color="secondary"
+                  className="hover:bg-purple-800 hover:text-white hover:border-purple-800"
                   onClick={() => {
                     const action = async () => {
                       try {
                         const firstRes = await leaveRequestApi.getLeaveRequests(
-                          LeaveRequestStatus.Approved,
+                          undefined,
                           params.row.id
                         );
-                        const leave = firstRes.data.data.sort((a, b) => {
-                          if (a.leaveDate && b.leaveDate) {
-                            return (
-                              new Date(b.leaveDate).getTime() -
-                              new Date(a.leaveDate).getTime()
-                            );
-                          }
-                          return -1;
-                        })[0];
-                        if (leave) {
-                          setSelectedLeaveRequest(leave);
+                        const leave = firstRes.data.data
+                          .filter(
+                            (item) => item.status != LeaveRequestStatus.Pending
+                          )
+                          .sort((a, b) => {
+                            if (a.leaveDate && b.leaveDate) {
+                              return (
+                                new Date(b.leaveDate).getTime() -
+                                new Date(a.leaveDate).getTime()
+                              );
+                            }
+                            return -1;
+                          });
+                        if (leave && leave.length > 0) {
+                          setLeaveCatechist(params.row);
+                          setSelectedLeaveRequests(leave);
                           setOpenViewLeaveRequest(true);
+                        } else {
+                          sweetAlert.alertInfo(
+                            "Giáo lý viên " +
+                              params.row.fullName +
+                              " chưa có phê duyệt xin nghỉ hay quay lại giảng dạy",
+                            "",
+                            6000,
+                            32
+                          );
                         }
                       } catch (err) {
                         console.error(err);
-                        sweetAlert.alertFailed(
-                          "Có lỗi khi tải đơn nghỉ dạy",
-                          "",
-                          3000,
-                          28
-                        );
+                        sweetAlert.alertFailed("Có lỗi khi tải đơn");
                       }
                     };
                     action();
                   }}
                 >
-                  Xem phê duyệt
+                  Xem
+                </Button>
+                <Button
+                  color="primary"
+                  className="btn btn-primary"
+                  onClick={() => {
+                    handleChangeIsTeaching(params.row);
+                  }}
+                >
+                  Thay đổi
                 </Button>
               </div>
             </div>
@@ -366,7 +421,10 @@ export default function CatechistComponent() {
         22
       );
     } finally {
-      disableLoading();
+      setLeaveCatechist(catechist);
+      setTimeout(() => {
+        disableLoading();
+      }, 1500);
     }
   };
 
@@ -419,6 +477,10 @@ export default function CatechistComponent() {
       disableLoading();
     }
   };
+
+  if (statusIsTeaching.value == false) {
+    columns.splice(columns.length - 2, 1);
+  }
 
   return (
     <Paper
@@ -566,6 +628,7 @@ export default function CatechistComponent() {
       {selectedCatechist && (
         <CatechistLeaveRequestDialog
           open={dialogOpen}
+          catechist={leaveCatechist}
           onClose={handleCloseDialog}
           catechistId={selectedCatechist.id}
           refreshCatechists={fetchCatechists} // Cập nhật lại danh sách catechists sau khi phê duyệt
@@ -576,7 +639,8 @@ export default function CatechistComponent() {
           <LeaveRequestDialog
             open={openViewLeaveRequest}
             onClose={handleCloseViewLeaveRequest}
-            leaveRequest={selectedLeaveRequest}
+            leaveRequests={selectedLeaveRequests}
+            catechist={leaveCatechist}
           />
         </>
       ) : (

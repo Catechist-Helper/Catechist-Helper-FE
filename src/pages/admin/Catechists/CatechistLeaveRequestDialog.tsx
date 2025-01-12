@@ -13,17 +13,21 @@ import useAppContext from "../../../hooks/useAppContext";
 import { formatDate } from "../../../utils/formatDate";
 import { AuthUser } from "../../../types/authentication";
 import { getUserInfo } from "../../../utils/utils";
+import { CatechistItemResponse } from "../../../model/Response/Catechist";
+import CatechistDetailDialog from "./CatechistDetailDialog";
+import { LeaveRequestStatus } from "../../../enums/LeaveRequest";
 
 interface CatechistLeaveRequestDialogProps {
   open: boolean;
   onClose: () => void;
   catechistId: string;
+  catechist?: CatechistItemResponse | null;
   refreshCatechists: () => void;
 }
 
 const CatechistLeaveRequestDialog: React.FC<
   CatechistLeaveRequestDialogProps
-> = ({ open, onClose, catechistId, refreshCatechists }) => {
+> = ({ open, onClose, catechistId, catechist, refreshCatechists }) => {
   const { enableLoading, disableLoading } = useAppContext(); // Lấy thông tin người phê duyệt
   const [reason, setReason] = useState<string>("");
   const [comment, setComment] = useState<string>("");
@@ -37,25 +41,38 @@ const CatechistLeaveRequestDialog: React.FC<
   }, []);
 
   const handleSubmit = async () => {
-    if (!reason || !comment) {
+    if (!reason || !comment || reason.trim() == "" || comment.trim() == "") {
       sweetAlert.alertWarning(
-        "Lý do xin nghỉ và Ghi chú phê duyệt là bắt buộc!",
+        "Lý do và ghi chú phê duyệt là bắt buộc!",
         "",
         6000,
-        33
+        30
       );
       return;
     }
 
-    const confirm = await sweetAlert.confirm(
-      "Xác nhận phê duyệt đơn nghỉ giảng dạy",
-      "",
-      undefined,
-      undefined,
-      "question"
-    );
-    if (!confirm) {
-      return;
+    if (catechist && catechist.isTeaching) {
+      const confirm = await sweetAlert.confirm(
+        "Xác nhận phê duyệt đơn nghỉ giảng dạy",
+        "",
+        undefined,
+        undefined,
+        "question"
+      );
+      if (!confirm) {
+        return;
+      }
+    } else if (catechist && !catechist.isTeaching) {
+      const confirm2 = await sweetAlert.confirm(
+        "Xác nhận phê duyệt đơn xin quay lại giảng dạy",
+        "",
+        undefined,
+        undefined,
+        "question"
+      );
+      if (!confirm2) {
+        return;
+      }
     }
 
     enableLoading();
@@ -84,32 +101,36 @@ const CatechistLeaveRequestDialog: React.FC<
             catechistId
           );
           const leaveRequest = getAllLeaveRequest.data.data.filter(
-            (item) => item.status == 0
+            (item) => item.status == LeaveRequestStatus.Pending
           )[0];
 
           // Phê duyệt yêu cầu nghỉ
           const processData = {
             requestId: leaveRequest.id,
             approverId: userLogin ? userLogin.id : "",
-            status: 1,
+            status: LeaveRequestStatus.Approved_For_Resign,
             comment,
           };
+
+          if (catechist && !catechist.isTeaching) {
+            processData.status = LeaveRequestStatus.Back_For_Teaching;
+          }
 
           const processResponse =
             await leaveRequestApi.processLeaveRequest(processData);
 
           if (processResponse.data) {
             sweetAlert.alertSuccess(
-              "Yêu cầu nghỉ đã được duyệt!",
+              "Yêu cầu đã được phê duyệt thành công",
               "",
               3000,
-              26
+              30
             );
             refreshCatechists(); // Refresh danh sách catechists
             onClose(); // Đóng dialog sau khi thành công
           } else {
             sweetAlert.alertFailed(
-              "Có lỗi khi phê duyệt yêu cầu nghỉ!",
+              "Có lỗi khi phê duyệt yêu cầu",
               "",
               3000,
               26
@@ -132,15 +153,44 @@ const CatechistLeaveRequestDialog: React.FC<
   if (!userLogin || !userLogin.id) return <></>;
 
   return (
-    <Dialog open={open} fullWidth>
+    <Dialog open={open} fullWidth maxWidth="md">
       <DialogContent>
         <h2 className="font-bold text-[1.5rem]">
-          Thông tin đơn xin nghỉ giảng dạy
+          {catechist && catechist.isTeaching ? (
+            <span className="text-danger">
+              Thông tin đơn xin nghỉ giảng dạy
+            </span>
+          ) : (
+            ""
+          )}{" "}
+          {catechist && !catechist.isTeaching ? (
+            <span className="text-primary">
+              Thông tin đơn xin quay lại giảng dạy
+            </span>
+          ) : (
+            ""
+          )}
         </h2>
+        <CatechistDetailDialog
+          catechistId={catechistId}
+          open={true}
+          onClose={() => {}}
+          viewing={true}
+        />
         <TextField
           label={
             <span>
-              Lý do xin nghỉ <span style={{ color: "red" }}>*</span>
+              {catechist && catechist.isTeaching ? (
+                <span>Lý do xin nghỉ</span>
+              ) : (
+                ""
+              )}{" "}
+              {catechist && !catechist.isTeaching ? (
+                <span>Lý do xin quay lại giảng dạy</span>
+              ) : (
+                ""
+              )}
+              <span style={{ color: "red" }}>*</span>
             </span>
           }
           variant="outlined"
@@ -167,13 +217,19 @@ const CatechistLeaveRequestDialog: React.FC<
         />
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose} color="secondary" variant="outlined">
+        <Button
+          onClick={onClose}
+          color="secondary"
+          variant="outlined"
+          className="hover:bg-purple-800 hover:text-white hover:border-purple-800"
+        >
           Hủy
         </Button>
         <Button
           onClick={handleSubmit}
           color="primary"
           variant="outlined"
+          className="btn btn-primary"
           disabled={loading}
         >
           {loading ? <CircularProgress size={24} /> : "Duyệt"}

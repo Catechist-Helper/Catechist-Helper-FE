@@ -23,6 +23,7 @@ import {
   RadioGroup,
   FormControlLabel,
   Radio,
+  TextField,
 } from "@mui/material";
 import classApi from "../../../api/Class"; // Import API Class
 import majorApi from "../../../api/Major"; // Import API Major
@@ -80,6 +81,7 @@ export default function ClassComponent() {
     null
   );
   const [openLeaveDialog, setOpenLeaveDialog] = useState<boolean>(false);
+  const [ignoreEffect, setIgnoreEffect] = useState<boolean>(false);
 
   // State for adding timetable
   const [openTimetableDialog, setOpenTimetableDialog] =
@@ -147,6 +149,12 @@ export default function ClassComponent() {
   const [openSlotsDialog, setOpenSlotsDialog] = useState<boolean>(false);
   const [slots, setSlots] = useState<any[]>([]); // Slots list
   const [chosenSlotToUpdate, setChosenSlotToUpdate] = useState<any>(null);
+  const [dialogUpdateSlotDate, setDialogUpdateSlotDate] =
+    useState<boolean>(false);
+  const [selectedDate, setSelectedDate] = useState("");
+  const handleDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSelectedDate(event.target.value);
+  };
   const [dialogUpdateSlotTime, setDialogUpdateSlotTime] =
     useState<boolean>(false);
   const [valueUpdateSlotTimeStart, setValueUpdateSlotTimeStart] =
@@ -199,6 +207,7 @@ export default function ClassComponent() {
           } else if (location.state.classIds) {
             enableLoading();
             setTimeout(() => {
+              setIgnoreEffect(true);
               fetchClasses(undefined, undefined, location.state.classIds);
               disableLoading();
             }, 1200);
@@ -234,12 +243,7 @@ export default function ClassComponent() {
       field: "name",
       headerName: "Tên lớp",
       width: 140,
-      renderCell: (params) =>
-        params.row.name
-          ? params.row.name.includes("Lớp")
-            ? params.row.name.split("Lớp")[1]
-            : params.row.name
-          : "",
+      renderCell: (params) => (params.row.name ? params.row.name : ""),
     },
     {
       field: "catechistCount",
@@ -266,11 +270,24 @@ export default function ClassComponent() {
       headerName: "Khối",
       width: 110,
       renderCell: (params) =>
-        params.row.gradeName
-          ? params.row.gradeName.includes("Khối")
-            ? params.row.gradeName.split("Khối")[1]
-            : params.row.gradeName
-          : "",
+        params.row.gradeName ? params.row.gradeName : "",
+    },
+    {
+      field: "pastoralYear",
+      headerName: "Niên khóa",
+      width: 100,
+      renderCell: (params: any) => {
+        if (pastoralYears && params.row.pastoralYearId) {
+          const year = pastoralYears.find(
+            (item) => item.id == params.row.pastoralYearId
+          );
+          if (year) {
+            return year.name ? year.name : "";
+          }
+          return "";
+        }
+        return "";
+      },
     },
     {
       field: "startDate",
@@ -398,11 +415,20 @@ export default function ClassComponent() {
     { field: "note", headerName: "Ghi chú", width: 90 },
   ];
 
+  if (!ignoreEffect) {
+    columns.splice(4, 1);
+  }
+
   const fetchClasses = async (
     changeInitDate?: boolean,
     defaultGradeId?: string,
-    classIds?: string[]
+    classIds?: string[],
+    forceRender?: boolean
   ) => {
+    if (ignoreEffect && forceRender != true) {
+      return;
+    }
+
     try {
       setLoading(true);
       const firstRes = await classApi.getAllClasses(
@@ -432,8 +458,6 @@ export default function ClassComponent() {
               (item) => classIds.findIndex((id) => id == item.id) >= 0
             )
           : data.data.items;
-
-      // filterDataByClassIds = [...filterDataByClassIds].sort((a,b)=>a.ma)
 
       const updatedRows = await Promise.all(
         filterDataByClassIds.map(async (classItem: any) => {
@@ -513,7 +537,8 @@ export default function ClassComponent() {
     try {
       const { data } = await classApi.getCatechistsOfClass(classId, 1, 100);
       return {
-        catechistCount: data.data.total,
+        catechistCount:
+          data && data.data && data.data.total ? data.data.total : 0,
       };
     } catch (error) {
       console.error("Error loading grades:", error);
@@ -523,7 +548,7 @@ export default function ClassComponent() {
     }
   };
 
-  const fetchPastoralYears = async () => {
+  const fetchPastoralYears = async (defaultYear?: string) => {
     try {
       const { data } = await pastoralYearsApi.getAllPastoralYears();
       // Sắp xếp theo niên khóa gần nhất tới xa nhất
@@ -533,9 +558,13 @@ export default function ClassComponent() {
         return yearB - yearA;
       });
       setPastoralYears(sortedPastoralYears);
-      setSelectedPastoralYear(
-        sortedPastoralYears[0] ? sortedPastoralYears[0].id : ""
-      );
+      if (defaultYear && defaultYear != "") {
+        setSelectedPastoralYear(defaultYear);
+      } else {
+        setSelectedPastoralYear(
+          sortedPastoralYears[0] ? sortedPastoralYears[0].id : ""
+        );
+      }
       if (!sortedPastoralYears[0]) {
         setLoading(false);
       }
@@ -582,7 +611,7 @@ export default function ClassComponent() {
   };
 
   useEffect(() => {
-    if (finishInitData) {
+    if (finishInitData && !ignoreEffect) {
       fetchClasses();
     }
   }, [selectedPastoralYear, selectedMajor, selectedGrade, paginationModel]);
@@ -675,7 +704,7 @@ export default function ClassComponent() {
         false,
         1,
         1000,
-        selectedPastoralYear
+        selectedClass.pastoralYearId
       );
       const catechistInClassUpdate = res.data.data.items;
       const catechistInGradeUpdate = secondRes.data.data.items;
@@ -693,7 +722,7 @@ export default function ClassComponent() {
       );
       const fetchItems: any[] = [];
       [...selectedCatechists].forEach((item) => {
-        fetchItems.push({ ...item, id: item.catechist.id });
+        fetchItems.push({ ...item.catechist });
       });
       setAssignedCatechists(
         [...assignedCatechists, ...fetchItems].sort((a, b) => {
@@ -718,6 +747,7 @@ export default function ClassComponent() {
 
   useEffect(() => {
     if (chosenSlotToUpdate) {
+      setSelectedDate("");
       setIsDeletedCurrentRoom(false);
       setSelectedClass(selectedClassView);
       setValueUpdateSlotTimeStart(
@@ -735,7 +765,7 @@ export default function ClassComponent() {
       const { data } = await roomApi.getAllRoom(
         1,
         1000,
-        selectedPastoralYear,
+        selectedClassView?.pastoralYearId,
         true
       );
       setRooms(data.data.items);
@@ -749,7 +779,7 @@ export default function ClassComponent() {
       const { data } = await roomApi.getAllRoom(
         1,
         1000,
-        selectedPastoralYear,
+        selectedClassView?.pastoralYearId,
         true,
         slotId
       );
@@ -766,7 +796,9 @@ export default function ClassComponent() {
         true,
         1,
         1000,
-        selectedPastoralYear
+        selectedClassView && selectedClassView?.pastoralYearId
+          ? selectedClassView?.pastoralYearId
+          : selectedPastoralYear
       );
 
       let fetchItems: any[] = []; // Đảm bảo mảng là extensible
@@ -780,7 +812,7 @@ export default function ClassComponent() {
 
           // if (remainingClassHavingSlots.data.data.length <= 0) {
           // Dùng concat thay vì push để tránh lỗi
-          fetchItems = fetchItems.concat({ ...item, id: item.catechist.id });
+          fetchItems = fetchItems.concat({ ...item.catechist });
           // }
         });
 
@@ -821,7 +853,9 @@ export default function ClassComponent() {
             // Dùng concat thay vì push để tránh lỗi
             let newItem: any = { ...item };
             newItem.level = { name: item.level };
-            fetchItems = fetchItems.concat({ catechist: newItem, id: item.id });
+            fetchItems = fetchItems.concat({
+              ...item,
+            });
           }
         });
 
@@ -924,6 +958,7 @@ export default function ClassComponent() {
         }
       } finally {
         setTimeout(() => {
+          handleViewSlots(selectedClass ? selectedClass.id : "");
           disableLoading();
         }, 3800);
       }
@@ -1038,8 +1073,8 @@ export default function ClassComponent() {
       renderCell: (params) => (
         <img
           src={
-            params.row.catechist.imageUrl
-              ? params.row.catechist.imageUrl
+            params.row.imageUrl
+              ? params.row.imageUrl
               : "https://firebasestorage.googleapis.com/v0/b/catechisthelper-1f8af.appspot.com/o/defaultAvatar%2FDefaultAvatar.png?alt=media&token=e117852a-f40f-47d8-9801-b802e438de96"
           }
           alt="Catechist"
@@ -1052,33 +1087,35 @@ export default function ClassComponent() {
       field: "code",
       headerName: "Mã giáo lý viên",
       width: 130,
-      renderCell: (params) => params.row.catechist.code,
+      renderCell: (params) => params.row.code,
     },
     {
       field: "christianName",
       headerName: "Tên Thánh",
       width: 150,
       renderCell: (params) =>
-        params.row.catechist.christianName.replace("Thánh", "").trim() || "N/A",
+        params.row.christianName
+          ? params.row.christianName.replace("Thánh", "").trim()
+          : "",
     },
     {
       field: "fullName",
       headerName: "Tên giáo lý viên",
       width: 180,
-      renderCell: (params) => params.row.catechist.fullName,
+      renderCell: (params) => params.row.fullName,
     },
     {
       field: "gender",
       headerName: "Giới tính",
       width: 90,
-      renderCell: (params) => params.row.catechist.gender,
+      renderCell: (params) => params.row.gender,
     },
     {
       field: "level",
       headerName: "Cấp bậc",
       width: 150,
       renderCell: (params) =>
-        params.row.catechist.level ? params.row.catechist.level.name : "N/A",
+        params.row.level ? params.row.level.name : "N/A",
     },
     {
       field: "assign",
@@ -1089,7 +1126,7 @@ export default function ClassComponent() {
           variant="outlined"
           color="primary"
           className="btn btn-primary"
-          onClick={() => handleAddCatechist([params.row.catechist.id])}
+          onClick={() => handleAddCatechist([params.row.id])}
         >
           Thêm
         </Button>
@@ -1105,8 +1142,8 @@ export default function ClassComponent() {
       renderCell: (params) => (
         <img
           src={
-            params.row.catechist.imageUrl
-              ? params.row.catechist.imageUrl
+            params.row.imageUrl
+              ? params.row.imageUrl
               : "https://firebasestorage.googleapis.com/v0/b/catechisthelper-1f8af.appspot.com/o/defaultAvatar%2FDefaultAvatar.png?alt=media&token=e117852a-f40f-47d8-9801-b802e438de96"
           }
           alt="Catechist"
@@ -1119,33 +1156,35 @@ export default function ClassComponent() {
       field: "code",
       headerName: "Mã giáo lý viên",
       width: 130,
-      renderCell: (params) => params.row.catechist.code,
+      renderCell: (params) => params.row.code,
     },
     {
       field: "christianName",
       headerName: "Tên Thánh",
       width: 150,
       renderCell: (params) =>
-        params.row.catechist.christianName.replace("Thánh", "").trim() || "N/A",
+        params.row.christianName
+          ? params.row.christianName.replace("Thánh", "").trim()
+          : "",
     },
     {
       field: "fullName",
       headerName: "Tên giáo lý viên",
       width: 180,
-      renderCell: (params) => params.row.catechist.fullName,
+      renderCell: (params) => params.row.fullName,
     },
     {
       field: "gender",
       headerName: "Giới tính",
       width: 90,
-      renderCell: (params) => params.row.catechist.gender,
+      renderCell: (params) => params.row.gender,
     },
     {
       field: "level",
       headerName: "Cấp bậc",
       width: 150,
       renderCell: (params) =>
-        params.row.catechist.level ? params.row.catechist.level.name : "N/A",
+        params.row.level ? params.row.level.name : "N/A",
     },
     {
       field: "assign",
@@ -1156,7 +1195,7 @@ export default function ClassComponent() {
           variant="outlined"
           color="primary"
           className="btn btn-primary"
-          onClick={() => handleAddCatechist([params.row.catechist.id], true)}
+          onClick={() => handleAddCatechist([params.row.id], true)}
         >
           Thêm
         </Button>
@@ -1172,8 +1211,8 @@ export default function ClassComponent() {
       renderCell: (params) => (
         <img
           src={
-            params.row.catechist.imageUrl
-              ? params.row.catechist.imageUrl
+            params.row.imageUrl
+              ? params.row.imageUrl
               : "https://firebasestorage.googleapis.com/v0/b/catechisthelper-1f8af.appspot.com/o/defaultAvatar%2FDefaultAvatar.png?alt=media&token=e117852a-f40f-47d8-9801-b802e438de96"
           }
           alt="Catechist"
@@ -1186,33 +1225,35 @@ export default function ClassComponent() {
       field: "code",
       headerName: "Mã giáo lý viên",
       width: 130,
-      renderCell: (params) => params.row.catechist.code,
+      renderCell: (params) => params.row.code,
     },
     {
       field: "christianName",
       headerName: "Tên Thánh",
       width: 150,
       renderCell: (params) =>
-        params.row.catechist.christianName.replace("Thánh", "").trim() || "N/A",
+        params.row.christianName
+          ? params.row.christianName.replace("Thánh", "").trim()
+          : "",
     },
     {
       field: "fullName",
       headerName: "Tên giáo lý viên",
       width: 180,
-      renderCell: (params) => params.row.catechist.fullName,
+      renderCell: (params) => params.row.fullName,
     },
     {
       field: "gender",
       headerName: "Giới tính",
       width: 90,
-      renderCell: (params) => params.row.catechist.gender,
+      renderCell: (params) => params.row.gender,
     },
     {
       field: "level",
       headerName: "Cấp bậc",
       width: 150,
       renderCell: (params) =>
-        params.row.catechist.level ? params.row.catechist.level.name : "N/A",
+        params.row.level ? params.row.level.name : "N/A",
     },
     {
       field: "remove",
@@ -1253,8 +1294,8 @@ export default function ClassComponent() {
       renderCell: (params) => (
         <img
           src={
-            params.row.catechist.imageUrl
-              ? params.row.catechist.imageUrl
+            params.row.imageUrl
+              ? params.row.imageUrl
               : "https://firebasestorage.googleapis.com/v0/b/catechisthelper-1f8af.appspot.com/o/defaultAvatar%2FDefaultAvatar.png?alt=media&token=e117852a-f40f-47d8-9801-b802e438de96"
           }
           alt="Catechist"
@@ -1267,33 +1308,35 @@ export default function ClassComponent() {
       field: "code",
       headerName: "Mã giáo lý viên",
       width: 130,
-      renderCell: (params) => params.row.catechist.code,
+      renderCell: (params) => params.row.code,
     },
     {
       field: "christianName",
       headerName: "Tên Thánh",
       width: 150,
       renderCell: (params) =>
-        params.row.catechist.christianName.replace("Thánh", "").trim() || "N/A",
+        params.row.christianName
+          ? params.row.christianName.replace("Thánh", "").trim()
+          : "",
     },
     {
       field: "fullName",
       headerName: "Tên giáo lý viên",
       width: 180,
-      renderCell: (params) => params.row.catechist.fullName,
+      renderCell: (params) => params.row.fullName,
     },
     {
       field: "gender",
       headerName: "Giới tính",
       width: 90,
-      renderCell: (params) => params.row.catechist.gender,
+      renderCell: (params) => params.row.gender,
     },
     {
       field: "level",
       headerName: "Cấp bậc",
       width: 150,
       renderCell: (params) =>
-        params.row.catechist.level ? params.row.catechist.level.name : "N/A",
+        params.row.level ? params.row.level.name : "N/A",
     },
     {
       field: "remove",
@@ -1381,13 +1424,7 @@ export default function ClassComponent() {
       const confirm = await sweetAlert.confirm(
         `Xác nhận sẽ xóa \n${deletedClass.name}?`,
         `Ngành: ${deletedClass.majorName}
-        </br> Khối: ${
-          deletedClass.gradeName
-            ? deletedClass.gradeName.includes("Khối")
-              ? deletedClass.gradeName.split("Khối")[1]
-              : deletedClass.gradeName
-            : ""
-        }
+        </br> Khối: ${deletedClass.gradeName ? deletedClass.gradeName : ""}
         </br> ${pastoralYear && pastoralYear.name ? `Niên khóa: ${pastoralYear.name}` : ``}
         </br> </br>Lưu ý: Khi xóa lớp sẽ xóa hết tất cả dữ liệu tiết học và giáo lý viên bên trong lớp`,
         undefined,
@@ -1519,117 +1556,123 @@ export default function ClassComponent() {
 
       <div className="my-2 flex justify-between mx-3">
         <div className="flex items-center justify-between w-full mt-1">
-          <div className="flex gap-x-[5px]">
-            {/* Select for Pastoral Year */}
-            <FormControl
-              fullWidth
-              sx={{
-                minWidth: 180,
-                marginTop: 1.5,
-                "& .MuiInputLabel-root": {
-                  transform: "translateY(-20px)",
-                  fontSize: "14px",
-                  marginLeft: "8px",
-                },
-                "& .MuiSelect-select": {
-                  paddingTop: "10px",
-                  paddingBottom: "10px",
-                },
-              }}
-            >
-              <InputLabel>Chọn Niên Khóa</InputLabel>
-              <MuiSelect
-                value={selectedPastoralYear}
-                onChange={(e) => {
-                  setSelectedPastoralYear(e.target.value);
-                  setSelectedMajor("all");
-                  setSelectedGrade("all");
-                }}
-                displayEmpty
-                required
-              >
-                {pastoralYears.map((year) => (
-                  <MenuItem key={year.id} value={year.id}>
-                    {year.name.split("-")[1]
-                      ? year.name.split("-")[0] +
-                        " - " +
-                        year.name.split("-")[1]
-                      : year.name}
-                  </MenuItem>
-                ))}
-              </MuiSelect>
-            </FormControl>
-
-            {/* Select for Major */}
-            <FormControl
-              fullWidth
-              sx={{
-                minWidth: 180,
-                marginTop: 1.5,
-                "& .MuiInputLabel-root": {
-                  transform: "translateY(-20px)",
-                  fontSize: "14px",
-                  marginLeft: "8px",
-                },
-                "& .MuiSelect-select": {
-                  paddingTop: "10px",
-                  paddingBottom: "10px",
-                },
-              }}
-            >
-              <InputLabel>Chọn Ngành</InputLabel>
-              <MuiSelect
-                value={selectedMajor}
-                onChange={(e) => {
-                  setSelectedMajor(e.target.value);
-                  setSelectedGrade("all");
-                }}
-                displayEmpty
-              >
-                <MenuItem value="all" key="all">
-                  Tất cả
-                </MenuItem>
-                {majors.map((major) => (
-                  <MenuItem key={major.id} value={major.id}>
-                    {major.name}
-                  </MenuItem>
-                ))}
-              </MuiSelect>
-            </FormControl>
-
-            {selectedMajor && selectedMajor != "all" && (
-              <FormControl
-                fullWidth
-                sx={{
-                  minWidth: 180,
-                  marginTop: 1.5,
-                  "& .MuiInputLabel-root": {
-                    transform: "translateY(-20px)",
-                    fontSize: "14px",
-                    marginLeft: "8px",
-                  },
-                  "& .MuiSelect-select": {
-                    paddingTop: "10px",
-                    paddingBottom: "10px",
-                  },
-                }}
-              >
-                <InputLabel>Chọn Khối</InputLabel>
-                <MuiSelect
-                  value={selectedGrade}
-                  onChange={(e) => setSelectedGrade(e.target.value)}
-                  displayEmpty
+          <div className="flex gap-x-[5px] min-w-[10px]">
+            {!ignoreEffect ? (
+              <>
+                {/* Select for Pastoral Year */}
+                <FormControl
+                  fullWidth
+                  sx={{
+                    minWidth: 180,
+                    marginTop: 1.5,
+                    "& .MuiInputLabel-root": {
+                      transform: "translateY(-20px)",
+                      fontSize: "14px",
+                      marginLeft: "8px",
+                    },
+                    "& .MuiSelect-select": {
+                      paddingTop: "10px",
+                      paddingBottom: "10px",
+                    },
+                  }}
                 >
-                  <MenuItem value="all" key="all">
-                    Tất cả
-                  </MenuItem>
-                  {grades.map((grade) => (
-                    <MenuItem key={grade.id} value={grade.id}>
-                      {grade.name}
+                  <InputLabel>Chọn Niên Khóa</InputLabel>
+                  <MuiSelect
+                    value={selectedPastoralYear}
+                    onChange={(e) => {
+                      setSelectedPastoralYear(e.target.value);
+                      setSelectedMajor("all");
+                      setSelectedGrade("all");
+                    }}
+                    displayEmpty
+                    required
+                  >
+                    {pastoralYears.map((year) => (
+                      <MenuItem key={year.id} value={year.id}>
+                        {year.name.split("-")[1]
+                          ? year.name.split("-")[0] +
+                            " - " +
+                            year.name.split("-")[1]
+                          : year.name}
+                      </MenuItem>
+                    ))}
+                  </MuiSelect>
+                </FormControl>
+
+                {/* Select for Major */}
+                <FormControl
+                  fullWidth
+                  sx={{
+                    minWidth: 180,
+                    marginTop: 1.5,
+                    "& .MuiInputLabel-root": {
+                      transform: "translateY(-20px)",
+                      fontSize: "14px",
+                      marginLeft: "8px",
+                    },
+                    "& .MuiSelect-select": {
+                      paddingTop: "10px",
+                      paddingBottom: "10px",
+                    },
+                  }}
+                >
+                  <InputLabel>Chọn Ngành</InputLabel>
+                  <MuiSelect
+                    value={selectedMajor}
+                    onChange={(e) => {
+                      setSelectedMajor(e.target.value);
+                      setSelectedGrade("all");
+                    }}
+                    displayEmpty
+                  >
+                    <MenuItem value="all" key="all">
+                      Tất cả
                     </MenuItem>
-                  ))}
-                </MuiSelect>
-              </FormControl>
+                    {majors.map((major) => (
+                      <MenuItem key={major.id} value={major.id}>
+                        {major.name}
+                      </MenuItem>
+                    ))}
+                  </MuiSelect>
+                </FormControl>
+
+                {selectedMajor && selectedMajor != "all" && (
+                  <FormControl
+                    fullWidth
+                    sx={{
+                      minWidth: 180,
+                      marginTop: 1.5,
+                      "& .MuiInputLabel-root": {
+                        transform: "translateY(-20px)",
+                        fontSize: "14px",
+                        marginLeft: "8px",
+                      },
+                      "& .MuiSelect-select": {
+                        paddingTop: "10px",
+                        paddingBottom: "10px",
+                      },
+                    }}
+                  >
+                    <InputLabel>Chọn Khối</InputLabel>
+                    <MuiSelect
+                      value={selectedGrade}
+                      onChange={(e) => setSelectedGrade(e.target.value)}
+                      displayEmpty
+                    >
+                      <MenuItem value="all" key="all">
+                        Tất cả
+                      </MenuItem>
+                      {grades.map((grade) => (
+                        <MenuItem key={grade.id} value={grade.id}>
+                          {grade.name}
+                        </MenuItem>
+                      ))}
+                    </MuiSelect>
+                  </FormControl>
+                )}
+              </>
+            ) : (
+              <></>
             )}
           </div>
           <div className="flex gap-x-[5px]">
@@ -1665,95 +1708,112 @@ export default function ClassComponent() {
             ) : (
               <></>
             )}
-            <div>
-              <Button
-                onClick={() => {
-                  const year = pastoralYears.find(
-                    (item) => item.id == selectedPastoralYear
-                  );
-                  if (year) {
-                    if (year.pastoralYearStatus == pastoralYearStatus.FINISH) {
-                      sweetAlert.alertInfo(
-                        `Niên khóa ${
-                          year.name.split("-")[1]
-                            ? year.name.split("-")[0] +
-                              " - " +
-                              year.name.split("-")[1]
-                            : year.name
-                        } đã kết thúc`,
-                        "",
-                        4000,
-                        27
-                      );
-                      return;
-                    }
-                    handleOpenDialogCreateUpdateClass();
-                  }
-                }} // Mở dialog thêm dữ liệu năm học mới
-                variant="outlined"
-                className="btn btn-success"
-                color="success"
-                style={{ marginBottom: "16px" }}
-              >
-                Tạo mới
-              </Button>
-            </div>
-            <div>
-              <Button
-                onClick={handleOpenTimetableDialog} // Mở dialog thêm dữ liệu năm học mới
-                variant="outlined"
-                color="primary"
-                className="btn btn-primary"
-                style={{ marginBottom: "16px" }}
-              >
-                Thêm dữ liệu năm học mới
-              </Button>
-            </div>
-            <div>
-              <Button
-                onClick={() => {
-                  const action = async () => {
-                    try {
-                      enableLoading();
-                      const yearName = pastoralYears.find(
+            {!ignoreEffect ? (
+              <>
+                <div>
+                  <Button
+                    onClick={() => {
+                      const year = pastoralYears.find(
                         (item) => item.id == selectedPastoralYear
-                      ).name;
-
-                      const { data } =
-                        await timetableApi.exportPastoralYearData(yearName);
-
-                      // Tạo Blob từ response và sử dụng FileSaver để tải xuống file
-                      const blob = new Blob([data], {
-                        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                      });
-                      FileSaver.saveAs(
-                        blob,
-                        `Danh sách thông tin các lớp năm học ${yearName}.xlsx`
                       );
-                    } catch (error) {
-                      console.error("Lỗi khi xuất danh sách:", error);
-                      sweetAlert.alertFailed(
-                        "Có lỗi xảy ra khi xuất danh sách!",
-                        "",
-                        2500,
-                        22
-                      );
-                    } finally {
-                      disableLoading();
-                    }
-                  };
-                  action();
-                }}
-                variant="contained"
-                color="primary"
-                style={{ marginBottom: "16px" }}
-              >
-                Xuất danh sách theo năm học
-              </Button>
-            </div>
+                      if (year) {
+                        if (
+                          year.pastoralYearStatus == pastoralYearStatus.FINISH
+                        ) {
+                          sweetAlert.alertInfo(
+                            `Niên khóa ${
+                              year.name.split("-")[1]
+                                ? year.name.split("-")[0] +
+                                  " - " +
+                                  year.name.split("-")[1]
+                                : year.name
+                            } đã kết thúc`,
+                            "",
+                            4000,
+                            27
+                          );
+                          return;
+                        }
+                        handleOpenDialogCreateUpdateClass();
+                      }
+                    }} // Mở dialog thêm dữ liệu năm học mới
+                    variant="outlined"
+                    className="btn btn-success"
+                    color="success"
+                    style={{ marginBottom: "16px" }}
+                  >
+                    Tạo mới
+                  </Button>
+                </div>
+                <div>
+                  <Button
+                    onClick={handleOpenTimetableDialog} // Mở dialog thêm dữ liệu năm học mới
+                    variant="outlined"
+                    color="primary"
+                    className="btn btn-primary"
+                    style={{ marginBottom: "16px" }}
+                  >
+                    Thêm dữ liệu năm học mới
+                  </Button>
+                </div>
+                <div>
+                  <Button
+                    onClick={() => {
+                      const action = async () => {
+                        try {
+                          enableLoading();
+                          const yearName = pastoralYears.find(
+                            (item) => item.id == selectedPastoralYear
+                          ).name;
+
+                          const { data } =
+                            await timetableApi.exportPastoralYearData(yearName);
+
+                          // Tạo Blob từ response và sử dụng FileSaver để tải xuống file
+                          const blob = new Blob([data], {
+                            type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                          });
+                          FileSaver.saveAs(
+                            blob,
+                            `Danh sách thông tin các lớp năm học ${yearName}.xlsx`
+                          );
+                        } catch (error) {
+                          console.error("Lỗi khi xuất danh sách:", error);
+                          sweetAlert.alertFailed(
+                            "Có lỗi xảy ra khi xuất danh sách!",
+                            "",
+                            2500,
+                            22
+                          );
+                        } finally {
+                          disableLoading();
+                        }
+                      };
+                      action();
+                    }}
+                    variant="contained"
+                    color="primary"
+                    style={{ marginBottom: "16px" }}
+                  >
+                    Xuất danh sách theo năm học
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <></>
+            )}
+
             <div>
               <Button
-                onClick={() => fetchClasses()}
+                onClick={() => {
+                  if (ignoreEffect) {
+                    setLoading(true);
+                    fetchClasses(undefined, undefined, undefined, true);
+                    setIgnoreEffect(false);
+                  } else {
+                    fetchClasses();
+                  }
+                }}
                 variant="contained"
                 color="primary"
                 style={{ marginBottom: "16px" }}
@@ -1791,7 +1851,7 @@ export default function ClassComponent() {
                 undefined &&
               pastoralYears.find((item) => item.id == selectedPastoralYear)
                 .pastoralYearStatus == pastoralYearStatus.FINISH
-            )
+            ) && !ignoreEffect
           }
           disableRowSelectionOnClick
           disableMultipleRowSelection
@@ -1850,11 +1910,7 @@ export default function ClassComponent() {
               </p>
               <p>
                 <strong>Khối: </strong>
-                {selectedClassView.gradeName
-                  ? selectedClassView.gradeName.includes("Khối")
-                    ? selectedClassView.gradeName.split("Khối")[1]
-                    : selectedClassView.gradeName
-                  : ""}
+                {selectedClassView.gradeName ? selectedClassView.gradeName : ""}
               </p>
             </div>
           ) : (
@@ -2033,7 +2089,7 @@ export default function ClassComponent() {
       <Dialog fullWidth maxWidth="lg" open={openSlotsDialog}>
         <div style={{ padding: "20px" }}>
           <h3 className="text-[1.2rem] mb-2">
-            Thông tin các tiết học của{" "}
+            Thông tin các tiết học của Lớp{" "}
             {selectedClassView ? (
               <>
                 <strong>{selectedClassView.name}</strong>
@@ -2048,18 +2104,16 @@ export default function ClassComponent() {
                 {selectedClassView.majorName ? selectedClassView.majorName : ""}
                 {" - "}
                 Khối{" "}
-                {selectedClassView.gradeName
-                  ? selectedClassView.gradeName.includes("Khối")
-                    ? selectedClassView.gradeName.split("Khối")[1]
-                    : selectedClassView.gradeName
-                  : ""}
+                {selectedClassView.gradeName ? selectedClassView.gradeName : ""}
                 {" - "}
                 Niên khóa{" "}
-                {pastoralYears.findIndex(
-                  (item) => item.id == selectedPastoralYear
+                {selectedClassView &&
+                selectedClassView.pastoralYearId &&
+                pastoralYears.findIndex(
+                  (item) => item.id == selectedClassView.pastoralYearId
                 ) >= 0
                   ? pastoralYears.find(
-                      (item) => item.id == selectedPastoralYear
+                      (item) => item.id == selectedClassView.pastoralYearId
                     ).name
                   : ""}
               </span>
@@ -2072,10 +2126,14 @@ export default function ClassComponent() {
             className="w-full justify-end mb-2"
             style={{
               display:
-                pastoralYears.find((item) => item.id == selectedPastoralYear) !=
-                  undefined &&
-                pastoralYears.find((item) => item.id == selectedPastoralYear)
-                  .pastoralYearStatus == pastoralYearStatus.FINISH
+                selectedClassView &&
+                selectedClassView.pastoralYearId &&
+                pastoralYears.findIndex(
+                  (item) => item.id == selectedClassView.pastoralYearId
+                ) >= 0 &&
+                pastoralYears.find(
+                  (item) => item.id == selectedClassView.pastoralYearId
+                ).pastoralYearStatus == pastoralYearStatus.FINISH
                   ? "none"
                   : "flex",
             }}
@@ -2121,11 +2179,13 @@ export default function ClassComponent() {
                       <span
                         className={`rounded-xl px-2 py-1
                       ${
+                        selectedClassView &&
+                        selectedClassView.pastoralYearId &&
+                        pastoralYears.findIndex(
+                          (item) => item.id == selectedClassView.pastoralYearId
+                        ) >= 0 &&
                         pastoralYears.find(
-                          (item) => item.id == selectedPastoralYear
-                        ) != undefined &&
-                        pastoralYears.find(
-                          (item) => item.id == selectedPastoralYear
+                          (item) => item.id == selectedClassView.pastoralYearId
                         ).pastoralYearStatus == pastoralYearStatus.FINISH
                           ? "bg-success text-white"
                           : formatDate.DD_MM_YYYY(
@@ -2139,6 +2199,21 @@ export default function ClassComponent() {
                               : ""
                       }`}
                       >
+                        {new Date(params.row.date).getTime() -
+                          new Date().getTime() >=
+                        0 ? (
+                          <>
+                            <i
+                              className="py-1 px-1 rounded-md fa-solid fa-pen-to-square text-primary cursor-pointer hover:!text-white hover:!bg-blue-500"
+                              onClick={() => {
+                                setChosenSlotToUpdate(params.row);
+                                setDialogUpdateSlotDate(true);
+                              }}
+                            ></i>
+                          </>
+                        ) : (
+                          <></>
+                        )}{" "}
                         {formatDate.DD_MM_YYYY(params.row.date)}
                       </span>
                     </div>
@@ -2156,7 +2231,7 @@ export default function ClassComponent() {
                     0 ? (
                       <>
                         <i
-                          className="mr-1 fa-solid fa-pen-to-square text-primary cursor-pointer"
+                          className="py-1 px-1 rounded-md fa-solid fa-pen-to-square text-primary cursor-pointer hover:!text-white hover:!bg-blue-500"
                           onClick={() => {
                             setChosenSlotToUpdate(params.row);
                             setDialogUpdateSlotTime(true);
@@ -2195,7 +2270,7 @@ export default function ClassComponent() {
                                     ? "none"
                                     : "",
                               }}
-                              className="mr-3 fa-solid fa-pen-to-square text-primary cursor-pointer"
+                              className="mr-1 py-1 px-1 rounded-md fa-solid fa-pen-to-square text-primary cursor-pointer hover:!text-white hover:!bg-blue-500"
                               onClick={() => {
                                 setChosenSlotToUpdate(params.row);
                                 setDialogUpdateSlotRoom(true);
@@ -2233,7 +2308,7 @@ export default function ClassComponent() {
                                   ? "none"
                                   : "",
                             }}
-                            className="mr-3 fa-solid fa-pen-to-square text-primary cursor-pointer"
+                            className="mr-1 py-1 px-1 rounded-md fa-solid fa-pen-to-square text-primary cursor-pointer hover:!text-white hover:!bg-blue-500"
                             onClick={() => {
                               setChosenSlotToUpdate(params.row);
                               setDialogUpdateSlotRoom(true);
@@ -2267,7 +2342,7 @@ export default function ClassComponent() {
                       0 ? (
                         <>
                           <i
-                            className="mr-2 fa-solid fa-pen-to-square text-primary cursor-pointer"
+                            className="mr-1 py-1 px-1 rounded-md fa-solid fa-pen-to-square text-primary cursor-pointer hover:!text-white hover:!bg-blue-500"
                             style={{
                               display:
                                 selectedClassView &&
@@ -2302,8 +2377,7 @@ export default function ClassComponent() {
 
                                         if (cateSlotExist != undefined) {
                                           fetchItems = fetchItems.concat({
-                                            catechist: item,
-                                            id: item.id,
+                                            ...item,
                                             type: cateSlotExist.type,
                                           });
                                           if (
@@ -2540,9 +2614,7 @@ export default function ClassComponent() {
                 <div className="w-[50%] my-1">
                   <strong>Khối: </strong>
                   {selectedClassView.gradeName
-                    ? selectedClassView.gradeName.includes("Khối")
-                      ? selectedClassView.gradeName.split("Khối")[1]
-                      : selectedClassView.gradeName
+                    ? selectedClassView.gradeName
                     : ""}
                 </div>
               </>
@@ -2638,8 +2710,172 @@ export default function ClassComponent() {
                     sweetAlert.alertFailed("Có lỗi khi cập nhật");
                   } finally {
                     setTimeout(() => {
+                      handleViewSlots(selectedClass ? selectedClass.id : "");
                       disableLoading();
                     }, 200);
+                  }
+                };
+                action();
+              }}
+            >
+              Xác nhận
+            </Button>
+          </div>
+        </div>
+      </Dialog>
+
+      <Dialog fullWidth maxWidth="sm" open={dialogUpdateSlotDate}>
+        <div style={{ padding: "20px" }}>
+          <h3 className={`mb-3 text-[1.2rem] text-primary`}>
+            <strong>Cập nhật ngày học</strong>
+          </h3>
+
+          <div className="flex justify-between flex-wrap">
+            {selectedClass ? (
+              <>
+                <div className="w-[45%] my-1">
+                  <strong>Lớp học:</strong> {selectedClass.name}
+                </div>
+              </>
+            ) : (
+              <></>
+            )}
+            {chosenSlotToUpdate ? (
+              <>
+                <div className="w-[50%] my-1">
+                  <strong>Ngày học:</strong>{" "}
+                  {formatDate.DD_MM_YYYY(chosenSlotToUpdate.date)}
+                </div>
+
+                <div className="w-[45%] my-1">
+                  <strong>Giờ học:</strong>{" "}
+                  {formatDate.HH_mm(chosenSlotToUpdate.startTime)} -{" "}
+                  {formatDate.HH_mm(chosenSlotToUpdate.endTime)}
+                </div>
+
+                {chosenSlotToUpdate.room ? (
+                  <>
+                    <div className="w-[50%] my-1">
+                      <strong>Phòng học:</strong> {chosenSlotToUpdate.room.name}
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="w-[50%] my-1">
+                      <strong>Phòng học:</strong> Chưa có
+                    </div>
+                  </>
+                )}
+              </>
+            ) : (
+              <></>
+            )}
+
+            {selectedClassView ? (
+              <>
+                <div className="w-[45%] my-1">
+                  <strong>Ngành: </strong>
+                  {selectedClassView.majorName
+                    ? selectedClassView.majorName
+                    : ""}
+                </div>
+                <div className="w-[50%] my-1">
+                  <strong>Khối: </strong>
+                  {selectedClassView.gradeName
+                    ? selectedClassView.gradeName
+                    : ""}
+                </div>
+              </>
+            ) : (
+              <></>
+            )}
+          </div>
+          <p className="mt-1 mb-3">
+            <strong>Cập nhật ngày học mới</strong>
+          </p>
+          <div className="flex justify-between w-full h-full gap-x-5">
+            <TextField
+              label={
+                <span>
+                  Chọn ngày <span style={{ color: "red" }}>*</span>
+                </span>
+              }
+              type="date"
+              value={selectedDate}
+              onChange={handleDateChange}
+              InputLabelProps={{
+                shrink: true, // Đảm bảo label không chồng lên placeholder
+              }}
+              sx={{ width: 250 }}
+            />
+          </div>
+
+          <div className="flex justify-end mt-4 gap-x-2">
+            <Button
+              variant="outlined"
+              color="primary"
+              className="btn btn-secondary"
+              onClick={() => {
+                setDialogUpdateSlotDate(false);
+                setChosenSlotToUpdate(null);
+              }}
+            >
+              Hủy bỏ
+            </Button>
+            <Button
+              variant="contained"
+              color={"primary"}
+              onClick={() => {
+                const action = async () => {
+                  if (selectedDate == "") {
+                    sweetAlert.alertWarning(
+                      "Ngày học mới là bắt buộc khi cập nhật",
+                      "",
+                      5000,
+                      30
+                    );
+                    return;
+                  }
+                  if (chosenSlotToUpdate) {
+                    const chosenDate = new Date().setHours(0, 0, 0, 0);
+                    const selectedDateObj = new Date(selectedDate).setHours(
+                      0,
+                      0,
+                      0,
+                      0
+                    );
+
+                    if (selectedDateObj <= chosenDate) {
+                      sweetAlert.alertWarning(
+                        "Ngày học mới phải là 1 ngày trong tương lai",
+                        "",
+                        5000,
+                        32
+                      );
+                      return;
+                    }
+
+                    try {
+                      enableLoading();
+                      await classApi.updateSlotOfClass(chosenSlotToUpdate.id, {
+                        date: selectedDate,
+                      });
+
+                      setTimeout(() => {
+                        setDialogUpdateSlotDate(false);
+                        setChosenSlotToUpdate(null);
+                        handleViewSlots(selectedClass ? selectedClass.id : "");
+                        sweetAlert.alertSuccess("Cập nhật thành công");
+                      }, 200);
+                    } catch (error) {
+                      console.error("Lỗi khi tải", error);
+                      sweetAlert.alertFailed("Có lỗi khi cập nhật");
+                    } finally {
+                      setTimeout(() => {
+                        handleViewSlots(selectedClass ? selectedClass.id : "");
+                        disableLoading();
+                      }, 200);
+                    }
                   }
                 };
                 action();
@@ -2717,9 +2953,7 @@ export default function ClassComponent() {
                 <div className="w-[50%] my-1">
                   <strong>Khối: </strong>
                   {selectedClassView.gradeName
-                    ? selectedClassView.gradeName.includes("Khối")
-                      ? selectedClassView.gradeName.split("Khối")[1]
-                      : selectedClassView.gradeName
+                    ? selectedClassView.gradeName
                     : ""}
                 </div>
               </>
@@ -2848,6 +3082,7 @@ export default function ClassComponent() {
                     sweetAlert.alertFailed("Có lỗi khi cập nhật");
                   } finally {
                     setTimeout(() => {
+                      handleViewSlots(selectedClass ? selectedClass.id : "");
                       disableLoading();
                       setSelectedRoomUpdateSlot(null);
                     }, 200);
@@ -2920,9 +3155,7 @@ export default function ClassComponent() {
                 <div className="w-[50%] my-1">
                   <strong>Khối: </strong>
                   {selectedClassView.gradeName
-                    ? selectedClassView.gradeName.includes("Khối")
-                      ? selectedClassView.gradeName.split("Khối")[1]
-                      : selectedClassView.gradeName
+                    ? selectedClassView.gradeName
                     : ""}
                 </div>
               </>
@@ -3065,6 +3298,7 @@ export default function ClassComponent() {
                     sweetAlert.alertFailed("Có lỗi khi cập nhật");
                   } finally {
                     setTimeout(() => {
+                      handleViewSlots(selectedClass ? selectedClass.id : "");
                       disableLoading();
                     }, 200);
                   }

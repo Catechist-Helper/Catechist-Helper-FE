@@ -77,6 +77,7 @@ const deleteClass = (classId:string) => {
 
 const updateSlotOfClass = (slotId: string, data: {
   catechistInSlots?: CatechistInSlotRequest[],
+  date?: string,
   startTime?: string,
   endTime?: string,
   roomId?: string,

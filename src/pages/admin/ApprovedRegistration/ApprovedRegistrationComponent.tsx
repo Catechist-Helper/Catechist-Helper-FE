@@ -40,7 +40,7 @@ import { RoleNameEnum } from "../../../enums/RoleEnum";
 import CkEditor from "../../../components/ckeditor5/CkEditor";
 import { RecruitersByMeetingTimeItemResponse } from "../../../model/Response/Account";
 import catechistApi from "../../../api/Catechist";
-import { storeCurrentPath } from "../../../utils/utils";
+import { formatPhone, storeCurrentPath } from "../../../utils/utils";
 import { PATH_ADMIN } from "../../../routes/paths";
 
 // import { RegistrationProcessTitle } from "../../../enums/RegistrationProcess";
@@ -108,7 +108,12 @@ export default function ApprovedRegistrationsTable() {
       },
     },
     { field: "email", headerName: "Email", width: 200 },
-    { field: "phone", headerName: "Số điện thoại", width: 120 },
+    {
+      field: "phone",
+      headerName: "Số điện thoại",
+      width: 120,
+      renderCell: (params) => formatPhone(params.value ? params.value : ""),
+    },
     { field: "address", headerName: "Địa chỉ", width: 180 },
     {
       field: "isTeachingBefore",

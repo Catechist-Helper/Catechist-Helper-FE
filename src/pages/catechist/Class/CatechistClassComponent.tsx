@@ -154,7 +154,8 @@ const CatechistClassComponent = () => {
     try {
       const { data } = await classApi.getCatechistsOfClass(classId, 1, 100);
       return {
-        catechistCount: data.data.total,
+        catechistCount:
+          data && data.data && data.data.total ? data.data.total : 0,
       };
     } catch (error) {
       console.error("Error loading grades:", error);

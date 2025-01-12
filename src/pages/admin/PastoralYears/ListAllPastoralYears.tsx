@@ -133,11 +133,11 @@ const ListAllPastoralYears: React.FC = () => {
           <label className="inline-flex items-center cursor-pointer">
             <span className="text-sm font-medium text-gray-900 mr-2">
               {params.value === pastoralYearStatus.START ? (
-                <span className="py-1 px-2 rounded-xl bg-success text-white">
+                <span className="py-1 px-2 rounded-xl bg-warning text-black">
                   Đang hoạt động
                 </span>
               ) : (
-                <span className="py-1 px-2 rounded-xl bg-black text-white">
+                <span className="py-1 px-2 rounded-xl bg-success text-white">
                   Đã kết thúc
                 </span>
               )}

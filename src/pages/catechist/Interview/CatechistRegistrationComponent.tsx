@@ -13,7 +13,11 @@ import registrationApi from "../../../api/Registration";
 import { RegistrationItemResponse } from "../../../model/Response/Registration";
 import { RegistrationStatus } from "../../../enums/Registration";
 import { formatDate } from "../../../utils/formatDate";
-import { getUserInfo, storeCurrentPath } from "../../../utils/utils";
+import {
+  formatPhone,
+  getUserInfo,
+  storeCurrentPath,
+} from "../../../utils/utils";
 import sweetAlert from "../../../utils/sweetAlert";
 import { Button, MenuItem, Modal, Select } from "@mui/material";
 import CkEditorComponent from "../../../components/ckeditor5/CkEditor";
@@ -164,7 +168,12 @@ export default function CatechistRegistrationsTable() {
       },
     },
     { field: "email", headerName: "Email", width: 200 },
-    { field: "phone", headerName: "Số điện thoại", width: 120 },
+    {
+      field: "phone",
+      headerName: "Số điện thoại",
+      width: 120,
+      renderCell: (params) => formatPhone(params.value ? params.value : ""),
+    },
     { field: "address", headerName: "Địa chỉ", width: 180 },
     {
       field: "isTeachingBefore",

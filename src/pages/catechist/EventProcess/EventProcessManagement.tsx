@@ -257,8 +257,8 @@ const EventProcessManagement: React.FC = () => {
     {
       field: "status",
       headerName: "Trạng thái",
-      headerAlign: "center",
-      align: "center",
+      // headerAlign: "center",
+      // align: "center",
       width: 150,
       renderCell: (params) => {
         switch (params.value) {

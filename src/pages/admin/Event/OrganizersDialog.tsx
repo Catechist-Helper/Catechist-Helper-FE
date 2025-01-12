@@ -19,6 +19,7 @@ import { UpdateMemberRequest } from "../../../model/Request/EventMember";
 import { RoleEventName } from "../../../enums/RoleEventEnum";
 import useAppContext from "../../../hooks/useAppContext";
 import viVNGridTranslation from "../../../locale/MUITable";
+import { formatPhone } from "../../../utils/utils";
 
 interface OrganizersDialogProps {
   open: boolean;
@@ -272,7 +273,12 @@ const OrganizersDialog: React.FC<OrganizersDialogProps> = ({
     { field: "fullName", headerName: "Họ và Tên", width: 200 },
     { field: "email", headerName: "Email", width: 220 },
 
-    { field: "phone", headerName: "Số Điện Thoại", width: 150 },
+    {
+      field: "phone",
+      headerName: "Số Điện Thoại",
+      width: 150,
+      renderCell: (params) => formatPhone(params.value ? params.value : ""),
+    },
     {
       field: "roleEventId",
       headerName: "Vai trò",
@@ -383,7 +389,13 @@ const OrganizersDialog: React.FC<OrganizersDialogProps> = ({
                 },
                 { field: "fullName", headerName: "Họ và Tên", width: 200 },
                 { field: "email", headerName: "Email", width: 220 },
-                { field: "phone", headerName: "Số Điện Thoại", width: 150 },
+                {
+                  field: "phone",
+                  headerName: "Số Điện Thoại",
+                  width: 150,
+                  renderCell: (params) =>
+                    formatPhone(params.value ? params.value : ""),
+                },
                 {
                   field: "action",
                   headerName: "Thêm",

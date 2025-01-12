@@ -20,6 +20,7 @@ export interface GetAbsenceItemResponse {
   id: string,
       status: number,
       approverId: string|null,
+      pastoralYearName: string|null,
       comment: string,
       approvalDate: string|null,
       createAt: string,
