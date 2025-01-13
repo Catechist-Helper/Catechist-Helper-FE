@@ -57,9 +57,9 @@ const ApprovalDialog = ({
             1000
           );
           setReplacementCatechists(
-            response.data.data.items.filter(
-              (item) => item.id != absence.catechistId
-            )
+            response.data.data.items
+              .filter((item) => item.id != absence.catechistId)
+              .reverse()
           );
         } catch (error) {
           console.error("Error fetching replacement catechists:", error);
