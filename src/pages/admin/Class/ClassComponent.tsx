@@ -1842,13 +1842,21 @@ export default function ClassComponent() {
             <div>
               <Button
                 onClick={() => {
-                  if (ignoreEffect) {
-                    setLoading(true);
-                    fetchClasses(undefined, undefined, undefined, true);
-                    setIgnoreEffect(false);
-                  } else {
-                    fetchClasses();
-                  }
+                  const action = async () => {
+                    if (ignoreEffect) {
+                      setLoading(true);
+                      fetchClasses(undefined, undefined, undefined, true);
+                      setIgnoreEffect(false);
+                    } else {
+                      await fetchPastoralYears(
+                        selectedPastoralYear != ""
+                          ? selectedPastoralYear
+                          : undefined
+                      );
+                      fetchClasses();
+                    }
+                  };
+                  action();
                 }}
                 variant="contained"
                 color="primary"
@@ -1883,8 +1891,9 @@ export default function ClassComponent() {
           localeText={viVNGridTranslation}
           checkboxSelection={
             !(
-              pastoralYears.find((item) => item.id == selectedPastoralYear) !=
-                undefined &&
+              pastoralYears.findIndex(
+                (item) => item.id == selectedPastoralYear
+              ) >= 0 &&
               pastoralYears.find((item) => item.id == selectedPastoralYear)
                 .pastoralYearStatus == pastoralYearStatus.FINISH
             ) && !ignoreEffect
@@ -1912,8 +1921,14 @@ export default function ClassComponent() {
                 : undefined
             }
             updateMode={openDialogUpdateClassMode}
-            refresh={() => {
+            refresh={(deletedId) => {
+              fetchPastoralYears(
+                selectedPastoralYear != "" ? selectedPastoralYear : undefined
+              );
               fetchClasses();
+              if (deletedId) {
+                setSelectedRows([]);
+              }
             }}
           />
         </>
@@ -3041,7 +3056,7 @@ export default function ClassComponent() {
                 <Select
                   options={slotUpdateRoomOptions}
                   value={
-                    options.find(
+                    slotUpdateRoomOptions.find(
                       (option) => option.value === selectedRoomUpdateSlot
                     ) || null
                   }

@@ -52,15 +52,22 @@ const ListAllPastoralYears: React.FC = () => {
     navigate("/admin/create-pastoral-years");
   };
 
-  const handleToggleChange = (year: any) => {
+  const handleToggleChange = async (year: any) => {
     const newStatus =
       year.pastoralYearStatus === pastoralYearStatus.START
         ? pastoralYearStatus.FINISH
         : pastoralYearStatus.START;
+    enableLoading();
 
-    pastoralYearsApi
+    await pastoralYearsApi
       .updatePastoralYears(year.id, year.name, year.note, newStatus)
       .then(() => {
+        sweetAlert.alertSuccess(
+          "Hoàn tất niên khóa " + year.name + " thành công",
+          "",
+          5000,
+          30
+        );
         setPastoralYears((prevYears) =>
           prevYears.map((y) =>
             y.id === year.id ? { ...y, pastoralYearStatus: newStatus } : y
@@ -70,11 +77,16 @@ const ListAllPastoralYears: React.FC = () => {
       .catch((err) => {
         console.error("Không thể cập nhật trạng thái niên khóa: ", err);
         sweetAlert.alertFailed(
-          "Không thể hoàn tất niên khóa vì vẫn còn lớp học đang hoạt động.",
+          "Không thể hoàn tất niên khóa " +
+            year.name +
+            " vì vẫn còn lớp học đang hoạt động.",
           "Vui lòng đợi đến khi kết thúc tất cả các lớp học của niên khóa trước khi cập nhật trạng thái.",
           10000,
-          45
+          52
         );
+      })
+      .finally(() => {
+        disableLoading();
       });
   };
 
@@ -120,7 +132,7 @@ const ListAllPastoralYears: React.FC = () => {
       headerName: "Niên Khóa",
       width: 200,
     },
-    { field: "note", headerName: "Ghi chú", width: 310 },
+    { field: "note", headerName: "Ghi chú", width: 400 },
     {
       field: "pastoralYearStatus",
       headerName: "Trạng thái",

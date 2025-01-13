@@ -41,7 +41,7 @@ interface CreateUpdateClassDialogProps {
   classData?: ClassResponse;
   pastoralYearId: string;
   pastoralYearName: string;
-  refresh: () => void;
+  refresh: (deleteId?: boolean) => void;
   rows?: any[];
 }
 
@@ -99,9 +99,31 @@ const CreateUpdateClassDialog: React.FC<CreateUpdateClassDialogProps> = ({
           refresh();
           sweetAlert.alertSuccess("Cập nhật thành công", "", 2500, 22);
         })
-        .catch((err) => {
-          console.error("Lỗi khi cập nhật lớp:", err);
-          sweetAlert.alertFailed("Có lỗi khi cập nhật lớp", "", 2500, 23);
+        .catch((error: any) => {
+          console.error("Lỗi khi cập nhật lớp:", error);
+          if (
+            error.message &&
+            (error.message.includes(
+              "Đã vượt quá ngày cuối cùng của các tiết học giáo lý vào ngày"
+            ) ||
+              error.message.includes("Năm học này đã kết thúc"))
+          ) {
+            sweetAlert.alertFailed(error.message, "", 8000, 32);
+            onClose();
+            refresh(true);
+          } else if (
+            error.Error &&
+            (error.Error.includes(
+              "Đã vượt quá ngày cuối cùng của các tiết học giáo lý vào ngày"
+            ) ||
+              error.Error.includes("Năm học này đã kết thúc"))
+          ) {
+            sweetAlert.alertFailed(error.Error, "", 8000, 32);
+            onClose();
+            refresh(true);
+          } else {
+            sweetAlert.alertFailed("Có lỗi khi cập nhật lớp", "", 2500, 23);
+          }
         })
         .finally(() => {
           disableLoading();
@@ -133,18 +155,24 @@ const CreateUpdateClassDialog: React.FC<CreateUpdateClassDialogProps> = ({
         .catch((error: any) => {
           if (
             error.message &&
-            error.message.includes(
+            (error.message.includes(
               "Đã vượt quá ngày cuối cùng của các tiết học giáo lý vào ngày"
-            )
+            ) ||
+              error.message.includes("Năm học này đã kết thúc"))
           ) {
-            sweetAlert.alertFailed(error.message, "", 6500, 30);
+            sweetAlert.alertFailed(error.message, "", 8000, 32);
+            onClose();
+            refresh(true);
           } else if (
             error.Error &&
-            error.Error.includes(
+            (error.Error.includes(
               "Đã vượt quá ngày cuối cùng của các tiết học giáo lý vào ngày"
-            )
+            ) ||
+              error.Error.includes("Năm học này đã kết thúc"))
           ) {
-            sweetAlert.alertFailed(error.Error, "", 6500, 30);
+            sweetAlert.alertFailed(error.Error, "", 8000, 32);
+            onClose();
+            refresh(true);
           } else {
             sweetAlert.alertFailed("Có lỗi khi tạo lớp", "", 2500, 23);
           }
