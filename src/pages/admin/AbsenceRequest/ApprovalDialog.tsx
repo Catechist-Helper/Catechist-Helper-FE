@@ -8,7 +8,6 @@ import {
   Button,
   Select,
   MenuItem,
-  FormControl,
   Checkbox,
 } from "@mui/material";
 
@@ -52,14 +51,16 @@ const ApprovalDialog = ({
     const fetchReplacementCatechists = async () => {
       if (absence?.id) {
         try {
-          const response =
-            await catechistInSlotApi.getAvailableCatechistsBySlotId(
-              absence.slot.id,
-              absence.catechistId,
-              1,
-              1000
-            );
-          setReplacementCatechists(response.data.data.items);
+          const response = await catechistInSlotApi.findAvailableCatesExcludeId(
+            absence.slot.id,
+            1,
+            1000
+          );
+          setReplacementCatechists(
+            response.data.data.items.filter(
+              (item) => item.id != absence.catechistId
+            )
+          );
         } catch (error) {
           console.error("Error fetching replacement catechists:", error);
         }
@@ -156,11 +157,12 @@ const ApprovalDialog = ({
         />
       ),
     },
-    { field: "code", headerName: "Mã giáo viên", width: 100 },
-    { field: "christianName", headerName: "Tên Thánh", width: 180 },
-    { field: "fullName", headerName: "Họ và tên", width: 170 },
-    { field: "level", headerName: "Cấp bậc", width: 100 },
-    { field: "major", headerName: "Ngành", width: 100 },
+    { field: "code", headerName: "Mã giáo viên", width: 110 },
+    { field: "christianName", headerName: "Tên Thánh", width: 230 },
+    { field: "fullName", headerName: "Họ và tên", width: 200 },
+    { field: "level", headerName: "Cấp bậc", width: 110 },
+    { field: "major", headerName: "Ngành", width: 110 },
+    { field: "grade", headerName: "Khối", width: 120 },
     {
       field: "replace",
       headerName: "Thay thế",
@@ -181,7 +183,7 @@ const ApprovalDialog = ({
   }, [status]);
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
+    <Dialog open={open} onClose={onClose} fullWidth maxWidth="lg">
       <DialogTitle>
         {absence.status == AbsenceRequestStatus.Pending
           ? "Phê duyệt đơn nghỉ phép"
@@ -237,8 +239,8 @@ const ApprovalDialog = ({
         {status == AbsenceRequestStatus.Approved ||
         absence.status != AbsenceRequestStatus.Pending ? (
           <>
-            <FormControl fullWidth margin="normal">
-              <label htmlFor="" className="mt-1 ml-1">
+            <div className="mt-3">
+              <label htmlFor="" className="mt-1 mb-2 ml-1 font-bold">
                 Chọn giáo lý viên thay thế
               </label>
               <DataGrid
@@ -247,9 +249,16 @@ const ApprovalDialog = ({
                 paginationMode="client"
                 disableRowSelectionOnClick
                 localeText={viVNGridTranslation}
-                sx={{ minHeight: "100px" }}
+                sx={{
+                  minHeight: 100,
+                  maxHeight: 330,
+                  overflowX: "auto",
+                  "& .MuiDataGrid-root": {
+                    overflowX: "auto",
+                  },
+                }}
               />
-            </FormControl>
+            </div>
           </>
         ) : (
           <></>

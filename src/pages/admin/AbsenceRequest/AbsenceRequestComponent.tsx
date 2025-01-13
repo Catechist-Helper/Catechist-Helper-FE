@@ -300,8 +300,6 @@ const AbsencePage = () => {
         })
       );
 
-      console.log("updatedRows", updatedRows);
-
       setAbsences(
         updatedRows.sort(
           (a, b) =>
