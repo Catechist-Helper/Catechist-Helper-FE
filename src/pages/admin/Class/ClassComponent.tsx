@@ -871,7 +871,7 @@ export default function ClassComponent() {
 
       // Gọi hàm xử lý
       processItems().then(() => {
-        setSlotUpdateCatechists(fetchItems);
+        setSlotUpdateCatechists([...fetchItems].reverse());
       });
 
       // setCatechists(fetchItems);
