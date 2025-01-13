@@ -1681,6 +1681,26 @@ export default function ClassComponent() {
                 <div>
                   <Button
                     onClick={() => {
+                      const year = pastoralYears.find(
+                        (item) => item.id == selectedPastoralYear
+                      );
+                      if (year) {
+                        const endYear = year.name.split("-")[1];
+
+                        const currentYear = formatDate.YYYY(
+                          new Date().toISOString()
+                        );
+
+                        if (Number(currentYear) > Number(endYear)) {
+                          sweetAlert.alertInfo(
+                            "Hiện tại đã qua niên khóa " + year.name,
+                            "",
+                            5000,
+                            28
+                          );
+                          return;
+                        }
+                      }
                       handleDeleteClass();
                     }}
                     className="btn btn-danger"
@@ -1694,6 +1714,26 @@ export default function ClassComponent() {
                 <div>
                   <Button
                     onClick={() => {
+                      const year = pastoralYears.find(
+                        (item) => item.id == selectedPastoralYear
+                      );
+                      if (year) {
+                        const endYear = year.name.split("-")[1];
+
+                        const currentYear = formatDate.YYYY(
+                          new Date().toISOString()
+                        );
+
+                        if (Number(currentYear) > Number(endYear)) {
+                          sweetAlert.alertInfo(
+                            "Hiện tại đã qua niên khóa " + year.name,
+                            "",
+                            5000,
+                            28
+                          );
+                          return;
+                        }
+                      }
                       handleOpenDialogCreateUpdateClass(true);
                     }} // Mở dialog thêm dữ liệu năm học mới
                     variant="outlined"
@@ -1717,6 +1757,22 @@ export default function ClassComponent() {
                         (item) => item.id == selectedPastoralYear
                       );
                       if (year) {
+                        const endYear = year.name.split("-")[1];
+
+                        const currentYear = formatDate.YYYY(
+                          new Date().toISOString()
+                        );
+
+                        if (Number(currentYear) > Number(endYear)) {
+                          sweetAlert.alertInfo(
+                            "Hiện tại đã qua niên khóa " + year.name,
+                            "",
+                            5000,
+                            28
+                          );
+                          return;
+                        }
+
                         if (
                           year.pastoralYearStatus == pastoralYearStatus.FINISH
                         ) {

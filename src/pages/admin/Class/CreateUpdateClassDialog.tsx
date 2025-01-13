@@ -130,9 +130,25 @@ const CreateUpdateClassDialog: React.FC<CreateUpdateClassDialogProps> = ({
           refresh();
           sweetAlert.alertSuccess("Tạo thành công", "", 2500, 22);
         })
-        .catch((err) => {
-          console.error("Lỗi khi tạo lớp:", err);
-          sweetAlert.alertFailed("Có lỗi khi tạo lớp", "", 2500, 23);
+        .catch((error: any) => {
+          if (
+            error.message &&
+            error.message.includes(
+              "Đã vượt quá ngày cuối cùng của các tiết học giáo lý vào ngày"
+            )
+          ) {
+            sweetAlert.alertFailed(error.message, "", 6500, 30);
+          } else if (
+            error.Error &&
+            error.Error.includes(
+              "Đã vượt quá ngày cuối cùng của các tiết học giáo lý vào ngày"
+            )
+          ) {
+            sweetAlert.alertFailed(error.Error, "", 6500, 30);
+          } else {
+            sweetAlert.alertFailed("Có lỗi khi tạo lớp", "", 2500, 23);
+          }
+          console.error("Lỗi khi tạo lớp:", error);
         })
         .finally(() => {
           disableLoading();
@@ -298,6 +314,7 @@ const CreateUpdateClassDialog: React.FC<CreateUpdateClassDialogProps> = ({
                   touched.numberOfCatechist && errors.numberOfCatechist
                 }
                 margin="normal"
+                disabled={updateMode}
               />
 
               <TextField
