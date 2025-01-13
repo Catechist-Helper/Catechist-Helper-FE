@@ -1058,13 +1058,36 @@ export default function ClassComponent() {
 
       await fetchPastoralYears();
       await fetchMajors(); // Lấy danh sách các major
-    } catch (error) {
-      sweetAlert.alertFailed(
-        "Có lỗi xảy ra khi tạo năm học mới!",
-        "",
-        2500,
-        27
-      );
+    } catch (error: any) {
+      // Tồn tại (Parameter 'value')
+      if (
+        error.message &&
+        error.message.includes("Tồn tại (Parameter 'value')")
+      ) {
+        sweetAlert.alertFailed(
+          "Niên khóa đã tồn tại, không thê thêm mới",
+          "",
+          8000,
+          32
+        );
+      } else if (
+        error.Error &&
+        error.Error.includes("Tồn tại (Parameter 'value')")
+      ) {
+        sweetAlert.alertFailed(
+          "Niên khóa đã tồn tại, không thê thêm mới",
+          "",
+          8000,
+          32
+        );
+      } else {
+        sweetAlert.alertFailed(
+          "Có lỗi xảy ra khi tạo năm học mới!",
+          "",
+          2500,
+          27
+        );
+      }
     } finally {
       disableLoading();
     }
