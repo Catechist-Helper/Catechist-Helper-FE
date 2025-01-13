@@ -66,8 +66,10 @@ const AdminRequestLeaveDialog: React.FC<AdminRequestLeaveDialogProps> = ({
       slotId,
       formData.images
     );
-    setReason("");
-    setSelectedCateId({});
+    setTimeout(() => {
+      setReason("");
+      setSelectedCateId({});
+    }, 5000);
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {

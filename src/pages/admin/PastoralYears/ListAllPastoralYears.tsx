@@ -10,10 +10,12 @@ import { Button, Paper } from "@mui/material";
 import viVNGridTranslation from "../../../locale/MUITable";
 import { PATH_ADMIN } from "../../../routes/paths";
 import { storeCurrentPath } from "../../../utils/utils";
+import useAppContext from "../../../hooks/useAppContext";
 
 const ListAllPastoralYears: React.FC = () => {
   const [pastoralYears, setPastoralYears] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const { enableLoading, disableLoading } = useAppContext();
   const navigate = useNavigate();
 
   const fetchPastoralYears = async () => {
@@ -76,31 +78,38 @@ const ListAllPastoralYears: React.FC = () => {
       });
   };
 
-  const handleDeletePastoralYearClick = async (id: string) => {
+  const handleDeletePastoralYearClick = async (id: string, name: string) => {
     const confirm = await sweetAlert.confirm(
-      "Bạn có chắc là muốn xóa niên khóa này không?",
-      "",
+      "Bạn có chắc là muốn xóa niên khóa " + name + " không?",
+      "<strong><u>Lưu ý:</u></strong> Việc xóa niên khóa <strong>" +
+        name +
+        "</strong> sẽ dẫn tới xóa toàn bộ dữ liệu về lớp học bên trong niên khóa",
       undefined,
       undefined,
       "question"
     );
 
     if (confirm) {
-      pastoralYearsApi
+      enableLoading();
+      await pastoralYearsApi
         .deletePastoralYears(id)
         .then(() => {
           setPastoralYears((prevYears) => prevYears.filter((y) => y.id !== id));
 
-          sweetAlert.alertSuccess("Xóa thành công", "", 3000, 22);
+          sweetAlert.alertSuccess("Xóa thành công", "", 3500, 22);
         })
         .catch((err: Error) => {
           console.error(`Không thể xóa niên khóa với ID: ${id}`, err);
           sweetAlert.alertFailed(
-            "Không thể xóa niên khóa vì đang có dữ liệu",
+            "Không thể xóa niên khóa vì đang có lớp đã bắt đầu",
             "",
             5000,
-            32
+            35
           );
+        })
+        .finally(() => {
+          fetchPastoralYears();
+          disableLoading();
         });
     }
   };
@@ -110,17 +119,6 @@ const ListAllPastoralYears: React.FC = () => {
       field: "name",
       headerName: "Niên Khóa",
       width: 200,
-      renderCell: (params) => {
-        return (
-          <span>
-            {params.row.name.split("-")[1]
-              ? params.row.name.split("-")[0] +
-                " - " +
-                params.row.name.split("-")[1]
-              : params.row.name}
-          </span>
-        );
-      },
     },
     { field: "note", headerName: "Ghi chú", width: 310 },
     {
@@ -128,9 +126,14 @@ const ListAllPastoralYears: React.FC = () => {
       headerName: "Trạng thái",
       width: 250,
       renderCell: (params) => {
-        console.log(params.row);
         return (
-          <label className="inline-flex items-center cursor-pointer">
+          <label
+            className="inline-flex items-center"
+            style={{
+              cursor:
+                params.value === pastoralYearStatus.START ? "pointer" : "",
+            }}
+          >
             <span className="text-sm font-medium text-gray-900 mr-2">
               {params.value === pastoralYearStatus.START ? (
                 <span className="py-1 px-2 rounded-xl bg-warning text-black">
@@ -198,7 +201,9 @@ const ListAllPastoralYears: React.FC = () => {
                 className="btn btn-danger"
                 color="error"
                 variant="outlined"
-                onClick={() => handleDeletePastoralYearClick(params.row.id)}
+                onClick={() =>
+                  handleDeletePastoralYearClick(params.row.id, params.row.name)
+                }
               >
                 Xóa
               </Button>

@@ -477,7 +477,7 @@ const EventProcessManagement: React.FC = () => {
   if (!userLogin || !userLogin.id) {
     return <></>;
   }
-  console.log("rows", rows);
+
   return (
     <Paper
       sx={{
