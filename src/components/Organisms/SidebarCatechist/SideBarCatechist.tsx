@@ -48,7 +48,7 @@ const SideBarCatechist = () => {
         >
           <div
             style={{
-              display: displayContent ? "block" : "none",
+              display: displayContent && isHovered ? "block" : "none",
             }}
           >
             {/* <div
