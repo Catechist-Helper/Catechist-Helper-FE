@@ -1099,10 +1099,7 @@ export default function ClassComponent() {
       field: "christianName",
       headerName: "Tên Thánh",
       width: 150,
-      renderCell: (params) =>
-        params.row.christianName
-          ? params.row.christianName.replace("Thánh", "").trim()
-          : "",
+      renderCell: (params) => params.row.christianName,
     },
     {
       field: "fullName",
@@ -1168,10 +1165,7 @@ export default function ClassComponent() {
       field: "christianName",
       headerName: "Tên Thánh",
       width: 150,
-      renderCell: (params) =>
-        params.row.christianName
-          ? params.row.christianName.replace("Thánh", "").trim()
-          : "",
+      renderCell: (params) => params.row.christianName,
     },
     {
       field: "fullName",
@@ -1237,10 +1231,7 @@ export default function ClassComponent() {
       field: "christianName",
       headerName: "Tên Thánh",
       width: 150,
-      renderCell: (params) =>
-        params.row.christianName
-          ? params.row.christianName.replace("Thánh", "").trim()
-          : "",
+      renderCell: (params) => params.row.christianName,
     },
     {
       field: "fullName",
@@ -1320,10 +1311,7 @@ export default function ClassComponent() {
       field: "christianName",
       headerName: "Tên Thánh",
       width: 150,
-      renderCell: (params) =>
-        params.row.christianName
-          ? params.row.christianName.replace("Thánh", "").trim()
-          : "",
+      renderCell: (params) => params.row.christianName,
     },
     {
       field: "fullName",

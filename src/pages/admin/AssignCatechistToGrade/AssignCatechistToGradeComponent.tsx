@@ -317,10 +317,6 @@ export default function AssignCatechistToGradeComponent() {
       field: "christianName",
       headerName: "Tên Thánh",
       width: 200,
-      renderCell: (params) =>
-        params.row.christianName
-          ? params.row.christianName.replace("Thánh", "").trim()
-          : "",
     },
     { field: "fullName", headerName: "Tên giáo lý viên", width: 200 },
     { field: "gender", headerName: "Giới tính", width: 100 },
@@ -360,8 +356,7 @@ export default function AssignCatechistToGradeComponent() {
       field: "christianName",
       headerName: "Tên Thánh",
       width: 200,
-      renderCell: (params) =>
-        params.row.catechist.christianName.replace("Thánh", "").trim() || "N/A",
+      renderCell: (params) => params.row.catechist.christianName,
     },
     {
       field: "fullName",
@@ -462,8 +457,7 @@ export default function AssignCatechistToGradeComponent() {
       field: "christianName",
       headerName: "Tên Thánh",
       width: 200,
-      renderCell: (params) =>
-        params.row.catechist.christianName.replace("Thánh", "").trim() || "N/A",
+      renderCell: (params) => params.row.catechist.christianName,
     },
     {
       field: "fullName",

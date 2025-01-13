@@ -99,10 +99,6 @@ export default function CatechistComponent() {
       field: "christianName",
       headerName: "Tên Thánh",
       width: 120,
-      renderCell: (params) =>
-        params.row.christianName
-          ? params.row.christianName.replace("Thánh", "").trim()
-          : "",
     },
     { field: "fullName", headerName: "Tên đầy đủ", width: 180 },
     { field: "gender", headerName: "Giới tính", width: 85 },
