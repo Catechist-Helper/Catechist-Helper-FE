@@ -426,6 +426,7 @@ export default function ClassComponent() {
     forceRender?: boolean
   ) => {
     if (ignoreEffect && forceRender != true) {
+      setLoading(false);
       return;
     }
 
@@ -1858,7 +1859,10 @@ export default function ClassComponent() {
                           ? selectedPastoralYear
                           : undefined
                       );
-                      fetchClasses();
+                      setLoading(true);
+                      setTimeout(() => {
+                        fetchClasses();
+                      }, 200);
                     }
                   };
                   action();
