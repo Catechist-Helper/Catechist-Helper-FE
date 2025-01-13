@@ -558,7 +558,12 @@ export default function ClassComponent() {
         return yearB - yearA;
       });
       setPastoralYears(sortedPastoralYears);
-      if (defaultYear && defaultYear != "") {
+      if (
+        defaultYear &&
+        defaultYear != "" &&
+        sortedPastoralYears.findIndex((item: any) => item.id == defaultYear) >=
+          0
+      ) {
         setSelectedPastoralYear(defaultYear);
       } else {
         setSelectedPastoralYear(
