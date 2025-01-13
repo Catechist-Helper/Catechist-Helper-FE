@@ -498,8 +498,6 @@ export default function EventsComponent() {
     return <></>;
   }
 
-  console.log(rows);
-
   return (
     <div>
       <Paper
